@@ -287,6 +287,14 @@ impl Editor {
     /// Callers must separately verify/copy sources; this performs no filesystem I/O.
     pub fn copied_with_source_directory(&self, directory: String) -> Result<Self, String> {
         self.validate_history()?;
+        if let Some(live) = &self.live_session {
+            let mut live = live.clone();
+            live.directory_display = directory;
+            live.validate()?;
+            let mut copy = self.clone();
+            copy.live_session = Some(live);
+            return Ok(copy);
+        }
         let mut origin = self
             .origin
             .clone()

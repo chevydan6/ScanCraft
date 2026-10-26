@@ -965,3 +965,26 @@ closed; nocameraUSBfds. Originalproofbytesunchanged. No newproductionchange,
 so574testgate applies to unchanged code; no redundant fullgate/review requested.
 Aggregate/runtime screenshot hashes in live-lineage-runtime.json. CLIcapacity
 stillpending from zero-capacitypreflight; draftPR14 notapproved.
+
+## Developer milestone — complete referenced live-session export (WIP)
+
+Separate dev/live-session-export branch based97c85f9 extends existing bounded
+project_bundle copy/verify/replay/publication path to LiveSession references.
+Only copied Editor metadata changes location; original state/bytes preserved.
+GUI live panel enables explicit export and reports full referenced raw data;
+legacy selected-frame labels remain accurate. No new format/dependency or
+geometry change. Two new byte-identity tests and all8 project_bundle tests
+passed; new fixtures deliberately dummyraw, not replay claims. Finalgate/runtime
+proof pending. No independent finding/status changed; reviewquota remainsblocked
+from priorzero-capacity preflight, no paid attempt.
+
+Live-session export finalgate576Rusttests/fmt/strictalltargetClippy/releasePASS
+exit0 /tmp/scancraft-live-export-full-gate.log. Actual releaseCLI exported8
+sourceartifacts from valid syntheticlivebundle, verified8, replay--decode both
+complete rawrecordings; all originalfileSHAs unchanged. ReleaseGUI startup
+export onprivateauthenticateddisplay visuallyconfirmed success/fullrawlabel/
+loadedcloud; resultingproject verifiedwithCLI, nocameraUSBfds. Fixturetest
+dummybytes are not confused with this actualsyntheticrecording replay proof.
+Runtimeaggregate live-session-export-runtime.json; physicalqualificationfalse.
+CodeRabbit remains unavailable from priorzero-capacitypreflight; no paidreview
+attempt. Source commit and draftPR follow; no mergeauthorization inferred.
