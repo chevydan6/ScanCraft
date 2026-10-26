@@ -955,3 +955,13 @@ evidence/2026-10-27-live-lineage-runtime.json. Newexternaldependencies:none.
 CodeRabbit preflight reports0includedreviews, nextslot~2796247ms; billinginactive.
 No actualreview requested while unavailable and no paidconsent. Source review
 remains pending; do not describe this feature as independently approved.
+
+Live-lineage release GUI validation on exact source d30ae9e: existing private
+authenticated X display harness opened ORPROJ08 and ran background explicit
+verification. Screenshot inspected:8/8match, live-session panel,3-point cloud.
+A separate copied bundle with alteredraw produced7/8match and
+left.raptor:crc_mismatch, preserving cloud and storedreferences. Bothprocesses
+closed; nocameraUSBfds. Originalproofbytesunchanged. No newproductionchange,
+so574testgate applies to unchanged code; no redundant fullgate/review requested.
+Aggregate/runtime screenshot hashes in live-lineage-runtime.json. CLIcapacity
+stillpending from zero-capacitypreflight; draftPR14 notapproved.

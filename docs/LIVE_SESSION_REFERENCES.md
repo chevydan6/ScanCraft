@@ -44,3 +44,9 @@ Tests cover unsafe/incomplete/qualified metadata, format downgrade rejection,
 edit/reopen persistence without source I/O, moved-directory verification, modified
 raw/calibration/report bytes and symlink rejection. All current datasets are
 synthetic; actual Raptor qualification remains outstanding.
+
+Release GUI startup verification was also inspected on a separate authenticated
+X display: the intact synthetic bundle reported8/8matches, while a copied bundle
+with modified left raw bytes reported7/8 and left.raptor:crc_mismatch. The
+three-point cloud and reference panel stayed loaded; no camera/USB descriptor
+was open. This is synthetic GUI verification evidence, not scanning qualification.
