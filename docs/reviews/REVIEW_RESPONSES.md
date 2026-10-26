@@ -123,7 +123,7 @@ source change or independent closure is claimed at this checkpoint.
   project recheck before root Close, and cleanup-error visibility. Full frozen
   formatting/strict Clippy/tests/release gate passes 511 Rust tests. Simulated
   Instant durations are not wall-clock or driver-stall benchmarks.
-- Commit: ordinary-close implementation hash will be recorded after commit.
+- Implementation commit: `7c4be31b9a8a3a5c47055676122907d62bece8cc`.
 - Remaining: no forced teardown bound, process isolation or physical driver-stall
   qualification. This mitigates normal window-close UI blocking; it does not
   establish the complete bounded-shutdown requirement or close this finding.
