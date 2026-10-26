@@ -17,3 +17,6 @@ Report measured behavior with input hashes, command, hardware/toolchain, units a
 limitations. Distinguish synthetic checks from genuine calibrated hardware results.
 Do not advertise incomplete workflows as operational. ArtCraft integration proposals
 must preserve standalone builds and must not imply official acceptance.
+
+Follow [development and independent review](docs/DEVELOPMENT_REVIEW.md).
+Run `tools/check.sh` and use a development PR; owner approval is required to merge.
