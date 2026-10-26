@@ -50,7 +50,7 @@ while preserving the PR requirement and remaining protections. Development does
 not change or independently close that status. Current read-only REST inspection
 confirms count 0; no settings changed here. Update stale local workflow prose to
 match the live rule, not restore the obsolete single-maintainer deadlock. No merge
-was attempted. Source: docs/DEVELOPMENT_REVIEW.md. Commit: this response checkpoint.
+was attempted. Source: docs/DEVELOPMENT_REVIEW.md. Commit: `2b85187ada787b64031528600e35dcf48e70fa83` (response and workflow prose).
 
 ## SCAN-REV-002 — accepted; external credential separation required
 
@@ -95,7 +95,7 @@ source change or independent closure is claimed at this checkpoint.
   a wrong Reader method name) were corrected before these passing runs. The late-
   publication race regression initially failed, then passed after the final channel
   read was inserted after join.
-- Commit: implementation hash will be added after committing this correction.
+- Implementation commit: `041fd8fed7ca16c9c539f51a0f5cc2f416a8c429`.
 - Limitations: operating-system thread-spawn failure is handled but not injected;
   hardware streaming/reconnection was not exercised. App shutdown still joins
   synchronously; SCAN-REV-005 remains distinct and unproven. No claim of a whole-app
