@@ -716,3 +716,74 @@ read0included, billinginactive, next availability approximately18minutes at chec
 No paid review attempted; initial72c5 review must not be transferred to this delta.
 Publish as draft for source inspection while required final automated review is
 pending. No approval/merge or finding closure claimed.
+
+## Developer investigation: SDK byte mirror numerical reference
+
+Related SCAN-REV-006: continue narrowing unverified runtime orientation without
+physical calibration. New optional tools/probe_sdk_byte_mirror.py and
+sdk_byte_mirror_probe.c execute only an exact-hash93-byte private arithmetic
+leaf on synthetic pixels under device-inaccessible/network-isolated bubblewrap.
+No DLL loaded or vendor bytes published; no production code/settings changed.
+The leaf matches horizontal row reflection over2,304,075pixels/sixshapes in each
+direction, with exact involution. docs/MIRROR_STATUS.md records static accessor/
+dispatch addresses and limits. Evidence under reviews/evidence records DLL/leaf/
+helper hashes. This is actual vendor-leaf execution, not proof of Raptor runtime
+orientation, active mirror flag, calibration convention, geometry or accuracy.
+Helpers are project-original diagnostics, not translations of vendor code.
+Three hardware-free negative-input tests PASS, Python syntax PASS, and frozen
+fullgate544Rust tests/fmt/strictClippy/release PASS. Automated review pending
+included quota; no paid usage. Independent Assignment73 separately confirms
+PR10 diagnostic source and30device tests, with005 still Open.
+Independent register remains untouched and006 is not claimed resolved.
+
+Extended the reference to compare actual leaf output directly with the existing
+Rust GrayImage::reflect_x_into, using the new synthetic-only sdk_mirror_reference
+example (no production function change). All2,304,075outputbytes match exactly;
+outputSHA985732008ce07bbcc0ce40176c1207d7f890b771c3daa9631e3ef3edba19399b.
+An actual wrong-reference probe fails closed. C helper emits synthetic pixels
+only to captured stdout; report goes to stderr and Python emits aggregates only.
+New fullgate544/fmt/strictClippy/releasePASS, three guardtestsPASS; evidenceupdated
+with finalhelper/fullgatelog hashes. Actual vendor execution remains developer
+evidence; independent Assignment77 inspected source/guardtests only and explicitly
+did not execute private bytes.006 remains UnderReview, not resolved by this result.
+
+Documentation correction: CALIBRATION.md still claimed no factory decoding and
+no integrated calibrated workflow. Updated it to distinguish existing bounded
+factory-field extraction and declared-calibration offline/GUI reconstruction
+from still-unqualified physical/live Raptor scanning. Source contracts remain
+factory_named/factory_pose/factory_laser, storage, image/depth/geometry crates and
+recorded_sequence workflow; no historical rationale invented or code changed.
+
+Combined final CLI review completed at d79959850bfa211cb558ea75476ba26b0553c82d
+(treeb39ff49d488e59077b9c9c99b5d3b757f126b6b7) versus72c5cf6:11files,
+zero findings, majorPASS, exit0. Sourcehead/tree unchanged before/after. Fresh
+quota1/inactivebilling preceded launch; no paidflag/consent. Source/blob/report/
+fullgatelog evidence: evidence/2026-10-27-cleanup-mirror-combined-review.json.
+Covers PR10 finaltwo-node correction (bothsourceblobs exactlymatcha6fa2d5) and
+PR11 reference/probe/docs. Together with earlier72c5 review this covers current
+cleanup implementation; it is not a full prior-code audit or GitHub Appapproval.
+Earlier pending statements are historical and superseded by this completion.
+Independent73/77/79 scopes acknowledged without changing their findings/status.
+Both PRs may now leave draft for actual Appreview; no merge authorized.
+
+PR10 GitHub App review COMPLETED at exacta6fa2d5 versus8da307e. Walkthrough
+6425906538 covers4files, reviewed marker maps source/coveredcommits exactly;
+reply6426474136 says Review finished. No actionable comments, noinlinecomments,
+noformalAPPROVED review; GraphQL confirms zero threads. Both exacta6faCIjobsPASS.
+Initialcommand wasrate-limited; oneafterresetcommand6426471987 accepted.
+Sanitized evidence: evidence/2026-10-27-github-pr10-review.json. No merge.
+
+Docstring warning9.09% vs80%,11functions/2files,2unsupported retained. Accept
+clear cleanup-contract documentation as useful; dispute a blanket requirement
+to document trivial private/test functions merely to reach a percentage. Module
+and finish contracts describe ordered accumulation/firstkind/no retries.
+Explicit limitation: aggregated io::Error preserves firstkind and all OS error
+text, but raw_os_error() is no longer structurally available; inspected callers
+report diagnostics rather than matching errno. Further public API documentation
+can be improved alongside transport work. Four reported passing premergechecks
+include skipped checks, plusonewarning: NOT allchecks passed. No threshold weakened.
+
+PR11 GitHub App request6426490393 afterreset remained rate-limited; reply6426492648,
+summary6426065548 at20:24:35Z says nextfreeOSSreview59minutes (~21:24UTC).
+Do not retry before thatwindow or enablepaidusage. CLI combinedreview remains
+completedPASS; Appreview is separately pending.006 remains unqualified.

@@ -1,0 +1,47 @@
+{
+  "pr": "https://github.com/chevydan6/ScanCraft/pull/10",
+  "reviewed_commit": "a6fa2d5f74afb8ebb11f199be1e67482b7fac358",
+  "base_commit": "8da307e102983d2b47678588bd514adc8ee30128",
+  "request_comments": [
+    6426318919,
+    6426471987
+  ],
+  "initial_request_outcome": "rate limited; retried once after advertised reset",
+  "walkthrough": {
+    "id": 6425906538,
+    "updated_at": "2026-10-26T20:27:07Z",
+    "body_sha256": "66729e86ee019fe5d8c0e68a682e4b0cdb97dc515b68311cc4ac1e473c1ae6a1",
+    "completed_reviewed_coverage_marker": true,
+    "selected_files": 4,
+    "no_actionable_comments": true
+  },
+  "completion_reply": {
+    "id": 6426474136,
+    "updated_at": "2026-10-26T20:27:11Z",
+    "review_finished": true
+  },
+  "formal_reviews_count": 0,
+  "inline_comments_count": 0,
+  "review_threads": [],
+  "approval_or_merge_authorization": false,
+  "premerge_advisory": {
+    "docstring_coverage_percent": 9.09,
+    "threshold_percent": 80,
+    "functions_analyzed": 11,
+    "files_analyzed": 2,
+    "unsupported_skipped": 2,
+    "reported_passed_checks": 4,
+    "reported_warnings": 1,
+    "passed_labels_include_skipped_checks": true
+  },
+  "exact_head_ci_passed_jobs": [
+    121811868439,
+    121811996602
+  ],
+  "limitations": [
+    "Completed walkthrough is not a formal APPROVED review or owner merge consent.",
+    "Synthetic collector tests do not qualify hardware restoration or bounded shutdown.",
+    "PR11 GitHub App review remains rate-limited; its CLI review is completed separately.",
+    "Raw service-access URLs omitted."
+  ]
+}

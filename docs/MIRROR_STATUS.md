@@ -200,3 +200,57 @@ landmarks: `evidence/sdk-mirror-internal-initialization-audit.json`.
 The flag scan is not a complete alias/write analysis; it does not prove the
 flag remains zero or that the current Raptor session ran this creator. No
 hardware state or active calibration is changed.
+
+## Format-9 byte-copy reference experiment
+
+Read-only inspection of the same hashed installed reference identifies the
+exported `ob_frame_format` accessor at RVA0x39a100 using virtual slot0x10.
+The width/height accessors at0x39a700/0x39a2e0 use slots0x90/0xa0. The mirror
+process path at0x32fca7 dispatches numeric format9 to the call at0x32fd0b,
+which invokes the byte-copy leaf at0x3297b0 with width/height as its last two
+arguments. The public SDK header names9 Y8, but the installed enum ABI has
+not been dynamically queried. Numeric dispatch and instruction inspection
+are static evidence, not a live device-format observation.
+
+`tools/probe_sdk_byte_mirror.py PRIVATE_STOCK_SDK` makes the numeric experiment
+reproducible on Linux x86-64 with GCC and bubblewrap. It refuses any whole-DLL
+hash or leaf hash except the inspected reference. It extracts only the93-byte
+self-contained leaf into a private temporary directory; no DLL is loaded.
+The independently written C harness uses the Microsoft x64 calling convention
+and runs with unshared namespaces/network, private `/dev`, read-only libraries
+and work directory, no scanner nodes and a ten-second process timeout. Code
+memory transitions writable to executable, never both simultaneously. Test
+input is read-only for the first call, and buffer mappings have guard pages.
+No proprietary instructions or binaries are included in the repository.
+
+For six synthetic shapes (1x1,1x7,2x3,7x3,8x5,1920x1200), the actual leaf
+matched `out[y*w+x] = in[(y+1)*w-1-x]` at every one of2,304,075 pixels. A
+second application restored the original synthetic values exactly. This is
+**executed vendor-leaf evidence**, distinct from previous static-only audits;
+it does not execute the SDK wrapper, device constructor or frame pipeline.
+Aggregate hashes/results: `docs/reviews/evidence/2026-10-27-sdk-byte-mirror-reference.json`.
+The helper uses no device data and no factory calibration. Private extracted
+bytes and compiled helper are removed on exit. Rejection tests require no DLL:
+`python3 -m unittest discover -s tools -p test_sdk_byte_mirror_probe.py`.
+
+This establishes the byte leaf's horizontal reflection behavior for the tested
+sizes and values. It does not establish active enable state, wrapper/format
+conversion behavior, camera assignment, calibration convention, synchronized
+exposures or physical accuracy. The existing native Rust reflection remains
+explicitly selected; no production default or calibration mapping changes.
+The `sdk_mirror_reference` Rust example generates the identical six synthetic
+input patterns and calls the existing `GrayImage::reflect_x_into`. Its concatenated
+output was compared byte-for-byte with actual leaf output using `--native-pixels`:
+all2,304,075bytes match (SHA256985732008ce07bbcc0ce40176c1207d7f890b771c3daa9631e3ef3edba19399b).
+A deliberately wrong native reference is rejected. This comparison exercises the
+existing Rust operation without modifying it. Reproduce with:
+
+```sh
+cargo run --frozen --release -p scancraft-image --example sdk_mirror_reference > /tmp/scancraft-synthetic-mirror.bin
+python3 tools/probe_sdk_byte_mirror.py PRIVATE_STOCK_SDK --native-pixels /tmp/scancraft-synthetic-mirror.bin
+```
+
+Only generated synthetic pixels go into that temporary file. The Python tool
+reads it as bounded regular-file data and never executes a supplied reference.
+Further work must observe the actual runtime chain or obtain
+usable independent correspondences before selecting an optical mapping.

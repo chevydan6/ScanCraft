@@ -1,9 +1,13 @@
 # Camera geometry and calibration records
 
-The `scancraft-calibration` crate is an independent Rust mathematical foundation.
-It does **not** yet estimate calibration from a board, decode Raptor factory
-calibration, establish a supported scanner optical model, or produce a real
-Raptor point cloud. Physical calibration remains deferred by user request.
+The `scancraft-calibration` crate provides independent Rust camera mathematics,
+versioned calibration records, and bounded decoders for observed factory-data
+schemas. [Factory-data diagnostics](FACTORY_CALIBRATION.md) extract named lens,
+pose and laser fields; extraction does not establish their active-mode binding,
+physical units, camera assignment or physical accuracy. The crate does **not**
+yet estimate calibration from a board or establish a qualified Raptor optical
+model. Genuine calibrated Raptor geometry remains unverified, and physical
+calibration remains deferred by user request.
 
 ## Coordinates and model
 
@@ -44,8 +48,13 @@ flowchart LR
 A prepared stereo model validates once and caches extrinsic matrices before
 processing correspondences. Its input limits are explicit: minimum ray angle,
 left Z depth range, maximum ray gap and maximum reprojection error. These are
-algorithm policies, not manufacturer claims. Matching, rectification,
-synchronization, confidence estimation and scan fusion are separate work.
+algorithm policies, not manufacturer claims. Image preparation and matching
+live in `scancraft-image`, reconstruction in `scancraft-depth`, and tracking/fusion
+in the `session`, `tracking`, and `fusion` modules of `scancraft-geometry`;
+`scancraft-workflow` orchestrates these components separately from camera mathematics.
+See [offline stereo](OFFLINE_STEREO.md), [scan sessions](SCAN_SESSIONS.md), and
+[recorded sequences](RECORDED_STEREO_SEQUENCE.md). Their synthetic/offline
+validation does not establish synchronized Raptor exposures or physical accuracy.
 
 ## Persistence and provenance
 
@@ -59,7 +68,12 @@ Records explicitly distinguish synthetic fixtures, estimated observations,
 device readouts and imports. The capture-binding guard rejects known synthetic
 fixtures and mismatched declared serial, firmware, mode or image sizes. A
 matching declaration does not establish physical provenance or accuracy. The
-application has not yet integrated a calibrated native scanning workflow.
+offline application workflow accepts explicit calibration records for recorded
+stereo reconstruction, including [GUI orchestration](GUI_RECONSTRUCTION.md) and
+[recorded-sequence projects](SEQUENCE_PROJECT_REFERENCES.md). This is an
+implemented declared-calibration workflow, not qualified calibrated live Raptor
+scanning. The application does not automatically convert diagnostic factory
+fields or mirror hypotheses into a physically qualified record.
 
 ## Independent numerical comparison
 
