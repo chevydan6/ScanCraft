@@ -40,7 +40,7 @@ def extract_leaf(path):
     return leaf
 
 
-def probe(path):
+def probe(path, native_pixels=None):
     """Run only the checked leaf on generated pixels in a device-free sandbox."""
     if platform.system() != "Linux" or platform.machine().lower() not in ("x86_64", "amd64"):
         raise ValueError("probe requires Linux x86-64 and the Microsoft x64 calling convention")
@@ -63,8 +63,20 @@ def probe(path):
                    "--ro-bind-try", "/lib64", "/lib64", "--dev", "/dev", "--proc", "/proc",
                    "--tmpfs", "/tmp", "--ro-bind", str(root), "/work", "--chdir", "/work",
                    "/work/probe", "/work/private-leaf.bin"]
-        completed = subprocess.run(command, check=True, timeout=10, capture_output=True, text=True)
-        result = json.loads(completed.stdout)
+        completed = subprocess.run(command, check=True, timeout=10, capture_output=True)
+        result = json.loads(completed.stderr)
+        if len(completed.stdout) != 2304075:
+            raise ValueError("unexpected synthetic pixel output length")
+        native_comparison = None
+        if native_pixels is not None:
+            descriptor = os.open(native_pixels, os.O_RDONLY | os.O_NONBLOCK | os.O_NOFOLLOW)
+            with os.fdopen(descriptor, "rb") as source:
+                if not stat.S_ISREG(os.fstat(source.fileno()).st_mode):
+                    raise ValueError("native pixel reference must be a regular file")
+                native = source.read(2304076)
+            if native != completed.stdout:
+                raise ValueError("native pixel reference differs from actual vendor-leaf output")
+            native_comparison = {"equal_bytes": len(native), "exact": True}
         expected = {"synthetic_shapes": 6, "pixels_checked_each_direction": 2304075,
                     "row_reversal_exact": True, "involution_exact": True}
         if result != expected:
@@ -78,6 +90,8 @@ def probe(path):
         "input_first_pass_read_only": True, "buffer_guard_pages": True,
         "comparison": "output[y*width+x] == input[(y+1)*width-1-x] for every pixel",
         "result": result,
+        "synthetic_output_sha256": hashlib.sha256(completed.stdout).hexdigest(),
+        "native_pixel_comparison": native_comparison,
         "vendor_leaf_executed": True, "dll_loaded": False, "hardware_accessed": False,
         "sdk_output_image_orientation_verified": False,
         "camera_assignment_verified": False, "calibration_binding_verified": False,
@@ -89,5 +103,7 @@ def probe(path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("private_stock_sdk", type=Path)
+    parser.add_argument("--native-pixels", type=Path,
+                        help="optional synthetic output from the sdk_mirror_reference Rust example")
     args = parser.parse_args()
-    print(json.dumps(probe(args.private_stock_sdk), indent=2))
+    print(json.dumps(probe(args.private_stock_sdk, args.native_pixels), indent=2))

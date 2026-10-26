@@ -36,6 +36,7 @@ int main(int argc,char **argv) {
    size_t i=(size_t)y*w+x;
    if(dst[i]!=src[(size_t)(y+1)*w-1-x])return 9;
   }
+  if(fwrite(dst,1,n,stdout)!=n)return 12;
   copy_fn same=copy;
   if(mprotect(a+page,span,PROT_READ|PROT_WRITE))return 10;
   same(dst,src,w,h);
@@ -45,6 +46,6 @@ int main(int argc,char **argv) {
   }
   munmap(a,span+2*page);munmap(b,span+2*page);tested+=n;
  }
- printf("{\"synthetic_shapes\":6,\"pixels_checked_each_direction\":%llu,\"row_reversal_exact\":true,\"involution_exact\":true}\n",(unsigned long long)tested);
+ fprintf(stderr,"{\"synthetic_shapes\":6,\"pixels_checked_each_direction\":%llu,\"row_reversal_exact\":true,\"involution_exact\":true}\n",(unsigned long long)tested);
  munmap(code,page);return 0;
 }

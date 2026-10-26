@@ -238,6 +238,19 @@ sizes and values. It does not establish active enable state, wrapper/format
 conversion behavior, camera assignment, calibration convention, synchronized
 exposures or physical accuracy. The existing native Rust reflection remains
 explicitly selected; no production default or calibration mapping changes.
-The matching index formula is not a direct cross-runtime comparison of every
-native Rust pixel. Further work must observe the actual runtime chain or obtain
+The `sdk_mirror_reference` Rust example generates the identical six synthetic
+input patterns and calls the existing `GrayImage::reflect_x_into`. Its concatenated
+output was compared byte-for-byte with actual leaf output using `--native-pixels`:
+all2,304,075bytes match (SHA256985732008ce07bbcc0ce40176c1207d7f890b771c3daa9631e3ef3edba19399b).
+A deliberately wrong native reference is rejected. This comparison exercises the
+existing Rust operation without modifying it. Reproduce with:
+
+```sh
+cargo run --frozen --release -p scancraft-image --example sdk_mirror_reference > /tmp/scancraft-synthetic-mirror.bin
+python3 tools/probe_sdk_byte_mirror.py PRIVATE_STOCK_SDK --native-pixels /tmp/scancraft-synthetic-mirror.bin
+```
+
+Only generated synthetic pixels go into that temporary file. The Python tool
+reads it as bounded regular-file data and never executes a supplied reference.
+Further work must observe the actual runtime chain or obtain
 usable independent correspondences before selecting an optical mapping.

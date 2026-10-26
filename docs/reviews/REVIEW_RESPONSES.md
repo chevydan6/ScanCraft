@@ -735,3 +735,14 @@ fullgate544Rust tests/fmt/strictClippy/release PASS. Automated review pending
 included quota; no paid usage. Independent Assignment73 separately confirms
 PR10 diagnostic source and30device tests, with005 still Open.
 Independent register remains untouched and006 is not claimed resolved.
+
+Extended the reference to compare actual leaf output directly with the existing
+Rust GrayImage::reflect_x_into, using the new synthetic-only sdk_mirror_reference
+example (no production function change). All2,304,075outputbytes match exactly;
+outputSHA985732008ce07bbcc0ce40176c1207d7f890b771c3daa9631e3ef3edba19399b.
+An actual wrong-reference probe fails closed. C helper emits synthetic pixels
+only to captured stdout; report goes to stderr and Python emits aggregates only.
+New fullgate544/fmt/strictClippy/releasePASS, three guardtestsPASS; evidenceupdated
+with finalhelper/fullgatelog hashes. Actual vendor execution remains developer
+evidence; independent Assignment77 inspected source/guardtests only and explicitly
+did not execute private bytes.006 remains UnderReview, not resolved by this result.
