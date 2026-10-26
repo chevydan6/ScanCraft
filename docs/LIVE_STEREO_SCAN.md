@@ -156,5 +156,5 @@ runner and processor as the native adapter. It opens no device. The expected
 result is one candidate pair, three points, two complete raw recordings, ten
 output files and nine verified manifest entries. Expected points in the declared
 synthetic millimeter frame are (-57.5,-27.5,400), (22.5,22.5,400), and
-(92.5,42.5,400); numerical comparison tolerance is1e-7mm. This is not scanner
+(92.5,42.5,400); numerical comparison tolerance is 1e-7 mm. This is not scanner
 accuracy, a dense reconstruction benchmark or a realistic throughput workload.

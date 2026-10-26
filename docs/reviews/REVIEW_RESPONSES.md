@@ -854,3 +854,11 @@ change or extra hardware test is warranted for this deterministic guard; do not
 replace actual implementation evidence with a hypothetical nonidempotent lease.
 Required560test/runtime validation remains scoped as above, not hardwareproof.
 Earlier pending CLI statements superseded; App review stillpending/freequota only.
+
+PR12 GitHub App completed COMMENTED review5659331857 at00114d89d6258146723172e8f0c3eead863faab9.
+One minor documentation comment4382715737 accepted: separate tolerance value
+from words/unit in LIVE_STEREO_SCAN.md. Numeric1e-7mm tolerance unchanged.
+Corrected typography only; no production/test/parameter change. Verified exact
+line diff and git diff --check; no new numerical test or paidreview warranted.
+Existing560test evidence applies to unchanged executable source. Original App
+comment/register untouched; only independent reviewer may close findings.
