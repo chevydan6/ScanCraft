@@ -765,3 +765,25 @@ cleanup implementation; it is not a full prior-code audit or GitHub Appapproval.
 Earlier pending statements are historical and superseded by this completion.
 Independent73/77/79 scopes acknowledged without changing their findings/status.
 Both PRs may now leave draft for actual Appreview; no merge authorized.
+
+PR10 GitHub App review COMPLETED at exacta6fa2d5 versus8da307e. Walkthrough
+6425906538 covers4files, reviewed marker maps source/coveredcommits exactly;
+reply6426474136 says Review finished. No actionable comments, noinlinecomments,
+noformalAPPROVED review; GraphQL confirms zero threads. Both exacta6faCIjobsPASS.
+Initialcommand wasrate-limited; oneafterresetcommand6426471987 accepted.
+Sanitized evidence: evidence/2026-10-27-github-pr10-review.json. No merge.
+
+Docstring warning9.09% vs80%,11functions/2files,2unsupported retained. Accept
+clear cleanup-contract documentation as useful; dispute a blanket requirement
+to document trivial private/test functions merely to reach a percentage. Module
+and finish contracts describe ordered accumulation/firstkind/no retries.
+Explicit limitation: aggregated io::Error preserves firstkind and all OS error
+text, but raw_os_error() is no longer structurally available; inspected callers
+report diagnostics rather than matching errno. Further public API documentation
+can be improved alongside transport work. Four reported passing premergechecks
+include skipped checks, plusonewarning: NOT allchecks passed. No threshold weakened.
+
+PR11 GitHub App request6426490393 afterreset remained rate-limited; reply6426492648,
+summary6426065548 at20:24:35Z says nextfreeOSSreview59minutes (~21:24UTC).
+Do not retry before thatwindow or enablepaidusage. CLI combinedreview remains
+completedPASS; Appreview is separately pending.006 remains unqualified.
