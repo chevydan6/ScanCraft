@@ -835,3 +835,22 @@ evidence/2026-10-27-live-stereo-runtime.json; privatefiles under/tmp pointer
 /tmp/scancraft-live-proof-root.txt, notpublished. Independent97 inspected earlier
 snapshot and passed13targetedtests; laterpanic/blank/repeatPTS tests/example/doc
 changes are beyond that snapshot. Sourcecommit andCodeRabbit evidence follow.
+
+Immutable live source484524d20ccc2707cbb62951d1dedfff28bd4642 tree58b61cd1c602ba5855e57601a1a2a41a19ed7395
+committed and pushed; draft PR12 basee1c4fc6. CodeRabbit CLI0.9.1 versus exact
+e1c4fc686f5451c6a0ef9a82ff4eba546fb5dfee completed12files,1minor,0blocking,
+majorPASS,exit0; sourcehead/tree unchanged. Freshquota2/inactivebilling checked,
+no paidflags/consent. Rawreport/blob/log evidence: evidence/2026-10-27-live-stereo-review.json.
+
+CR-LIVE-IDEMPOTENT-RESTORE: confirmation accepted, proposeddefect/change disputed.
+CodeRabbit conditionally warned a second lease.restore after publication could
+perform I/O/fail. Actual SettingsLease::restore (stream_group.rs:95) immediately
+returnsOk when self.restored; all ioctls are belowthatguard. Successful restore
+sets restored=true; bundle requires thatsuccess before publishing. Drop calls
+the same guardedmethod. Thus post-publication outercall performs no deviceI/O
+and cannot turn a successful published scan into an error. Failure paths have
+not published and retain useful besteffort retry/Drop cleanup. No production
+change or extra hardware test is warranted for this deterministic guard; do not
+replace actual implementation evidence with a hypothetical nonidempotent lease.
+Required560test/runtime validation remains scoped as above, not hardwareproof.
+Earlier pending CLI statements superseded; App review stillpending/freequota only.
