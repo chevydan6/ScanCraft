@@ -2005,3 +2005,22 @@ docs/SUBPIXEL_STEREO.md and docs/reviews/evidence/2026-10-26-subpixel-validation
 Fresh discovery returned no scanner. Genuine calibrated Raptor reconstruction,
 transport reliability, physical accuracy, live workflow and bounded forced teardown
 remain unqualified. No calibration or firmware operation was performed.
+
+## Read-only recorded timing checkpoint
+
+`recording-timing` validates complete stereo recordings then reports nearest-host
+value candidates, ties, reuse and raw PTS equality without automatically pairing
+frames for geometry. 524 Rust tests, formatting, strict Clippy and release build
+pass, including an exhaustive-distance oracle and native CLI source preservation.
+Source: indexed.rs, recording_playback.rs, recording_timing.rs; method and memory
+tradeoffs: docs/RECORDING_TIMING.md.
+
+Read-only replay of the preserved genuine 100+100-frame native stereo recording,
+at a caller-selected 1000us diagnostic limit, found six unique nearest candidates
+in range, 94 outside, no ties/reuse, and three raw-PTS-equal in-range candidates.
+Both original file SHA256 values were unchanged. Only aggregate evidence is
+published in docs/reviews/evidence/2026-10-26-genuine-recording-timing.json; raw
+images/timestamps remain private. This limit is not a qualified exposure tolerance.
+These observations do not verify clock domains, exposure synchronization, optical
+content, calibrated geometry or hardware accuracy. No new acquisition, physical
+calibration or firmware operation was performed.
