@@ -117,7 +117,7 @@ qualification flags. These do not negate the open findings below.
 ## SCAN-REV-004 — Capture worker panic leaves GUI permanently active
 
 - Severity: Medium
-- Status: Open
+- Status: Under Review
 - Affected: `crates/scancraft-app/src/main.rs:125`, `:267`, `:394`.
 - Problem: receive handles only `Ok(result)` from the result channel. If the capture
   worker panics before `done.send(run())`, the sender disconnects without a result;
@@ -136,6 +136,13 @@ qualification flags. These do not negate the open findings below.
   injects worker panic/disconnection and verifies stopped/error state, restart
   availability and preservation of incomplete recordings. Reviewer has not patched
   source. Temporary reproduction: `/tmp/scancraft-capture-disconnect-probe.rs`.
+
+- Review update 2026-10-26 09:09 UTC: developer response accepts the issue;
+  uncommitted main.rs and new capture_worker.rs implement finished-only joins,
+  disconnection handling, spawn errors and panic/partial-file recovery. Independently
+  ran `cargo test --frozen -p scancraft-app capture_`: four tests passed. Do not
+  close yet: completion race SCAN-REV-008 was independently reproduced in the
+  proposed helper. No completed developer correction/commit is claimed here.
 
 ## SCAN-REV-005 — GUI shutdown can wait indefinitely for capture worker
 
@@ -232,3 +239,73 @@ focused checks before changing status. Preserve all finding history. Do not repe
 unchanged full reviews or schedule polling implicitly. Current follow-up priorities:
 SCAN-REV-002 technical authorization separation; SCAN-REV-004 panic recovery;
 then device lifecycle and deeper numerical/mesh/parser reference testing.
+
+## SCAN-REV-008 — Completion poll can discard a successful capture result
+
+- Severity: Medium
+- Status: Open
+- Affected: `crates/scancraft-app/src/capture_worker.rs:31` through `:48`
+  (uncommitted developer proposal); `crates/scancraft-app/src/main.rs:274`.
+- Problem: poll samples try_recv before checking thread completion. If it sees
+  Empty, then the worker sends its result and exits before is_finished, poll joins
+  successfully but never re-reads the channel. With pending=None it reports
+  “Capture worker finished without a result” and consumes the thread handle.
+- Evidence: a standalone reviewer probe imports the actual module with #[path],
+  repeatedly spawns a closure returning Ok("success"), and polls it without touching
+  a scanner. It reproduced the false failure at iteration 700. The four developer
+  capture tests still passed, demonstrating missing coverage of this scheduling
+  window. Reviewed helper SHA-256:
+  `1f2a0e11564dc9490eb90d63b6ee891a96fd6688d52bf35b1c6d4c822b07a7a0`.
+- Consequence: successful capture/recording can be presented as failure, and a real
+  error's original message can be lost. This race does not itself prove recording
+  corruption or an abandoned live worker. It is separate from the original
+  permanent-running-state defect.
+- Recommended action: after successful finished-thread join, drain/re-read the
+  completion channel before classifying missing results. Preserve pending results
+  and panic precedence; do not join a live thread. Add a deterministic regression
+  controlling completion between the first receive and finish classification,
+  plus a repeated immediate-success check. Developer owns implementation.
+- Reproduction: `/tmp/scancraft-worker-race.rs` and executable
+  `/tmp/scancraft-worker-race`; durable reproduction below. Build with rustc
+  --edition 2024 -O and run. Scheduling means iteration counts can vary.
+- History: discovered by independent inspection and execution during the recovery
+  review; application source and developer response file were not modified.
+
+### SCAN-REV-008 reproduction (review code only)
+
+```rust
+#[path="/home/dan/scancraft/crates/scancraft-app/src/capture_worker.rs"]
+mod capture_worker;
+fn main() {
+    for iteration in 0..50000 {
+        let mut worker = capture_worker::Worker::spawn(|| Ok("success".into())).unwrap();
+        loop {
+            if let Some(outcome) = worker.poll() {
+                if outcome != Ok("success".into()) {
+                    println!("False failure at iteration {iteration}: {outcome:?}");
+                    return;
+                }
+                break;
+            }
+            std::hint::spin_loop();
+        }
+    }
+    println!("No failure observed; this does not disprove the scheduling race");
+}
+```
+
+## Recovery review milestone — 2026-10-26
+
+Read mission/checkpoint and current shared findings/responses before review.
+Developer commit `2b85187` contains the previously inspected spatial optimization;
+its source fingerprint matches the prior independent inspection. Benchmark JSON
+correctly labels whole-workflow synthetic timings; reported 4000-point medians are
+534.388 ms before and 39.297 ms after. These recorded historical measurements were
+not rerun or upgraded to general throughput claims. Responses 002/003/005/006/007
+acknowledge the limitations and claim no fixes: their statuses remain unchanged.
+
+Read-only GitHub recheck confirms count 0, required Actions test (app 15368), strict
+updates, conversation resolution, admin enforcement, prohibited force/deletion,
+and auto-merge disabled. PRs #1 and #2 remain OPEN. Runtime still has ADMIN authority;
+SCAN-REV-002 remains Open. No protection change, merge, paid service or hardware
+operation was performed in this continuation.
