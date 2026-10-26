@@ -349,3 +349,36 @@ caller-selected 1000us limit found 6 unique nearest candidates / 94 outside amon
 100 left and 100 right frames, no ties/reuse, 3 equal raw PTS candidates. Both
 source SHA256s unchanged. Aggregate-only evidence is published; no private images
 or timestamps. These observations do not establish shared clocks or exposures.
+
+### CR-TIMING-PTS — CodeRabbit major finding disputed
+
+Local identifier for the CLI finding, not an independent-review register ID.
+Reviewed implementation `b2d8417b58585623a574054d5729b7c14fc90ffd` vs12fc3a2.
+Bot alleges the new cache rejects previously valid missing/non-UVC PTS recordings.
+**Disputed:** unchanged recording/lib.rs Reader::read_frame_inner invokes core
+validate_frame (requires PTS) and validate_order (also requires PTS) before returning
+any frame to IndexedRecording::build. Both v1/v2 use this path. Writer::push likewise
+requires it; recovered valid prefixes do not make absent PTS legal. Optional fields
+in display structs do not override the reader's actual contract.
+
+Added regression indexed::tests::existing_reader_rejects_crc_valid_missing_or_malformed_pts_before_index_caching
+constructs CRC-valid missing-PTS, empty-metadata and malformed-header frames in v1
+and v2, verifies the underlying reader and index both reject them for the PTS/header
+reason rather than CRC. It also passes when inserted alone into an isolated exact
+12fc3a2 snapshot: one test passed, production unchanged. Log
+/tmp/scancraft-baseline-pts-test.log. Current focused regression passed as well.
+No Option conversion or relaxation of established integrity gates is justified.
+
+Raw review completed 11 files, one major finding, blocked major gate, exit 2.
+That raw gate is preserved, not renamed passed. Evidence/report hash and baseline
+reader blob are in evidence/2026-10-26-recording-timing-review.json. Included quota
+only, no paid consent. Independent reviewer retains verification authority; PR5
+remains draft pending disposition visibility. No repeated paid/bot loop requested.
+GUI startup/render also visually passed on a private display with no camera FDs;
+not full manual workflow or hardware qualification. Added regression commit and
+final whole-workspace count follow.
+
+Post-disposition full frozen gate passes 525 Rust tests, formatting, strict Clippy
+and release build. Log /tmp/scancraft-recording-timing-disposition-checks.log.
+This adds test evidence and documentation only; production implementation is still
+b2d8417. Raw bot gate remains blocked with its specific major finding disputed.

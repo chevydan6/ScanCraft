@@ -168,6 +168,58 @@ mod tests {
         }
         writer.finish().unwrap()
     }
+    #[test]
+    fn existing_reader_rejects_crc_valid_missing_or_malformed_pts_before_index_caching() {
+        let original = fixture();
+        let header_len = u32::from_le_bytes(original[8..12].try_into().unwrap()) as usize;
+        let frame_start = 16 + header_len;
+        let body_len =
+            u32::from_le_bytes(original[frame_start..frame_start + 4].try_into().unwrap()) as usize;
+        let original_body = &original[frame_start + 8..frame_start + 8 + body_len];
+        for legacy in [false, true] {
+            for kind in 0..3 {
+                let mut body = original_body.to_vec();
+                let expected = match kind {
+                    0 => {
+                        body[24 + 11] = 0;
+                        "missing sensor PTS"
+                    }
+                    1 => {
+                        body[16..20].copy_from_slice(&0_u32.to_le_bytes());
+                        body.drain(24..40);
+                        "missing sensor PTS"
+                    }
+                    _ => {
+                        body[24 + 10] = 1;
+                        "invalid UVC header length"
+                    }
+                };
+                let mut bytes = if legacy {
+                    let header: serde_json::Value =
+                        serde_json::from_slice(&original[16..frame_start]).unwrap();
+                    let profile = serde_json::to_vec(&header["profile"]).unwrap();
+                    let mut out = b"RAPTOR01".to_vec();
+                    out.extend_from_slice(&(profile.len() as u32).to_le_bytes());
+                    out.extend_from_slice(&profile);
+                    out
+                } else {
+                    original[..frame_start].to_vec()
+                };
+                bytes.extend_from_slice(&(body.len() as u32).to_le_bytes());
+                bytes.extend_from_slice(&crc32fast::hash(&body).to_le_bytes());
+                bytes.extend_from_slice(&body);
+                bytes.extend_from_slice(&0_u32.to_le_bytes());
+                bytes.extend_from_slice(&1_u64.to_le_bytes());
+                let mut reader = Reader::new(Cursor::new(&bytes)).unwrap();
+                let error = reader.read_frame().unwrap_err();
+                assert!(error.to_string().contains(expected), "{error}");
+                let error = IndexedRecording::build(Cursor::new(&bytes), 10, &|_| Ok(()))
+                    .err()
+                    .unwrap();
+                assert!(error.to_string().contains(expected), "{error}");
+            }
+        }
+    }
     struct Counted {
         source: Cursor<Vec<u8>>,
         bytes: Rc<Cell<usize>>,

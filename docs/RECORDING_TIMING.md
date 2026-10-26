@@ -62,3 +62,9 @@ This tool supports investigation before manual frame selection with
 `reconstruct-recordings`; it deliberately does not feed candidates automatically
 into geometry. Genuine optical content, mode/calibration binding and independent
 physical measurements remain necessary for a qualified Raptor scan.
+
+The existing reader already requires valid PTS for every stored frame, including
+v1/recovered-prefix inputs; timing caching does not introduce that restriction.
+A CRC-valid adversarial regression covers missing PTS, empty metadata and malformed
+UVC headers for both versions and also passes on the isolated pre-feature source.
+See developer review responses for the disputed bot compatibility claim.
