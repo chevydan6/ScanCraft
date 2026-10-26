@@ -862,3 +862,22 @@ Corrected typography only; no production/test/parameter change. Verified exact
 line diff and git diff --check; no new numerical test or paidreview warranted.
 Existing560test evidence applies to unchanged executable source. Original App
 comment/register untouched; only independent reviewer may close findings.
+
+## Developer milestone — live GUI controls (uncommitted)
+
+Independent013 resolution acknowledged; typography-only commit84b89f4 remains
+unchanged. Independent012 rejection acknowledged; idempotent restore semantics
+retained in the shared acquisition adapter. No reviewer status edited.
+
+Developer implementation adds one-slot previews, pause/resume, graceful stop
+versus abort, shared native acquisition ownership and guarded completed-project
+handover. Source: app/live_ui.rs, workflow/live_stereo/control.rs and runner.rs,
+geometry/fusion.rs and session.rs, new acquisition crate; CLI retains signals.
+571-test gate passed before final documentation; final gate is running.
+Actual release GUI on private authenticated X display passed synthetic pause/
+resume/stop-save/editor-open interactions. Report46pairs,16paused,46rawframes
+per side,6fusedpoints,zeroprocessingdrops,gracefulStoptrue; no camera/USBfds.
+Evidence: evidence/2026-10-27-live-gui-runtime.json and LIVE_STEREO_GUI.md.
+This is developer evidence on uncommitted source, not independent closure,
+physical qualification or benchmark.005 remains unbounded-driver limitation;
+006 physical binding/accuracy remains unproven. Exact source commit/review pending.

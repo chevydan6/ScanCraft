@@ -88,6 +88,14 @@ impl ScanSession {
     pub fn last_integrated(&self) -> Option<u64> {
         self.fusion.last_frame()
     }
+    /// Bounded display subset plus actual fused count; never changes session state.
+    pub fn preview_cloud(
+        &self,
+        maximum: usize,
+        work: &WorkControl,
+    ) -> Result<(usize, Cloud), String> {
+        Ok((self.fusion.len(), self.fusion.preview_cloud(maximum, work)?))
+    }
     pub fn cloud(&self, work: &WorkControl) -> Result<Cloud, String> {
         self.fusion.cloud(work)
     }

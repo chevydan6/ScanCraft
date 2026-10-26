@@ -1,0 +1,15 @@
+[package]
+name = "scancraft-acquisition"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "ScanCraft native scanner orchestration shared by GUI and CLI"
+
+[dependencies]
+scancraft-core.workspace = true
+scancraft-device.workspace = true
+scancraft-recording.workspace = true
+scancraft-workflow = { path = "../scancraft-workflow" }
+scancraft-geometry = { path = "../scancraft-geometry" }
+serde_json.workspace = true
