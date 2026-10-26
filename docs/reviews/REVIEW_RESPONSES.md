@@ -988,3 +988,20 @@ dummybytes are not confused with this actualsyntheticrecording replay proof.
 Runtimeaggregate live-session-export-runtime.json; physicalqualificationfalse.
 CodeRabbit remains unavailable from priorzero-capacitypreflight; no paidreview
 attempt. Source commit and draftPR follow; no mergeauthorization inferred.
+
+## SCAN-REV-005 — cooperative capture follow-up, not closure
+
+Accepted limitation remains: kernel ioctls/setup/restoration/joins have no
+established shutdown bound. New native next_frame_until stop predicate checks
+between dequeuecalls and caps poll by remaining frame deadline. LiveNative
+passesControlstop; CLIsignal sets bothabortWorkControl andstop (publication
+stillaborted). A stoppedincompletevideo counter distinguishes intentional
+pre-metadata abandonment from validated recordings/processingdrops. Successful
+reads retained; disconnect/othererrors preserved. No thread detachment/kill.
+Three injected-read policytests pass; full579Rusttests/fmt/strictalltargetClippy/
+releasePASS /tmp/scancraft-cooperative-stop-full-gate.log. NoV4L2latency or
+physicalshutdown proof;005remainsOpen under reviewercontrol. Docs
+COOPERATIVE_CAPTURE_STOP.md. No newdependency/vendorcode/hardwareoperation.
+CodeRabbitCLI capacitypending as recorded; actualsource reviewnotclaimed.
+PR13 oneApprequest6428805372 at22:26:32Z acceptedreply6428807089 at22:26:38Z;
+reviewtriggered, NOTcompletion. No repeatedrequest/paidconsent.
