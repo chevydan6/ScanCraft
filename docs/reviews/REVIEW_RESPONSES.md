@@ -215,3 +215,20 @@ only test cleanup. The updated full frozen gate still passes 511 tests. Local lo
 /tmp/scancraft-capture-close-final-guarded-checks.log. No new production shutdown
 bound is inferred. A returned included review slot is checked separately before
 another review attempt; review output alone does not attest its immutable head.
+
+## Completed ordinary-close CLI review
+
+After a separate quota check returned one included slot and inactive billing,
+CodeRabbit completed committed head `3a37db079708af952060037ad44e978236d9f791`
+against exact base `a178690bc8aca0eaeea87cc113975903e5365983`: five files,
+zero findings, passed major gate and exit 0. Head/tree were captured unchanged
+before/after. The operator-side manifest, file blob IDs and report/test-log hashes
+are in evidence/2026-10-26-capture-close-review.json. This is not a CodeRabbit
+server attestation of head identity or closure of SCAN-REV-005. Raw local report:
+/tmp/scancraft-close-bound-review.ndjson. No paid consent or service was used.
+
+Implementation 7c4be31, response reference a2bb61a, unwind-safe test guard 3a37db0.
+All 511 Rust tests, formatting, strict Clippy, release build and private-display
+startup/render pass. Later response/evidence bookkeeping does not alter reviewed
+production code or receive its own independent-review claim. GitHub feedback and
+reviewer-owned register verification remain separate from this local bot result.
