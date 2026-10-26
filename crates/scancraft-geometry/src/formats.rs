@@ -195,7 +195,9 @@ pub fn save_project(editor: &Editor, mut out: impl Write) -> io::Result<()> {
         editor: &'a Editor,
     }
     let view = View {
-        version: if editor.sequence().is_some() {
+        version: if editor.live_session().is_some() {
+            8
+        } else if editor.sequence().is_some() {
             7
         } else if editor.recordings().is_some() {
             6
@@ -226,8 +228,10 @@ pub fn save_project(editor: &Editor, mut out: impl Write) -> io::Result<()> {
         b"ORPROJ05"
     } else if view.version == 6 {
         b"ORPROJ06"
-    } else {
+    } else if view.version == 7 {
         b"ORPROJ07"
+    } else {
+        b"ORPROJ08"
     })?;
     out.write_all(&(count.length as u32).to_le_bytes())?;
     out.write_all(&count.hash.finalize().to_le_bytes())?;
@@ -284,7 +288,13 @@ pub fn load_project(input: impl Read) -> io::Result<Editor> {
         || bytes.len() > 64 * 1024 * 1024 + 16
         || !matches!(
             &bytes[..8],
-            b"ORPROJ02" | b"ORPROJ03" | b"ORPROJ04" | b"ORPROJ05" | b"ORPROJ06" | b"ORPROJ07"
+            b"ORPROJ02"
+                | b"ORPROJ03"
+                | b"ORPROJ04"
+                | b"ORPROJ05"
+                | b"ORPROJ06"
+                | b"ORPROJ07"
+                | b"ORPROJ08"
         )
     {
         return Err(invalid("unsupported or oversized project file"));
@@ -301,7 +311,8 @@ pub fn load_project(input: impl Read) -> io::Result<Editor> {
         b"ORPROJ04" => 4,
         b"ORPROJ05" => 5,
         b"ORPROJ06" => 6,
-        _ => 7,
+        b"ORPROJ07" => 7,
+        _ => 8,
     };
     if p.version != version
         || p.units != "millimeters"
@@ -311,6 +322,8 @@ pub fn load_project(input: impl Read) -> io::Result<Editor> {
         || ((5..=6).contains(&version) && p.editor.origin().is_none())
         || (version < 6 && p.editor.recordings().is_some())
         || (version == 6 && p.editor.recordings().is_none())
+        || (version < 8 && p.editor.live_session().is_some())
+        || (version == 8 && p.editor.live_session().is_none())
         || (version < 7 && p.editor.sequence().is_some())
         || (version == 7
             && (p.editor.sequence().is_none()

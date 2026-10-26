@@ -931,3 +931,37 @@ majorPASS,exit0. Head/tree unchanged. Fresh includedcapacity1/billinginactive
 confirmed before execution; no paidflags/consent. Numerical/GUI gate572tests
 and regression red/green log hashes recorded in live-gui-review.json.
 This provides requested developer evidence, not independent closure of014.
+
+## Developer milestone — live-session provenance integration (WIP)
+
+014 independently Resolved by Assignment113 acknowledged; developer does not
+change the register. New live-session lineage addresses the mission’s retained
+raw/project relationship without forcing fused sessions into single-pair or
+frame-directory schemas. Added optional Editor metadata and ORPROJ08; legacy
+02–07 remain readable. Live runner retains the Editor until raw/report fingerprints
+exist, attaches references, saves project, then outermanifest. No fullcloudreload
+or added exportclone is needed. Explicit CLI and GUI sourceverification reuse
+existing guarded checker; loading never follows external paths.
+Geometry focused2tests and live runner10tests passed, including new edit/save/
+reopen/movedfolder/raw+cal+reporttamper/symlink checks. Full gate pending.
+No hardware, physical binding, synchronization or accuracy claim; CRC notauthenticity.
+No independent finding invented, no new library/version or copiedvendorcode.
+
+Live-lineage final gate passed574Rusttests,fmt,strictalltargetClippy,release
+exit0 (/tmp/scancraft-live-lineage-integrated-gate.log). Actual releaseexample
+publishedORPROJ08; releaseCLI verify-source-bundle passed8artifacts (exit0),
+modifiedraw failed(exit1), rawbytesrestored. Aggregate evidence
+evidence/2026-10-27-live-lineage-runtime.json. Newexternaldependencies:none.
+CodeRabbit preflight reports0includedreviews, nextslot~2796247ms; billinginactive.
+No actualreview requested while unavailable and no paidconsent. Source review
+remains pending; do not describe this feature as independently approved.
+
+Live-lineage release GUI validation on exact source d30ae9e: existing private
+authenticated X display harness opened ORPROJ08 and ran background explicit
+verification. Screenshot inspected:8/8match, live-session panel,3-point cloud.
+A separate copied bundle with alteredraw produced7/8match and
+left.raptor:crc_mismatch, preserving cloud and storedreferences. Bothprocesses
+closed; nocameraUSBfds. Originalproofbytesunchanged. No newproductionchange,
+so574testgate applies to unchanged code; no redundant fullgate/review requested.
+Aggregate/runtime screenshot hashes in live-lineage-runtime.json. CLIcapacity
+stillpending from zero-capacitypreflight; draftPR14 notapproved.
