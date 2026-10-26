@@ -895,3 +895,11 @@ CR-LIVE-STATUS-CONTRADICTION accepted: PROJECT_STATUS preceding paragraph now
 states GUI exists with synthetic validation; hardware remains unverified.
 No reviewer-owned finding status changed. Existing final-snapshot runner and
 worker lifecycle regressions apply; full gate after corrections follows.
+
+Correction506c01c1c69378d6e31339944969213213f43e3e passed the full571-test,
+fmt/strictClippy/release gate. Incremental CodeRabbit review versus5aa93c3
+completed4files,0findings,majorPASS,exit0. Source tree4fc3b4b unchanged.
+Freeincluded1/billinginactive checked beforehand; no paidconsent. Sanitized
+metadata added to live-gui-review.json; rawreports remain local. PR13 ready:
+https://github.com/chevydan6/ScanCraft/pull/13 base dev/live-stereo-scan.
+No auto-merge or ownerapproval inferred. App/current-headCI checked separately.

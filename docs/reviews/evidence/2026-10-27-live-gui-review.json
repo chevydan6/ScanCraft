@@ -56,5 +56,31 @@
       "disposition": "accepted; poll/join worker before consuming final mailbox"
     }
   ],
-  "billing": "included reviews available and usage billing inactive in fresh preflight; no paid flags or consent"
+  "billing": "included reviews available and usage billing inactive in fresh preflight; no paid flags or consent",
+  "correction_review": {
+    "source_commit": "506c01c1c69378d6e31339944969213213f43e3e",
+    "source_tree": "4fc3b4b103309c1ffe9de28cd644c3e6e5281b91",
+    "base_commit": "5aa93c35ce911f83bde8b5103e5be049e2101cc1",
+    "completion": {
+      "type": "complete",
+      "status": "review_completed",
+      "findings": 0,
+      "gate": {
+        "threshold": "major",
+        "status": "passed",
+        "blockingFindings": 0
+      },
+      "reviewedFiles": [
+        "PROJECT_STATUS.md",
+        "crates/scancraft-app/src/live_ui.rs",
+        "docs/reviews/REVIEW_RESPONSES.md",
+        "docs/reviews/evidence/2026-10-27-live-gui-review.json"
+      ],
+      "outcome": "completed",
+      "message": "Review completed"
+    },
+    "exit_code": 0,
+    "raw_sha256": "f34665382a281ab34ea8b473885c79776030c3efd34e12c165e15ed87117a45f",
+    "validation_log_sha256": "3091b03ac86fc424031c5d274ca61c52af580c2ecb72423c560796036eccd254"
+  }
 }
