@@ -128,3 +128,19 @@ regression or cycle establishes an urgent extraction. Preserve existing APIs and
 prioritize capture lifecycle and genuine reconstruction before moving this shared
 infrastructure. No broad crate rewrite is justified by this finding alone. No source
 change, dependency-graph result or independent closure claimed at this checkpoint.
+
+## SCAN-REV-008 — accepted; late-publication race corrected
+
+The independent reviewer registered the same receive/finished-check race that
+self-review was addressing concurrently. Its reported helper fingerprint describes
+the earlier proposal, not committed correction 041fd8f. That commit re-reads the
+result channel after a successful finished-thread join, preserving the original
+completion; panic still takes precedence and no live thread is joined by poll.
+The deterministic late-publication regression passes. Added a 256-iteration immediate
+success regression in this follow-up to supplement the deterministic interleaving.
+Source: crates/scancraft-app/src/capture_worker.rs. Updated full frozen gate passes:
+505 Rust tests, formatting, strict Clippy and release workspace build. Initial complete correction
+commit: `041fd8fed7ca16c9c539f51a0f5cc2f416a8c429`; follow-up test commit to follow.
+No claim that stochastic stress proves absence of all races, no hardware or shutdown
+bound qualification, and no independent closure by development. Only the reviewer
+may verify and close this finding after inspecting the committed helper.

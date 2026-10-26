@@ -70,6 +70,21 @@ mod tests {
     use std::time::Duration;
 
     #[test]
+    fn repeated_immediate_success_keeps_the_actual_completion() {
+        let deadline = std::time::Instant::now() + Duration::from_secs(10);
+        for _ in 0..256 {
+            let mut worker = Worker::spawn(|| Ok("success".into())).unwrap();
+            let outcome = loop {
+                if let Some(result) = worker.poll() {
+                    break result;
+                }
+                assert!(std::time::Instant::now() < deadline);
+                thread::yield_now();
+            };
+            assert_eq!(outcome, Ok("success".into()));
+        }
+    }
+    #[test]
     fn late_result_between_empty_receive_and_thread_finish_is_retained() {
         let (release, wait) = mpsc::channel();
         let mut worker = Worker::spawn(move || {
