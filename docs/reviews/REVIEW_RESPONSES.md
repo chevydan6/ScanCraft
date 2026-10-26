@@ -524,3 +524,29 @@ or an invented fresh review of previous variant PR heads. The old PR5 raw blocke
 result and independent009rejection remain preserved separately.
 Later evidence-only bookkeeping does not change reviewed code or receive a new
 review claim. GitHub App feedback remains separate; no owner merge consent implied.
+
+### Completed GitHub App review at3129761
+
+Supported single manual request completed at exact
+`312976145d08afbc96cc9466535e0ec54028152e`, base47293dd. Walkthrough6415231559
+explicitly marks source/covered head reviewed and says no actionable comments;
+reply6415310710 says Review finished. Post-completion API: zero inline comments,
+zero review threads and zero formal Reviews. This is not formal APPROVED or owner
+merge consent. Both test checks passed at covered head121555435820/121555459781.
+Sanitized completion metadata in evidence/2026-10-26-github-pr8-review.json; raw
+service-access links excluded. No paid consent/billing/configuration change.
+
+Docstring advisory8.33% versus80%,24touched functions across6files,6unsupported
+skipped: **disputed as blanket merge blocker**, not hidden. This change contains
+private/startup/controller helpers and descriptive regression functions alongside
+public staged-publication APIs. Module/type/API docs and the architecture/interface
+document explain ownership, ordering, cancellation, source checks, staging retention,
+committed-output sync errors and external provenance. Repeating those as docstrings
+on every private/test function to hit a percentage does not establish correctness.
+Concrete missing public/non-obvious contracts remain legitimate documentation work;
+this metric supplied no specific such defect. No threshold/check was weakened.
+Four premerge checks passed and one warning remains; no all-checks-pass claim.
+
+Current implementation remains1bed149;3129761 and later evidence-only bookkeeping
+do not change app code. Full538gate and GUI/CLI29file equivalence remain recorded
+with their actual scopes. Independent reviewer retains all finding/closure authority.
