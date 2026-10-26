@@ -208,3 +208,10 @@ No paid consent was given. Future quota checks must be separate/checked operatio
 not a fall-through shell assertion. No fresh successful review is claimed for this
 change yet. Prior 505-test source review and reviewer closure are not extended to
 this new ordinary-close code. Preserve draft status pending actual review.
+
+The close regression's injected stall now has an unwind-safe release guard, so an
+assertion failure releases the test worker before App::drop joins it. This changes
+only test cleanup. The updated full frozen gate still passes 511 tests. Local log:
+/tmp/scancraft-capture-close-final-guarded-checks.log. No new production shutdown
+bound is inferred. A returned included review slot is checked separately before
+another review attempt; review output alone does not attest its immutable head.

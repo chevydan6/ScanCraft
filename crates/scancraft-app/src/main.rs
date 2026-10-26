@@ -1119,6 +1119,22 @@ mod startup_tests {
 #[cfg(test)]
 mod capture_recovery_tests {
     use super::*;
+    // Release injected stalls even if an assertion unwinds before normal cleanup.
+    // Otherwise App::drop could join a test worker still waiting on this sender.
+    struct ReleaseOnDrop(Option<mpsc::Sender<()>>);
+    impl ReleaseOnDrop {
+        fn release(&mut self) {
+            if let Some(sender) = self.0.take() {
+                let _ = sender.send(());
+            }
+        }
+    }
+    impl Drop for ReleaseOnDrop {
+        fn drop(&mut self) {
+            self.release();
+        }
+    }
+
     fn running(run: impl FnOnce() -> Result<String, String> + Send + 'static) -> Running {
         let (_sender, rx) = mpsc::channel();
         Running {
@@ -1187,6 +1203,7 @@ mod capture_recovery_tests {
             wait.recv().unwrap();
             Ok("cleanup finished".into())
         }));
+        let mut release = ReleaseOnDrop(Some(release)); // Drops before App on failure.
         let cancel = app.running.as_ref().unwrap().cancel.clone();
         app.close_allowed = true; // Old discard consent must be rechecked.
         let ctx = egui::Context::default();
@@ -1201,8 +1218,9 @@ mod capture_recovery_tests {
         assert!(app.running.is_some());
         assert!(app.capture_close_step(&ctx, true, now + Duration::from_secs(20)));
         assert!(app.capture_close.slow(now + Duration::from_secs(20)));
-        release.send(()).unwrap();
+        release.release();
         finish(&mut app);
+        assert_eq!(app.log, "cleanup finished");
         assert!(!app.capture_close_step(&ctx, false, now + Duration::from_secs(21)));
         assert!(!app.capture_close.is_waiting());
         assert!(app.closing_window);
