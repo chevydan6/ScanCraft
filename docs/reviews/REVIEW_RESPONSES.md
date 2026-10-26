@@ -677,3 +677,25 @@ Initial App review is COMMENTED at a68666f with2minor comments, not clean/no-fin
 subsequent incremental CLI dff5748 is clean with a passed major gate. Independent
 file reviewer resolved010/011 separately. Correction CI: one passed, one still
 installing Linux dependencies; neither pending nor skipped badges count as pass.
+
+## Developer follow-up: preserve stream cleanup diagnostics
+
+Related SCAN-REV-005: accepted need for cleanup evidence; this is a limited
+diagnostic correction, not a resolution of the unbounded driver-shutdown finding.
+Inspection found Stream::close overwrote earlier failures with each later failure.
+The cleanup collector now retains every failed phase in order and the first
+io::ErrorKind. Drop identifies the V4L2 buffer type (1 video /13 metadata).
+Files: crates/scancraft-device/src/{lib.rs,cleanup_errors.rs}. Restoration order,
+remaining-attempt behavior, state flags, Drop ownership and synchronous ioctls
+are unchanged. All restoration steps still execute after earlier failures.
+No new retries, detachment, timeout or driver-cancellation guarantee is introduced.
+
+Two hardware-free tests check multiple failure messages, OS error context, first
+kind/order, intervening successes and empty/success-only cleanup. They exercise
+the error collector, not a real or stalled V4L2 driver. The scanner is absent
+from the current lsusb inventory, so hardware cleanup/disconnect qualification
+was not performed. Full frozen gate passed543Rust tests, formatting, strict Clippy and release build
+(/tmp/scancraft-cleanup-diagnostics-checks.log). Review/commit evidence follows.
+This is independently identified development work; original reviewer register
+and its finding status are untouched. Implementation is project-local MIT Rust;
+no dependency or upstream source was added.
