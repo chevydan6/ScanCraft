@@ -2037,3 +2037,23 @@ standard flag interpretation and qualification limits: docs/RECORDED_CLOCK_OBSER
 No genuine calibrated geometry, new acquisition, physical calibration or firmware
 action. Independent reviewer rejected the alleged earlier PTS compatibility defect;
 raw CodeRabbit gate remains recorded as blocked, not silently relabeled passed.
+
+## Offline recorded-stereo sequence checkpoint
+
+A reusable recording processor now keeps validated indexes and rectification maps
+across explicitly selected pairs. The new native CLI sequence workflow connects
+reconstruction to the existing point-to-point tracking/fusion session, retains each
+raw pair and diagnostics, and atomically publishes fused PLY/editable project.
+Tracking rejection preserves diagnostics and is not fused; a subsequent valid pair
+can recover against the retained reference. No-geometry failure retains current
+raw inputs/rejection evidence in incomplete staging rather than inventing poses.
+
+535 Rust tests, formatting, strict Clippy and release build pass. New regressions
+cover cached report equivalence/source mutation, full retained inputs, project
+reopening/overwrite/input preservation, cancellation/index errors, synthetic
+wrong-depth rejection/recovery, no-geometry diagnostics and actual CLI execution.
+Details: docs/RECORDED_STEREO_SEQUENCE.md. Per-frame provenance remains in the full
+external bundle; fused standalone projects do not yet embed multi-frame lineage.
+Point-to-plane selection, meshing in this path, blank-frame recovery/resumption,
+dedicated GUI orchestration and genuine live/calibrated Raptor evidence remain
+unfinished. No scanner, firmware or physical calibration action was performed.

@@ -391,3 +391,12 @@ Requested unavailable/inconsistent fits are rejected with explicit reasons.
 Four additional patch reads per pair are included in the bounded work budget.
 See docs/SUBPIXEL_STEREO.md for provenance, units, compatibility and synthetic-only
 validation. Hardware timing and physical qualification flags remain unverified.
+
+Offline recorded sequences use workflow `RecordingProcessor` to retain validated
+left/right indexes and a shared `StereoProcessor` map set. Explicit increasing pair
+indices feed the unchanged image/matching/triangulation logic, then the existing
+`ScanSession` point-to-point tracker and voxel fusion. The sequence orchestrator
+writes per-frame raw selections/reports to staging, keeps only current frame
+geometry plus bounded session/fusion state, and atomically publishes the fused
+editable project and external provenance bundle. No timing heuristic selects pairs
+or qualifies geometry. See docs/RECORDED_STEREO_SEQUENCE.md for boundaries/limits.

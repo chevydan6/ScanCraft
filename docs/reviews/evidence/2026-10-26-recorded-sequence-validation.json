@@ -1,0 +1,53 @@
+{
+  "recorded_utc": "2026-10-26T11:31:57.608264+00:00",
+  "implementation_commit": "6128be4602e15db29660542e274443dad37a2f74",
+  "implementation_tree": "28c058fb766fbbe849142316a4cff163235659b5",
+  "base": "0d6e96ee07cc684858d2b1fcbd4a50dac64f0d84",
+  "validation": "535 Rust tests, formatting, strict Clippy and release build pass",
+  "test_log_sha256": "12a002d915a4327c7a1a14c144c58f3a18aa5bb55ef38a764d48b05dc0e56638",
+  "cli_release_binary_sha256": "ba7b75d0a176a70b1586003fbe0c777fd4ec7b1605373daec025141ad0dd5681",
+  "cli_synthetic_summary": {
+    "artifacts": [
+      {
+        "bytes": 784,
+        "crc32": 2750386546,
+        "role": "sequence-request.json"
+      },
+      {
+        "bytes": 3897,
+        "crc32": 1063766970,
+        "role": "report.json"
+      },
+      {
+        "bytes": 406,
+        "crc32": 2126816080,
+        "role": "points.ply"
+      },
+      {
+        "bytes": 609,
+        "crc32": 1540393261,
+        "role": "project.orproj"
+      }
+    ],
+    "frames": 3,
+    "integrated_frames": 3,
+    "physical_accuracy_qualified": false,
+    "points": 5,
+    "rejected_frames": 0,
+    "schema_version": 1,
+    "synchronization_verified": false
+  },
+  "gui_scope": "private-display startup render only; requires screenshot inspection, not full GUI workflow or hardware qualification",
+  "gui_binary_sha256": "bd1cdf38d10dc740e406cc777c53ab7ae7fb04f5be09996fc8d5cb2638903e4a",
+  "gui_screenshot_sha256": "a085156d36007ba58b34cbea270220bbaa2584fd5d4e7da81aca71beb1f41112",
+  "gui_camera_device_fds": [],
+  "gui_visual_inspection": "Five loaded points at three visible analytic plane locations, startup/render only",
+  "independent_review": "Reviewer Assignments37/38: 11 adapter/sequence +1 native CLI tests on stable snapshot, then exact6128be4 context/retention test; no actionable defect; full535 not independently rerun",
+  "coderabbit_review": "Pending: checked included CLI quota0, billing inactive, no paid consent/flags or review attempt",
+  "limits": [
+    "Synthetic end-to-end offline workflow, not physical scanner qualification",
+    "Fused project multi-frame lineage remains external to complete bundle",
+    "No dedicated sequence GUI, live integration, blank-frame resumption, mesh or normals support in this path"
+  ],
+  "binding": "Operator-recorded source/validation observations; no automated immutable-head attestation"
+}

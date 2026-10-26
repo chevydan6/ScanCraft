@@ -322,3 +322,310 @@ fn cancellation_after_recorded_preparation_never_publishes_bundle() {
     assert!(scancraft_workflow::publish_prepared(&prepared, &output, &work).is_err());
     assert!(!output.exists());
 }
+
+#[test]
+fn cached_recording_processor_reuses_pairs_without_weakening_source_guards() {
+    let t = Temp::new();
+    let mut inputs = fixture(&t.0);
+    let work = WorkControl::default();
+    let mut processor = recording_reconstruction::RecordingProcessor::open(&inputs, &work).unwrap();
+    for (left, right) in [(0, 0), (2, 1), (1, 2)] {
+        let cached = processor.prepare_pair(left, right, &work).unwrap();
+        inputs.left_index = left;
+        inputs.right_index = right;
+        let independent = recording_reconstruction::prepare(&inputs, &work).unwrap();
+        assert_eq!(
+            serde_json::to_value(cached.report()).unwrap(),
+            serde_json::to_value(independent.report()).unwrap()
+        );
+    }
+    assert!(processor.prepare_pair(3, 0, &work).is_err());
+    let mut file = fs::OpenOptions::new()
+        .append(true)
+        .open(&inputs.left)
+        .unwrap();
+    std::io::Write::write_all(&mut file, b"changed").unwrap();
+    assert!(processor.prepare_pair(0, 0, &work).is_err());
+    assert!(processor.check_sources(&work).is_err());
+}
+fn sequence_settings(path: &Path) {
+    fs::write(path, serde_json::to_vec_pretty(&serde_json::json!({
+        "schema_version":1,"session_id":"synthetic-recorded-sequence",
+        "tracking":{"max_correspondence_mm":2.,"max_rms_mm":0.01,"minimum_overlap":0.8,
+            "max_step_translation_mm":1.,"max_step_rotation_rad":0.1,"iterations":20,"tolerance_mm":1e-8},
+        "voxel_mm":0.1,"maximum_voxels":1000,
+        "pairs":[{"id":1,"left_index":0,"right_index":0,"tracking_indices":[0,1,2]},
+            {"id":2,"left_index":1,"right_index":1,"tracking_indices":[0,1,2]},
+            {"id":3,"left_index":2,"right_index":2,"tracking_indices":[0,1,2]}]
+    })).unwrap()).unwrap();
+}
+#[test]
+fn recorded_sequence_retains_raw_pairs_fuses_and_reopens_without_overwriting_inputs() {
+    let t = Temp::new();
+    let inputs = fixture(&t.0);
+    let settings = t.0.join("sequence.json");
+    sequence_settings(&settings);
+    let originals: Vec<_> = [
+        &inputs.left,
+        &inputs.right,
+        &inputs.calibration,
+        &inputs.settings,
+        &settings,
+    ]
+    .into_iter()
+    .map(|p| (p.clone(), fs::read(p).unwrap()))
+    .collect();
+    let target = t.0.join("sequence");
+    let summary = scancraft_workflow::recorded_sequence::run(
+        &inputs,
+        &settings,
+        &target,
+        &WorkControl::default(),
+    )
+    .unwrap();
+    assert_eq!(summary["integrated_frames"], 3);
+    assert_eq!(summary["rejected_frames"], 0);
+    assert!(summary["points"].as_u64().unwrap() >= 3);
+    assert_eq!(summary["physical_accuracy_qualified"], false);
+    let report: serde_json::Value =
+        serde_json::from_slice(&fs::read(target.join("report.json")).unwrap()).unwrap();
+    assert_eq!(report["synchronization_verified"], false);
+    assert_eq!(report["source_device_binding_verified"], false);
+    assert_eq!(
+        report["reconstruction_context"]["source"],
+        "synthetic_fixture"
+    );
+    for index in 0..3 {
+        let dir = target.join(format!("frame-{index:04}"));
+        let source: serde_json::Value =
+            serde_json::from_slice(&fs::read(dir.join("recording-sources.json")).unwrap()).unwrap();
+        assert_eq!(source["left"]["selected_frame_index"], index);
+        let mut reader =
+            Reader::new(fs::File::open(dir.join("left-frame.raptor")).unwrap()).unwrap();
+        assert_eq!(
+            reader.read_frame().unwrap().unwrap().sequence,
+            10 + index as u32
+        );
+        assert!(reader.read_frame().unwrap().is_none());
+        assert!(dir.join("report.json").is_file());
+    }
+    let editor = scancraft_geometry::formats::load_project(
+        fs::File::open(target.join("project.orproj")).unwrap(),
+    )
+    .unwrap();
+    assert_eq!(
+        editor.cloud.points.len() as u64,
+        summary["points"].as_u64().unwrap()
+    );
+    // Analytic stationary plane coordinates in the original left frame. Tiny
+    // fitted-pose perturbations can straddle voxel boundaries, so validate
+    // geometry/coverage instead of assuming exactly three occupied cells.
+    let expected = [[-57.5, -27.5, 400.], [22.5, 22.5, 400.], [92.5, 42.5, 400.]];
+    let close = |a: [f64; 3], b: [f64; 3]| {
+        a.iter().zip(b).map(|(x, y)| (x - y).powi(2)).sum::<f64>() < 1e-14
+    };
+    assert!(
+        editor
+            .cloud
+            .points
+            .iter()
+            .all(|p| expected.iter().any(|&q| close(p.position, q)))
+    );
+    assert!(
+        expected
+            .iter()
+            .all(|&p| editor.cloud.points.iter().any(|q| close(p, q.position)))
+    );
+    let original_project = fs::read(target.join("project.orproj")).unwrap();
+    assert!(
+        scancraft_workflow::recorded_sequence::run(
+            &inputs,
+            &settings,
+            &target,
+            &WorkControl::default()
+        )
+        .is_err()
+    );
+    assert_eq!(
+        fs::read(target.join("project.orproj")).unwrap(),
+        original_project
+    );
+    for (path, bytes) in originals {
+        assert_eq!(fs::read(path).unwrap(), bytes);
+    }
+}
+#[test]
+fn recorded_sequence_errors_and_cancellation_never_publish_partial_success() {
+    let t = Temp::new();
+    let inputs = fixture(&t.0);
+    let settings = t.0.join("sequence.json");
+    sequence_settings(&settings);
+    let target = t.0.join("never-published");
+    let work = WorkControl::default();
+    work.cancel();
+    assert!(
+        scancraft_workflow::recorded_sequence::run(&inputs, &settings, &target, &work).is_err()
+    );
+    assert!(!target.exists());
+    let mut value: serde_json::Value =
+        serde_json::from_slice(&fs::read(&settings).unwrap()).unwrap();
+    value["pairs"][2]["left_index"] = 99.into();
+    fs::write(&settings, serde_json::to_vec(&value).unwrap()).unwrap();
+    let error = scancraft_workflow::recorded_sequence::run(
+        &inputs,
+        &settings,
+        &target,
+        &WorkControl::default(),
+    )
+    .unwrap_err()
+    .to_string();
+    assert!(
+        error.contains("incomplete recorded sequence retained"),
+        "{error}"
+    );
+    assert!(!target.exists());
+    assert!(
+        t.0.read_dir()
+            .unwrap()
+            .filter_map(Result::ok)
+            .any(|entry| entry.file_type().unwrap().is_dir()
+                && entry.path().join("frame-0000/left-frame.raptor").is_file())
+    );
+    value["pairs"][2]["left_index"] = 2.into();
+    value["pairs"][1]["id"] = 1.into();
+    fs::write(&settings, serde_json::to_vec(&value).unwrap()).unwrap();
+    assert!(
+        scancraft_workflow::recorded_sequence::run(
+            &inputs,
+            &settings,
+            &target,
+            &WorkControl::default()
+        )
+        .is_err()
+    );
+    assert!(!target.exists());
+}
+
+#[test]
+fn recorded_sequence_rejects_bad_alignment_and_recovers_without_integrating_it() {
+    let t = Temp::new();
+    let inputs = fixture(&t.0);
+    let original = original();
+    let left = image::open(&original.left).unwrap().to_luma8();
+    let right = image::open(&original.right).unwrap().to_luma8();
+    let mut shifted = vec![0; right.as_raw().len()];
+    for y in 0..32usize {
+        for x in 0..56usize {
+            shifted[y * 64 + x] = 2 * left.as_raw()[y * 64 + x + 8] + 20;
+        }
+    }
+    // The bundled synthetic right sensor is rotated 180 degrees.
+    shifted.reverse();
+    let mut writer = Writer::with_context(
+        Vec::new(),
+        StreamProfile {
+            interface: 2,
+            width: 64,
+            height: 32,
+            fourcc: *b"GREY",
+            fps: 30,
+        },
+        synthetic(),
+    )
+    .unwrap();
+    for i in 0..3u32 {
+        let mut metadata = vec![0; 16];
+        metadata[10] = 6;
+        metadata[11] = 4;
+        metadata[12..16].copy_from_slice(&(1000 + i * 33333).to_le_bytes());
+        writer
+            .push(&Frame {
+                sequence: 10 + i,
+                host_timestamp_us: 1000 + u64::from(i) * 33333,
+                flags: 0,
+                metadata,
+                data: if i == 1 {
+                    shifted.clone()
+                } else {
+                    right.as_raw().clone()
+                },
+            })
+            .unwrap();
+    }
+    fs::write(&inputs.right, writer.finish().unwrap()).unwrap();
+    let settings = t.0.join("sequence.json");
+    sequence_settings(&settings);
+    let mut request: serde_json::Value =
+        serde_json::from_slice(&fs::read(&settings).unwrap()).unwrap();
+    for i in 0..3 {
+        request["pairs"][i]["right_index"] = i.into();
+    }
+    fs::write(&settings, serde_json::to_vec(&request).unwrap()).unwrap();
+    let target = t.0.join("sequence");
+    let summary = scancraft_workflow::recorded_sequence::run(
+        &inputs,
+        &settings,
+        &target,
+        &WorkControl::default(),
+    )
+    .unwrap();
+    assert_eq!(summary["integrated_frames"], 2);
+    assert_eq!(summary["rejected_frames"], 1);
+    let report: serde_json::Value =
+        serde_json::from_slice(&fs::read(target.join("report.json")).unwrap()).unwrap();
+    assert_eq!(report["frames"][1]["tracking_state"], "Lost");
+    assert_eq!(report["frames"][1]["integrated"], false);
+    assert!(report["frames"][1]["world_from_frame"].is_null());
+    assert_eq!(report["frames"][2]["tracking_state"], "Tracking");
+    assert_eq!(report["frames"][2]["integrated"], true);
+    let cloud = scancraft_geometry::formats::read_ply(
+        std::io::BufReader::new(fs::File::open(target.join("points.ply")).unwrap()),
+        None,
+    )
+    .unwrap();
+    assert!(
+        cloud
+            .points
+            .iter()
+            .all(|p| (p.position[2] - 400.).abs() < 1e-7)
+    );
+}
+
+#[test]
+fn recorded_sequence_no_geometry_keeps_current_raw_inputs_and_rejection_diagnostics() {
+    let t = Temp::new();
+    let mut inputs = fixture(&t.0);
+    let mut request: serde_json::Value =
+        serde_json::from_slice(&fs::read(&inputs.settings).unwrap()).unwrap();
+    request["seeds"] = serde_json::json!([[0, 0]]);
+    inputs.settings = t.0.join("empty-request.json");
+    fs::write(&inputs.settings, serde_json::to_vec(&request).unwrap()).unwrap();
+    let settings = t.0.join("sequence.json");
+    sequence_settings(&settings);
+    let target = t.0.join("no-geometry");
+    let error = scancraft_workflow::recorded_sequence::run(
+        &inputs,
+        &settings,
+        &target,
+        &WorkControl::default(),
+    )
+    .unwrap_err()
+    .to_string();
+    assert!(error.contains("no geometry"), "{error}");
+    assert!(!target.exists());
+    let partial =
+        t.0.read_dir()
+            .unwrap()
+            .filter_map(Result::ok)
+            .map(|e| e.path())
+            .find(|p| p.join("frame-0000/report.json").is_file())
+            .unwrap();
+    let frame = partial.join("frame-0000");
+    assert!(frame.join("left-frame.raptor").is_file());
+    assert!(frame.join("right-frame.raptor").is_file());
+    let report: serde_json::Value =
+        serde_json::from_slice(&fs::read(frame.join("report.json")).unwrap()).unwrap();
+    assert!(report["reconstruction"].is_null());
+    assert_eq!(report["matching"]["rejected"].as_array().unwrap().len(), 1);
+    assert!(!frame.join("points.ply").exists());
+}
