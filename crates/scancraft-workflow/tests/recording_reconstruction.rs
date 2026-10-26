@@ -740,4 +740,17 @@ fn sequence_project_references_survive_edit_reopen_and_explicitly_verify_moved_s
         )
         .is_err()
     );
+    fs::remove_file(&parent).unwrap();
+    let missing = scancraft_workflow::source_verification::verify_sequence(
+        &references,
+        &moved,
+        &WorkControl::default(),
+    )
+    .unwrap_err()
+    .to_string();
+    assert!(missing.contains("frame-0000"), "{missing}");
+    assert!(
+        missing.contains("Cannot inspect retained artifact directory"),
+        "{missing}"
+    );
 }

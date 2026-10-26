@@ -97,11 +97,18 @@ fn verify_artifacts(
             if parents.contains_key(&path) {
                 continue;
             }
-            let metadata = fs::symlink_metadata(&path)?;
+            let metadata = fs::symlink_metadata(&path).map_err(|error| {
+                format!(
+                    "Cannot inspect retained artifact directory {}: {error}",
+                    path.display()
+                )
+            })?;
             if !metadata.is_dir() {
-                return Err(
-                    "sequence artifact parents must be real directories, not symlinks".into(),
-                );
+                return Err(format!(
+                    "Retained artifact directory {} must be a real directory, not a symlink",
+                    path.display()
+                )
+                .into());
             }
             parents.insert(path, stamp(&metadata));
         }

@@ -372,7 +372,7 @@ impl CloudUi {
                 ui.label("References survive edits and reopening. External bytes are not checked on load; binding, synchronization and physical accuracy remain unqualified.");
                 ui.add_enabled_ui(self.job.is_none(), |ui| {
                     ui.horizontal(|ui| {ui.label("Folder to verify:");ui.text_edit_singleline(&mut self.source_directory);if ui.button("Use recorded location").clicked(){self.source_directory=sequence.directory_display.clone();}});
-                    if ui.button("Verify sequence sources on disk").clicked(){verify_directory=Some(PathBuf::from(&self.source_directory));}
+                    if ui.add_enabled(!self.source_directory.trim().is_empty(), egui::Button::new("Verify sequence sources on disk")).clicked(){verify_directory=Some(PathBuf::from(&self.source_directory));}
                 });
             });
         }

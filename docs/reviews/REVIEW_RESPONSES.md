@@ -617,3 +617,34 @@ Independent Assignment56 maps prior30targeted tests to this committed source and
 separately passes5verifier tests for parent-loop delta; operator runtime artifacts
 independently inspected/recomputed. Full541 remains developer evidence. Reviewer
 register/statuses untouched. GitHub review/CI remain separate from this CLI result.
+
+### PR9 App minor findings — accepted
+
+CR-SEQREF-EMPTY-DIRECTORY (GitHub comment4381521555): accepted. The sequence
+verification button now follows its single-frame sibling's nonempty/trimmed field
+guard, preventing a pointless empty-path job. Existing outer busy guard and click
+behavior retained. Source: app/cloud_ui.rs. No mirrored button-condition unit test
+added for this low-impact UI correction; formatting/build plus existing GUI guard
+and verification tests remain appropriate.
+
+CR-SEQREF-PARENT-DIAGNOSTIC (comment4381521578): accepted. Nested-parent metadata
+errors now name the affected directory; non-directory/symlink errors also include
+its path. Behavior remains fail-fast, with no unsafe fallback or per-artifact
+report promised. Source: workflow/source_verification.rs. Extended moved-source
+regression removes a frame parent and requires frame-0000 in the error. Existing
+mutation/symlink checks remain. Neither original bot comment nor reviewer register
+was altered/resolved by development. Final tests, commit and review evidence follow.
+
+SCAN-REV-010: accepted, implemented via the same egui add_enabled/trim guard as
+the single-frame panel. Empty and whitespace-only values disable dispatch by
+source inspection; nonempty-folder pipeline/GUI verification remains covered.
+No new manual empty-field click proof claimed. Source cloud_ui.rs. Reviewer alone
+may verify/close the register finding; development does not change its status.
+
+SCAN-REV-011: accepted, errors identify the computed retained frame directory.
+Existing moved-folder regression now removes frame-0000 and asserts that directory
+and diagnostic context in the propagated error. Source source_verification.rs and
+workflow tests/recording_reconstruction.rs. Full541Rusttests/fmt/strictClippy/release
+PASS /tmp/scancraft-sequence-reference-app-fixes-checks.log. No change to fail-closed
+checks, source references or geometry. Both corrections await independent closure;
+commit and incremental review evidence follow.
