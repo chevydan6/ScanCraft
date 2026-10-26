@@ -1971,3 +1971,11 @@ regressions pass, including retained incomplete recording and replacement-worker
 availability; full workspace has 504 passing Rust tests. Await independent reviewer
 verification. SCAN-REV-005 shutdown-bound and physical scanning qualifications
 remain unresolved. No hardware, firmware or calibration writes performed.
+
+Final correction checkpoint: 505 Rust tests pass with six hardware-free capture
+regressions, including deterministic late-publication and repeated immediate-success
+checks. CodeRabbit completed a committed review of 231695c against the workflow
+branch with zero findings and a passed major gate. Draft PR #3 is available for
+independent verification; no reviewer finding was closed by development and no merge
+or protection change was performed. Genuine reconstruction and bounded driver
+shutdown remain unqualified. See developer responses for exact commit scope.

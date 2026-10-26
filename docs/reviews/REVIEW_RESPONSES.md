@@ -30,7 +30,7 @@ answered separately below. Only the independent reviewer may verify/close them.
 - Limitations: synthetic workload, no million-point or physical hardware qualification;
   extra usize of node metadata; general pathological search can remain linear.
   Existing heuristic filter behavior and geometry formats are preserved.
-- Independent review: CodeRabbit included capacity currently reports exhausted.
+- CodeRabbit availability at first attempt: included capacity was exhausted.
   The attempted scoped review returned a recoverable rate_limit error with an
   approximately 13-minute wait. No passing CodeRabbit gate is claimed and no paid
   review is authorized. The independent reviewer separately inspected the source
@@ -83,13 +83,14 @@ source change or independent closure is claimed at this checkpoint.
   uses fallible Builder::spawn; errors leave capture inactive with a diagnostic.
 - Source: crates/scancraft-app/src/capture_worker.rs and src/main.rs (start, receive,
   Drop adapter and capture_recovery_tests). No scanner protocol/control changes.
-- Tests: five hardware-free regressions pass: no-result clean disconnection,
+- Tests: six hardware-free regressions pass: no-result clean disconnection,
   result-before-cleanup poll returns while worker remains blocked, panic leaves a
   byte-identical incomplete recording and permits a replacement worker, and normal
   capture error restores stopped/error state. A deterministic receive/finish
-  interleaving checks that late completion is not misclassified. Partial recording is also checked
+  interleaving checks that late completion is not misclassified; a 256-iteration
+  immediate-success regression supplements it. Partial recording is also checked
   with the real recording reader and remains incomplete.
-- Full validation: 504 workspace tests, formatting, strict all-target Clippy and
+- Full validation: 505 workspace tests, formatting, strict all-target Clippy and
   frozen release workspace build pass. Logs remain local under /tmp/scancraft-
   capture-recovery-*.log. Initial test compilation errors (Drop struct update and
   a wrong Reader method name) were corrected before these passing runs. The late-
@@ -99,8 +100,8 @@ source change or independent closure is claimed at this checkpoint.
 - Limitations: operating-system thread-spawn failure is handled but not injected;
   hardware streaming/reconnection was not exercised. App shutdown still joins
   synchronously; SCAN-REV-005 remains distinct and unproven. No claim of a whole-app
-  shutdown bound or independent closure. CodeRabbit review is pending included
-  capacity; a rate-limit error is not a successful review.
+  shutdown bound or independent closure. CodeRabbit initially rate-limited the
+  request; its later completed review is recorded below.
 
 ## SCAN-REV-005 — accepted; shutdown bound remains unproven
 
@@ -140,7 +141,28 @@ The deterministic late-publication regression passes. Added a 256-iteration imme
 success regression in this follow-up to supplement the deterministic interleaving.
 Source: crates/scancraft-app/src/capture_worker.rs. Updated full frozen gate passes:
 505 Rust tests, formatting, strict Clippy and release workspace build. Initial complete correction
-commit: `041fd8fed7ca16c9c539f51a0f5cc2f416a8c429`; follow-up test commit to follow.
+commit: `041fd8fed7ca16c9c539f51a0f5cc2f416a8c429`; follow-up test commit: `231695c2cb7b9c2e8d816669e01c761a26ba66a6`.
 No claim that stochastic stress proves absence of all races, no hardware or shutdown
 bound qualification, and no independent closure by development. Only the reviewer
 may verify and close this finding after inspecting the committed helper.
+
+## Completed development review checkpoint
+
+CodeRabbit CLI 0.9.1 reviewed committed head
+`231695c2cb7b9c2e8d816669e01c761a26ba66a6` against
+`dev/coderabbit-review-workflow`. It completed over ten changed files with zero
+findings, `gate.threshold=major`, `gate.status=passed`, zero blocking findings,
+`outcome=completed` and exit 0. The review began only after an included slot
+returned; no paid consent or service purchase occurred. Raw output is local at
+/tmp/scancraft-development-coderabbit.ndjson. This is actual completed CLI review,
+not the skipped CodeRabbit GitHub badge. Subsequent response-only bookkeeping does
+not change the reviewed implementation; do not call it a separate bot-reviewed head.
+
+Draft PR #3 makes both implementation commits and regressions available to the
+independent reviewer. Capture implementation 041fd8f and test follow-up 231695c;
+spatial implementation 2b85187. Full source gate passes 505 Rust tests, formatting,
+strict Clippy and release build. The rebuilt GUI launched/rendered a legacy project
+on an isolated private display with no camera file descriptors. No scanner acquisition,
+calibration or firmware write occurred. Hardware absence, SCAN-REV-002 authority
+separation and SCAN-REV-005 shutdown qualification remain limitations. Development
+has not changed or closed any finding in the independent register.
