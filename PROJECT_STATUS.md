@@ -1955,3 +1955,34 @@ recovery; CLI/GUI output artifacts match. Bias and an initial failed unsupported
 test expectation are retained in evidence. See docs/POINT_TO_PLANE_ICP.md and
 huber-plane-* evidence. No genuine geometry, global alignment, live scanning,
 transport or physical accuracy gate is advanced. Calibration remains deferred.
+
+
+Development checkpoint 2026-10-26: exact coincident-point k-neighbor pruning added
+with brute-force/order and structural work-bound regression tests. All 499 Rust
+tests and six NumPy statistical-filter comparisons pass. The 4000-coincident-point
+CLI workload median improved from 534.388 ms to 39.297 ms (three runs each); this
+is not general scanner or million-point qualification. See docs/benchmarks/COINCIDENT_NEIGHBORS.md
+and developer-owned docs/reviews/REVIEW_RESPONSES.md. Independent shared findings
+were absent and were not created by development. Hardware discovery remains empty.
+
+SCAN-REV-004 development correction: capture panic/disconnection now reaches an
+explicit stopped/error state after thread completion. Five hardware-free lifecycle
+regressions pass, including retained incomplete recording and replacement-worker
+availability; full workspace has 504 passing Rust tests. Await independent reviewer
+verification. SCAN-REV-005 shutdown-bound and physical scanning qualifications
+remain unresolved. No hardware, firmware or calibration writes performed.
+
+Final correction checkpoint: 505 Rust tests pass with six hardware-free capture
+regressions, including deterministic late-publication and repeated immediate-success
+checks. CodeRabbit completed a committed review of 231695c against the workflow
+branch with zero findings and a passed major gate. Draft PR #3 is available for
+independent verification; no reviewer finding was closed by development and no merge
+or protection change was performed. Genuine reconstruction and bounded driver
+shutdown remain unqualified. See developer responses for exact commit scope.
+
+SCAN-REV-005 ordinary-close mitigation: window close requests stop and keeps the UI
+open while capture cleanup remains active. Completion explicitly rechecks unsaved/
+busy project guards; errors keep diagnostics visible. Replacement capture cannot
+start during pending close. Six additional hardware-free tests pass; full frozen
+Rust gate now 511 tests. No measured whole-app shutdown bound or real driver-stall
+qualification is claimed. Reviewer's finding is not closed by development.

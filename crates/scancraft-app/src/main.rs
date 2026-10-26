@@ -1,4 +1,6 @@
 mod archive_ui;
+mod capture_close;
+mod capture_worker;
 mod cloud_jobs;
 mod cloud_ui;
 mod measurement_view;
@@ -20,7 +22,6 @@ use std::{
         atomic::{AtomicBool, AtomicU64, Ordering},
         mpsc::{self, Receiver, TrySendError},
     },
-    thread,
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 fn camera_texture(
@@ -53,8 +54,7 @@ struct Running {
     frames: Arc<AtomicU64>,
     preview_drops: Arc<AtomicU64>,
     rx: Receiver<Frame>,
-    result: Receiver<Result<String, String>>,
-    worker: Option<thread::JoinHandle<()>>,
+    worker: capture_worker::Worker,
 }
 struct App {
     recovery: recovery_ui::RecoveryUi,
@@ -66,6 +66,8 @@ struct App {
     mesh: mesh_ui::MeshUi,
     confirm_close: bool,
     close_allowed: bool,
+    closing_window: bool,
+    capture_close: capture_close::CaptureClose,
     running: Option<Running>,
     interface: u8,
     status: String,
@@ -91,6 +93,8 @@ impl Default for App {
             mesh: mesh_ui::MeshUi::default(),
             confirm_close: false,
             close_allowed: false,
+            closing_window: false,
+            capture_close: Default::default(),
             running: None,
             interface: 4,
             status: "Ready. Find the scanner to check its USB interfaces.".into(),
@@ -110,7 +114,56 @@ impl Default for App {
     }
 }
 impl App {
+    fn capture_active_or_closing(&self) -> bool {
+        self.running.is_some() || self.capture_close.is_waiting() || self.closing_window
+    }
+    fn needs_close_confirmation(&self) -> bool {
+        !self.close_allowed
+            && (self.cloud.is_dirty()
+                || self.cloud.is_busy()
+                || self.recovery.is_busy()
+                || self.playback.is_busy()
+                || self.archive.is_busy())
+    }
+    fn request_window_close(&mut self, ctx: &egui::Context) {
+        if self.running.is_some() {
+            self.capture_close_step(ctx, true, std::time::Instant::now());
+        } else if self.needs_close_confirmation() {
+            self.confirm_close = true;
+            ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+        } else {
+            self.closing_window = true;
+            ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+        }
+    }
+    fn capture_close_step(
+        &mut self,
+        ctx: &egui::Context,
+        requested: bool,
+        now: std::time::Instant,
+    ) -> bool {
+        match self
+            .capture_close
+            .advance(requested, self.running.is_some(), now)
+        {
+            capture_close::Action::CancelViewportClose => {
+                // Re-evaluate unsaved state after cleanup; prior close consent
+                // cannot cover edits made while capture is still stopping.
+                self.close_allowed = false;
+                if let Some(running) = &self.running {
+                    running.cancel.store(true, Ordering::Relaxed);
+                }
+                ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+            }
+            capture_close::Action::RetryViewportClose => self.request_window_close(ctx),
+            capture_close::Action::None => {}
+        }
+        self.capture_close.is_waiting()
+    }
     fn start(&mut self) {
+        if self.capture_active_or_closing() {
+            return;
+        }
         let interface = self.interface;
         let record = self.record;
         let folder = self.folder.clone();
@@ -118,11 +171,10 @@ impl App {
         let frames = Arc::new(AtomicU64::new(0));
         let drops = Arc::new(AtomicU64::new(0));
         let (tx, rx) = mpsc::sync_channel(2);
-        let (done, result) = mpsc::channel();
         let c = cancel.clone();
         let f = frames.clone();
         let d = drops.clone();
-        let worker = thread::spawn(move || {
+        let worker = match capture_worker::Worker::spawn(move || {
             let run = || -> Result<String, String> {
                 let _locks = SessionLock::acquire().map_err(|e| e.to_string())?;
                 let profile = StreamProfile {
@@ -207,15 +259,21 @@ impl App {
                     output.map_or_else(|| "off".into(), |p| p.display().to_string())
                 ))
             };
-            let _ = done.send(run());
-        });
+            run()
+        }) {
+            Ok(worker) => worker,
+            Err(error) => {
+                self.status = "Capture not started".into();
+                self.log = format!("Could not create capture worker: {error}");
+                return;
+            }
+        };
         self.running = Some(Running {
             cancel,
             frames,
             preview_drops: drops,
             rx,
-            result,
-            worker: Some(worker),
+            worker,
         });
         self.status = "Starting native capture…".into();
     }
@@ -264,19 +322,18 @@ impl App {
             r.frames.load(Ordering::Relaxed),
             r.preview_drops.load(Ordering::Relaxed)
         );
-        if let Ok(result) = r.result.try_recv() {
+        if let Some(result) = self.running.as_mut().and_then(|r| r.worker.poll()) {
             self.log = match result {
                 Ok(s) => s,
                 Err(e) => {
+                    // Keep the failure and partial-recording diagnostic visible;
+                    // a pending close must not silently consume capture errors.
+                    self.capture_close.keep_open();
+                    self.close_allowed = false;
                     format!("Capture failed: {e}. Any .partial file is an incomplete recording.")
                 }
             };
-            if let Some(mut r) = self.running.take()
-                && let Some(w) = r.worker.take()
-                && w.join().is_err()
-            {
-                self.log = "Capture worker panicked".into();
-            }
+            self.running = None;
             self.status = "Capture stopped".into();
         }
         ctx.request_repaint_after(Duration::from_millis(30));
@@ -292,18 +349,29 @@ impl eframe::App for App {
         if self.recovery.is_busy() || self.playback.is_busy() || self.archive.is_busy() {
             ctx.request_repaint_after(Duration::from_millis(50));
         }
-        if ctx.input(|i| i.viewport().close_requested())
-            && !self.close_allowed
-            && (self.cloud.is_dirty()
-                || self.cloud.is_busy()
-                || self.recovery.is_busy()
-                || self.playback.is_busy()
-                || self.archive.is_busy())
-        {
+        let close_requested = ctx.input(|i| i.viewport().close_requested());
+        let waiting_for_capture =
+            self.capture_close_step(ctx, close_requested, std::time::Instant::now());
+        if close_requested && !waiting_for_capture && self.needs_close_confirmation() {
             ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
             self.confirm_close = true;
+        } else if close_requested && !waiting_for_capture {
+            self.closing_window = true;
         }
-        if self.confirm_close {
+        if self.closing_window {
+            return;
+        }
+        if waiting_for_capture {
+            egui::Window::new("Stopping capture before closing")
+                .collapsible(false).resizable(false).show(ctx, |ui| {
+                    ui.label("Waiting for capture cleanup. Recordings are not finalized until capture stops.");
+                    if self.capture_close.slow(std::time::Instant::now()) {
+                        ui.label("Cleanup is taking longer than expected. The window stays open while the capture worker owns device cleanup.");
+                    }
+                    if ui.button("Keep window open").clicked() { self.capture_close.keep_open(); self.confirm_close = false; }
+                });
+        }
+        if self.confirm_close && !waiting_for_capture {
             egui::Window::new("Close ScanCraft?")
                 .collapsible(false)
                 .resizable(false)
@@ -337,9 +405,14 @@ impl eframe::App for App {
                         self.archive.cancel();
                         self.close_allowed = true;
                         self.confirm_close = false;
-                        ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                        self.request_window_close(ctx);
                     }
                 });
+        }
+        // Once root Close is queued, do not accept new work or edits in
+        // the remainder of this frame after its safety checks have passed.
+        if self.closing_window {
+            return;
         }
         if self.running.is_some()
             || self.cloud.is_busy()
@@ -389,7 +462,7 @@ impl eframe::App for App {
             if self.editing {self.cloud.ui(ui,&mut self.folder);return;}
             ui.heading("ScanCraft");ui.label("ArtCraft Ecosystem Candidate · Experimental 0.1");
             ui.label("Calibration deferred. Scanner reconstruction and accuracy qualification are not available yet.");ui.separator();
-            let active=self.running.is_some();
+            let active=self.capture_active_or_closing();
             let previous_interface=self.interface;
             ui.horizontal(|ui|{
                 ui.add_enabled_ui(!active,|ui|{
@@ -426,9 +499,7 @@ impl Drop for App {
     fn drop(&mut self) {
         if let Some(r) = &mut self.running {
             r.cancel.store(true, Ordering::Relaxed);
-            if let Some(w) = r.worker.take() {
-                let _ = w.join();
-            }
+            let _ = r.worker.join();
         }
     }
 }
@@ -1042,5 +1113,170 @@ mod startup_tests {
         assert!(startup_args(args(&["--reconstruct", "calibration"])).is_err());
         assert!(startup_args(args(&["--unknown"])).is_err());
         assert!(startup_args(args(&["one", "two"])).is_err());
+    }
+}
+
+#[cfg(test)]
+mod capture_recovery_tests {
+    use super::*;
+    // Release injected stalls even if an assertion unwinds before normal cleanup.
+    // Otherwise App::drop could join a test worker still waiting on this sender.
+    struct ReleaseOnDrop(Option<mpsc::Sender<()>>);
+    impl ReleaseOnDrop {
+        fn release(&mut self) {
+            if let Some(sender) = self.0.take() {
+                let _ = sender.send(());
+            }
+        }
+    }
+    impl Drop for ReleaseOnDrop {
+        fn drop(&mut self) {
+            self.release();
+        }
+    }
+
+    fn running(run: impl FnOnce() -> Result<String, String> + Send + 'static) -> Running {
+        let (_sender, rx) = mpsc::channel();
+        Running {
+            cancel: Arc::new(AtomicBool::new(false)),
+            frames: Arc::new(AtomicU64::new(0)),
+            preview_drops: Arc::new(AtomicU64::new(0)),
+            rx,
+            worker: capture_worker::Worker::spawn(run).unwrap(),
+        }
+    }
+    fn finish(app: &mut App) {
+        let deadline = std::time::Instant::now() + Duration::from_secs(5);
+        let context = egui::Context::default();
+        while app.running.is_some() {
+            app.receive(&context);
+            assert!(
+                std::time::Instant::now() < deadline,
+                "capture failed to leave running state"
+            );
+            std::thread::yield_now();
+        }
+    }
+    #[test]
+    fn capture_completion_rechecks_busy_project_before_root_close_command() {
+        let mut app = App::default();
+        app.cloud.open_startup(
+            PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                .join("../../evidence/offline-cli-verified/project.orproj"),
+        );
+        assert!(app.cloud.is_busy()); // Retained until UI tick, even if load finishes.
+        let now = std::time::Instant::now();
+        app.capture_close.advance(true, true, now); // A prior capture close intent.
+        assert!(app.capture_active_or_closing()); // No replacement start while close is pending.
+        let ctx = egui::Context::default();
+        let output = ctx.run(Default::default(), |ctx| {
+            assert!(!app.capture_close_step(ctx, false, now));
+        });
+        assert!(app.confirm_close);
+        assert!(!app.close_allowed);
+        assert!(
+            !output.viewport_output[&egui::ViewportId::ROOT]
+                .commands
+                .contains(&egui::ViewportCommand::Close)
+        );
+        app.cloud.cancel();
+    }
+    #[test]
+    fn capture_error_cancels_pending_close_so_diagnostic_remains_visible() {
+        let mut app = App::default();
+        app.running = Some(running(|| Err("cleanup error".into())));
+        let ctx = egui::Context::default();
+        let now = std::time::Instant::now();
+        assert!(app.capture_close_step(&ctx, true, now));
+        finish(&mut app);
+        assert!(!app.capture_close.is_waiting());
+        assert!(!app.close_allowed);
+        assert!(app.log.contains("cleanup error"));
+        assert!(app.log.contains("incomplete recording"));
+        assert!(!app.capture_close_step(&ctx, false, now));
+    }
+    #[test]
+    fn ordinary_close_requests_stop_and_waits_without_abandoning_worker() {
+        let (release, wait) = mpsc::channel();
+        let mut app = App::default();
+        app.running = Some(running(move || {
+            wait.recv().unwrap();
+            Ok("cleanup finished".into())
+        }));
+        let mut release = ReleaseOnDrop(Some(release)); // Drops before App on failure.
+        let cancel = app.running.as_ref().unwrap().cancel.clone();
+        app.close_allowed = true; // Old discard consent must be rechecked.
+        let ctx = egui::Context::default();
+        let now = std::time::Instant::now();
+        app.request_window_close(&ctx);
+        assert!(app.capture_close.is_waiting());
+        assert!(cancel.load(Ordering::Relaxed));
+        assert!(!app.close_allowed);
+        // The worker is deliberately blocked. Polling and repeated close intent
+        // must retain its owner; do not close by dropping/joining it on the UI.
+        app.receive(&ctx);
+        assert!(app.running.is_some());
+        assert!(app.capture_close_step(&ctx, true, now + Duration::from_secs(20)));
+        assert!(app.capture_close.slow(now + Duration::from_secs(20)));
+        release.release();
+        finish(&mut app);
+        assert_eq!(app.log, "cleanup finished");
+        assert!(!app.capture_close_step(&ctx, false, now + Duration::from_secs(21)));
+        assert!(!app.capture_close.is_waiting());
+        assert!(app.closing_window);
+        assert!(app.capture_active_or_closing());
+    }
+    #[test]
+    fn capture_panic_restores_restart_state_and_preserves_partial_recording() {
+        static NEXT: AtomicU64 = AtomicU64::new(0);
+        let path = std::env::temp_dir().join(format!(
+            "scancraft-panic-{}-{}.raptor.partial",
+            std::process::id(),
+            NEXT.fetch_add(1, Ordering::Relaxed)
+        ));
+        let file = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&path)
+            .unwrap();
+        let profile = StreamProfile {
+            interface: 0,
+            width: 2,
+            height: 2,
+            fourcc: *b"GREY",
+            fps: 30,
+        };
+        let writer = Writer::new(file, profile).unwrap();
+        let before = std::fs::read(&path).unwrap();
+        let mut app = App::default();
+        app.running = Some(running(move || {
+            let _recording = writer;
+            panic!("injected capture failure");
+        }));
+        finish(&mut app);
+        assert_eq!(app.status, "Capture stopped");
+        assert!(app.log.contains("panicked"));
+        assert!(app.log.contains("incomplete recording"));
+        assert_eq!(std::fs::read(&path).unwrap(), before);
+        let mut reader =
+            scancraft_recording::Reader::new(std::fs::File::open(&path).unwrap()).unwrap();
+        assert!(
+            reader.read_frame().is_err(),
+            "partial recording must not become a completed recording"
+        );
+        // Start/interface controls use running.is_some(); a replacement worker
+        // can now complete. This test never opens a scanner or changes controls.
+        app.running = Some(running(|| Ok("replacement stopped".into())));
+        finish(&mut app);
+        assert_eq!(app.log, "replacement stopped");
+        std::fs::remove_file(path).unwrap();
+    }
+    #[test]
+    fn ordinary_capture_error_stops_and_remains_visible() {
+        let mut app = App::default();
+        app.running = Some(running(|| Err("injected capture error".into())));
+        finish(&mut app);
+        assert_eq!(app.status, "Capture stopped");
+        assert!(app.log.contains("injected capture error"));
     }
 }
