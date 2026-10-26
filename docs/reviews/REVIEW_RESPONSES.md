@@ -746,3 +746,10 @@ New fullgate544/fmt/strictClippy/releasePASS, three guardtestsPASS; evidenceupda
 with finalhelper/fullgatelog hashes. Actual vendor execution remains developer
 evidence; independent Assignment77 inspected source/guardtests only and explicitly
 did not execute private bytes.006 remains UnderReview, not resolved by this result.
+
+Documentation correction: CALIBRATION.md still claimed no factory decoding and
+no integrated calibrated workflow. Updated it to distinguish existing bounded
+factory-field extraction and declared-calibration offline/GUI reconstruction
+from still-unqualified physical/live Raptor scanning. Source contracts remain
+factory_named/factory_pose/factory_laser, storage, image/depth/geometry crates and
+recorded_sequence workflow; no historical rationale invented or code changed.
