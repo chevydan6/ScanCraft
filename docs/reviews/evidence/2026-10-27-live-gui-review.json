@@ -111,5 +111,66 @@
     "rust_tests_passed": 572,
     "scope": "synchronized GUI consumer regression; real one-pair synthetic runner, no hardware",
     "independent_finding": "SCAN-REV-014; reviewer controls verification and closure"
+  },
+  "github_app_review": {
+    "review_id": 5660000912,
+    "state": "COMMENTED",
+    "source_commit": "478fc646473ff31f969bbe4f4b8de02835f297dd",
+    "submitted_at": "2026-10-26T22:32:48Z",
+    "summary_comment_id": 6428422902,
+    "request_comment_id": 6428805372,
+    "request_accepted_reply_id": 6428807089,
+    "actionable_inline_comments": [
+      {
+        "id": 4383238987,
+        "severity": "minor",
+        "id_local": "CR-LIVE-PAUSE-BOUNDARY",
+        "disposition": "accepted; corrected in 9a071e2"
+      }
+    ],
+    "docstring_advisory": {
+      "coverage_percent": 12.39,
+      "threshold_percent": 80.0,
+      "functions_analyzed": 113,
+      "files": 13,
+      "unsupported_skipped": 10
+    },
+    "limitations": "COMMENTED is not approval or owner merge authorization; completion covers 478fc64 only"
+  },
+  "pause_boundary_correction": {
+    "source_commit": "9a071e293f64216d1d5d90564e6bde58d6e917c9",
+    "propagation": {
+      "source_fix": "9a071e293f64216d1d5d90564e6bde58d6e917c9",
+      "branches": {
+        "dev/live-session-lineage": {
+          "head": "7effbbfd36538cb46fac6ae020d18f37cf1cc245",
+          "worktree": "/tmp/scancraft-pause-propagate-mz1u446l/worktree"
+        },
+        "dev/live-session-export": {
+          "head": "448ab6cd39f19368e8816f74ce9c7ad91792adae",
+          "worktree": "/tmp/scancraft-pause-propagate-vcuu7eg7/worktree"
+        },
+        "dev/cooperative-capture-stop": {
+          "head": "b9f934a34182fb998884717fb61e73f3c9c1d219",
+          "worktree": "/home/dan/scancraft"
+        }
+      }
+    },
+    "source_branch_test_count": 573,
+    "source_branch_gate_exit": 0,
+    "red_log_sha256": "d335db7f67454522a6b68cf71e9fb036d32cc21d80a839e83ffd4e0081334ed4",
+    "green_gate_log_sha256": "d0c819a95d294d78d4d8c99f435fd09cb2da2e702ad392cc89a98919f567c443",
+    "reply_comment_id": 4383285896,
+    "review_of_corrected_source": "pending included capacity; no independent closure inferred",
+    "propagated_source_commit": "b9f934a34182fb998884717fb61e73f3c9c1d219",
+    "propagated_gate": {
+      "tests": 580,
+      "fmt": "PASS",
+      "strict_clippy": "PASS",
+      "release": "PASS",
+      "exit_code": 0,
+      "log_sha256": "0d76d81d2552d7407ede1d293f4c5a9aafeefc93b4cbc24f554bdcdcc32a25f0",
+      "build_cache_note": "shared worktree target cache invalidated separately for debug and release; failed attempts retained locally; future worktree targets isolated"
+    }
   }
 }

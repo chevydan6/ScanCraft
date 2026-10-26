@@ -115,3 +115,14 @@ scanner accuracy, global convergence, robustness prevalence or speed qualificati
 Native example/runner hashes and Python/NumPy/SciPy versions are retained in
 evidence/huber-plane-reference/result.json. Method and scope: docs/POINT_TO_PLANE_ICP.md.
 No live/throughput/physical acceptance gate is advanced by these comparisons.
+
+## Repeated single-image undistortion baseline (2026-10-27 local date)
+
+Unchanged release undistort_benchmark on the Ryzen6900HS:1920×1200synthetic
+GREY,20runs after1warmup, median40.109ms,p9546.174ms,max49.208ms; one map
+build202.117ms. Allocation included; mapbuilding excluded from apply timing.
+Coordinate storage55,296,000bytes, not processRSS. All2,304,000map pixels valid.
+Evidence docs/benchmarks/undistort-baseline-2026-10-27.json records source/example
+hashes and original output. This is a repeated component baseline, not a speedup,
+paired-camera measurement, full-pipeline FPS or hardware accuracy/latency gate.
+No optimized implementation is selected from this result alone.
