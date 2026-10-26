@@ -1,10 +1,13 @@
-//! Sparse integer-pixel ZNCC matching on explicitly calibrated rectified images.
+//! Sparse integer-pixel ZNCC matching with opt-in bounded subpixel refinement on explicitly calibrated rectified images.
 //! No exposure synchronization, feature detection or stereo rectification is inferred.
 use scancraft_calibration::{Brown5, CameraModel, stereo::StereoCalibration};
 use scancraft_geometry::work::{Stage, WorkControl};
 use scancraft_image::MaskedImage;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
+
+mod subpixel;
+pub use subpixel::{SubpixelConfig, SubpixelRefinement};
 
 const MAX_SEEDS: usize = 100_000;
 const MAX_SAMPLE_VISITS: usize = 100_000_000;
@@ -20,22 +23,33 @@ pub struct MatchConfig {
     pub min_correlation: f64,
     /// Absolute ZNCC score margin over every other valid disparity candidate.
     pub min_uniqueness_margin: f64,
+    /// None preserves the legacy integer-only method and serialized output.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subpixel: Option<SubpixelConfig>,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MatchedFeature {
     pub seed_index: usize,
     pub left_pixel: [u32; 2],
+    /// Integer winner retained for lineage; use pixel_match() for geometry.
     pub right_pixel: [u32; 2],
     pub correlation: f64,
     pub second_correlation: f64,
     pub reverse_correlation: f64,
     pub reverse_second_correlation: f64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subpixel: Option<SubpixelRefinement>,
 }
 impl MatchedFeature {
+    /// Geometry observations use the fractional right coordinate when available.
+    /// The left observation remains the supplied integer seed, in the same grid.
     pub fn pixel_match(&self) -> crate::PixelMatch {
         crate::PixelMatch {
             left_pixel: self.left_pixel.map(f64::from),
-            right_pixel: self.right_pixel.map(f64::from),
+            right_pixel: self.subpixel.as_ref().map_or_else(
+                || self.right_pixel.map(f64::from),
+                |refined| refined.right_pixel,
+            ),
             color: None,
         }
     }
@@ -49,6 +63,8 @@ pub enum Rejection {
     Ambiguous,
     ReverseRejected,
     ReverseMismatch,
+    SubpixelUnavailable,
+    SubpixelReverseMismatch,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RejectedSeed {
@@ -105,10 +121,19 @@ fn validate_config(config: MatchConfig, width: u32, seeds: usize) -> Result<(), 
     {
         return Err("invalid sparse stereo matching configuration or seed count".into());
     }
+    if let Some(settings) = config.subpixel {
+        settings.validate()?;
+        if span < 3 {
+            return Err("subpixel refinement needs at least three disparities".into());
+        }
+    }
     let side = 2 * config.patch_radius as usize + 1;
+    // Two templates + two full searches; optional refinement reads four more
+    // candidate patches. The work budget must include all additional samples.
+    let patches = 2 * (span as usize + 1) + if config.subpixel.is_some() { 4 } else { 0 };
     let visits = seeds
-        .checked_mul(span as usize + 1)
-        .and_then(|n| n.checked_mul(side * side * 2));
+        .checked_mul(patches)
+        .and_then(|n| n.checked_mul(side * side));
     if visits.is_none_or(|n| n > MAX_SAMPLE_VISITS) {
         return Err("matching request exceeds 100 million bidirectional patch sample visits; split into bounded batches".into());
     }
@@ -314,6 +339,53 @@ pub fn match_rectified(
             if reverse.position != seed {
                 return Ok(Err(Rejection::ReverseMismatch));
             }
+            let subpixel = if let Some(settings) = config.subpixel {
+                let disparity = i64::from(seed[0]) - i64::from(forward.position[0]);
+                if disparity <= i64::from(config.min_disparity)
+                    || disparity >= i64::from(config.max_disparity)
+                {
+                    return Ok(Err(Rejection::SubpixelUnavailable));
+                }
+                let Some(f) = subpixel::offset(
+                    &template,
+                    right,
+                    &rig.right,
+                    forward.position,
+                    forward.score,
+                    config,
+                    work,
+                )?
+                else {
+                    return Ok(Err(Rejection::SubpixelUnavailable));
+                };
+                let Some(r) = subpixel::offset(
+                    &reverse_template,
+                    left,
+                    &rig.left,
+                    seed,
+                    reverse.score,
+                    config,
+                    work,
+                )?
+                else {
+                    return Ok(Err(Rejection::SubpixelUnavailable));
+                };
+                if (f.offset + r.offset).abs() > settings.max_bidirectional_error_px {
+                    return Ok(Err(Rejection::SubpixelReverseMismatch));
+                }
+                Some(SubpixelRefinement {
+                    right_pixel: [
+                        f64::from(forward.position[0]) + f.offset,
+                        f64::from(seed[1]),
+                    ],
+                    forward_offset_px: f.offset,
+                    reverse_offset_px: r.offset,
+                    forward_curvature: f.curvature,
+                    reverse_curvature: r.curvature,
+                })
+            } else {
+                None
+            };
             Ok(Ok(MatchedFeature {
                 seed_index,
                 left_pixel: seed,
@@ -322,6 +394,7 @@ pub fn match_rectified(
                 second_correlation: forward.second,
                 reverse_correlation: reverse.score,
                 reverse_second_correlation: reverse.second,
+                subpixel,
             }))
         })()?;
         match outcome {
@@ -375,6 +448,7 @@ mod tests {
             min_patch_stddev: 5.,
             min_correlation: 0.9,
             min_uniqueness_margin: 0.05,
+            subpixel: None,
         }
     }
     fn noise(seed: u32) -> Vec<f32> {
@@ -400,6 +474,28 @@ mod tests {
             }
         }
         (image(left), image(right))
+    }
+    #[test]
+    fn refinement_extra_patch_reads_are_included_in_work_budget() {
+        let mut c = config();
+        c.max_disparity = 100;
+        assert!(validate_config(c, 4096, 19800).is_ok());
+        c.subpixel = Some(SubpixelConfig {
+            min_curvature: 0.001,
+            max_bidirectional_error_px: 0.1,
+        });
+        assert!(
+            validate_config(c, 4096, 19800)
+                .unwrap_err()
+                .contains("100 million")
+        );
+        c.min_disparity = 1;
+        c.max_disparity = 2;
+        assert!(
+            validate_config(c, 4096, 1)
+                .unwrap_err()
+                .contains("three disparities")
+        );
     }
     #[test]
     fn automatic_seeds_are_deterministic_masked_bounded_and_cancellable() {

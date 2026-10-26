@@ -262,3 +262,28 @@ application source and does not receive an invented fresh-review claim. The prio
 independent 004/008 resolutions remain the reviewer's decisions. 005 remains only
 mitigated on normal close, not qualified for bounded forced teardown. No merge,
 protection change, paid consent, firmware or physical calibration operation.
+
+## DEV-RECON-001 — optional fractional stereo observations
+
+Developer-identified reconstruction work, not an independent finding. Accepted:
+add opt-in three-sample quadratic ZNCC peak refinement while retaining integer
+winners, coarse confidence checks, old JSON defaults and provenance flags. The
+processor uses fractional observations for original-camera triangulation. New
+curvature, support, bidirectional consistency and work-budget checks reject
+unsupported fits. Independently derived Rust mathematics; no copied upstream code.
+
+Sources: depth/src/matching.rs, matching/subpixel.rs, pipeline.rs; depth tests and
+reference example; CLI tests/subpixel_reconstruction.rs; tools/check_subpixel_reference.py.
+Detailed method, compatibility and reproduction: docs/SUBPIXEL_STEREO.md.
+
+Validation: frozen formatting, strict all-target Clippy, workspace tests (518 pass)
+and release build; final log /tmp/scancraft-subpixel-final-checks.log. Independent
+NumPy polynomial-fit oracle agrees within 7.4e-15 on four synthetic signed shifts;
+legacy integer OpenCV comparison passes. Native CLI integration saves/reopens
+synthetic geometry, preserves inputs and rejects overwrite. These are synthetic
+results, not physical scanner accuracy. No firmware/calibration operation.
+
+Implementation commit and automated review evidence follow after immutable commit.
+Limitations: local parabolic bias, horizontal-only refinement, additional patch
+work and inline optional diagnostics memory (not benchmarked), no live qualification.
+SCAN-REV-006 remains unqualified; no reviewer status is changed.
