@@ -66,7 +66,9 @@ owner; never claim integration works merely because the config file exists.
    reviewThreads for resolved/outdated status. `coderabbit pullrequest --help`
    describes the CLI's stored GitHub-feedback viewer. Reply with evidence to valid
    bot feedback, fix defects and update the branch; do not bulk-resolve findings.
-   If automatic review paused, request one `@coderabbitai review` after meaningful
+   If automatic review paused or the service skips automatic review for a small
+   OSS repository (observed: fewer than 10 stars), request one
+   `@coderabbitai review` after meaningful
    fixes. Do not trigger repeated full reviews of unchanged commits.
 8. Require passing checks and no unresolved actionable high-severity findings.
    Ask the owner to approve merging only after the change is reviewable. Do not
