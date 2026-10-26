@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=https://www.coderabbit.ai/integrations/schema.v2.json
+{
+  "language": "en-US",
+  "early_access": false,
+  "enable_free_tier": true,
+  "reviews": {
+    "profile": "chill",
+    "auto_approvals": {
+      "enabled": false,
+      "allow_author_approval": false
+    },
+    "auto_review": {
+      "enabled": true,
+      "drafts": false,
+      "auto_incremental_review": true,
+      "auto_pause_after_reviewed_commits": 3
+    },
+    "path_instructions": [
+      {
+        "path": "crates/scancraft-device/**",
+        "instructions": "Check V4L2 ABI/unsafe lifetimes, buffer bounds, cancellation, advisory old/new session lock cooperation and restoration. Do not infer hardware qualification from mocks or synthetic tests."
+      },
+      {
+        "path": "crates/scancraft-{calibration,depth,geometry,image}/**",
+        "instructions": "Check units, coordinate frames, finite/degenerate cases, bounds, numerical stability and cancellation. Distinguish synthetic validation from physical calibration. Preserve file-format compatibility; require evidence for performance/accuracy claims."
+      },
+      {
+        "path": "**",
+        "instructions": "ScanCraft is independent and not officially affiliated with ArtCraft or Creality. Preserve architecture and license/provenance notices. Focus on actionable defects; do not propose broad rewrites solely because a mature library exists. Developer evaluates fixes; no automatic merging."
+      }
+    ]
+  },
+  "chat": {
+    "auto_reply": false,
+    "art": false
+  },
+  "knowledge_base": {
+    "automatic_linking_mode": "disabled"
+  }
+}
