@@ -34,7 +34,7 @@ use std::{
     path::{Path, PathBuf},
 };
 pub type Error = Box<dyn std::error::Error + Send + Sync>;
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Request {
     schema_version: u32,
@@ -247,7 +247,17 @@ fn process_images(
     inputs: Vec<Digest>,
     work: &WorkControl,
 ) -> Result<Prepared, Error> {
-    let processor = StereoProcessor::build(calibration, request.output_grid, work)?;
+    let processor = StereoProcessor::build(calibration, request.output_grid.clone(), work)?;
+    process_with_processor(&processor, request, left, right, inputs, work)
+}
+fn process_with_processor(
+    processor: &StereoProcessor,
+    request: Request,
+    left: &[u8],
+    right: &[u8],
+    inputs: Vec<Digest>,
+    work: &WorkControl,
+) -> Result<Prepared, Error> {
     let source = processor.rectification().source();
     let stereo_request = StereoRequest {
         left: GrayImage::new(source.left.width, source.left.height, left)?,
@@ -611,3 +621,5 @@ pub mod project_bundle;
 pub mod recording_archive;
 
 pub mod recording_timing;
+
+pub mod recorded_sequence;

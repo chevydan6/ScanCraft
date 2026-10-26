@@ -419,3 +419,45 @@ evidence/2026-10-26-clock-comparison-validation.json. Automated review pending d
 to verified exhausted included quota; no paid service or duplicate call. Later
 response/evidence bookkeeping is not a reviewed source revision. Reviewer-owned
 register and all unrelated work remain untouched.
+
+## DEV-SEQUENCE-001 — recorded stereo to native tracking/fusion
+
+Accepted developer mission work: connect explicit increasing recorded-frame pairs
+to unchanged reconstruction and ScanSession tracking/fusion. New RecordingProcessor
+reuses full validated indexes and rectification maps; process_with_processor shares
+existing per-pair processing. Existing six adapter regressions still pass and a
+new cached-vs-standalone report comparison plus mutation guard regression passes.
+No context/binding/confidence gate is relaxed. No pair chosen by timing heuristics.
+
+Sources: workflow lib.rs, recording_reconstruction.rs, recorded_sequence.rs; CLI
+main.rs and tests/recorded_sequence.rs; workflow tests/recording_reconstruction.rs.
+This is independently implemented orchestration of existing project algorithms,
+not imported upstream code or an added dependency. Detailed interface/bounds and
+source retention: docs/RECORDED_STEREO_SEQUENCE.md.
+
+535 Rust tests, frozen fmt, strict Clippy and release PASS; log
+/tmp/scancraft-recorded-sequence-verified-checks.log. Tests retain all raw sources,
+reopen project, refuse overwrite, preserve originals, reject invalid/cancelled work
+without final publication, retain no-geometry diagnostics, and exercise actual
+reconstruction->tracking loss->recovery with rejected geometry excluded from fusion.
+Initial wrong-depth fixture omitted the existing inverted right-sensor orientation;
+corrected before passing. A later strict-order preflight required updating the
+out-of-range fixture to keep indices increasing before reaching its intended error.
+No production gate was weakened to accommodate either test.
+
+Limits: offline explicit pairs, point-to-point only, unsupported mesh/normal request
+explicitly rejected, no blank-frame resumption, multi-frame lineage remains external
+to fused project. Physical accuracy/sync/binding flags stayfalse. Scanner discovery
+empty, calibration/firmware unchanged. No existing reviewer finding is closed by
+this implementation. Automated review and exact commit evidence follow; no paid
+service authorization is given.
+
+Release CLI demonstration integrated three synthetic frames and reopened/rendered
+its fused project using the existing GUI on a private display, no camera FDs. Input
+SHA256s unchanged and output overwrite rejected. Fused cell count5 from3stationary
+positions reflects tiny pose perturbations crossing voxel boundaries; a regression
+checks all fused coordinates and source coverage against analytic points within
+1e-7mm instead of assuming exactly3cells. This does not qualify physical precision.
+Local proof root is recorded in /tmp/scancraft-recorded-sequence-proof-root.txt;
+GUI evidence /tmp/scancraft-recorded-sequence-proof-gui. Fresh included CLI quota0
+with about21minutes until availability; no paid review attempted.
