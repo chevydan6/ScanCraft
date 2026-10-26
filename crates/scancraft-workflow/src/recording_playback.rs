@@ -76,7 +76,7 @@ impl Playback {
     /// Cached observations from full indexing; source guards remain mandatory.
     pub fn timings(
         &self,
-    ) -> impl ExactSizeIterator<Item = scancraft_recording::indexed::FrameTiming> + '_ {
+    ) -> impl ExactSizeIterator<Item = scancraft_recording::indexed::FrameTiming> + Clone + '_ {
         self.recording.timings()
     }
     pub fn len(&self) -> usize {

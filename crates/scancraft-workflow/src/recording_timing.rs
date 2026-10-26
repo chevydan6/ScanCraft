@@ -7,6 +7,8 @@ use scancraft_recording::indexed::FrameTiming;
 use serde::Serialize;
 use std::path::Path;
 
+mod raw_pts;
+pub use raw_pts::Comparison as RawPtsComparison;
 const MAX_SAMPLES: usize = 100;
 #[derive(Debug, Serialize)]
 pub struct Candidate {
@@ -31,6 +33,7 @@ pub struct Report {
     pub outside_limit: usize,
     pub right_frames_used_by_multiple_left_candidates: usize,
     pub raw_pts_equal_unique_candidates: usize,
+    pub raw_pts_comparison: RawPtsComparison,
     pub candidate_samples: Vec<Candidate>,
     pub samples_truncated: bool,
     pub clock_domains_verified: bool,
@@ -72,14 +75,14 @@ pub fn inspect(
 }
 
 fn associate(
-    left: impl ExactSizeIterator<Item = FrameTiming>,
+    left: impl ExactSizeIterator<Item = FrameTiming> + Clone,
     right: &[FrameTiming],
     limit: u64,
     work: &WorkControl,
 ) -> Result<Report, Error> {
     let mut report = Report {
         schema_version: 1,
-        scope: "nearest recorded host values only; clocks/exposures unverified; no automatic reconstruction pairing",
+        scope: "nearest host and raw PTS diagnostics only; clocks/exposures unverified; no automatic reconstruction pairing",
         left_frames: left.len(),
         right_frames: right.len(),
         max_host_delta_us: limit,
@@ -88,6 +91,7 @@ fn associate(
         outside_limit: 0,
         right_frames_used_by_multiple_left_candidates: 0,
         raw_pts_equal_unique_candidates: 0,
+        raw_pts_comparison: raw_pts::compare(left.clone(), right, limit, work)?,
         candidate_samples: Vec::new(),
         samples_truncated: false,
         clock_domains_verified: false,

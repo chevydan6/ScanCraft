@@ -382,3 +382,33 @@ Post-disposition full frozen gate passes 525 Rust tests, formatting, strict Clip
 and release build. Log /tmp/scancraft-recording-timing-disposition-checks.log.
 This adds test evidence and documentation only; production implementation is still
 b2d8417. Raw bot gate remains blocked with its specific major finding disputed.
+
+## DEV-TIMING-002 — cross-check raw PTS independently of host nearest
+
+Accepted developer investigation: genuine recordings contain many equal raw PTS
+values with differing kernel host times. Added independently implemented sorted
+exact-value lookup in workflow recording_timing/raw_pts.rs. Unique means exactly
+one occurrence on each side; repeated values are explicitly ambiguous, never
+assigned across an assumed wrap epoch. No automatic geometry pairing or clock
+qualification. Matching clock/exposure/accuracy flags remain false. Iterator Clone
+contracts expose existing cloneable cached iterators; no new index fields/format.
+
+Sources: workflow recording_timing.rs, recording_timing/raw_pts.rs; recording
+indexed.rs/playback iterator signatures, CLI regression, docs/RECORDING_TIMING.md
+and RECORDED_CLOCK_OBSERVATIONS.md. Method is original project code using standard
+sort and partition-point lookup, no imported upstream algorithm/dependency. Added
+temporary key/index memory and sorting cancellation limits are documented.
+
+529 Rust tests, fmt, strict Clippy and release pass; full log
+/tmp/scancraft-clock-comparison-checks.log. Four new raw-value regressions include
+an independent exhaustive equality oracle, collisions/wrap values, extremes, absent
+matches and cancellation. Native CLI verifies nested fields and unchanged inputs.
+Genuine replay reproduces 72 unique equal-PTS pairs, 3 within1000us, min/max8/20026us;
+independent CRC-validating Python parse agrees; original SHA256s unchanged.
+Raw clocks and exposures remain unqualified, not physical geometry evidence.
+
+Independent Assignment30 rejected SCAN-REV-009; development acknowledges reviewer
+authority without modifying that register or reclassifying the raw blocked bot
+gate. PR5 exact b452b09 CI both passed. New feature is separate from that reviewed
+implementation. CLI included quota is exhausted (about40min at latest check); no
+paid usage/retry requested. New feature review remains pending; commits follow.

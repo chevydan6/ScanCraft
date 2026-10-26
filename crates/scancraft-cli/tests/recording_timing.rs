@@ -66,6 +66,19 @@ fn native_timing_command_reports_unqualified_candidates_without_modifying_record
     );
     let report: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
     assert_eq!(report["unique_nearest_within_limit"], 3);
+    assert_eq!(report["raw_pts_comparison"]["unique_equal_value_pairs"], 3);
+    assert_eq!(
+        report["raw_pts_comparison"]["unique_pairs_within_host_limit"],
+        3
+    );
+    assert_eq!(
+        report["raw_pts_comparison"]["minimum_absolute_host_delta_us"],
+        1
+    );
+    assert_eq!(
+        report["raw_pts_comparison"]["maximum_absolute_host_delta_us"],
+        1
+    );
     for key in [
         "clock_domains_verified",
         "synchronization_verified",

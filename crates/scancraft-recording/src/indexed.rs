@@ -95,7 +95,7 @@ impl<R: Read + Seek> IndexedRecording<R> {
     }
     /// Historical timing observations from indexing, without rereading payloads.
     /// Caller must guard source identity; this is not a fresh integrity check.
-    pub fn timings(&self) -> impl ExactSizeIterator<Item = FrameTiming> + '_ {
+    pub fn timings(&self) -> impl ExactSizeIterator<Item = FrameTiming> + Clone + '_ {
         self.entries.iter().map(|entry| entry.timing)
     }
     /// Read one frame, without rescanning other image payloads. CRC/order and
