@@ -380,13 +380,22 @@ fn execute(
         ));
     }
     if let Operation::VerifySources { directory } = &operation {
-        let origin = document
+        let editor = document
             .editor
             .as_ref()
-            .and_then(|e| e.origin())
-            .ok_or("project has no recorded reconstruction provenance")?;
-        let checked = scancraft_workflow::source_verification::verify(origin, directory, work)
-            .map_err(|e| e.to_string())?;
+            .ok_or("no editable project is open")?;
+        let checked = if let Some(sequence) = editor.sequence() {
+            scancraft_workflow::source_verification::verify_sequence(sequence, directory, work)
+        } else {
+            scancraft_workflow::source_verification::verify(
+                editor
+                    .origin()
+                    .ok_or("project has no recorded reconstruction provenance")?,
+                directory,
+                work,
+            )
+        }
+        .map_err(|e| e.to_string())?;
         let count = checked
             .artifacts
             .iter()
@@ -458,7 +467,7 @@ fn execute(
             scancraft_workflow::recorded_sequence::prepare(&inputs, &settings, &output, work)
                 .map_err(|e| e.to_string())?;
         let make_view = || -> Result<_, String> {
-            let editor = Editor::new(prepared.cloud().clone(), 32)?;
+            let editor = prepared.create_editor().map_err(|e| e.to_string())?;
             let preview = build_preview(&editor.cloud, &[], work)?;
             Ok((editor, preview))
         };
@@ -3180,6 +3189,19 @@ mod tests {
         assert_eq!(report.opened_path, Some(output.join("project.orproj")));
         let saved = load_project(File::open(output.join("project.orproj")).unwrap()).unwrap();
         assert_eq!(saved.cloud, doc.editor.as_ref().unwrap().cloud);
+        assert!(saved.sequence().is_some());
+        assert_eq!(saved.sequence(), doc.editor.as_ref().unwrap().sequence());
+        let unchanged = snapshot(&doc);
+        let verified = execute(
+            &mut doc,
+            Operation::VerifySources {
+                directory: output.clone(),
+            },
+            &WorkControl::default(),
+        )
+        .unwrap();
+        assert!(verified.message.contains("Source verification passed"));
+        assert_eq!(snapshot(&doc), unchanged);
         assert!(output.join("frame-0001/left-frame.raptor").exists());
         let before = snapshot(&doc);
         assert!(

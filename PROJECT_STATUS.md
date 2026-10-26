@@ -2075,3 +2075,23 @@ synthetic frames, preserved inputSHA256s and opened no camera descriptors.
 See docs/RECORDED_STEREO_SEQUENCE.md and sequence-gui-equivalence evidence.
 This is not manual dialog/hardware qualification. Multi-frame project provenance
 remains external, live integration and physical accuracy remain unfinished.
+
+## Persistent sequence-project references checkpoint
+
+ORPROJ07 preserves initial sequence selections, integration decisions, declared
+source/calibration ID and retained-artifact fingerprints across edit history and
+standalone save/reopen. Both saved and live GUI editors retain the same metadata.
+Older02..06 projects keep their old schema when sequence metadata is absent.
+Project loading never opens external sources. Explicit source verification now
+supports sequence folders and guards nested parents against symlinks/changes.
+
+541 Rust tests, formatting, strict Clippy and release pass. Runtime native CLI/GUI
+proof creates v7, filters/saves/reopens without losing refs and explicitly verifies
+27retained artifacts after moving the bundle; inputSHA256s unchanged. GUI/CLI27
+non-location-dependent files are identical, projects agree after descriptive-path
+normalization and root-manifest differences are only project size/CRC. Independent
+reviewer passed30targeted tests on a stable snapshot, not the full541suite.
+See docs/SEQUENCE_PROJECT_REFERENCES.md and sequence-references-runtime evidence.
+Raw sources/full reports stay external; fingerprints do not qualify original
+recording completeness, semantic replay, binding, synchronization or physical
+accuracy. No hardware/calibration/firmware change or new dependency.

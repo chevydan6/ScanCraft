@@ -54,14 +54,70 @@ fn verify_inner(
 ) -> Result<Report, Error> {
     work.check()?;
     origin.validate()?;
+    verify_artifacts(&origin.artifacts, directory, work, before_final)
+}
+/// Explicit sequence artifact verification; references alone never verify disk.
+pub fn verify_sequence(
+    sequence: &scancraft_geometry::sequence_references::Sequence,
+    directory: &Path,
+    work: &WorkControl,
+) -> Result<Report, Error> {
+    work.check()?;
+    sequence.validate()?;
+    let expected: Vec<_> = sequence
+        .artifacts
+        .iter()
+        .map(|a| scancraft_geometry::project_origin::Artifact {
+            name: a.name.clone(),
+            bytes: a.bytes,
+            crc32: a.crc32,
+        })
+        .collect();
+    verify_artifacts(&expected, directory, work, &|| Ok(()))
+}
+fn verify_artifacts(
+    expected: &[scancraft_geometry::project_origin::Artifact],
+    directory: &Path,
+    work: &WorkControl,
+    before_final: &dyn Fn() -> Result<(), Error>,
+) -> Result<Report, Error> {
+    work.check()?;
     let before = fs::symlink_metadata(directory)?;
     if !before.is_dir() {
         return Err("source bundle must be an explicit directory, not a symlink".into());
     }
+    let mut parents = std::collections::BTreeMap::new();
+    for artifact in expected {
+        work.check()?;
+        if let Some(parent) = Path::new(&artifact.name)
+            .parent()
+            .filter(|p| !p.as_os_str().is_empty())
+        {
+            let path = directory.join(parent);
+            if parents.contains_key(&path) {
+                continue;
+            }
+            let metadata = fs::symlink_metadata(&path).map_err(|error| {
+                format!(
+                    "Cannot inspect retained artifact directory {}: {error}",
+                    path.display()
+                )
+            })?;
+            if !metadata.is_dir() {
+                return Err(format!(
+                    "Retained artifact directory {} must be a real directory, not a symlink",
+                    path.display()
+                )
+                .into());
+            }
+            parents.insert(path, stamp(&metadata));
+        }
+    }
     let mut artifacts = Vec::new();
     let mut verified_stamps = Vec::new();
-    for (index, expected) in origin.artifacts.iter().enumerate() {
-        work.update(Stage::Reading, index, origin.artifacts.len())?;
+    let total_artifacts = expected.len();
+    for (index, expected) in expected.iter().enumerate() {
+        work.update(Stage::Reading, index, total_artifacts)?;
         let mut result = ArtifactResult {
             name: expected.name.clone(),
             expected_bytes: expected.bytes,
@@ -137,11 +193,7 @@ fn verify_inner(
         verified_stamps.push(verified_stamp);
     }
     before_final()?;
-    work.update(
-        Stage::Finishing,
-        origin.artifacts.len(),
-        origin.artifacts.len(),
-    )?;
+    work.update(Stage::Finishing, expected.len(), expected.len())?;
     for (artifact, expected) in artifacts.iter_mut().zip(verified_stamps) {
         if let Some(expected) = expected
             && !fs::symlink_metadata(directory.join(&artifact.name))
@@ -151,8 +203,11 @@ fn verify_inner(
         }
     }
     work.check()?;
-    let unchanged =
-        fs::symlink_metadata(directory).is_ok_and(|m| m.is_dir() && stamp(&m) == stamp(&before));
+    let unchanged = fs::symlink_metadata(directory)
+        .is_ok_and(|m| m.is_dir() && stamp(&m) == stamp(&before))
+        && parents.iter().all(|(path, expected)| {
+            fs::symlink_metadata(path).is_ok_and(|m| m.is_dir() && stamp(&m) == *expected)
+        });
     Ok(Report {
         schema_version: 1,
         passed: unchanged && artifacts.iter().all(|r| r.status == "match"),
@@ -181,6 +236,9 @@ pub fn verify_project(
         return Err("verification requires a regular bounded project".into());
     }
     let editor = scancraft_geometry::formats::load_project(std::io::BufReader::new(file))?;
+    if let Some(sequence) = editor.sequence() {
+        return verify_sequence(sequence, directory, work);
+    }
     verify(
         editor
             .origin()

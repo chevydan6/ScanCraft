@@ -37,7 +37,11 @@ struct Request {
     pairs: Vec<Pair>,
 }
 
-fn write_frame(prepared: &Prepared, path: &Path, work: &WorkControl) -> Result<(), Error> {
+fn write_frame(
+    prepared: &Prepared,
+    path: &Path,
+    work: &WorkControl,
+) -> Result<Vec<crate::Digest>, Error> {
     fs::create_dir(path)?;
     let mut artifacts = vec![artifact(path, "report.json", work, |out| {
         serde_json::to_writer_pretty(out, prepared.report())?;
@@ -55,7 +59,7 @@ fn write_frame(prepared: &Prepared, path: &Path, work: &WorkControl) -> Result<(
             Ok(())
         })?);
     }
-    artifact(path, "manifest.json", work, |out| {
+    let manifest = artifact(path, "manifest.json", work, |out| {
         serde_json::to_writer_pretty(
             out,
             &json!({"schema_version":1,"points":points,"artifacts":artifacts,
@@ -64,13 +68,14 @@ fn write_frame(prepared: &Prepared, path: &Path, work: &WorkControl) -> Result<(
         Ok(())
     })?;
     File::open(path)?.sync_all()?;
-    Ok(())
+    artifacts.push(manifest);
+    Ok(artifacts)
 }
 
 /// Complete staged sequence whose final publication is deferred until callers
 /// have prepared their view/document. Dropping it retains staging for recovery.
 pub struct PreparedSequence {
-    cloud: scancraft_geometry::Cloud,
+    editor: Editor,
     summary: Value,
     partial: PathBuf,
     target: PathBuf,
@@ -78,7 +83,12 @@ pub struct PreparedSequence {
 }
 impl PreparedSequence {
     pub fn cloud(&self) -> &scancraft_geometry::Cloud {
-        &self.cloud
+        &self.editor.cloud
+    }
+    /// Preserve the same initial sequence references in the saved and GUI document.
+    pub fn create_editor(&self) -> Result<Editor, Error> {
+        self.editor.validate_history()?;
+        Ok(self.editor.clone())
     }
     pub fn staging_directory(&self) -> &Path {
         &self.partial
@@ -134,13 +144,15 @@ pub fn prepare(
     let mut processor = RecordingProcessor::open(inputs, work)?;
     session.start()?;
     let partial = staging(target)?;
-    let result = (|| -> Result<(Value, scancraft_geometry::Cloud), Error> {
+    let result = (|| -> Result<(Value, Editor), Error> {
         let request_artifact = artifact(&partial, "sequence-request.json", work, |out| {
             std::io::Write::write_all(out, &bytes)?;
             Ok(())
         })?;
         let mut frames = Vec::with_capacity(request.pairs.len());
         let mut reconstruction_context = Value::Null;
+        let mut sequence_frames = Vec::with_capacity(request.pairs.len());
+        let mut retained = Vec::new();
         for (index, pair) in request.pairs.iter().enumerate() {
             work.check()?;
             let prepared = processor.prepare_pair(pair.left_index, pair.right_index, work)?;
@@ -154,9 +166,22 @@ pub fn prepare(
                 return Err("recorded sequence currently requires reconstruction settings without meshing or surface normals".into());
             }
             let directory = format!("frame-{index:04}");
-            write_frame(&prepared, &partial.join(&directory), work)?;
+            let references = write_frame(&prepared, &partial.join(&directory), work)?;
+            retained.extend(references.into_iter().map(|d| {
+                scancraft_geometry::sequence_references::Artifact {
+                    name: format!("{directory}/{}", d.role),
+                    bytes: d.bytes,
+                    crc32: d.crc32,
+                }
+            }));
             let cloud = prepared.cloud().ok_or("selected stereo pair produced no geometry; sequence stopped without inventing tracking")?;
             let update = session.process(pair.id, cloud, &pair.tracking_indices, work)?;
+            sequence_frames.push(scancraft_geometry::sequence_references::Frame {
+                id: pair.id,
+                left_index: pair.left_index,
+                right_index: pair.right_index,
+                integrated: update.fusion.is_some(),
+            });
             let tracking = &update.tracking;
             let pose = tracking.world_from_frame.as_ref().map(|p|json!({
                 "rotation":(0..3).map(|r|(0..3).map(|c|p.rotation[(r,c)]).collect::<Vec<_>>()).collect::<Vec<_>>(),
@@ -177,7 +202,7 @@ pub fn prepare(
             "registration_method":"point_to_point","voxel_mm":request.voxel_mm,"maximum_voxels":request.maximum_voxels,
             "reconstruction_context":reconstruction_context,"frames":frames,"integrated_frames":integrated,"rejected_frames":request.pairs.len()-integrated,
             "synchronization_verified":false,"physical_accuracy_qualified":false,"source_device_binding_verified":false,
-            "project_lineage":"fused project stores geometry/edit history only; keep complete sequence bundle for per-frame provenance",
+            "project_lineage":"initial sequence references retained in project; raw sources and complete reports remain in external bundle",
             "source_integrity":"complete recordings indexed once; selected fingerprints and final filesystem guards checked"});
         let mut artifacts = vec![
             request_artifact,
@@ -190,7 +215,34 @@ pub fn prepare(
             write_ply(&cloud, out)?;
             Ok(())
         })?);
-        let editor = Editor::new(cloud, 32)?;
+        retained.extend(artifacts.iter().map(|d| {
+            scancraft_geometry::sequence_references::Artifact {
+                name: d.role.clone(),
+                bytes: d.bytes,
+                crc32: d.crc32,
+            }
+        }));
+        let mut editor = Editor::new(cloud, 32)?;
+        editor.attach_sequence(scancraft_geometry::sequence_references::Sequence {
+            schema_version: 1,
+            directory_display: std::path::absolute(target)?.display().to_string(),
+            session_id: request.session_id.clone(),
+            source_kind: if reconstruction_context["source"] == "synthetic_fixture" {
+                "synthetic_fixture"
+            } else {
+                "declared_observations"
+            }
+            .into(),
+            calibration_record_id: reconstruction_context["calibration_record_id"]
+                .as_str()
+                .ok_or("missing sequence calibration ID")?
+                .into(),
+            frames: sequence_frames,
+            artifacts: retained,
+            source_device_binding_verified: false,
+            synchronization_verified: false,
+            physical_accuracy_qualified: false,
+        })?;
         artifacts.push(artifact(&partial, "project.orproj", work, |out| {
             save_project(&editor, out)?;
             Ok(())
@@ -205,16 +257,16 @@ pub fn prepare(
         processor.check_sources(work)?;
         File::open(&partial)?.sync_all()?;
         work.check()?;
-        Ok((summary, editor.cloud))
+        Ok((summary, editor))
     })();
-    let (summary, cloud) = result.map_err(|e| {
+    let (summary, editor) = result.map_err(|e| {
         format!(
             "{e}; incomplete recorded sequence retained at {}",
             partial.display()
         )
     })?;
     Ok(PreparedSequence {
-        cloud,
+        editor,
         summary,
         partial,
         target: target.into(),

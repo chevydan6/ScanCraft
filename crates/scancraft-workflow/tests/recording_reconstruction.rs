@@ -670,3 +670,87 @@ fn recorded_sequence_deferred_publication_rechecks_cancellation_and_sources() {
     assert!(!target.exists());
     assert!(partial.exists());
 }
+
+#[test]
+fn sequence_project_references_survive_edit_reopen_and_explicitly_verify_moved_sources() {
+    let t = Temp::new();
+    let inputs = fixture(&t.0);
+    let settings = t.0.join("sequence.json");
+    sequence_settings(&settings);
+    let target = t.0.join("bundle");
+    scancraft_workflow::recorded_sequence::run(
+        &inputs,
+        &settings,
+        &target,
+        &WorkControl::default(),
+    )
+    .unwrap();
+    let mut editor = scancraft_geometry::formats::load_project(
+        fs::File::open(target.join("project.orproj")).unwrap(),
+    )
+    .unwrap();
+    let references = editor.sequence().unwrap().clone();
+    assert_eq!(references.frames.len(), 3);
+    assert_eq!(references.artifacts.len(), 27);
+    assert_eq!(references.source_kind, "synthetic_fixture");
+    assert_eq!(references.frames.iter().filter(|f| f.integrated).count(), 3);
+    editor.trim(&[0], false).unwrap();
+    assert!(editor.undo());
+    assert!(editor.redo());
+    let saved = t.0.join("edited.orproj");
+    scancraft_geometry::formats::save_project(&editor, fs::File::create(&saved).unwrap()).unwrap();
+    let moved = t.0.join("moved");
+    fs::rename(&target, &moved).unwrap();
+    let reopened =
+        scancraft_geometry::formats::load_project(fs::File::open(&saved).unwrap()).unwrap();
+    assert_eq!(reopened.sequence(), Some(&references));
+    let checked = scancraft_workflow::source_verification::verify_project(
+        &saved,
+        &moved,
+        &WorkControl::default(),
+    )
+    .unwrap();
+    assert!(checked.passed);
+    assert_eq!(checked.artifacts.len(), 27);
+    assert!(!checked.synchronization_verified && !checked.physical_accuracy_qualified);
+    let changed = moved.join("frame-0001/left-frame.raptor");
+    std::io::Write::write_all(
+        &mut fs::OpenOptions::new().append(true).open(changed).unwrap(),
+        b"changed",
+    )
+    .unwrap();
+    assert!(
+        !scancraft_workflow::source_verification::verify_sequence(
+            &references,
+            &moved,
+            &WorkControl::default()
+        )
+        .unwrap()
+        .passed
+    );
+    let parent = moved.join("frame-0000");
+    let elsewhere = t.0.join("elsewhere");
+    fs::rename(&parent, &elsewhere).unwrap();
+    std::os::unix::fs::symlink(&elsewhere, &parent).unwrap();
+    assert!(
+        scancraft_workflow::source_verification::verify_sequence(
+            &references,
+            &moved,
+            &WorkControl::default()
+        )
+        .is_err()
+    );
+    fs::remove_file(&parent).unwrap();
+    let missing = scancraft_workflow::source_verification::verify_sequence(
+        &references,
+        &moved,
+        &WorkControl::default(),
+    )
+    .unwrap_err()
+    .to_string();
+    assert!(missing.contains("frame-0000"), "{missing}");
+    assert!(
+        missing.contains("Cannot inspect retained artifact directory"),
+        "{missing}"
+    );
+}

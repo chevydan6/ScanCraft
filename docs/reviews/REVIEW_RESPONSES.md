@@ -550,3 +550,130 @@ Four premerge checks passed and one warning remains; no all-checks-pass claim.
 Current implementation remains1bed149;3129761 and later evidence-only bookkeeping
 do not change app code. Full538gate and GUI/CLI29file equivalence remain recorded
 with their actual scopes. Independent reviewer retains all finding/closure authority.
+
+## DEV-SEQUENCE-REF-001 — durable initial sequence references
+
+Accepted developer mission gap: fused project previously lost multi-frame metadata
+on standalone save. Added bounded typed sequence references in Editor/ORPROJ07,
+kept outside geometry history, retained in the producer's saved/live GUI editor.
+Old02..06save/load behavior remains when sequence metadata absent; strictv7 headers
+and safe complete artifact sets prevent downgrade/silent loss. No filesystem I/O
+on project load. Raw files/reports remain external; initial references do not claim
+current per-point correspondence or qualified physical data.
+
+Sources: geometry sequence_references.rs/lib.rs/formats.rs; workflow recorded_sequence.rs
+and source_verification.rs; app source panel/verification/editor creation; CLI/GUI
+and workflow regressions. Existing serde/CRC implementation reused, no imported
+algorithm or dependency. Artifact fingerprints captured at writing; project/root
+manifest excluded from embedded references to avoid checksum cycles. Explicit
+verify-source-bundle now handles sequence folders, rejects symlink parents and
+checks nested directory/file stamps. It verifies bytes, not semantic replay or
+cryptographic/historical/device authenticity. Details: SEQUENCE_PROJECT_REFERENCES.md.
+
+Tests cover metadata and CRC-valid format rejection, old/no-source round trips,
+trim/undo/redo/save/reopen, moved-folder verification, changed source bytes and
+symlink-parent refusal, plus native CLI and live/saved GUI reference equality.
+Initial shared verifier refactor shadowed artifact count in progress reporting;
+compile caught it and total count now captured before loop. Final full gate, runtime
+and automated review outcomes follow. Reviewer register remains untouched; all
+physical/merge/protection/paid constraints preserved.
+
+DEV-SEQUENCE-REF-001 final full gate541Rusttests/fmt/strictClippy/release PASS:
+/tmp/scancraft-sequence-references-final-source-checks.log. Synthetic release proof
+createsv7, preserves exact references through native filtering/save, moves sources
+and verifies27artifacts in CLI and GUI; inputSHA256s unchanged. GUI screenshot
+/tmp/scancraft-sequence-ref-verify-gui/window-2.png visually inspected. All27non-
+location-dependent files match GUI/CLI; normalized projects and root-manifest
+project fingerprint differences behave as documented. Aggregate evidence:
+evidence/2026-10-26-sequence-references-runtime.json. Runtime preceded only added
+parent-loop cancellation checks/deduplicated stat calls; final541gate covers those.
+No live physical, whole-original-recording, semantic replay or authentication claim.
+
+Independent Assignment55 inspected stable uncommitted snapshot, passed30targeted
+tests including8legacy origin tests, newformat/history/verification tests and
+nativeCLI/GUI; no actionable defect in that scope. It is not committed-head/bot
+attestation or full541rerun. No finding status changed. Fresh included review
+capacity/billing will be checked before one incremental review; no paid consent.
+
+DEV-SEQUENCE-REF-001 implementation `c67a46fba687fb941cacd7b1d01912c52ea92597`,
+PR https://github.com/chevydan6/ScanCraft/pull/9. Included CodeRabbit CLI review
+against exact13790e3 completed15files, one minor finding, zero blocking findings,
+major gate passed, exit0. Head/tree unchanged before/after; operator manifest,
+file blob IDs and log/report hashes in evidence/2026-10-27-sequence-reference-review.json.
+This is not server immutable-head attestation or a new review of later bookkeeping.
+
+CR-SEQREF-ID-BOUNDS (local bot identifier, not an independent finding): **accepted
+confirmation request, no added code needed**. ScanSession::new delegates to
+new_with_method, session.rs:55ff, enforcing nonempty <=128bytes with exactly the
+same ASCII set before RecordingProcessor::open or staging. storage.rs::read calls
+CalibrationRecord::validate, enforcing record_id1..128bytes; RecordingProcessor::open
+loads this before either Playback::open/index. Therefore valid upstream inputs
+cannot fail these same ID restrictions only after expensive staging. Duplicating
+these existing checks would add maintenance without closing a demonstrated gap.
+Minor conditional request satisfied by source verification; no defect or validator
+weakening introduced. No repeated unchanged bot call or paid consent.
+
+Independent Assignment56 maps prior30targeted tests to this committed source and
+separately passes5verifier tests for parent-loop delta; operator runtime artifacts
+independently inspected/recomputed. Full541 remains developer evidence. Reviewer
+register/statuses untouched. GitHub review/CI remain separate from this CLI result.
+
+### PR9 App minor findings — accepted
+
+CR-SEQREF-EMPTY-DIRECTORY (GitHub comment4381521555): accepted. The sequence
+verification button now follows its single-frame sibling's nonempty/trimmed field
+guard, preventing a pointless empty-path job. Existing outer busy guard and click
+behavior retained. Source: app/cloud_ui.rs. No mirrored button-condition unit test
+added for this low-impact UI correction; formatting/build plus existing GUI guard
+and verification tests remain appropriate.
+
+CR-SEQREF-PARENT-DIAGNOSTIC (comment4381521578): accepted. Nested-parent metadata
+errors now name the affected directory; non-directory/symlink errors also include
+its path. Behavior remains fail-fast, with no unsafe fallback or per-artifact
+report promised. Source: workflow/source_verification.rs. Extended moved-source
+regression removes a frame parent and requires frame-0000 in the error. Existing
+mutation/symlink checks remain. Neither original bot comment nor reviewer register
+was altered/resolved by development. Final tests, commit and review evidence follow.
+
+SCAN-REV-010: accepted, implemented via the same egui add_enabled/trim guard as
+the single-frame panel. Empty and whitespace-only values disable dispatch by
+source inspection; nonempty-folder pipeline/GUI verification remains covered.
+No new manual empty-field click proof claimed. Source cloud_ui.rs. Reviewer alone
+may verify/close the register finding; development does not change its status.
+
+SCAN-REV-011: accepted, errors identify the computed retained frame directory.
+Existing moved-folder regression now removes frame-0000 and asserts that directory
+and diagnostic context in the propagated error. Source source_verification.rs and
+workflow tests/recording_reconstruction.rs. Full541Rusttests/fmt/strictClippy/release
+PASS /tmp/scancraft-sequence-reference-app-fixes-checks.log. No change to fail-closed
+checks, source references or geometry. Both corrections await independent closure;
+commit and incremental review evidence follow.
+
+Correction commit `dff5748834049f456eef6128129b4affe2c9078b` full541gate passes.
+One included incremental CLI review versus exacta68666f completed4files, zero
+findings, majorPASS, exit0; head/tree unchanged, evidence/report/log hashes in
+evidence/2026-10-27-sequence-reference-corrections.json. No paid consent/flag.
+Independent Assignments63/64 verified7targeted tests and mapped the source to this
+commit; reviewer independently resolved SCAN-REV-010/011. Development acknowledges
+that decision without changing the register. No live empty-field click claimed.
+
+GitHub initial App review at a68666f was completed COMMENTED, two minor findings,
+not APPROVED. Both have factual source/test replies. Threads currently outdated
+and unresolved; developer has not closed them. One scoped bot confirmation of
+these corrections requested, not another full-PR review. The premerge docstring
+warning28.57% vs80%,28functions/9files/7unsupported is retained: disputed as blanket
+functional blocker for the same documented contract-based reasons recorded earlier.
+Four premerge checks passed, one warning; no threshold/check weakened.
+
+PR9 scoped GitHub confirmation: comment6425555338 independently inspected exact
+dff5748 correction/source/regression/replies and says both findings addressed.
+No new full review or test rerun claimed. Follow-up6425624258 reports its GitHub
+connection has viewerCanResolve:false for both threads, so it left them unresolved.
+A permitted reviewer must close them; development will not self-resolve, grant
+permissions or bypass conversation requirements. No approval/merge change.
+Sanitized initial App/review/scoped confirmation metadata in
+evidence/2026-10-27-github-pr9-review.json. Raw service-access links excluded.
+Initial App review is COMMENTED at a68666f with2minor comments, not clean/no-findings;
+subsequent incremental CLI dff5748 is clean with a passed major gate. Independent
+file reviewer resolved010/011 separately. Correction CI: one passed, one still
+installing Linux dependencies; neither pending nor skipped badges count as pass.
