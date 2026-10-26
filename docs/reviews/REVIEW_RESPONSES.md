@@ -512,3 +512,15 @@ in that scope. This is not a full538rerun or committed-head/service attestation.
 CLI included capacity was0 with nextslot~11:47UTC; no paid request or repeated
 unchanged review. Pending combined review should cover rawPTS+sequence+GUI versus
 b452b09 to avoid duplicate review of unchanged earlier source. Commitrefs follow.
+
+DEV-SEQUENCE-GUI-001 implementation `1bed149cdc5e998d77710a04d25b41d39e76bb4a`,
+PR https://github.com/chevydan6/ScanCraft/pull/8. Included capacity returned1 with
+inactive billing; one combined CodeRabbit CLI review against exact b452b09 completed
+26files, zero findings, major gate passed, exit0. Head/tree unchanged before/after;
+operator manifest/report and full538gate hashes plus file blob IDs in
+evidence/2026-10-26-combined-recorded-sequence-review.json. No paid consent/flag.
+This covers current combined implementation, not a server immutable-head attestation
+or an invented fresh review of previous variant PR heads. The old PR5 raw blocked
+result and independent009rejection remain preserved separately.
+Later evidence-only bookkeeping does not change reviewed code or receive a new
+review claim. GitHub App feedback remains separate; no owner merge consent implied.
