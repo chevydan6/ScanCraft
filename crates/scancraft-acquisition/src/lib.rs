@@ -9,7 +9,7 @@ use scancraft_workflow::live_stereo::{Processor, control::Control, runner::Sourc
 use serde_json::{Value, json};
 use std::{path::Path, sync::Arc};
 type Result<T> = std::result::Result<T, String>;
-struct Native(Capture);
+struct Native(Capture, Arc<Control>);
 impl Source for Native {
     fn context(&self) -> Result<CaptureContext> {
         let mut context = CaptureContext::default();
@@ -21,10 +21,12 @@ impl Source for Native {
         Ok(context)
     }
     fn next(&mut self) -> Result<Option<Frame>> {
-        self.0.next_frame().map(Some).map_err(|e| e.to_string())
+        self.0
+            .next_frame_until(|| self.1.stop_requested())
+            .map_err(|e| e.to_string())
     }
     fn statistics(&self) -> Value {
-        json!({"rejected_buffers":self.0.rejected,"metadata_missing":self.0.metadata_missing,
+        json!({"rejected_buffers":self.0.rejected,"stopped_incomplete_video_buffers":self.0.stopped_incomplete_video_buffers,"metadata_missing":self.0.metadata_missing,
         "sequence_gaps":self.0.sequence_drops,"duplicate_sensor_pts":self.0.duplicate_sensor_pts,
         "rejection_samples":self.0.rejection_samples,"ongoing_rejection_samples":self.0.ongoing_rejection_samples})
     }
@@ -60,13 +62,14 @@ pub fn scan(
     work.check()?;
     let _lock = SessionLock::acquire().map_err(|e| e.to_string())?;
     let mut lease = SettingsLease::capture(&[0, 2]).map_err(|e| e.to_string())?;
+    let source_control = control.clone();
     let result = scancraft_workflow::live_stereo::runner::bundle_controlled(
         &mut processor,
         target,
         work,
-        |_, profile| {
+        move |_, profile| {
             Capture::open_recording(profile)
-                .map(Native)
+                .map(|capture| Native(capture, source_control.clone()))
                 .map_err(|e| e.to_string())
         },
         || lease.restore().map_err(|e| e.to_string()),

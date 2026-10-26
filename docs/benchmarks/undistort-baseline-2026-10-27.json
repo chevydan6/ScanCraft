@@ -1,0 +1,23 @@
+{
+  "apply_includes_output_allocation": true,
+  "apply_max_ms": 49.208374,
+  "apply_median_ms": 40.1088805,
+  "apply_min_ms": 39.963808,
+  "apply_p95_ms": 46.173766,
+  "image_size": [
+    1920,
+    1200
+  ],
+  "map_build_ms": 202.11728100000002,
+  "map_coordinate_storage_bytes": 55296000,
+  "measured_runs": 20,
+  "scope": "single release synthetic image-preparation benchmark; not scanner/live qualification",
+  "valid_pixels": 2304000,
+  "warmup_runs": 1,
+  "source_commit": "d9397852c84fbce58b9e2779f799b974af9c9710",
+  "source_binding": "operator-recorded baseline; image source unchanged during run",
+  "cpu_model": "AMD Ryzen 9 6900HS with Radeon Graphics",
+  "example": "crates/scancraft-image/examples/undistort_benchmark.rs",
+  "example_sha256": "ddf04d2c1e48947e19e11ccc909bb51b55386334ff29bc3bb7d80ccdaed564c1",
+  "raw_log_sha256": "223cc4b7b881e140c106fc71af23b161df173d8d0b32bde595cb3c7a3a790850"
+}

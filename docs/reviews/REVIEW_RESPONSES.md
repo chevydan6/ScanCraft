@@ -988,3 +988,51 @@ dummybytes are not confused with this actualsyntheticrecording replay proof.
 Runtimeaggregate live-session-export-runtime.json; physicalqualificationfalse.
 CodeRabbit remains unavailable from priorzero-capacitypreflight; no paidreview
 attempt. Source commit and draftPR follow; no mergeauthorization inferred.
+
+## SCAN-REV-005 — cooperative capture follow-up, not closure
+
+Accepted limitation remains: kernel ioctls/setup/restoration/joins have no
+established shutdown bound. New native next_frame_until stop predicate checks
+between dequeuecalls and caps poll by remaining frame deadline. LiveNative
+passesControlstop; CLIsignal sets bothabortWorkControl andstop (publication
+stillaborted). A stoppedincompletevideo counter distinguishes intentional
+pre-metadata abandonment from validated recordings/processingdrops. Successful
+reads retained; disconnect/othererrors preserved. No thread detachment/kill.
+Three injected-read policytests pass; full579Rusttests/fmt/strictalltargetClippy/
+releasePASS /tmp/scancraft-cooperative-stop-full-gate.log. NoV4L2latency or
+physicalshutdown proof;005remainsOpen under reviewercontrol. Docs
+COOPERATIVE_CAPTURE_STOP.md. No newdependency/vendorcode/hardwareoperation.
+CodeRabbitCLI capacitypending as recorded; actualsource reviewnotclaimed.
+PR13 oneApprequest6428805372 at22:26:32Z acceptedreply6428807089 at22:26:38Z;
+reviewtriggered, NOTcompletion. No repeatedrequest/paidconsent.
+
+## CR-LIVE-PAUSE-BOUNDARY — accepted GitHub App finding
+
+Appreview5660000912 COMMENTED completed at478fc64 on22:32:48UTC. One minor
+inline4383238987 identifies pause sampled beforeblockingrecv, causing one
+post-request pair to reconstruct/fuse with stale state. Accepted aftersource
+inspection. Correction9a071e2 samples sharedpause at completed-pair processing
+entry anduses the same snapshot for Processor andphase. In-flight CPU work is
+not retroactively interrupted; latercommands apply at nextpairboundary.
+A deterministic rendezvous producer sets pause afterinitialRunning sample and
+hands over a pair: oldcodefails Trackingvs paused(exit101); fixedcode skips
+integration and resumes onfollowingpair. Fullsource13gate573tests/fmt/strict
+Clippy/releasePASS. Source-onlypatch copied into14(7effbbf),15(448ab6c),16(b9f934a);
+no PR/branchmerge or mainchange. Factualreply4383285896; threadnotresolved.
+Appdocstringwarning12.39%vs80%,113functions/13files/10unsupportedskipped retained
+asadvisory, not claimed a functionaldefect. Currentcorrectionreviewpendingquota.
+IndependentAssignment129 verifiedd939 cooperative-stopdelta and33devicetests;
+005Open retained. No newindependentfindingID/statusinvented.
+
+Combinedgate initially failed due generatedartifactcachecontamination after
+developer shared one targetdir with an older worktree; canonicalsource methods
+werepresent. Cleared generatedworkspacepackage artifacts only, source untouched;
+freshgate log /tmp/scancraft-pause-propagated-fresh-gate.log follows. All future
+worktree builds use separatetargetdirs. Priorfailure log retained, not hidden.
+
+After clearing debug andrelease workspaceartifacts separately, combinedcurrent
+sourceb9f934a passed580tests/fmt/strictClippy/release,exit0. Log
+/tmp/scancraft-pause-propagated-debug-release-gate.log; hashes inlive-gui-review
+evidence. Cachefailure wasreproducedonlywithshared olderworktreeartifacts;
+source unchanged by cleanup. NewactualCodeRabbitreview of correctedsource
+remains pendingcapacity; App478completion isnot transferred to9a/b9.

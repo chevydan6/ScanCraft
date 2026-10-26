@@ -2138,3 +2138,12 @@ source rechecks precede atomic publication. Explicit GUI/CLI workflows passed
 synthetic runtime verification and both raw replays;576-test gate passed.
 This is not resumable fusion or physical qualification. Automated independent
 review remains pending included service capacity.
+
+## Cooperative native stop policy
+
+Live acquisition now checks shared stop between video/metadata waits and caps
+poll timeouts by remaining frame deadline. Abandoned pre-metadata video buffers
+are counted separately; disconnect errors are retained.579-test gate passes,
+including3new injected-read policy tests. This cannot preempt synchronous ioctls
+or establish a shutdown deadline;005 staysOpen. See docs/COOPERATIVE_CAPTURE_STOP.md.
+Actual scanner timing/driver-stall qualification remains unavailable.

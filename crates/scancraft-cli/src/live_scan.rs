@@ -29,6 +29,8 @@ impl Drop for CancellationMonitor {
 pub fn run(calibration: &Path, request: &Path, settings: &Path, target: &Path) -> Result<Value> {
     let _termination = termination::Guard::install().map_err(|e| e.to_string())?;
     let work = Arc::new(WorkControl::default());
+    let control = Arc::new(scancraft_workflow::live_stereo::control::Control::default());
+    let stop = control.clone();
     let finished = Arc::new(AtomicBool::new(false));
     let cancellation = work.clone();
     let done = finished.clone();
@@ -38,6 +40,7 @@ pub fn run(calibration: &Path, request: &Path, settings: &Path, target: &Path) -
             while !done.load(Ordering::Relaxed) {
                 if termination::check().is_err() {
                     cancellation.cancel();
+                    stop.request_stop();
                     break;
                 }
                 thread::sleep(Duration::from_millis(10));
@@ -48,12 +51,5 @@ pub fn run(calibration: &Path, request: &Path, settings: &Path, target: &Path) -
         finished,
         handle: Some(monitor),
     };
-    scancraft_acquisition::scan(
-        calibration,
-        request,
-        settings,
-        target,
-        &work,
-        &Arc::new(scancraft_workflow::live_stereo::control::Control::default()),
-    )
+    scancraft_acquisition::scan(calibration, request, settings, target, &work, &control)
 }

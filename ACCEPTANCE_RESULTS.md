@@ -758,3 +758,24 @@ the initially failed 0.04 mm expectation. Native private-display synthetic fusio
 integrates 3/4 frames, recovers after loss and produces 27 points; CLI/GUI artifacts
 match byte-for-byte. Evidence: huber-plane-* and docs/POINT_TO_PLANE_ICP.md. These
 checks do not qualify global registration, real scanner geometry or physical gates.
+
+## Live workflow and retained-session software gates — synthetic PASS only
+
+- Live processor/runner and native GUI have injected-source and private-display
+  evidence for raw retention, tracking/fusion, pause/resume, graceful stop versus
+  abort, final preview/counters, window close and editor handover (572-test stage).
+- ORPROJ08 retains initial live-session references through edits/reopen. Moved
+  folders verify explicitly; altered raw/calibration/reports and symlinks fail
+  (574-test stage). Actual release CLI/GUI verified8retained synthetic artifacts.
+- Edited live projects export with both full referenced raw recordings, verified
+  copies and full-state project replay; originals preserved. CLI/GUI export and
+  both raw replays passed (576-test stage). This is not resumable fusion.
+- Cooperative native stop policy has3injected-read tests and579-test full gate;
+  no real driver deadline is established.005 remainsOpen.
+
+Source/evidence: docs/LIVE_STEREO_GUI.md, LIVE_SESSION_REFERENCES.md,
+COOPERATIVE_CAPTURE_STOP.md and docs/reviews/evidence/2026-10-27-live-*.json.
+Formatting, strict Clippy and release build passed at each stated stage.
+Real Raptor calibration/mode binding, synchronization, dimensional accuracy,
+transport reliability, processing throughput and10completehardwaretrials remain
+unqualified. These software passes do not establish alpha/beta/stable readiness.

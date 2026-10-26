@@ -12,6 +12,7 @@ use std::{
     time::{Duration, Instant},
 };
 mod cleanup_errors;
+mod wait_policy;
 use cleanup_errors::CleanupErrors;
 use v4l2_sys_mit as v;
 fn invalid(s: impl Into<String>) -> io::Error {
@@ -335,6 +336,8 @@ pub struct Capture {
     pub rejected_before_first_valid: u64,
     pub rejected_after_first_valid: u64,
     pub metadata_missing: u64,
+    /// Video buffers abandoned during an explicit stop before matching metadata.
+    pub stopped_incomplete_video_buffers: u64,
     pub sequence_drops: u64,
     last: Option<(u32, u64, u32)>,
     pub duplicate_sensor_pts: u64,
@@ -379,6 +382,7 @@ impl Capture {
             rejected_before_first_valid: 0,
             rejected_after_first_valid: 0,
             metadata_missing: 0,
+            stopped_incomplete_video_buffers: 0,
             sequence_drops: 0,
             last: None,
             duplicate_sensor_pts: 0,
@@ -387,15 +391,37 @@ impl Capture {
         })
     }
     pub fn next_frame(&mut self) -> io::Result<Frame> {
+        self.next_frame_until(|| false)?
+            .ok_or_else(|| invalid("capture stopped"))
+    }
+    /// Cooperative stop between driver calls. None means stopped, not device EOF.
+    /// Poll waits share the frame deadline; synchronous ioctls/cleanup remain unbounded.
+    pub fn next_frame_until(&mut self, stopped: impl Fn() -> bool) -> io::Result<Option<Frame>> {
         let deadline = Instant::now() + Duration::from_secs(8);
         while Instant::now() < deadline {
-            let v = self.video.dequeue(Duration::from_secs(2))?;
+            let Some(v) =
+                wait_policy::dequeue(deadline, Duration::from_secs(2), &stopped, |timeout| {
+                    self.video.dequeue(timeout)
+                })?
+            else {
+                return Ok(None);
+            };
             let mut meta = None;
             for _ in 0..32 {
                 let m = if let Some(m) = self.pending.take() {
                     m
                 } else {
-                    self.metadata.dequeue(Duration::from_millis(200))?
+                    let Some(packet) = wait_policy::dequeue(
+                        deadline,
+                        Duration::from_millis(200),
+                        &stopped,
+                        |timeout| self.metadata.dequeue(timeout),
+                    )?
+                    else {
+                        self.stopped_incomplete_video_buffers += 1;
+                        return Ok(None);
+                    };
+                    packet
                 };
                 if m.sequence == v.sequence {
                     meta = Some(m);
@@ -446,7 +472,7 @@ impl Capture {
                 self.sequence_drops += u64::from(delta - 1);
             }
             self.last = Some((frame.sequence, frame.host_timestamp_us, pts));
-            return Ok(frame);
+            return Ok(Some(frame));
         }
         Err(invalid("no validated frame within eight seconds"))
     }
