@@ -465,9 +465,10 @@ impl Capture {
         );
     }
     pub fn close(mut self) -> io::Result<()> {
-        let a = self.video.close();
-        let b = self.metadata.close();
-        a.and(b)
+        let mut errors = CleanupErrors::default();
+        errors.record("video stream", self.video.close());
+        errors.record("metadata stream", self.metadata.close());
+        errors.finish()
     }
 }
 
