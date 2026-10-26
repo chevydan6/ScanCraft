@@ -2,7 +2,7 @@
   "date_utc": "2026-10-26T08:07:26.805277+00:00",
   "source_baseline": "8bf67feb1ef30a02e4bb0d61dc5b03d6d4ffc74f",
   "original_preexisting_work_preserved": true,
-  "publication_state": "PUBLIC_REPOSITORY_CREATED_SOURCE_PREPARED_FOR_PUSH",
+  "publication_state": "PUBLISHED",
   "license": "MIT; third-party licenses and GPL-2.0-only kernel experiment separately retained",
   "rust_tests_passed": 497,
   "python_tool_tests_passed": 19,
@@ -271,5 +271,7 @@
     "release_build": "12217940c0b762019ea0164eb1b48ea46f836052323fbba4bdf2908b93dc9d4d"
   },
   "repository_url": "https://github.com/chevydan6/ScanCraft",
-  "gitleaks_prepublication_history_findings": 0
+  "gitleaks_prepublication_history_findings": 0,
+  "first_published_commit": "75d5d2ab3644ecd10c0b1aa80bd9627d53dec9e2",
+  "repository_visibility_verified": "PUBLIC"
 }

@@ -2,6 +2,7 @@
 
 Publication target: https://github.com/chevydan6/ScanCraft
 
+The source was pushed to public main and repository visibility was verified.
 The public repository was created on 2026-10-26 under the authenticated owner's
 account. This source snapshot uses fresh publication history; the original private
 development repository, history, captures and research inputs are not pushed.
