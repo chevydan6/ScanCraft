@@ -21,6 +21,11 @@ only the intended repository using https://github.com/apps/coderabbitai, then co
 an actual bot review on a PR. Authentication and paid-plan prompts require the
 owner; never claim integration works merely because the config file exists.
 
+Before the offline gate, install the pinned toolchain and its rustfmt/clippy
+components and run `cargo fetch --locked` while network access is available.
+`tools/check.sh` uses `--frozen` for clippy/tests/build: missing cached dependencies
+fail instead of being downloaded. Rustup/toolchain setup is a separate online step.
+
 ## Repeatable loop
 
 1. Start a focused `dev/...` branch from current main; preserve unrelated work.

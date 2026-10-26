@@ -3,6 +3,6 @@
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 cargo fmt --all -- --check
-cargo clippy --locked --workspace --all-targets -- -D warnings
-cargo test --locked --workspace
-cargo build --locked --release --workspace
+cargo clippy --frozen --workspace --all-targets -- -D warnings
+cargo test --frozen --workspace
+cargo build --frozen --release --workspace
