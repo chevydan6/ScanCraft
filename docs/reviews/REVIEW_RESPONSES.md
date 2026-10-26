@@ -648,3 +648,32 @@ workflow tests/recording_reconstruction.rs. Full541Rusttests/fmt/strictClippy/re
 PASS /tmp/scancraft-sequence-reference-app-fixes-checks.log. No change to fail-closed
 checks, source references or geometry. Both corrections await independent closure;
 commit and incremental review evidence follow.
+
+Correction commit `dff5748834049f456eef6128129b4affe2c9078b` full541gate passes.
+One included incremental CLI review versus exacta68666f completed4files, zero
+findings, majorPASS, exit0; head/tree unchanged, evidence/report/log hashes in
+evidence/2026-10-27-sequence-reference-corrections.json. No paid consent/flag.
+Independent Assignments63/64 verified7targeted tests and mapped the source to this
+commit; reviewer independently resolved SCAN-REV-010/011. Development acknowledges
+that decision without changing the register. No live empty-field click claimed.
+
+GitHub initial App review at a68666f was completed COMMENTED, two minor findings,
+not APPROVED. Both have factual source/test replies. Threads currently outdated
+and unresolved; developer has not closed them. One scoped bot confirmation of
+these corrections requested, not another full-PR review. The premerge docstring
+warning28.57% vs80%,28functions/9files/7unsupported is retained: disputed as blanket
+functional blocker for the same documented contract-based reasons recorded earlier.
+Four premerge checks passed, one warning; no threshold/check weakened.
+
+PR9 scoped GitHub confirmation: comment6425555338 independently inspected exact
+dff5748 correction/source/regression/replies and says both findings addressed.
+No new full review or test rerun claimed. Follow-up6425624258 reports its GitHub
+connection has viewerCanResolve:false for both threads, so it left them unresolved.
+A permitted reviewer must close them; development will not self-resolve, grant
+permissions or bypass conversation requirements. No approval/merge change.
+Sanitized initial App/review/scoped confirmation metadata in
+evidence/2026-10-27-github-pr9-review.json. Raw service-access links excluded.
+Initial App review is COMMENTED at a68666f with2minor comments, not clean/no-findings;
+subsequent incremental CLI dff5748 is clean with a passed major gate. Independent
+file reviewer resolved010/011 separately. Correction CI: one passed, one still
+installing Linux dependencies; neither pending nor skipped badges count as pass.

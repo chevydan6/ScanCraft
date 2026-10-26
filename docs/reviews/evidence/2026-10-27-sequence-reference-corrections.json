@@ -1,0 +1,32 @@
+{
+  "recorded_utc": "2026-10-26T19:37:35.692430+00:00",
+  "head_observed_before_and_after": "dff5748834049f456eef6128129b4affe2c9078b",
+  "tree_observed_before_and_after": "be721f5d1931e3996665e34e911c51d7c08cd13b",
+  "base": "a68666f14516730a60bf1e9c85dae4bd932bee9a",
+  "completion": {
+    "type": "complete",
+    "status": "review_completed",
+    "findings": 0,
+    "gate": {
+      "threshold": "major",
+      "status": "passed",
+      "blockingFindings": 0
+    },
+    "reviewedFiles": [
+      "crates/scancraft-app/src/cloud_ui.rs",
+      "crates/scancraft-workflow/src/source_verification.rs",
+      "crates/scancraft-workflow/tests/recording_reconstruction.rs",
+      "docs/reviews/REVIEW_RESPONSES.md"
+    ],
+    "outcome": "completed",
+    "message": "Review completed"
+  },
+  "exit_code": 0,
+  "report_sha256": "86d6252ab36977c4f357712950beab0b8d91b019edab2eeced1d870f9cf369af",
+  "full_gate_log_sha256": "51ad3ded1b7126f1acc215db1489f013a036506cc3ba4df6feabea659faa8b4f",
+  "validation": "541 Rust tests, formatting, strict Clippy, release build PASS; missing-parent diagnostic regression extended",
+  "independent_review": "Assignments63/64 verified seven targeted tests and mapped unchanged correction source to dff5748; reviewer independently resolved010/011",
+  "github_threads": "Two initial minor findings at a68666f corrected and replied; outdated/unresolved at observation, scoped independent bot check requested; development never self-resolved",
+  "billing": "Fresh included capacity2 and inactive billing checked before review; no paid flag/consent",
+  "binding": "Operator-observed source identity/artifact hashes, not service immutable-head attestation"
+}
