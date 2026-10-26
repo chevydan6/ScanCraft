@@ -2024,3 +2024,16 @@ images/timestamps remain private. This limit is not a qualified exposure toleran
 These observations do not verify clock domains, exposure synchronization, optical
 content, calibrated geometry or hardware accuracy. No new acquisition, physical
 calibration or firmware operation was performed.
+
+## Host/PTS comparison checkpoint
+
+The read-only native timing report now independently compares unique raw PTS
+values across complete recordings, withholding repeated values as ambiguous.
+529 Rust tests and frozen format/Clippy/release pass. Genuine historical replay
+finds72 equal-PTS pairs, only3 within1000us of host time; host differences range
+8..20026us. Independent parser agrees and inputSHA256s are unchanged. This narrows
+investigation but does not establish a cause or synchronized exposures. Details,
+standard flag interpretation and qualification limits: docs/RECORDED_CLOCK_OBSERVATIONS.md.
+No genuine calibrated geometry, new acquisition, physical calibration or firmware
+action. Independent reviewer rejected the alleged earlier PTS compatibility defect;
+raw CodeRabbit gate remains recorded as blocked, not silently relabeled passed.

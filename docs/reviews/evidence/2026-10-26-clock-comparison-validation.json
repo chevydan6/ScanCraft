@@ -1,0 +1,10 @@
+{
+  "implementation_commit": "61582f9e11afe419e64b22c4ba3fe72053408cf7",
+  "implementation_tree": "95ca007b4ee1b03f7360f7e0c4ea250486d219f5",
+  "base": "b452b09eb8f7d36a979d1356c7ef2444fe566fa5",
+  "validation": "529 Rust tests, formatting, strict Clippy, release build passed",
+  "test_log_sha256": "ddfcb94fd45fa43f873edc5ab43fb0b19f959739da9407b5a737711a598a2824",
+  "genuine_aggregate_sha256": "05fac63cf23b00ca7b8431231b7727bc48de20a2e189c8e903c128ea6c1d6d3b",
+  "review": "Pending: separately checked included CLI quota exhausted, no paid consent or review launched",
+  "scope": "Operator-recorded source/validation observations, not independent service attestation or physical geometry qualification"
+}
