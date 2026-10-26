@@ -82,5 +82,34 @@
     "exit_code": 0,
     "raw_sha256": "f34665382a281ab34ea8b473885c79776030c3efd34e12c165e15ed87117a45f",
     "validation_log_sha256": "3091b03ac86fc424031c5d274ca61c52af580c2ecb72423c560796036eccd254"
+  },
+  "counter_completion_review": {
+    "source_commit": "beb962816ca817cd9b12f1ae13a04954fe1a1adb",
+    "source_tree": "2882e56d4ae8e6c6a00eee176e4ffd8147de1de6",
+    "base_commit": "9e8a21e2de1a62945c153f01876448ffd6bde772",
+    "completion": {
+      "type": "complete",
+      "status": "review_completed",
+      "findings": 0,
+      "gate": {
+        "threshold": "major",
+        "status": "passed",
+        "blockingFindings": 0
+      },
+      "reviewedFiles": [
+        "crates/scancraft-app/src/live_ui.rs",
+        "docs/LIVE_STEREO_GUI.md",
+        "docs/reviews/REVIEW_RESPONSES.md"
+      ],
+      "outcome": "completed",
+      "message": "Review completed"
+    },
+    "exit_code": 0,
+    "raw_sha256": "7d56970e89eafd2fa854609cf89ca8db85ea6838bdd5daaa893b0e8d18c97c4e",
+    "validation_log_sha256": "4edcefce8d564d7c418185313437554dad17a826bda0f17c761f38aabde546af",
+    "regression_red_log_sha256": "492dce2d6a73be4a1b74113cb7acfed459e081074c6deb91ff6a8b82d80a5df1",
+    "rust_tests_passed": 572,
+    "scope": "synchronized GUI consumer regression; real one-pair synthetic runner, no hardware",
+    "independent_finding": "SCAN-REV-014; reviewer controls verification and closure"
   }
 }

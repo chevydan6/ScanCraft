@@ -923,3 +923,11 @@ Corrected complete frozen gate passed572Rusttests, formatting, strictalltarget
 Clippy and releasebuild, exit0 (/tmp/scancraft-live-counter-final-gate.log).
 New regression checks actual displayed cloud count as well as counters; no
 threshold or lifecycle guard weakened. Source/docs fullcontext secret scanPASS.
+
+SCAN-REV-014 correction committed/pushed as
+beb962816ca817cd9b12f1ae13a04954fe1a1adb tree2882e56d4ae8e6c6a00eee176e4ffd8147de1de6.
+CodeRabbit CLI incremental review versus9e8a21e completed3files,0findings,
+majorPASS,exit0. Head/tree unchanged. Fresh includedcapacity1/billinginactive
+confirmed before execution; no paidflags/consent. Numerical/GUI gate572tests
+and regression red/green log hashes recorded in live-gui-review.json.
+This provides requested developer evidence, not independent closure of014.
