@@ -412,3 +412,10 @@ authority without modifying that register or reclassifying the raw blocked bot
 gate. PR5 exact b452b09 CI both passed. New feature is separate from that reviewed
 implementation. CLI included quota is exhausted (about40min at latest check); no
 paid usage/retry requested. New feature review remains pending; commits follow.
+
+DEV-TIMING-002 implementation `61582f9e11afe419e64b22c4ba3fe72053408cf7`, stacked draft PR6
+https://github.com/chevydan6/ScanCraft/pull/6. Validation identity/log hash in
+evidence/2026-10-26-clock-comparison-validation.json. Automated review pending due
+to verified exhausted included quota; no paid service or duplicate call. Later
+response/evidence bookkeeping is not a reviewed source revision. Reviewer-owned
+register and all unrelated work remain untouched.
