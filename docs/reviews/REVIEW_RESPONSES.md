@@ -1036,3 +1036,81 @@ sourceb9f934a passed580tests/fmt/strictClippy/release,exit0. Log
 evidence. Cachefailure wasreproducedonlywithshared olderworktreeartifacts;
 source unchanged by cleanup. NewactualCodeRabbitreview of correctedsource
 remains pendingcapacity; App478completion isnot transferred to9a/b9.
+
+## SCAN-REV-015 — independent resolution acknowledged
+
+Reviewer136 independently verified9a071e2 andresolved015;137–139 verified exact
+sourcepatch propagation to16/15/14. No developer registerchange. Existing005
+remainsOpen; no approval/merge inferred.
+
+## Developer milestone — measured paired map concurrency
+
+Original Rust orchestration only: StereoImageMaps largeoutputusesone scoped
+helper, callerprocessesothermap; same UndistortMap sampler/numericalmath unchanged.
+Smallmaps/CPUhint<2/queryfailure/spawnerror staysequential. Explicit sequential
+API retained. Bothownerscomplete before pairedresult; helperjoinedonright-error.
+Three focusedtests +full583Rusttests/fmt/strictClippy/releasePASS. Benchmark
+initially hadClippy let-and-return; fixedwithoutweakeninglint. Final actualAPI
+20rounds+warmups, alternatingorder, eachfloatbit/maskmatchedreference. Fullsize
+median89.930msseqvs43.795adaptive on16reportedCPUs; smallcaseunchanged. SingleCPU
+childfallbackpasses; RLIMIT_NPROC0childthread-denialverifiedfallbackwith16CPUs.
+No parent/userprocesspolicychanged. No hardware, accuracy or liveFPS claim.
+Evidence docs/benchmarks/paired-remap-2026-10-27.json, PAIRED_REMAP_CONCURRENCY.md;
+code image/stereo.rs +benchmarkexample. No dependency/license/versionchange.
+Automatedreviewpendingincludedcapacity; notindependentlyapproved ormerged.
+
+## Integrated review on c33c453 — findings evaluated
+
+CodeRabbit CLI 0.9.1 completed 28 files versus corrected PR13 source 9a071e2:
+3 minor findings, zero blocking findings, major gate passed, exit 0. Fresh included
+capacity was 1 and billing inactive. The detached checkout head/tree stayed fixed.
+The source tree is also unchanged by the later development-base synchronization.
+Evidence: evidence/2026-10-27-integrated-review.json; raw output retained privately.
+
+CR-INTEGRATED-DOC-SPACING accepted: separate prose, numbers and finding IDs in
+acceptance, architecture and status reports; clarify recent public method notes.
+Numerical values and executable behavior remain unchanged.
+CR-INTEGRATED-SESSION-ID confirmation accepted; no defect or code change needed.
+Processor::open calls ScanSession::new, which calls new_with_method and enforces
+the identical nonempty, <=128-byte ASCII alphanumeric/"-_ ." rule before any
+native Source opens. Native acquisition invokes Processor::open before session
+locking/settings capture. Thus an ID rejected by LiveSession cannot pass this
+constructor and fail only after acquisition. This is verified constructor ordering
+and predicate inspection, not a new hardware experiment. No duplicate validator
+or speculative refactor was added.
+CR-INTEGRATED-LOCAL-PATHS accepted: remove worktree location fields from the current
+public GUI review evidence. Commit IDs, trees and log hashes retain verification
+value. Earlier development commits retain the historical path strings; no Git
+history rewrite or credential disclosure is claimed.
+
+## SCAN-REV-016 — accepted integration correction, verification running
+
+The branch had one pause regression, but GitHub's PR14 merge snapshot da4d79a
+contained it twice, causing E0428. Development bases were synchronized in order
+14→15→16→17; the automatic PR14 candidate's duplicate was replaced with the exact
+preexisting single-definition branch file. Each resulting development commit has
+an unchanged full source tree and now contains its base in its ancestry. No PR or
+protected-main merge, history rewrite or coverage removal occurred. GitHub's new
+PR14 integration 4cc519c has tree 379ecabd, identical to the previously reviewed
+branch tree, with one canonical regression. An isolated checkout is running the
+full gate on that exact integration revision using its own target directory.
+Only the independent reviewer may verify and close SCAN-REV-016.
+
+SCAN-REV-016 exact corrected integration4cc519c passed the full frozen gate:
+575 Rust tests, formatting, strict all-target Clippy and release build, exit0.
+Its source tree remains379ecabd with one regression definition. The build used
+an isolated checkout and its own target directory; no shared-cache substitution.
+Evidence and gate-log hash are recorded in integrated-review.json. This is
+developer verification; finding status remains under independent reviewer control.
+
+Documentation correction0570a643eb8dcb5566d89fbbc97b6db7d4de7450 passed an
+incremental CodeRabbit review versus c33c453: 10 files, zero findings, major gate
+passed, exit0. The detached checkout stayed clean with unchanged head/tree.
+Fresh included capacity and inactive billing were confirmed before execution.
+No numerical source changed; existing 583-test code gate remains applicable.
+Metadata-only review evidence needs no unchanged paid/repeated review loop.
+
+Independent reviewer Assignment156 has resolved SCAN-REV-016 after inspecting
+exact4cc519c and successful integration CI40417772893/check121904268081 (575 tests),
+plus push40417764389/check121904240273. Developer acknowledges that independent
+resolution without changing findings. SCAN-REV-005 remains Open and006 Under Review.

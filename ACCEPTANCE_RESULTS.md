@@ -764,18 +764,22 @@ checks do not qualify global registration, real scanner geometry or physical gat
 - Live processor/runner and native GUI have injected-source and private-display
   evidence for raw retention, tracking/fusion, pause/resume, graceful stop versus
   abort, final preview/counters, window close and editor handover (572-test stage).
-- ORPROJ08 retains initial live-session references through edits/reopen. Moved
-  folders verify explicitly; altered raw/calibration/reports and symlinks fail
-  (574-test stage). Actual release CLI/GUI verified8retained synthetic artifacts.
-- Edited live projects export with both full referenced raw recordings, verified
-  copies and full-state project replay; originals preserved. CLI/GUI export and
-  both raw replays passed (576-test stage). This is not resumable fusion.
-- Cooperative native stop policy has3injected-read tests and579-test full gate;
-  no real driver deadline is established.005 remainsOpen.
+- ORPROJ08 retains initial live-session references through edits and reopening.
+  Moved folders verify explicitly; altered raw/calibration/reports and symlinks
+  fail (574-test stage). Release CLI/GUI verified 8 retained synthetic artifacts.
+- Edited live projects export both full referenced raw recordings, verified copies
+  and replayed editable state. CLI/GUI export and both raw replays passed
+  (576-test stage). This does not save resumable fusion weights.
+- Cooperative native stop has 3 injected-read tests and a 579-test full gate.
+  A real driver shutdown deadline remains unqualified; SCAN-REV-005 remains Open.
+- The pause-boundary regression raises the combined gate to 580 tests. Paired
+  map concurrency raises it to 583, with exact synthetic output comparisons.
+  These later counts describe the combined development tree.
 
-Source/evidence: docs/LIVE_STEREO_GUI.md, LIVE_SESSION_REFERENCES.md,
-COOPERATIVE_CAPTURE_STOP.md and docs/reviews/evidence/2026-10-27-live-*.json.
-Formatting, strict Clippy and release build passed at each stated stage.
-Real Raptor calibration/mode binding, synchronization, dimensional accuracy,
-transport reliability, processing throughput and10completehardwaretrials remain
-unqualified. These software passes do not establish alpha/beta/stable readiness.
+Evidence: docs/LIVE_STEREO_GUI.md, LIVE_SESSION_REFERENCES.md,
+COOPERATIVE_CAPTURE_STOP.md, PAIRED_REMAP_CONCURRENCY.md and the associated
+review/benchmark JSON reports. Formatting, strict Clippy and release build passed
+at each stated stage. Real Raptor calibration/mode binding, synchronization,
+dimensional accuracy, transport reliability, processing throughput and 10 complete
+hardware trials remain unqualified. These software results do not establish
+alpha, beta or stable readiness.

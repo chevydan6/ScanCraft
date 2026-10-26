@@ -118,11 +118,21 @@ No live/throughput/physical acceptance gate is advanced by these comparisons.
 
 ## Repeated single-image undistortion baseline (2026-10-27 local date)
 
-Unchanged release undistort_benchmark on the Ryzen6900HS:1920×1200synthetic
-GREY,20runs after1warmup, median40.109ms,p9546.174ms,max49.208ms; one map
-build202.117ms. Allocation included; mapbuilding excluded from apply timing.
-Coordinate storage55,296,000bytes, not processRSS. All2,304,000map pixels valid.
+Unchanged release undistort_benchmark on the Ryzen 6900HS: 1920×1200 synthetic
+GREY, 20 runs after 1 warmup, median 40.109 ms, p95 46.174 ms, maximum 49.208 ms; one map
+build 202.117 ms. Allocation included; mapbuilding excluded from apply timing.
+Coordinate storage 55,296,000 bytes, not processRSS. All 2,304,000 map pixels valid.
 Evidence docs/benchmarks/undistort-baseline-2026-10-27.json records source/example
 hashes and original output. This is a repeated component baseline, not a speedup,
 paired-camera measurement, full-pipeline FPS or hardware accuracy/latency gate.
 No optimized implementation is selected from this result alone.
+
+## Measured paired image preparation
+
+Large stereo maps now use one scoped helper when at least two CPUs are reported;
+small/one-CPU/resource-limited cases retain sequential processing. Sampling math
+is unchanged. On this workstation, the production API’s synthetic 1920×1200 pair
+median changed from 89.930 to 43.795 ms with bit-identical outputs/masks. The 583-test gate
+passes; single-CPU and thread-denied child fallbacks passed. This is not full
+scan throughput, accuracy or RSS qualification. See docs/PAIRED_REMAP_CONCURRENCY.md
+and docs/benchmarks/paired-remap-2026-10-27.json. Automated review remains pending.
