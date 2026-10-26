@@ -1,7 +1,7 @@
 # Paired remapping concurrency
 
 `StereoImageMaps::apply` uses one scoped helper for the left map while the caller
-processes the right map when both output maps contain at least320×240pixels and
+processes the right map when both output maps contain at least 320×240 pixels and
 Rust reports at least two available CPUs. Smaller maps, an unavailable CPU hint,
 one CPU or a failed thread spawn use the unchanged sequential path. The public
 `apply_sequential` method remains an explicit reference/fallback. No new crate
@@ -26,7 +26,7 @@ Allocation and thread spawn/join are included; map construction, comparison and
 output destruction are excluded. No other owned build ran during the final runs.
 The CPU governor and general OS scheduling were not fixed.
 
-Ryzen9 6900HS,16availableCPUs, median milliseconds per pair:
+Ryzen 9 6900HS, 16 available CPUs, median milliseconds per pair:
 
 | Output size | Sequential | Adaptive production |
 |---|---:|---:|
@@ -36,15 +36,15 @@ Ryzen9 6900HS,16availableCPUs, median milliseconds per pair:
 |1920×1200|89.930|43.795|
 
 A separate child restricted to one CPU reported one available CPU and used the
-sequential fallback (full-size median93.529versus93.691ms). A child with
-RLIMIT_NPROC=0 could not create threads, still reported16CPUs, and completed all
+sequential fallback (full-size median 93.529 versus 93.691 ms). A child with
+RLIMIT_NPROC=0 could not create threads, still reported 16 CPUs, and completed all
 maps with exact matching output through the spawn-failure fallback. Only test
 children’s affinity/limits changed; other processes were untouched.
 
-The320×240policy crossover is based on representative sizes on this workstation,
-not a universal optimum. The exploratory always-threaded64×32case was slower;
+The 320×240 policy crossover is based on representative sizes on this workstation,
+not a universal optimum. The exploratory always-threaded 64×32 case was slower;
 small maps therefore remain sequential. Full-size map coordinate buffers total
-110,592,000bytes; this is not RSS. Additional helper stack/thread overhead was
+110,592,000 bytes; this is not RSS. Additional helper stack/thread overhead was
 not profiled. Results do not establish hardware latency, sustained frame rate,
 physical precision, GPU/SIMD benefit or memory-growth qualification.
 
@@ -58,7 +58,7 @@ Source: crates/scancraft-image/src/stereo.rs and
 crates/scancraft-image/examples/paired_remap_benchmark.rs.
 Three regressions compare rotated/distorted large maps bit-for-bit, retain the
 small-map contract and reject wrong-sized/cancelled inputs without partial
-results. The full frozen gate passes583Rusttests, formatting, strict all-target
+results. The full frozen gate passes 583 Rust tests, formatting, strict all-target
 Clippy and release build. The benchmark also exercises single-CPU and actual
 thread-denial fallback in isolated test children. Measurements, toolchain,
 source/binary hashes and limits are in benchmarks/paired-remap-2026-10-27.json.

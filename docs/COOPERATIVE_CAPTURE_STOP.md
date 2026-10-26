@@ -24,7 +24,7 @@ No thread is detached or device ownership abandoned by this change.
 
 Three hardware-free policy tests cover stop/expired-deadline read prevention,
 remaining-time caps, stop during timeout, successful data retention and disconnect
-error preservation. The full frozen gate passed579Rusttests, formatting, strict
+error preservation. The full frozen gate passed 579 Rust tests, formatting, strict
 all-target Clippy and release build. These tests inject read closures; they do
 not exercise V4L2 or establish physical stop latency. No scanner was available
 for runtime qualification. No frame validation threshold, firmware, illumination,

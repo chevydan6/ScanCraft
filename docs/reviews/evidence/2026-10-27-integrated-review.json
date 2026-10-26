@@ -1,0 +1,131 @@
+{
+  "tool": "official CodeRabbit CLI 0.9.1",
+  "scope": "integrated live lineage/export/cooperative stop/paired remapping changes versus corrected PR13 source",
+  "before": {
+    "head": "c33c453484c56217e679ede77bfda93dd57ef83a",
+    "tree": "a4be065821e16a9bdaed6316fe65ed7a5e92c1f3",
+    "base": "9a071e293f64216d1d5d90564e6bde58d6e917c9"
+  },
+  "after": {
+    "head": "c33c453484c56217e679ede77bfda93dd57ef83a",
+    "tree": "a4be065821e16a9bdaed6316fe65ed7a5e92c1f3",
+    "exit_code": 0
+  },
+  "binding": "operator recorded immutable Git source; not service cryptographic attestation",
+  "complete": {
+    "type": "complete",
+    "status": "review_completed",
+    "findings": 3,
+    "gate": {
+      "threshold": "major",
+      "status": "passed",
+      "blockingFindings": 0
+    },
+    "reviewedFiles": [
+      "ACCEPTANCE_RESULTS.md",
+      "ARCHITECTURE.md",
+      "BENCHMARKS.md",
+      "PROJECT_STATUS.md",
+      "crates/scancraft-acquisition/src/lib.rs",
+      "crates/scancraft-app/src/cloud_jobs.rs",
+      "crates/scancraft-app/src/cloud_ui.rs",
+      "crates/scancraft-cli/src/live_scan.rs",
+      "crates/scancraft-device/src/lib.rs",
+      "crates/scancraft-device/src/wait_policy.rs",
+      "crates/scancraft-geometry/src/formats.rs",
+      "crates/scancraft-geometry/src/lib.rs",
+      "crates/scancraft-geometry/src/live_references.rs",
+      "crates/scancraft-image/examples/paired_remap_benchmark.rs",
+      "crates/scancraft-image/src/stereo.rs",
+      "crates/scancraft-workflow/src/live_stereo/runner.rs",
+      "crates/scancraft-workflow/src/project_bundle.rs",
+      "crates/scancraft-workflow/src/source_verification.rs",
+      "docs/COOPERATIVE_CAPTURE_STOP.md",
+      "docs/LIVE_SESSION_REFERENCES.md",
+      "docs/LIVE_STEREO_SCAN.md",
+      "docs/PAIRED_REMAP_CONCURRENCY.md",
+      "docs/benchmarks/paired-remap-2026-10-27.json",
+      "docs/benchmarks/undistort-baseline-2026-10-27.json",
+      "docs/reviews/REVIEW_RESPONSES.md",
+      "docs/reviews/evidence/2026-10-27-live-gui-review.json",
+      "docs/reviews/evidence/2026-10-27-live-lineage-runtime.json",
+      "docs/reviews/evidence/2026-10-27-live-session-export-runtime.json"
+    ],
+    "outcome": "completed",
+    "message": "Review completed"
+  },
+  "raw_report_sha256": "2ae45b263afa4979a02a1de3a813402b63bd3c1070425396f18c07f3049b9c20",
+  "billing": "included capacity 1 and inactive billing verified immediately before review; no paid flags/consent",
+  "findings": [
+    {
+      "id": "CR-INTEGRATED-DOC-SPACING",
+      "severity": "minor",
+      "disposition": "accepted; readability fixes, numeric values retained"
+    },
+    {
+      "id": "CR-INTEGRATED-SESSION-ID",
+      "severity": "minor",
+      "disposition": "confirmation accepted; already enforced by ScanSession::new_with_method before acquisition; no production change warranted"
+    },
+    {
+      "id": "CR-INTEGRATED-LOCAL-PATHS",
+      "severity": "minor",
+      "disposition": "accepted; remove worktree fields from current public evidence; earlier Git revisions retain historical strings"
+    }
+  ],
+  "development_base_synchronization": [
+    {
+      "branch": "dev/live-session-lineage",
+      "base": "dev/live-stereo-controls",
+      "previous_head": "7effbbfd36538cb46fac6ae020d18f37cf1cc245",
+      "head": "5871a7a5b171f3dd75e6cd3612a3504fc7c9e77a",
+      "tree_unchanged": "379ecabd34617ac485b1007e3dec8edb31854c1f",
+      "automatic_candidate_test_definitions": 2,
+      "retained_test_definitions": 1
+    },
+    {
+      "branch": "dev/live-session-export",
+      "base": "dev/live-session-lineage",
+      "previous_head": "448ab6cd39f19368e8816f74ce9c7ad91792adae",
+      "head": "80bca7080bab834d10f945f92ebc0b0365608faa",
+      "tree_unchanged": "14ea9fc6e44945fea4ff3c5b439076460339116b",
+      "automatic_candidate_test_definitions": 1,
+      "retained_test_definitions": 1
+    },
+    {
+      "branch": "dev/cooperative-capture-stop",
+      "base": "dev/live-session-export",
+      "previous_head": "f5160e69520e12b5e6fa35ff276ef86fd59d036a",
+      "head": "b2ca99c7d2adf37a1b66189b6aedb35397ee872e",
+      "tree_unchanged": "7a3ca4df347d9dbf01d64956e92758f26659a720",
+      "automatic_candidate_test_definitions": 1,
+      "retained_test_definitions": 1
+    },
+    {
+      "branch": "dev/paired-remap-concurrency",
+      "base": "dev/cooperative-capture-stop",
+      "previous_head": "c33c453484c56217e679ede77bfda93dd57ef83a",
+      "head": "cc5ebef209390b612a8c6ae0ccdf3eea346f3b6a",
+      "tree_unchanged": "a4be065821e16a9bdaed6316fe65ed7a5e92c1f3",
+      "automatic_candidate_test_definitions": 1,
+      "retained_test_definitions": 1
+    }
+  ],
+  "integration_fix": {
+    "finding": "SCAN-REV-016",
+    "failed_merge_commit": "da4d79ac43fd6d446cda51a474ee90aacaa9a47a",
+    "corrected_merge_commit": "4cc519cff521cdc601f220e243f8772692ecaedc",
+    "corrected_tree": "379ecabd34617ac485b1007e3dec8edb31854c1f",
+    "regression_definitions": 1,
+    "local_gate": {
+      "commit": "4cc519cff521cdc601f220e243f8772692ecaedc",
+      "tests_passed": 575,
+      "formatting": "PASS",
+      "strict_all_target_clippy": "PASS",
+      "release": "PASS",
+      "exit_code": 0,
+      "log_sha256": "eb392457e3b6ac5e36159fac121d7db153b61e07e61356b8aa779ae40dd4a986",
+      "target_directory": "separate isolated integration checkout"
+    }
+  }
+}

@@ -143,16 +143,13 @@
       "source_fix": "9a071e293f64216d1d5d90564e6bde58d6e917c9",
       "branches": {
         "dev/live-session-lineage": {
-          "head": "7effbbfd36538cb46fac6ae020d18f37cf1cc245",
-          "worktree": "/tmp/scancraft-pause-propagate-mz1u446l/worktree"
+          "head": "7effbbfd36538cb46fac6ae020d18f37cf1cc245"
         },
         "dev/live-session-export": {
-          "head": "448ab6cd39f19368e8816f74ce9c7ad91792adae",
-          "worktree": "/tmp/scancraft-pause-propagate-vcuu7eg7/worktree"
+          "head": "448ab6cd39f19368e8816f74ce9c7ad91792adae"
         },
         "dev/cooperative-capture-stop": {
-          "head": "b9f934a34182fb998884717fb61e73f3c9c1d219",
-          "worktree": "/home/dan/scancraft"
+          "head": "b9f934a34182fb998884717fb61e73f3c9c1d219"
         }
       }
     },

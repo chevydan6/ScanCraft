@@ -2122,11 +2122,11 @@ synchronization, accuracy and bounded kernel shutdown remain unqualified.
 
 Live geometry projects now use ORPROJ08 to retain initial session/pair decisions
 and full raw/calibration/settings/report artifact fingerprints through edits and
-reopening. Legacy02–07 remain readable. Explicit GUI/CLI verification supports
+reopening. Legacy versions 02–07 remain readable. Explicit GUI/CLI verification supports
 user-chosen moved folders; loading never follows recorded paths. Raw bytes stay
 external and fusion weights are not resumable. See docs/LIVE_SESSION_REFERENCES.md.
-The full frozen gate passed574tests; actual release synthetic runner and CLI
-verification passed8artifacts and rejected a modified raw recording (exit1).
+The full frozen gate passed 574 tests; actual release synthetic runner and CLI
+verification passed8artifacts and rejected a modified raw recording (exit 1).
 These are software/byte-identity checks, not hardware qualification.
 
 ## Live-session project archive export
@@ -2135,7 +2135,7 @@ The existing project exporter now packages edited live projects with all
 referenced raw/calibration/settings/report artifacts. Original data/state stay
 unchanged; copied references relocate to the export. Full-state replay and
 source rechecks precede atomic publication. Explicit GUI/CLI workflows passed
-synthetic runtime verification and both raw replays;576-test gate passed.
+synthetic runtime verification and both raw replays; 576-test gate passed.
 This is not resumable fusion or physical qualification. Automated independent
 review remains pending included service capacity.
 
@@ -2143,17 +2143,17 @@ review remains pending included service capacity.
 
 Live acquisition now checks shared stop between video/metadata waits and caps
 poll timeouts by remaining frame deadline. Abandoned pre-metadata video buffers
-are counted separately; disconnect errors are retained.579-test gate passes,
-including3new injected-read policy tests. This cannot preempt synchronous ioctls
-or establish a shutdown deadline;005 staysOpen. See docs/COOPERATIVE_CAPTURE_STOP.md.
+are counted separately; disconnect errors are retained. The 579-test gate passes,
+including 3 new injected-read policy tests. This cannot preempt synchronous ioctls
+or establish a shutdown deadline; SCAN-REV-005 remains Open. See docs/COOPERATIVE_CAPTURE_STOP.md.
 Actual scanner timing/driver-stall qualification remains unavailable.
 
 ## Measured paired image preparation
 
 Large stereo maps now use one scoped helper when at least two CPUs are reported;
 small/one-CPU/resource-limited cases retain sequential processing. Sampling math
-is unchanged. On this workstation, the production API’s synthetic1920×1200pair
-median changed from89.930to43.795ms with bit-identical outputs/masks.583-test gate
+is unchanged. On this workstation, the production API’s synthetic 1920×1200 pair
+median changed from 89.930 to 43.795 ms with bit-identical outputs/masks. The 583-test gate
 passes; single-CPU and thread-denied child fallbacks passed. This is not full
 scan throughput, accuracy or RSS qualification. See docs/PAIRED_REMAP_CONCURRENCY.md
 and docs/benchmarks/paired-remap-2026-10-27.json. Automated review remains pending.
