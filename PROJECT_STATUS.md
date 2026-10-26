@@ -1986,3 +1986,22 @@ busy project guards; errors keep diagnostics visible. Replacement capture cannot
 start during pending close. Six additional hardware-free tests pass; full frozen
 Rust gate now 511 tests. No measured whole-app shutdown bound or real driver-stall
 qualification is claimed. Reviewer's finding is not closed by development.
+
+## Optional fractional stereo checkpoint
+
+Opt-in three-sample quadratic ZNCC peak refinement now propagates fractional
+observations through original-camera triangulation. Integer matching remains the
+default and existing confidence gates remain prerequisites. Independent NumPy
+polynomial fitting agrees within 7.4e-15 across four synthetic signed shifts; native
+CLI persistence and no-overwrite checks pass. A further regression verifies two
+rotated-camera configurations, including fractional rectified x becoming original
+y, against independently computed pixel rotations and analytic plane depth.
+
+519 Rust tests, formatting, strict Clippy and release build pass. Earlier 518-test
+implementation received completed CodeRabbit CLI review with zero findings; later
+test/docs work is tracked separately in developer responses. Private-display GUI
+startup/render passed; this is not live scanning qualification. See
+docs/SUBPIXEL_STEREO.md and docs/reviews/evidence/2026-10-26-subpixel-validation.json.
+Fresh discovery returned no scanner. Genuine calibrated Raptor reconstruction,
+transport reliability, physical accuracy, live workflow and bounded forced teardown
+remain unqualified. No calibration or firmware operation was performed.

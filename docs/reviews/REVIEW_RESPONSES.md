@@ -299,3 +299,16 @@ FDs. This is not manual end-to-end GUI or hardware scanning qualification.
 GitHub CI was pending at recording; skipped draft CodeRabbit badge is not review.
 Later evidence-only bookkeeping does not change the reviewed implementation.
 Independent reviewer retains verification/closure authority.
+
+### DEV-RECON-001 rotated-source regression follow-up
+
+Accepted developer-identified evidence gap: prior fractional pipeline regression
+used aligned cameras. Added a test with both sensors rotated clockwise and with
+the right sensor inverted. Expected source pixel coordinates are computed directly
+from image rotation formulas, independently of rectification mapping helpers. The
+test requires fractional source y in the vertical case, preserves unqualified
+flags, and checks all three triangulated points against analytic plane depth.
+Production source is unchanged. Sources: depth/tests/subpixel.rs; docs updated.
+Focused test and full frozen gate pass: 519 Rust tests, fmt, strict Clippy/release;
+log /tmp/scancraft-subpixel-rotated-checks.log. Synthetic rotations are not real
+Raptor mode/calibration or physical accuracy qualification. Commit/review follows.

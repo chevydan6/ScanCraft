@@ -251,3 +251,115 @@ fn offline_pipeline_triangulates_refined_observations_and_retains_unqualified_fl
         "integer/refined mean depth errors: {errors:?}"
     );
 }
+
+#[test]
+fn rotated_source_cameras_preserve_fractional_observations_through_triangulation() {
+    for vertical in [false, true] {
+        let (mut rig, l, r) = scene::fixture(4.25);
+        let grid = rig.left.clone();
+        let quantize =
+            |values: Vec<f32>| -> Vec<u8> { values.into_iter().map(|v| v.round() as u8).collect() };
+        let (mut left, mut right) = (quantize(l), quantize(r));
+        if vertical {
+            // Independently rotate both source images clockwise. Rectified x is
+            // original y, so retaining only a fractional original x would fail.
+            let rotate = |data: Vec<u8>| {
+                let mut out = vec![0; 96 * 48];
+                for y in 0..48 {
+                    for x in 0..96 {
+                        out[x * 48 + 47 - y] = data[y * 96 + x];
+                    }
+                }
+                out
+            };
+            left = rotate(left);
+            right = rotate(right);
+            for camera in [&mut rig.left, &mut rig.right] {
+                camera.width = 48;
+                camera.height = 96;
+                camera.cx = 23.5;
+                camera.cy = 47.5;
+            }
+            rig.right_from_left.translation_mm = [0., -20., 0.];
+        } else {
+            // A right sensor mounted upside down changes both image axes while
+            // leaving the left camera coordinate frame unchanged.
+            right.reverse();
+            rig.right_from_left.rotation = [[-1., 0., 0.], [0., -1., 0.], [0., 0., 1.]];
+            rig.right_from_left.translation_mm = [20., 0., 0.];
+        }
+        let (width, height) = (rig.left.width, rig.left.height);
+        let processor = StereoProcessor::build(
+            CalibrationRecord {
+                schema_version: 1,
+                record_id: "synthetic-subpixel-rotated".into(),
+                units: "millimeters".into(),
+                camera_axes: "x_right_y_down_z_forward".into(),
+                provenance: Provenance::SyntheticFixture,
+                binding: None,
+                geometry: rig,
+                notes: "synthetic rotated sensors, not hardware calibration".into(),
+            },
+            grid,
+            &WorkControl::default(),
+        )
+        .unwrap();
+        let report = processor
+            .process(
+                StereoRequest {
+                    left: GrayImage::new(width, height, &left).unwrap(),
+                    right: GrayImage::new(width, height, &right).unwrap(),
+                    source: MatchSource::SyntheticFixture,
+                    seeds: &[[32, 18], [48, 24], [64, 30]],
+                    matching: scene::config(4.25),
+                    triangulation: TriangulationLimits {
+                        min_depth_z_mm: 10.,
+                        max_depth_z_mm: 1000.,
+                        min_ray_angle_rad: 0.0001,
+                        max_ray_gap_mm: 0.01,
+                        max_reprojection_error_px: 0.01,
+                    },
+                },
+                &WorkControl::default(),
+            )
+            .unwrap();
+        assert!(!report.synchronization_verified && !report.physical_accuracy_qualified);
+        assert!(report.mapping_failures.is_empty());
+        assert_eq!(report.mapped_matches.len(), 3);
+        for (matched, mapped) in report.matching.accepted.iter().zip(&report.mapped_matches) {
+            let rectified = matched.pixel_match();
+            let (expected_left, expected_right) = if vertical {
+                (
+                    [47. - rectified.left_pixel[1], rectified.left_pixel[0]],
+                    [47. - rectified.right_pixel[1], rectified.right_pixel[0]],
+                )
+            } else {
+                (
+                    rectified.left_pixel,
+                    [
+                        95. - rectified.right_pixel[0],
+                        47. - rectified.right_pixel[1],
+                    ],
+                )
+            };
+            for (actual, expected) in [
+                (mapped.observations.left_pixel, expected_left),
+                (mapped.observations.right_pixel, expected_right),
+            ] {
+                for axis in 0..2 {
+                    assert!((actual[axis] - expected[axis]).abs() < 1e-9);
+                }
+            }
+            let fractional_axis = usize::from(vertical);
+            let value = mapped.observations.right_pixel[fractional_axis];
+            assert!((value - value.round()).abs() > 0.1);
+        }
+        let reconstruction = report.reconstruction.unwrap();
+        assert_eq!(reconstruction.accepted.len(), 3);
+        assert!(reconstruction.rejected.is_empty());
+        for point in reconstruction.accepted {
+            // Analytic plane depth is unchanged by rotations about optical z.
+            assert!((point.geometry.position_mm[2] - 2400. / 4.25).abs() < 5.);
+        }
+    }
+}

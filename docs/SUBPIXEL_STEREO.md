@@ -89,7 +89,9 @@ project coordinates, original-input preservation and no-overwrite behavior. Neit
 result establishes physical millimeter accuracy or any release acceptance gate.
 
 Other regressions cover analytic peak sign/curvature, flat/nonfinite/unusable fits,
-masked neighbors, boundary winners, reverse inconsistency, retained coarse quality
+rotated source sensors (including rectified x mapping to original y), independently
+computed source-coordinate expectations, masked neighbors, boundary winners,
+reverse inconsistency, retained coarse quality
 gates, invalid settings, cancellation, old JSON and the additional work budget.
 
 ```sh
