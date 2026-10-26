@@ -1,0 +1,42 @@
+{
+  "scope": "Stream cleanup diagnostic preservation; does not establish bounded driver shutdown",
+  "reviewed_commit": "72c5cf607db70bb1f4226e728120e8b56814d60a",
+  "reviewed_tree": "d2d470b73b18b3c3f5d68cd73bc2721ff870ee9c",
+  "base_commit": "8da307e102983d2b47678588bd514adc8ee30128",
+  "cli_version": "0.9.1",
+  "cli_exit_code": 0,
+  "cli_completion": {
+    "type": "complete",
+    "status": "review_completed",
+    "findings": 0,
+    "gate": {
+      "threshold": "major",
+      "status": "passed",
+      "blockingFindings": 0
+    },
+    "reviewedFiles": [
+      "crates/scancraft-device/src/cleanup_errors.rs",
+      "crates/scancraft-device/src/lib.rs",
+      "docs/reviews/REVIEW_RESPONSES.md"
+    ],
+    "outcome": "completed",
+    "message": "Review completed"
+  },
+  "raw_report_sha256": "3d59802d696935cf888715f424de89a63364fcd371f85b480e4980e3ef9d9ec6",
+  "binding": "Operator captured committed head/tree; not service immutable-head attestation. Later two-node correction is outside this completed review.",
+  "final_local_gate": {
+    "tests_passed": 544,
+    "formatting": "passed",
+    "clippy": "passed",
+    "release_build": "passed",
+    "log_sha256": "a55f81f9abdbcb02cc446a124c7149cffe9191dacbee9b5fa9b2f72a12d719d0"
+  },
+  "later_correction_review": "pending: included quota exhausted; billing inactive; no paid review authorized",
+  "hardware_validation": "not performed: no Raptor in lsusb inventory",
+  "limitations": [
+    "Collector tests exercise synthetic errors, not a real V4L2 driver.",
+    "No bounded ioctl/Drop shutdown guarantee.",
+    "No physical calibration, firmware or protection changes.",
+    "Initial empty committed-diff CLI invocation skipped and is not review evidence."
+  ]
+}

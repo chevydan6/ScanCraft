@@ -11,6 +11,8 @@ use std::{
     ptr::NonNull,
     time::{Duration, Instant},
 };
+mod cleanup_errors;
+use cleanup_errors::CleanupErrors;
 use v4l2_sys_mit as v;
 fn invalid(s: impl Into<String>) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidData, s.into())
@@ -288,12 +290,10 @@ impl Stream {
         packet
     }
     fn close(&mut self) -> io::Result<()> {
-        let mut error = None;
+        let mut errors = CleanupErrors::default();
         if self.streaming {
             let mut kind = self.kind;
-            if let Err(e) = ioctl(&self.fd, 19, 1, &mut kind) {
-                error = Some(e);
-            }
+            errors.record("stop streaming", ioctl(&self.fd, 19, 1, &mut kind));
             self.streaming = false;
         }
         self.maps.clear();
@@ -302,28 +302,22 @@ impl Stream {
             let mut r: v::v4l2_requestbuffers = unsafe { zeroed() };
             r.type_ = self.kind;
             r.memory = MMAP;
-            if let Err(e) = ioctl(&self.fd, 8, 3, &mut r) {
-                error = Some(e);
-            }
+            errors.record("release buffers", ioctl(&self.fd, 8, 3, &mut r));
             self.allocated = false;
         }
-        if let Some(mut f) = self.old_format.take()
-            && let Err(e) = ioctl(&self.fd, 5, 3, &mut f)
-        {
-            error = Some(e);
+        if let Some(mut f) = self.old_format.take() {
+            errors.record("restore format", ioctl(&self.fd, 5, 3, &mut f));
         }
-        if let Some(mut r) = self.old_rate.take()
-            && let Err(e) = ioctl(&self.fd, 22, 3, &mut r)
-        {
-            error = Some(e);
+        if let Some(mut r) = self.old_rate.take() {
+            errors.record("restore frame rate", ioctl(&self.fd, 22, 3, &mut r));
         }
-        error.map_or(Ok(()), Err)
+        errors.finish()
     }
 }
 impl Drop for Stream {
     fn drop(&mut self) {
         if let Err(e) = self.close() {
-            eprintln!("stream cleanup failed: {e}");
+            eprintln!("stream cleanup failed (buffer type {}): {e}", self.kind);
         }
     }
 }
@@ -471,9 +465,10 @@ impl Capture {
         );
     }
     pub fn close(mut self) -> io::Result<()> {
-        let a = self.video.close();
-        let b = self.metadata.close();
-        a.and(b)
+        let mut errors = CleanupErrors::default();
+        errors.record("video stream", self.video.close());
+        errors.record("metadata stream", self.metadata.close());
+        errors.finish()
     }
 }
 
