@@ -1,0 +1,60 @@
+{
+  "tool": "CodeRabbit CLI 0.9.1",
+  "source_commit": "5aa93c35ce911f83bde8b5103e5be049e2101cc1",
+  "source_tree": "7c168b6e48875ecd31ee2dd0f907af019931249d",
+  "base_commit": "84b89f42c977173bab580ca9d1d8eea90e81d3b2",
+  "binding": "operator recorded commit/tree; not service cryptographic attestation",
+  "completion": {
+    "type": "complete",
+    "status": "review_completed",
+    "findings": 2,
+    "gate": {
+      "threshold": "major",
+      "status": "passed",
+      "blockingFindings": 0
+    },
+    "reviewedFiles": [
+      "ARCHITECTURE.md",
+      "Cargo.lock",
+      "PROJECT_STATUS.md",
+      "crates/scancraft-acquisition/Cargo.toml",
+      "crates/scancraft-acquisition/src/lib.rs",
+      "crates/scancraft-app/Cargo.toml",
+      "crates/scancraft-app/src/capture_worker.rs",
+      "crates/scancraft-app/src/cloud_ui.rs",
+      "crates/scancraft-app/src/live_ui.rs",
+      "crates/scancraft-app/src/main.rs",
+      "crates/scancraft-cli/Cargo.toml",
+      "crates/scancraft-cli/src/live_scan.rs",
+      "crates/scancraft-geometry/src/fusion.rs",
+      "crates/scancraft-geometry/src/session.rs",
+      "crates/scancraft-workflow/src/live_stereo.rs",
+      "crates/scancraft-workflow/src/live_stereo/control.rs",
+      "crates/scancraft-workflow/src/live_stereo/runner.rs",
+      "crates/scancraft-workflow/tests/live_control.rs",
+      "crates/scancraft-workflow/tests/live_stereo.rs",
+      "docs/LIVE_STEREO_GUI.md",
+      "docs/LIVE_STEREO_SCAN.md",
+      "docs/reviews/REVIEW_RESPONSES.md",
+      "docs/reviews/evidence/2026-10-27-live-gui-runtime.json"
+    ],
+    "outcome": "completed",
+    "message": "Review completed"
+  },
+  "exit_code": 0,
+  "raw_sha256": "f673b73c7f9e57cf98d5821efa03fae5f3edab08a1f37eed1419a19e2ccfb66c",
+  "validation_log_sha256": "196918568dccbd91ab2ec6d114a1c446b0fa3f1d282d243890f3f174d02f4f16",
+  "findings": [
+    {
+      "id": "CR-LIVE-STATUS-CONTRADICTION",
+      "severity": "minor",
+      "disposition": "accepted; update preceding status paragraph"
+    },
+    {
+      "id": "CR-LIVE-FINAL-PREVIEW",
+      "severity": "minor",
+      "disposition": "accepted; poll/join worker before consuming final mailbox"
+    }
+  ],
+  "billing": "included reviews available and usage billing inactive in fresh preflight; no paid flags or consent"
+}

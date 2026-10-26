@@ -152,6 +152,8 @@ impl LiveUi {
         self.recorded = job.control.recorded_frames();
         self.drops = job.control.processing_drops();
         self.skipped = job.control.skipped_previews();
+        // A completed poll joins the owner: no final offer can race the mailbox drain.
+        let finished = job.worker.poll();
         if let Some(snapshot) = job.control.take_preview() {
             self.fused = snapshot.fused_points;
             self.tracking = snapshot.tracking["state"]
@@ -167,7 +169,7 @@ impl LiveUi {
                 texture(&mut self.cameras[index], ctx, index, image);
             }
         }
-        if let Some(result) = job.worker.poll() {
+        if let Some(result) = finished {
             let failed = result.is_err();
             self.message = match result {
                 Ok(report) => {

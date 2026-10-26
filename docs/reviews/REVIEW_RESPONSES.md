@@ -881,3 +881,17 @@ Evidence: evidence/2026-10-27-live-gui-runtime.json and LIVE_STEREO_GUI.md.
 This is developer evidence on uncommitted source, not independent closure,
 physical qualification or benchmark.005 remains unbounded-driver limitation;
 006 physical binding/accuracy remains unproven. Exact source commit/review pending.
+
+## CodeRabbit live GUI source review — accepted minor corrections
+
+Source5aa93c35ce911f83bde8b5103e5be049e2101cc1 versus84b89f4 completed
+23files,2minor,0blocking,major gatePASS,exit0.
+CR-LIVE-FINAL-PREVIEW accepted: tick previously drained before polling completion,
+so a final offer between those operations could be abandoned when job cleared.
+Poll/join now precedes mailbox drain; an unfinished worker retains the job for
+future ticks, while a finished worker can make no later offer. Source live_ui.rs.
+This developer-observed race was independently also identified by CodeRabbit.
+CR-LIVE-STATUS-CONTRADICTION accepted: PROJECT_STATUS preceding paragraph now
+states GUI exists with synthetic validation; hardware remains unverified.
+No reviewer-owned finding status changed. Existing final-snapshot runner and
+worker lifecycle regressions apply; full gate after corrections follows.

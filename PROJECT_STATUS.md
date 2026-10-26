@@ -2103,7 +2103,8 @@ association -> existing reconstruction/tracking/fusion -> project/PLY bundle.
 Synthetic injected sources exercise complete publication and cleanup; physical
 entry rejects synthetic calibration. Configured source binding, equal rawPTS and
 host-window association do not establish calibration/exposure accuracy. Actual
-Raptor operation and live GUI integration remain unverified/unimplemented here;
+Raptor operation remains unverified. Live GUI integration is now implemented
+and synthetically validated as described in the following milestone;
 no physical calibration, firmware or illumination operation was performed.
 See docs/LIVE_STEREO_SCAN.md and developer review responses for evidence scope.
 
