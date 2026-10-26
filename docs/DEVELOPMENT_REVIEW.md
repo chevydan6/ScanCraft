@@ -131,6 +131,10 @@ PATCH only `required_approving_review_count` from 1 to 0 at
 `repos/chevydan6/ScanCraft/branches/main/protection/required_pull_request_reviews`.
 Retain the PR requirement and every other protection above. Do not delete the PR
 review protection object or replace the entire branch protection configuration.
+Before implementation, obtain owner authorization explicitly acknowledging that
+shared ADMIN credentials cannot enforce owner-only consent, or establish the
+separate-identity controls below. Do not describe the resulting workflow as
+technically owner-gated while these credentials remain available.
 Re-read REST and GraphQL settings afterward, then inspect the harmless audit PR
 for passing CI and removal of `REVIEW_REQUIRED`, leaving it unmerged. Until that
 change is authorized and verified, the approval deadlock remains unresolved.
@@ -159,9 +163,34 @@ gate. Tool confirmations alone are procedural, not a GitHub permission boundary.
 
 A separate `dev/protection-audit` branch from the live main contains only this
 document. The original workflow PR and local development branch are preserved.
-The audit PR is intentionally left open and must not be merged without explicit
-owner authorization. Check its live CI and review results; post-change behavior
-cannot be claimed before the settings change is approved and applied.
+Audit PR #2 (https://github.com/chevydan6/ScanCraft/pull/2) is intentionally left
+open and must not be merged without explicit owner authorization. At tested head
+`b65cd61`, both push and PR `test` jobs completed successfully. GitHub still
+reported `REVIEW_REQUIRED` / `BLOCKED`. CodeRabbit posted a fresh small-repository
+skip message and a successful status; no completed GitHub review is claimed for
+this probe. Post-change behavior cannot be claimed before authorization and
+implementation. This document's later evidence-only edits need their own CI.
+
+The CLI 0.9.1 review completed against `b65cd61`, exit 2, with
+`complete.status: review_completed`, `outcome: completed`, three findings and
+`gate: {threshold: major, status: blocked, blockingFindings: 1}`. This is a
+blocked review, not a passing gate. Dispositions:
+
+- Major: accepted the underlying owner-consent limitation; strengthened the
+  implementation prerequisite and retained the live one-approval protection
+  pending authorization. The unresolved shared-credential risk remains a blocker
+  to claiming technical owner-only merge authority. Keeping one approval forever
+  is not a solution to the demonstrated self-approval deadlock.
+- Minor, unsupported skills command: rejected for the installed binary.
+  `coderabbit skills --help` explicitly lists `install`, `update`, `uninstall`
+  and the example `coderabbit skills install`. The v1.1.1 installation statement
+  is historical; this audit does not newly verify that package release.
+- Minor, unverified gate contract: resolved by direct evidence. The installed
+  `review --help` lists `--gate`, explicitly documents exit 2, and this completed
+  blocked run demonstrates the completion fields and process exit together.
+
+No passing re-review of these documentation corrections is claimed. No paid
+usage, merge, settings mutation, bypass, force push or main deletion was attempted.
 
 Evidence:
 - PR #1: https://github.com/chevydan6/ScanCraft/pull/1
