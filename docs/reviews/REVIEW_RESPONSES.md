@@ -753,3 +753,15 @@ factory-field extraction and declared-calibration offline/GUI reconstruction
 from still-unqualified physical/live Raptor scanning. Source contracts remain
 factory_named/factory_pose/factory_laser, storage, image/depth/geometry crates and
 recorded_sequence workflow; no historical rationale invented or code changed.
+
+Combined final CLI review completed at d79959850bfa211cb558ea75476ba26b0553c82d
+(treeb39ff49d488e59077b9c9c99b5d3b757f126b6b7) versus72c5cf6:11files,
+zero findings, majorPASS, exit0. Sourcehead/tree unchanged before/after. Fresh
+quota1/inactivebilling preceded launch; no paidflag/consent. Source/blob/report/
+fullgatelog evidence: evidence/2026-10-27-cleanup-mirror-combined-review.json.
+Covers PR10 finaltwo-node correction (bothsourceblobs exactlymatcha6fa2d5) and
+PR11 reference/probe/docs. Together with earlier72c5 review this covers current
+cleanup implementation; it is not a full prior-code audit or GitHub Appapproval.
+Earlier pending statements are historical and superseded by this completion.
+Independent73/77/79 scopes acknowledged without changing their findings/status.
+Both PRs may now leave draft for actual Appreview; no merge authorized.

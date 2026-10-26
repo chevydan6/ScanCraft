@@ -38,6 +38,6 @@
     "clippy": "passed",
     "release_build": "passed",
     "workspace_log_sha256": "af712f92f7655f09d38b7c3840d7bb3355bc9e00b63bab0c9042228b835cbfd1",
-    "automated_review": "pending included quota"
+    "automated_review": "completed: combined d799598 vs72c5cf6, zero findings, major passed; see combined review manifest"
   }
 }

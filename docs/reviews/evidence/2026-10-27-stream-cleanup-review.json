@@ -31,7 +31,7 @@
     "release_build": "passed",
     "log_sha256": "a55f81f9abdbcb02cc446a124c7149cffe9191dacbee9b5fa9b2f72a12d719d0"
   },
-  "later_correction_review": "pending: included quota exhausted; billing inactive; no paid review authorized",
+  "later_correction_review": "completed in combined d799598 vs72c5cf6 review; cleanup source blobs equal to a6fa2d5; zero findings, major passed",
   "hardware_validation": "not performed: no Raptor in lsusb inventory",
   "limitations": [
     "Collector tests exercise synthetic errors, not a real V4L2 driver.",
