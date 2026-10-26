@@ -400,3 +400,9 @@ writes per-frame raw selections/reports to staging, keeps only current frame
 geometry plus bounded session/fusion state, and atomically publishes the fused
 editable project and external provenance bundle. No timing heuristic selects pairs
 or qualifies geometry. See docs/RECORDED_STEREO_SEQUENCE.md for boundaries/limits.
+
+The native recorded-sequence panel submits an owned geometry-worker operation.
+Sequence `prepare` returns a staged bundle/cloud; the worker builds Editor/Preview
+before `publish_prepared` rechecks sources/cancellation and atomically publishes.
+Only then is the live document replaced. Existing dirty-document and busy guards
+apply. CLI run composes the same phases; no live acquisition is introduced.

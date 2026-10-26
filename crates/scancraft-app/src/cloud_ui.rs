@@ -52,6 +52,8 @@ pub struct CloudUi {
     package_after_open: Option<(PathBuf, PathBuf)>,
     source_open: bool,
     verify_after_open: Option<PathBuf>,
+    recorded_sequence_files: [String; 6],
+    recorded_sequence_open: bool,
     sequence_files: [String; 2],
     sequence_open: bool,
     import_after_save: bool,
@@ -110,6 +112,8 @@ impl Default for CloudUi {
             package_after_open: None,
             source_open: false,
             verify_after_open: None,
+            recorded_sequence_files: Default::default(),
+            recorded_sequence_open: false,
             sequence_files: Default::default(),
             sequence_open: false,
         }
@@ -168,6 +172,27 @@ impl CloudUi {
         self.start(Operation::Load {
             path,
             unit_scale: None,
+        });
+    }
+    pub fn recorded_sequence_startup(
+        &mut self,
+        inputs: scancraft_workflow::recording_reconstruction::Inputs,
+        settings: PathBuf,
+        output: PathBuf,
+    ) {
+        self.recorded_sequence_files = [
+            inputs.calibration.display().to_string(),
+            inputs.left.display().to_string(),
+            inputs.right.display().to_string(),
+            inputs.settings.display().to_string(),
+            settings.display().to_string(),
+            output.display().to_string(),
+        ];
+        self.recorded_sequence_open = true;
+        self.start(Operation::ReconstructRecordedSequence {
+            inputs,
+            settings,
+            output,
         });
     }
     pub fn sequence_startup(&mut self, settings: PathBuf, output: PathBuf) {
@@ -294,6 +319,7 @@ impl CloudUi {
                     | Operation::Reconstruct { .. }
                     | Operation::ReconstructRecordings { .. }
                     | Operation::FuseSequence { .. }
+                    | Operation::ReconstructRecordedSequence { .. }
             )
         {
             self.pending_import = Some(operation);
@@ -415,6 +441,21 @@ impl CloudUi {
                 }
                 if ui.add_enabled(self.sequence_files.iter().all(|s|!s.trim().is_empty()),egui::Button::new("Track, fuse and open")).clicked() {
                     operation=Some(Operation::FuseSequence {settings:self.sequence_files[0].clone().into(),output:self.sequence_files[1].clone().into()});
+                }
+            });
+        });
+        egui::CollapsingHeader::new("Reconstruct and fuse recorded stereo sequence").default_open(self.recorded_sequence_open).show(ui, |ui| {
+            ui.label("Offline explicit frame pairs with supplied calibration. Exposure timing and physical accuracy remain unqualified. Keep the complete result folder for frame provenance.");
+            ui.add_enabled_ui(idle, |ui| {
+                for (label, value) in ["Calibration file", "Left recording", "Right recording", "Reconstruction settings", "Sequence settings", "New result folder"].into_iter().zip(self.recorded_sequence_files.iter_mut()) {
+                    ui.horizontal(|ui| { ui.label(label); ui.add(egui::TextEdit::singleline(value).desired_width(450.)); });
+                }
+                if ui.add_enabled(self.recorded_sequence_files.iter().all(|s|!s.trim().is_empty()), egui::Button::new("Reconstruct, track, fuse and open")).clicked() {
+                    operation = Some(Operation::ReconstructRecordedSequence {
+                        inputs: scancraft_workflow::recording_reconstruction::Inputs {
+                            calibration:self.recorded_sequence_files[0].clone().into(),left:self.recorded_sequence_files[1].clone().into(),right:self.recorded_sequence_files[2].clone().into(),settings:self.recorded_sequence_files[3].clone().into(),left_index:0,right_index:0,
+                        }, settings:self.recorded_sequence_files[4].clone().into(),output:self.recorded_sequence_files[5].clone().into(),
+                    });
                 }
             });
         });
@@ -1388,6 +1429,30 @@ mod tests {
             ui.document.as_ref().unwrap().editor.as_ref().unwrap().cloud,
             cloud
         );
+        ui.pending_import = None;
+        ui.submit(Operation::ReconstructRecordedSequence {
+            inputs: scancraft_workflow::recording_reconstruction::Inputs {
+                calibration: "missing".into(),
+                left: "left".into(),
+                right: "right".into(),
+                settings: "recon.json".into(),
+                left_index: 0,
+                right_index: 0,
+            },
+            settings: "sequence.json".into(),
+            output: "result".into(),
+        });
+        assert!(!ui.is_busy());
+        assert!(matches!(
+            ui.pending_import,
+            Some(Operation::ReconstructRecordedSequence { .. })
+        ));
+        assert_eq!(
+            ui.document.as_ref().unwrap().editor.as_ref().unwrap().cloud,
+            cloud
+        );
+        assert_eq!(ui.document.as_ref().unwrap().selection, [0]);
+        assert!(ui.dirty);
         ui.pending_import = None;
         ui.submit(Operation::FuseSequence {
             settings: "sequence.json".into(),

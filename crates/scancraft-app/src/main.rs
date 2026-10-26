@@ -582,6 +582,11 @@ enum Startup {
         inputs: scancraft_workflow::FileInputs,
         output: PathBuf,
     },
+    RecordedSequence {
+        inputs: scancraft_workflow::recording_reconstruction::Inputs,
+        settings: PathBuf,
+        output: PathBuf,
+    },
     FuseSequence {
         settings: PathBuf,
         output: PathBuf,
@@ -597,6 +602,9 @@ fn startup_args(args: Vec<std::ffi::OsString>) -> Result<Startup, String> {
         [flag] if flag == "--smoke-test" => Ok(Startup::Smoke),
         [flag] if flag == "--smoke-test-ir" => Ok(Startup::SmokeIr),
         [flag,calibration,left,right,settings,output] if flag=="--reconstruct" => Ok(Startup::Reconstruct {inputs:scancraft_workflow::FileInputs {calibration:calibration.into(),left:left.into(),right:right.into(),settings:settings.into()},output:output.into()}),
+        [flag,cal,left,right,recon,settings,output] if flag=="--reconstruct-recorded-sequence" => Ok(Startup::RecordedSequence {
+            inputs:scancraft_workflow::recording_reconstruction::Inputs {calibration:cal.into(),left:left.into(),right:right.into(),settings:recon.into(),left_index:0,right_index:0},settings:settings.into(),output:output.into()
+        }),
         [flag,settings,output] if flag=="--fuse-sequence" => Ok(Startup::FuseSequence {settings:settings.into(),output:output.into()}),
         [flag,calibration,left,li,right,ri,settings,output] if flag=="--reconstruct-recordings" => {
             let index=|s:&std::ffi::OsString|s.to_str().ok_or("invalid recording index")?.parse::<usize>().map_err(|_|"invalid recording index");
@@ -646,14 +654,14 @@ fn startup_args(args: Vec<std::ffi::OsString>) -> Result<Startup, String> {
         [path] if !path.to_string_lossy().starts_with('-') => {
             Ok(Startup::File(PathBuf::from(path)))
         }
-        _ => Err("Usage: scancraft [PROJECT_OR_PLY_FILE] | --reconstruct CALIBRATION LEFT.PNG RIGHT.PNG SETTINGS NEW_RESULT_FOLDER | --fuse-sequence SETTINGS NEW_RESULT_FOLDER | --mesh MESH_JSON | --mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM | --mesh-boundaries MESH_OR_PROJECT | --fit-cylinder PROJECT_OR_PLY_FILE MAX_RMS_MM | --frame-document FRAME_FILE | --coordinate-frame PROJECT_OR_PLY_FILE | --measurement-outlines PROJECT_OR_PLY_FILE | --cloud-normals PROJECT_OR_PLY_FILE | --mesh-normals MESH_OR_PROJECT | --reconstruct-recordings CALIBRATION LEFT_RECORDING LEFT_INDEX RIGHT_RECORDING RIGHT_INDEX SETTINGS NEW_FOLDER | --statistical-preview PROJECT_OR_PLY K SIGMA_MULTIPLIER | --export-scan-project PROJECT SOURCE_BUNDLE LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --archive-recordings LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --export-project-bundle PROJECT SOURCE_BUNDLE NEW_DIRECTORY | --verify-source-bundle PROJECT DIRECTORY | --play-recording RECORDING | --recover-recording INPUT MAX_FRAMES NEW_FOLDER | --import-mesh FILE obj|stl mm|in|m separate|weld-exact NEW_FOLDER | --mesh-smooth-preview MESH_OR_PROJECT ITERATIONS RELAXATION MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG | --mesh-simplify-preview MESH_OR_PROJECT TARGET MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG MAX_COLLAPSES | --mesh-plane-preview MESH_JSON NX NY NZ OFFSET | --help | --smoke-test | --smoke-test-ir".into()),
+        _ => Err("Usage: scancraft [PROJECT_OR_PLY_FILE] | --reconstruct CALIBRATION LEFT.PNG RIGHT.PNG SETTINGS NEW_RESULT_FOLDER | --reconstruct-recorded-sequence CAL LEFT_RECORDING RIGHT_RECORDING RECON_SETTINGS SEQUENCE_SETTINGS NEW_FOLDER | --fuse-sequence SETTINGS NEW_RESULT_FOLDER | --mesh MESH_JSON | --mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM | --mesh-boundaries MESH_OR_PROJECT | --fit-cylinder PROJECT_OR_PLY_FILE MAX_RMS_MM | --frame-document FRAME_FILE | --coordinate-frame PROJECT_OR_PLY_FILE | --measurement-outlines PROJECT_OR_PLY_FILE | --cloud-normals PROJECT_OR_PLY_FILE | --mesh-normals MESH_OR_PROJECT | --reconstruct-recordings CALIBRATION LEFT_RECORDING LEFT_INDEX RIGHT_RECORDING RIGHT_INDEX SETTINGS NEW_FOLDER | --statistical-preview PROJECT_OR_PLY K SIGMA_MULTIPLIER | --export-scan-project PROJECT SOURCE_BUNDLE LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --archive-recordings LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --export-project-bundle PROJECT SOURCE_BUNDLE NEW_DIRECTORY | --verify-source-bundle PROJECT DIRECTORY | --play-recording RECORDING | --recover-recording INPUT MAX_FRAMES NEW_FOLDER | --import-mesh FILE obj|stl mm|in|m separate|weld-exact NEW_FOLDER | --mesh-smooth-preview MESH_OR_PROJECT ITERATIONS RELAXATION MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG | --mesh-simplify-preview MESH_OR_PROJECT TARGET MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG MAX_COLLAPSES | --mesh-plane-preview MESH_JSON NX NY NZ OFFSET | --help | --smoke-test | --smoke-test-ir".into()),
     }
 }
 fn main() -> eframe::Result {
     let startup = match startup_args(std::env::args_os().skip(1).collect()) {
         Ok(Startup::Help) => {
             println!(
-                "Usage: scancraft [PROJECT_OR_PLY_FILE]\n       scancraft --reconstruct CALIBRATION LEFT.PNG RIGHT.PNG SETTINGS NEW_RESULT_FOLDER\n       scancraft --fuse-sequence SETTINGS NEW_RESULT_FOLDER\n       scancraft --mesh MESH_JSON\n       scancraft --mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM | --mesh-boundaries MESH_OR_PROJECT\n       scancraft --fit-cylinder PROJECT_OR_PLY_FILE MAX_RMS_MM | --frame-document FRAME_FILE | --coordinate-frame PROJECT_OR_PLY_FILE | --measurement-outlines PROJECT_OR_PLY_FILE | --cloud-normals PROJECT_OR_PLY_FILE\n       scancraft --mesh-normals MESH_OR_PROJECT\n       scancraft --reconstruct-recordings CALIBRATION LEFT_RECORDING LEFT_INDEX RIGHT_RECORDING RIGHT_INDEX SETTINGS NEW_FOLDER | --statistical-preview PROJECT_OR_PLY K SIGMA_MULTIPLIER | --export-scan-project PROJECT SOURCE_BUNDLE LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --archive-recordings LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --export-project-bundle PROJECT SOURCE_BUNDLE NEW_DIRECTORY | --verify-source-bundle PROJECT DIRECTORY | --play-recording RECORDING | --recover-recording INPUT MAX_FRAMES NEW_FOLDER | --import-mesh FILE obj|stl mm|in|m separate|weld-exact NEW_FOLDER | --mesh-smooth-preview MESH_OR_PROJECT ITERATIONS RELAXATION MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG | --mesh-simplify-preview MESH_OR_PROJECT TARGET MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG MAX_COLLAPSES | --mesh-plane-preview MESH_JSON NX NY NZ OFFSET\nOpen geometry without starting camera acquisition. Files without units require an explicit choice in the import panel."
+                "Usage: scancraft [PROJECT_OR_PLY_FILE]\n       scancraft --reconstruct CALIBRATION LEFT.PNG RIGHT.PNG SETTINGS NEW_RESULT_FOLDER\n       scancraft --reconstruct-recorded-sequence CAL LEFT_RECORDING RIGHT_RECORDING RECON_SETTINGS SEQUENCE_SETTINGS NEW_FOLDER\n       scancraft --fuse-sequence SETTINGS NEW_RESULT_FOLDER\n       scancraft --mesh MESH_JSON\n       scancraft --mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM | --mesh-boundaries MESH_OR_PROJECT\n       scancraft --fit-cylinder PROJECT_OR_PLY_FILE MAX_RMS_MM | --frame-document FRAME_FILE | --coordinate-frame PROJECT_OR_PLY_FILE | --measurement-outlines PROJECT_OR_PLY_FILE | --cloud-normals PROJECT_OR_PLY_FILE\n       scancraft --mesh-normals MESH_OR_PROJECT\n       scancraft --reconstruct-recordings CALIBRATION LEFT_RECORDING LEFT_INDEX RIGHT_RECORDING RIGHT_INDEX SETTINGS NEW_FOLDER | --statistical-preview PROJECT_OR_PLY K SIGMA_MULTIPLIER | --export-scan-project PROJECT SOURCE_BUNDLE LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --archive-recordings LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --export-project-bundle PROJECT SOURCE_BUNDLE NEW_DIRECTORY | --verify-source-bundle PROJECT DIRECTORY | --play-recording RECORDING | --recover-recording INPUT MAX_FRAMES NEW_FOLDER | --import-mesh FILE obj|stl mm|in|m separate|weld-exact NEW_FOLDER | --mesh-smooth-preview MESH_OR_PROJECT ITERATIONS RELAXATION MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG | --mesh-simplify-preview MESH_OR_PROJECT TARGET MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG MAX_COLLAPSES | --mesh-plane-preview MESH_JSON NX NY NZ OFFSET\nOpen geometry without starting camera acquisition. Files without units require an explicit choice in the import panel."
             );
             return Ok(());
         }
@@ -788,6 +796,15 @@ fn main() -> eframe::Result {
                     app.editing = true;
                     app.cloud.open_startup(path);
                 }
+                Startup::RecordedSequence {
+                    inputs,
+                    settings,
+                    output,
+                } => {
+                    app.editing = true;
+                    app.cloud
+                        .recorded_sequence_startup(inputs, settings, output);
+                }
                 Startup::FuseSequence { settings, output } => {
                     app.editing = true;
                     app.cloud.sequence_startup(settings, output);
@@ -823,6 +840,34 @@ mod startup_tests {
     use super::*;
     fn args(values: &[&str]) -> Vec<std::ffi::OsString> {
         values.iter().map(std::ffi::OsString::from).collect()
+    }
+    #[test]
+    fn recorded_sequence_startup_requires_all_explicit_files() {
+        let args = |v: &[&str]| v.iter().map(std::ffi::OsString::from).collect();
+        assert!(matches!(
+            startup_args(args(&[
+                "--reconstruct-recorded-sequence",
+                "cal",
+                "left",
+                "right",
+                "recon",
+                "sequence",
+                "out"
+            ]))
+            .unwrap(),
+            Startup::RecordedSequence { .. }
+        ));
+        assert!(
+            startup_args(args(&[
+                "--reconstruct-recorded-sequence",
+                "cal",
+                "left",
+                "right",
+                "recon",
+                "sequence"
+            ]))
+            .is_err()
+        );
     }
     #[test]
     fn statistical_preview_parameters_are_explicit_and_validated() {

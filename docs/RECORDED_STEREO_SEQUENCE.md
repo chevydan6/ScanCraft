@@ -83,8 +83,9 @@ The fused project stores geometry and edit history. Multi-frame reconstruction
 provenance remains in the **complete external sequence bundle**, not a fabricated
 single-frame project origin. Keep that bundle; standalone project export does not
 embed the raw inputs or preserve a multi-frame association. Opening the fused
-project in the existing GUI is supported; a dedicated sequence GUI and persisted
-multi-frame source verification remain future work. Frames in this path use
+project in the existing GUI is supported. The native sequence panel/startup path
+now orchestrates the same operation in the background; persisted multi-frame source
+verification remains future work. Frames in this path use
 point-to-point tracking; other registration methods remain available in the
 existing cloud-sequence workflow. All binding/synchronization/physical accuracy
 qualification fields remain false regardless of successful matching or local ICP.
@@ -120,3 +121,39 @@ fitted-pose perturbations straddle cell boundaries. A regression independently
 checks every fused position and coverage against the three analytic coordinates
 within 1e-7mm; it does not assume exactly three cells or claim physical precision.
 This is a synthetic numerical consistency check, not hardware accuracy evidence.
+
+## Native GUI background operation
+
+Point clouds → **Reconstruct and fuse recorded stereo sequence** accepts the six
+paths used by the CLI. It uses the existing bounded geometry worker, progress and
+cooperative cancellation. The save/discard guard applies before replacing an
+unsaved document. Acquisition is never started. The startup equivalent is:
+
+```
+scancraft --reconstruct-recorded-sequence CALIBRATION LEFT_RECORDING RIGHT_RECORDING RECONSTRUCTION_SETTINGS SEQUENCE_SETTINGS NEW_DIRECTORY
+```
+
+Workflow `prepare` writes a complete unpublished staging bundle and returns the
+fused cloud. The GUI constructs its new editor and viewport preview first; only
+then does `publish_prepared` recheck original sources/cancellation and commit the
+result folder atomically. Editor/selection/path replacement follows publication
+without further fallible view construction. Failures preserve the original live
+document; staging remains available for inspection. Source mutation or cancellation
+between preparation and publication prevents the final folder from appearing.
+Successful publication is not undone by a later cancellation; a parent-directory
+sync failure is explicitly reported as already published. The CLI `run` remains a
+wrapper over these two stages and retains its command interface.
+
+Prepared state retains its source indexes/maps until publication, and the GUI
+builds a separate editor/preview from the final cloud. This adds bounded overlap
+in memory; no peak-RSS/latency qualification is claimed. The fused standalone
+project still does not embed multi-frame provenance: keep the complete result
+bundle. This integration does not add live processing, physical calibration,
+blank-frame recovery or a scanner-accuracy guarantee.
+
+Regressions cover the GUI unsaved-document guard, background operation success and
+failed/cancelled/overwrite document preservation, startup arguments and deferred
+publication with late cancellation/source mutation. A private-display helper can
+exercise the full synthetic startup operation with `--reconstruct-recorded-sequence`
+on a dataset directory containing calibration.rapcal, left/right.raptor, request.json
+and sequence.json. It never controls the user's desktop or opens camera hardware.

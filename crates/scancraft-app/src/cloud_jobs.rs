@@ -116,6 +116,11 @@ pub enum Operation {
         vertex: usize,
     },
     FlipNormals,
+    ReconstructRecordedSequence {
+        inputs: scancraft_workflow::recording_reconstruction::Inputs,
+        settings: PathBuf,
+        output: PathBuf,
+    },
     FuseSequence {
         settings: PathBuf,
         output: PathBuf,
@@ -442,6 +447,42 @@ fn execute(
     }
     if let Operation::ApplyFrame { label, frame } = operation {
         return apply_coordinate_frame(document, label, frame, work);
+    }
+    if let Operation::ReconstructRecordedSequence {
+        inputs,
+        settings,
+        output,
+    } = operation
+    {
+        let prepared =
+            scancraft_workflow::recorded_sequence::prepare(&inputs, &settings, &output, work)
+                .map_err(|e| e.to_string())?;
+        let make_view = || -> Result<_, String> {
+            let editor = Editor::new(prepared.cloud().clone(), 32)?;
+            let preview = build_preview(&editor.cloud, &[], work)?;
+            Ok((editor, preview))
+        };
+        let (editor, preview) = make_view().map_err(|e| {
+            format!(
+                "{e}; incomplete sequence retained at {}",
+                prepared.staging_directory().display()
+            )
+        })?;
+        let summary = scancraft_workflow::recorded_sequence::publish_prepared(&prepared, work)
+            .map_err(|e| e.to_string())?;
+        document.editor = Some(editor);
+        document.selection.clear();
+        let mut result = report(
+            format!(
+                "Reconstructed and fused {} points from {} integrated recorded pairs; {} tracking rejections. Keep the complete result folder for frame provenance. Physical accuracy remains unqualified.",
+                summary["points"], summary["integrated_frames"], summary["rejected_frames"]
+            ),
+            Some(preview),
+        );
+        result.reset_view = true;
+        result.project_saved = true;
+        result.opened_path = Some(output.join("project.orproj"));
+        return Ok(result);
     }
     if let Operation::FuseSequence { settings, output } = operation {
         if std::fs::symlink_metadata(&output).is_ok() {
@@ -3079,6 +3120,76 @@ mod tests {
             execute(
                 &mut doc,
                 Operation::FuseSequence { settings, output },
+                &WorkControl::default()
+            )
+            .is_err()
+        );
+        assert_eq!(snapshot(&doc), before);
+    }
+    #[test]
+    fn recorded_sequence_job_commits_view_after_publication_and_preserves_failures() {
+        let temp = Temp::new();
+        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../evidence/recorded-stereo-dataset");
+        let inputs = scancraft_workflow::recording_reconstruction::Inputs {
+            calibration: root.join("calibration.rapcal"),
+            left: root.join("left.raptor"),
+            right: root.join("right.raptor"),
+            settings: root.join("request.json"),
+            left_index: 0,
+            right_index: 0,
+        };
+        let settings = temp.path.join("sequence.json");
+        std::fs::write(&settings,serde_json::to_vec(&serde_json::json!({"schema_version":1,"session_id":"gui-recorded-sequence",
+            "tracking":{"max_correspondence_mm":2.,"max_rms_mm":0.01,"minimum_overlap":0.8,"max_step_translation_mm":1.,"max_step_rotation_rad":0.1,"iterations":20,"tolerance_mm":1e-8},"voxel_mm":0.1,"maximum_voxels":1000,
+            "pairs":[{"id":1,"left_index":0,"right_index":0,"tracking_indices":[0,1,2]},{"id":2,"left_index":1,"right_index":1,"tracking_indices":[0,1,2]}]})).unwrap()).unwrap();
+        let output = temp.path.join("result");
+        let mut doc = document(20);
+        let before = snapshot(&doc);
+        let selection = doc.selection.clone();
+        let cancelled = WorkControl::default();
+        cancelled.cancel();
+        assert!(
+            execute(
+                &mut doc,
+                Operation::ReconstructRecordedSequence {
+                    inputs: inputs.clone(),
+                    settings: settings.clone(),
+                    output: output.clone()
+                },
+                &cancelled
+            )
+            .is_err()
+        );
+        assert_eq!(snapshot(&doc), before);
+        assert_eq!(doc.selection, selection);
+        assert!(!output.exists());
+        let report = execute(
+            &mut doc,
+            Operation::ReconstructRecordedSequence {
+                inputs: inputs.clone(),
+                settings: settings.clone(),
+                output: output.clone(),
+            },
+            &WorkControl::default(),
+        )
+        .unwrap();
+        assert!(report.reset_view && report.project_saved);
+        assert!(report.preview.unwrap().total >= 3);
+        assert!(doc.selection.is_empty());
+        assert_eq!(report.opened_path, Some(output.join("project.orproj")));
+        let saved = load_project(File::open(output.join("project.orproj")).unwrap()).unwrap();
+        assert_eq!(saved.cloud, doc.editor.as_ref().unwrap().cloud);
+        assert!(output.join("frame-0001/left-frame.raptor").exists());
+        let before = snapshot(&doc);
+        assert!(
+            execute(
+                &mut doc,
+                Operation::ReconstructRecordedSequence {
+                    inputs,
+                    settings,
+                    output
+                },
                 &WorkControl::default()
             )
             .is_err()

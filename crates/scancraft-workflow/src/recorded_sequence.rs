@@ -14,7 +14,7 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use std::{
     fs::{self, File},
-    path::Path,
+    path::{Path, PathBuf},
 };
 
 #[derive(Deserialize)]
@@ -67,17 +67,44 @@ fn write_frame(prepared: &Prepared, path: &Path, work: &WorkControl) -> Result<(
     Ok(())
 }
 
-/// Processes 1..1000 explicit pairs with one validated source/index/map set.
-/// Retains only the current reconstruction plus bounded session/fusion state in
-/// memory. Each pair's raw sources and diagnostics are persisted in staging.
-/// Errors/cancellation retain incomplete staging; success publishes atomically
-/// without overwriting. No accepted frame is silently dropped or re-anchored.
+/// Complete staged sequence whose final publication is deferred until callers
+/// have prepared their view/document. Dropping it retains staging for recovery.
+pub struct PreparedSequence {
+    cloud: scancraft_geometry::Cloud,
+    summary: Value,
+    partial: PathBuf,
+    target: PathBuf,
+    processor: RecordingProcessor,
+}
+impl PreparedSequence {
+    pub fn cloud(&self) -> &scancraft_geometry::Cloud {
+        &self.cloud
+    }
+    pub fn staging_directory(&self) -> &Path {
+        &self.partial
+    }
+}
 pub fn run(
     inputs: &Inputs,
     settings: &Path,
     target: &Path,
     work: &WorkControl,
 ) -> Result<Value, Error> {
+    let prepared = prepare(inputs, settings, target, work)?;
+    publish_prepared(&prepared, work)
+}
+/// Processes 1..1000 explicit pairs with one validated source/index/map set.
+/// Retains only the current reconstruction plus bounded session/fusion state in
+/// memory. Each pair's raw sources and diagnostics are persisted in staging.
+/// Errors/cancellation retain incomplete staging. Success returns an unpublished
+/// sequence for view preparation before explicit publish_prepared. No accepted
+/// frame is silently dropped or re-anchored.
+pub fn prepare(
+    inputs: &Inputs,
+    settings: &Path,
+    target: &Path,
+    work: &WorkControl,
+) -> Result<PreparedSequence, Error> {
     if fs::symlink_metadata(target).is_ok() {
         return Err("recorded sequence output already exists".into());
     }
@@ -107,7 +134,7 @@ pub fn run(
     let mut processor = RecordingProcessor::open(inputs, work)?;
     session.start()?;
     let partial = staging(target)?;
-    let result = (|| -> Result<Value, Error> {
+    let result = (|| -> Result<(Value, scancraft_geometry::Cloud), Error> {
         let request_artifact = artifact(&partial, "sequence-request.json", work, |out| {
             std::io::Write::write_all(out, &bytes)?;
             Ok(())
@@ -178,24 +205,52 @@ pub fn run(
         processor.check_sources(work)?;
         File::open(&partial)?.sync_all()?;
         work.check()?;
-        publish(&partial, target)?;
-        Ok(summary)
+        Ok((summary, editor.cloud))
     })();
-    let summary = result.map_err(|e| {
+    let (summary, cloud) = result.map_err(|e| {
         format!(
             "{e}; incomplete recorded sequence retained at {}",
             partial.display()
         )
     })?;
-    let parent = target
+    Ok(PreparedSequence {
+        cloud,
+        summary,
+        partial,
+        target: target.into(),
+        processor,
+    })
+}
+/// Rechecks sources/cancellation and atomically commits a fully prepared sequence.
+/// No fallible view/document construction should follow successful publication.
+pub fn publish_prepared(prepared: &PreparedSequence, work: &WorkControl) -> Result<Value, Error> {
+    let commit = || -> Result<(), Error> {
+        if fs::symlink_metadata(&prepared.target).is_ok() {
+            return Err("recorded sequence output already exists".into());
+        }
+        prepared.processor.check_sources(work)?;
+        work.check()?;
+        publish(&prepared.partial, &prepared.target)?;
+        Ok(())
+    };
+    commit().map_err(|e| {
+        format!(
+            "{e}; recorded sequence staging path: {}",
+            prepared.partial.display()
+        )
+    })?;
+    let parent = prepared
+        .target
         .parent()
         .filter(|p| !p.as_os_str().is_empty())
         .unwrap_or(Path::new("."));
-    File::open(parent)?.sync_all().map_err(|e| {
-        format!(
-            "recorded sequence published at {}, parent sync failed: {e}",
-            target.display()
-        )
-    })?;
-    Ok(summary)
+    File::open(parent)
+        .and_then(|file| file.sync_all())
+        .map_err(|e| {
+            format!(
+                "recorded sequence published at {}, parent sync failed: {e}",
+                prepared.target.display()
+            )
+        })?;
+    Ok(prepared.summary.clone())
 }

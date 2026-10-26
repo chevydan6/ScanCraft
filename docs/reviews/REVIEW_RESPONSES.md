@@ -473,3 +473,42 @@ that review to6128be4 and separately passed the added context assertion test.
 Full535 remains developer evidence; no transfer of review to later bookkeeping.
 GitHub CI pending at recording, App draft-skip is not completed review. Included
 CLI quota still unavailable, no paid retry. Reviewer statuses/authority preserved.
+
+## DEV-SEQUENCE-GUI-001 — native recorded-sequence workflow
+
+Accepted developer mission work: add native background panel and startup operation
+for the shared recorded-stereo sequence pipeline. Unsaved-document replacement
+uses existing submit/save/discard guard. Workflow prepare/publish split lets the
+worker build Editor/Preview BEFORE atomic publication, then commit document/selection
+without fallible view construction. Original CLI run wraps these stages unchanged.
+Publication rechecks sources/cancellation; late pre-publication errors preserve
+staging, and post-publication sync errors explicitly identify committed output.
+
+Sources: app cloud_ui.rs, cloud_jobs.rs, main.rs; workflow recorded_sequence.rs,
+workflow tests/recording_reconstruction.rs; private-display helper. No new algorithm
+copy/dependency or scanner action. Existing architecture and algorithms retained.
+Regressions extend dirty guard, verify GUI worker document/selection persistence
+on cancelled/overwrite errors, exact saved/live geometry equality, startup arity,
+and cancellation/source mutation between preparation/publication. Detailed
+interface/publication contract and memory overlap: docs/RECORDED_STEREO_SEQUENCE.md.
+Final gate/runtime/review/commit evidence follows. Fused project multi-frame lineage
+still external; clocks/exposures/physical accuracy remain unqualified. No finding
+status changed. No paid review authorization; included quota is checked separately.
+
+DEV-SEQUENCE-GUI-001 final source gate:538Rusttests, frozenfmt/strictClippy/release
+PASS /tmp/scancraft-sequence-gui-complete-checks.log; helper Python syntax passes.
+Private-display synthetic startup background operation completed; all29outputfiles
+match CLI byte-for-byte, inputSHA256s unchanged, three frames integrated, no camera
+FDs. Screenshot window-3.png visually inspected, completed panel/result visible.
+Local /tmp/scancraft-sequence-gui-operation and datasetpointer
+/tmp/scancraft-recorded-sequence-gui-dataset.txt. Aggregate evidence in
+evidence/2026-10-26-sequence-gui-equivalence.json. Capture precedes a help-string-only
+addition; numerical/operation/UI behavior unchanged, fullgate rerun afterwards.
+No claim of manual dialog interaction or physical scanner qualification.
+
+Independent Assignment43 inspected stable uncommitted GUI snapshot and passed
+16 focused tests (app2, dirtyguard1, workflow12, nativeCLI1), no actionable defect
+in that scope. This is not a full538rerun or committed-head/service attestation.
+CLI included capacity was0 with nextslot~11:47UTC; no paid request or repeated
+unchanged review. Pending combined review should cover rawPTS+sequence+GUI versus
+b452b09 to avoid duplicate review of unchanged earlier source. Commitrefs follow.
