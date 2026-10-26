@@ -103,15 +103,33 @@ source change or independent closure is claimed at this checkpoint.
   shutdown bound or independent closure. CodeRabbit initially rate-limited the
   request; its later completed review is recorded below.
 
-## SCAN-REV-005 — accepted; shutdown bound remains unproven
+## SCAN-REV-005 — accepted; ordinary-close mitigation, shutdown bound unproven
 
-A stop flag cannot interrupt arbitrary synchronous driver ioctls/restoration.
-Do not detach threads and silently abandon device cleanup. A bounded lifecycle
-likely needs an explicit isolation/supervision design with cleanup evidence.
-No whole-app shutdown-bound claim or physical driver-stall test is made. Source:
-existing App::drop and device lifecycle remain unchanged at this checkpoint.
-Defer invasive isolation work until lifecycle requirements and fault-injection
-coverage are concrete. No independent verification or closure claimed.
+- Implemented a nonblocking ordinary-close handshake: request cancellation,
+  cancel the viewport close while capture owns resources, poll its existing
+  completion controller, then retry closing only after actual termination. A
+  ten-second UI notice is explanatory, NOT a forced timeout or measured bound.
+- Unsaved/busy project checks run explicitly before emitting root Close, including
+  after capture completion; prior discard consent is rechecked. No replacement
+  capture can start while close intent is pending. Keep-open cancels only close
+  intent; capture cancellation remains requested. Cleanup errors keep the window
+  open so the error/partial-file diagnostic stays visible.
+- Source: crates/scancraft-app/src/capture_close.rs and main.rs. The small pure
+  intent controller does not own scanner resources. App::drop still joins its
+  owned capture worker and may block on uninterruptible driver cleanup; threads
+  are not detached and no driver/session restoration duty is abandoned.
+- Validation: six additional hardware-free tests cover ordinary/explicit close,
+  blocked-worker retention, logical prolonged wait/repeated close, keep-open, busy
+  project recheck before root Close, and cleanup-error visibility. Full frozen
+  formatting/strict Clippy/tests/release gate passes 511 Rust tests. Simulated
+  Instant durations are not wall-clock or driver-stall benchmarks.
+- Commit: ordinary-close implementation hash will be recorded after commit.
+- Remaining: no forced teardown bound, process isolation or physical driver-stall
+  qualification. This mitigates normal window-close UI blocking; it does not
+  establish the complete bounded-shutdown requirement or close this finding.
+  Independent reviewer verification remains required. No hardware/calibration/
+  firmware or GitHub protection changes. CodeRabbit review follows when included
+  capacity permits; unavailable/skipped review is not a passing review.
 
 ## SCAN-REV-006 — accepted; qualification remains blocked
 
@@ -166,3 +184,27 @@ on an isolated private display with no camera file descriptors. No scanner acqui
 calibration or firmware write occurred. Hardware absence, SCAN-REV-002 authority
 separation and SCAN-REV-005 shutdown qualification remain limitations. Development
 has not changed or closed any finding in the independent register.
+
+## Reviewer verification received for earlier recovery revision
+
+Read the independent reviewer's Assignment 2 update at exact head a178690. It
+independently ran six capture tests and 50,000 immediate-success outcomes and
+recorded SCAN-REV-004/008 Resolved for that revision. Development acknowledges that
+reviewer-owned decision without changing the register or independently closing
+anything. The new ordinary-close mitigation is later work and is outside that
+verification. SCAN-REV-005 remains an unresolved requirement.
+
+## Ordinary-close review availability and GUI check
+
+The 511-test ordinary-close revision passes the full frozen Rust gate. Its rebuilt
+GUI opened/rendered the legacy three-point project on a private display; no camera
+file descriptors were opened. This is startup/render validation, not a full manual
+closing or hardware driver-stall test. Local artifacts: /tmp/scancraft-capture-close-gui.
+
+An earlier quota snapshot had one slot, but the fresh snapshot was exhausted.
+The shell sequence continued after its preflight assertion failed; CodeRabbit
+returned rate_limit (approximately five-minute wait), not a completion/gate result.
+No paid consent was given. Future quota checks must be separate/checked operations,
+not a fall-through shell assertion. No fresh successful review is claimed for this
+change yet. Prior 505-test source review and reviewer closure are not extended to
+this new ordinary-close code. Preserve draft status pending actual review.

@@ -372,3 +372,13 @@ errors, and restart controls return only after the old thread finishes. A receiv
 result alone does not prove cleanup completed. App shutdown still joins owned
 capture cleanup synchronously; no driver-stall shutdown bound is established.
 Hardware-free regressions exercise panic/disconnection and partial-file retention.
+
+Ordinary window close uses `capture_close.rs`: a pure close-intent controller
+cancels the close event and signals capture cancellation while ownership remains
+with the active worker. The GUI keeps polling. Once the worker exits, a centralized
+request method explicitly rechecks busy/unsaved state before sending root Close;
+egui's root Close can directly shut down rather than deliver another cancellable
+event (egui 0.33.3 viewport.rs, ViewportCommand::Close). Capture errors cancel close
+intent and stay visible. A ten-second explanatory notice is not a shutdown deadline.
+Pending close disables replacement capture. This is a normal-window-path mitigation,
+not process isolation: forced teardown/App::drop can still wait on driver cleanup.

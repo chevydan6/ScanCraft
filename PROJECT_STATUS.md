@@ -1979,3 +1979,10 @@ branch with zero findings and a passed major gate. Draft PR #3 is available for
 independent verification; no reviewer finding was closed by development and no merge
 or protection change was performed. Genuine reconstruction and bounded driver
 shutdown remain unqualified. See developer responses for exact commit scope.
+
+SCAN-REV-005 ordinary-close mitigation: window close requests stop and keeps the UI
+open while capture cleanup remains active. Completion explicitly rechecks unsaved/
+busy project guards; errors keep diagnostics visible. Replacement capture cannot
+start during pending close. Six additional hardware-free tests pass; full frozen
+Rust gate now 511 tests. No measured whole-app shutdown bound or real driver-stall
+qualification is claimed. Reviewer's finding is not closed by development.
