@@ -91,7 +91,7 @@ and PR review state. These are observed settings, not inferred from this file.
 | --- | --- | --- |
 | Required CI | `test`, GitHub Actions app ID 15368 | Keep |
 | Branch up to date | Required (`strict: true`) | Keep |
-| Approving reviews | 1; stale approvals dismissed | 0, retaining PR requirement |
+| Approving reviews | 0 after owner-authorized correction; stale dismissal retained | Keep 0 and PR requirement |
 | Code-owner / last-push approval | Both disabled | Keep |
 | Conversations resolved | Required | Keep |
 | Administrators subject to protections | Yes | Keep |
@@ -126,18 +126,21 @@ request `@coderabbitai review` when necessary and within included quota. A green
 status for a skipped review is not evidence that the head was reviewed. Do not
 enable billing to eliminate this service limitation without owner authorization.
 
-**Configuration change pending owner authorization.** Minimum proposed action:
-PATCH only `required_approving_review_count` from 1 to 0 at
+**Owner-authorized correction applied and verified — 2026-10-26 08:54 UTC.**
+Following the owner's explicit “yes”, PATCH changed only
+`required_approving_review_count` from 1 to 0 at
 `repos/chevydan6/ScanCraft/branches/main/protection/required_pull_request_reviews`.
-Retain the PR requirement and every other protection above. Do not delete the PR
-review protection object or replace the entire branch protection configuration.
-Before implementation, obtain owner authorization explicitly acknowledging that
-shared ADMIN credentials cannot enforce owner-only consent, or establish the
-separate-identity controls below. Do not describe the resulting workflow as
-technically owner-gated while these credentials remain available.
-Re-read REST and GraphQL settings afterward, then inspect the harmless audit PR
-for passing CI and removal of `REVIEW_REQUIRED`, leaving it unmerged. Until that
-change is authorized and verified, the approval deadlock remains unresolved.
+A full before/after REST object comparison was equal after substituting that one
+field. GraphQL independently reports `requiresApprovingReviews: true` with count
+0: the PR requirement remains enabled. CI app binding, strict updates, resolved
+conversations, admin enforcement and force-push/deletion prohibitions remain.
+Repository auto-merge remains false and both ruleset endpoints remain empty.
+
+Post-change PR #2 at `f7f14ae` has both required `test` runs successful,
+`reviewDecision: null` and `mergeStateStatus: CLEAN`. PR #1 also reports CLEAN.
+Both remain OPEN and unmerged. No merge API was invoked. This proves the approval
+deadlock was removed without bypassing CI; it does not prove a technical owner
+consent boundary with shared credentials.
 
 **Owner authority is procedural with the current credentials.** AGENTS.md and the
 PR template prohibit merging without explicit owner approval; the inspected CI
@@ -161,24 +164,24 @@ gate. Tool confirmations alone are procedural, not a GitHub permission boundary.
 
 ### Harmless workflow probe
 
-A separate `dev/protection-audit` branch from the live main contains only this
-document. The original workflow PR and local development branch are preserved.
+A separate `dev/protection-audit` branch from the live main contains only review
+documentation (this audit, the reviewer charter and findings register). The original workflow PR and local development branch are preserved.
 Audit PR #2 (https://github.com/chevydan6/ScanCraft/pull/2) is intentionally left
 open and must not be merged without explicit owner authorization. At tested head
 `b65cd61`, both push and PR `test` jobs completed successfully. GitHub still
 reported `REVIEW_REQUIRED` / `BLOCKED`. CodeRabbit posted a fresh small-repository
 skip message and a successful status; no completed GitHub review is claimed for
-this probe. Post-change behavior cannot be claimed before authorization and
-implementation. This document's later evidence-only edits need their own CI.
+this probe. Post-change verification at `f7f14ae` is recorded above. This document's
+later evidence-only edits need their own CI.
 
 The CLI 0.9.1 review completed against `b65cd61`, exit 2, with
 `complete.status: review_completed`, `outcome: completed`, three findings and
 `gate: {threshold: major, status: blocked, blockingFindings: 1}`. This is a
 blocked review, not a passing gate. Dispositions:
 
-- Major: accepted the underlying owner-consent limitation; strengthened the
-  implementation prerequisite and retained the live one-approval protection
-  pending authorization. The unresolved shared-credential risk remains a blocker
+- Major: accepted and documented the underlying owner-consent limitation before
+  obtaining explicit owner authorization. The authorized correction now removes
+  the deadlock; the unresolved shared-credential risk remains a blocker
   to claiming technical owner-only merge authority. Keeping one approval forever
   is not a solution to the demonstrated self-approval deadlock.
 - Minor, unsupported skills command: rejected for the installed binary.
@@ -189,8 +192,11 @@ blocked review, not a passing gate. Dispositions:
   `review --help` lists `--gate`, explicitly documents exit 2, and this completed
   blocked run demonstrates the completion fields and process exit together.
 
-No passing re-review of these documentation corrections is claimed. No paid
-usage, merge, settings mutation, bypass, force push or main deletion was attempted.
+A fresh quota check reports zero included CLI reviews remaining; no paid usage
+was requested. No passing re-review of these documentation corrections is claimed.
+The single
+settings mutation above was explicitly authorized. No paid usage, merge, bypass,
+force push or main deletion was attempted.
 
 Evidence:
 - PR #1: https://github.com/chevydan6/ScanCraft/pull/1
