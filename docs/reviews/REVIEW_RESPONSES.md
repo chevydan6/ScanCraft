@@ -787,3 +787,78 @@ PR11 GitHub App request6426490393 afterreset remained rate-limited; reply6426492
 summary6426065548 at20:24:35Z says nextfreeOSSreview59minutes (~21:24UTC).
 Do not retry before thatwindow or enablepaidusage. CLI combinedreview remains
 completedPASS; Appreview is separately pending.006 remains unqualified.
+
+## Developer milestone in progress: native live stereo scan pipeline
+
+Related SCAN-REV-006 accepted end-to-end gap: new shared live_stereo Processor
+and runner connect live Frame inputs to existing rectification/matching/depth
+and ScanSession tracking/fusion. CLI scan-live-stereo uses native Capture sources
+for interfaces0/2, explicit declared calibration/settings, and a finite1..1000
+raw frames per-camera cap. Physical entry rejects synthetic records; source
+binding/sync/physical qualification remain false. No factory mapping is guessed.
+
+Raw recording append precedes try_send into channel4; pending association retains
+2frames/side, exactrawPTS+explicit hostwindow selects candidates only. Drops and
+unmatched frames are accounted; full raw CRC/footer replay and uniquePTS check
+precede publication. Queue drops do not discard recording data. No geometry
+produces no fake tracking pose; rejected alignment is not fused and later pairs
+can recover. Tracking uses deterministic evenly-spaced source cloud indices.
+
+Related005: camera owners are always joined on error/unwind, group settings
+restore/readback precedes atomic no-overwrite publication, source/read/close and
+restoration failures are retained. Synchronous kernel calls still lack a bounded
+shutdown guarantee;005 is not claimed resolved. Source trait/runner are in
+workflow for GUI reuse; CLI holds only native adapter and signal ownership.
+No projector, mirror, gain, firmware or physical calibration operation is added.
+Native hardware validation is unavailable while scanner absent; synthetic injected
+sources validate plumbing only. Sources workflow/live_stereo.rs,live_stereo/runner.rs,
+CLI/live_scan.rs+command, workflow tests/live_stereo.rs. Fullgate/review evidence
+follows; no independent finding status changed. Implementation is project-original
+MIT orchestration using existing Rust algorithms, no new dependency/upstream copy.
+
+Live-pipeline validation milestone: final560Rusttests/fmt/strictalltargetClippy/
+releasePASS;16new tests (6engine,10runner). Source-read panics now still attempt
+explicit close; closepanics are diagnostics, cameraowners never detached.
+Outputpreflight now checks parent/existing paths before sourceopen, with an
+explicit open-counter regression (earlier caught-panic assertion was inadequate).
+Wrong-depth test uses existing fixture's180degree right-camera convention and
+correct synthetic intensity transform; actual pipeline rejects it asLost and
+recovers without fusing it. No thresholds weakened to make tests pass.
+
+Release synthetic_live_scan example executes same runner, produces10files/9CRC
+manifestentries/3analyticallyexpectedpoints within1e-7mm numericaltolerance.
+Both generated rawrecordings pass releaseCLI replay--decode; all sourcefixture
+SHA256 unchanged. Runtimeproof is synthetic with injected restorationcallback,
+NOT hardwarequalification. Actual release native-entry command rejects synthetic
+calibration with exit1 beforecreatingtarget or openingdevice. Proofmetadata in
+evidence/2026-10-27-live-stereo-runtime.json; privatefiles under/tmp pointer
+/tmp/scancraft-live-proof-root.txt, notpublished. Independent97 inspected earlier
+snapshot and passed13targetedtests; laterpanic/blank/repeatPTS tests/example/doc
+changes are beyond that snapshot. Sourcecommit andCodeRabbit evidence follow.
+
+Immutable live source484524d20ccc2707cbb62951d1dedfff28bd4642 tree58b61cd1c602ba5855e57601a1a2a41a19ed7395
+committed and pushed; draft PR12 basee1c4fc6. CodeRabbit CLI0.9.1 versus exact
+e1c4fc686f5451c6a0ef9a82ff4eba546fb5dfee completed12files,1minor,0blocking,
+majorPASS,exit0; sourcehead/tree unchanged. Freshquota2/inactivebilling checked,
+no paidflags/consent. Rawreport/blob/log evidence: evidence/2026-10-27-live-stereo-review.json.
+
+CR-LIVE-IDEMPOTENT-RESTORE: confirmation accepted, proposeddefect/change disputed.
+CodeRabbit conditionally warned a second lease.restore after publication could
+perform I/O/fail. Actual SettingsLease::restore (stream_group.rs:95) immediately
+returnsOk when self.restored; all ioctls are belowthatguard. Successful restore
+sets restored=true; bundle requires thatsuccess before publishing. Drop calls
+the same guardedmethod. Thus post-publication outercall performs no deviceI/O
+and cannot turn a successful published scan into an error. Failure paths have
+not published and retain useful besteffort retry/Drop cleanup. No production
+change or extra hardware test is warranted for this deterministic guard; do not
+replace actual implementation evidence with a hypothetical nonidempotent lease.
+Required560test/runtime validation remains scoped as above, not hardwareproof.
+Earlier pending CLI statements superseded; App review stillpending/freequota only.
+
+PR12 GitHub App completed COMMENTED review5659331857 at00114d89d6258146723172e8f0c3eead863faab9.
+One minor documentation comment4382715737 accepted: separate tolerance value
+from words/unit in LIVE_STEREO_SCAN.md. Numeric1e-7mm tolerance unchanged.
+Corrected typography only; no production/test/parameter change. Verified exact
+line diff and git diff --check; no new numerical test or paidreview warranted.
+Existing560test evidence applies to unchanged executable source. Original App
+comment/register untouched; only independent reviewer may close findings.

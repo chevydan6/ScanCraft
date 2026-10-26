@@ -1,4 +1,4 @@
-//! Shared bounded, cancellable offline reconstruction and atomic bundle publication.
+//! Shared bounded, cancellable reconstruction/scanning and atomic bundle publication.
 pub mod frame_document;
 pub mod mesh_document;
 pub mod mesh_history;
@@ -623,3 +623,5 @@ pub mod recording_archive;
 pub mod recording_timing;
 
 pub mod recorded_sequence;
+
+pub mod live_stereo;

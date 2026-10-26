@@ -413,3 +413,13 @@ and retained-artifact fingerprints outside cloud edit history. Geometry-only and
 single-frame project versions retain their old schemas. Source verification remains
 explicit; the loader never follows external references. Root/project manifest cycles
 are avoided by excluding project/root-manifest fingerprints from embedded metadata.
+
+## Incremental live stereo CLI path
+
+The shared `live_stereo` processor/runner now bridge explicit raw Frame sources
+to cached stereo reconstruction and ScanSession tracking/fusion, with raw-first
+recording, bounded processing delivery and grouped cleanup before publication.
+The CLI supplies the native Capture adapter; the workflow has no device or GUI
+dependency and can serve later GUI integration. See [live stereo](docs/LIVE_STEREO_SCAN.md).
+This is a finite candidate-scan path, not hardware/calibration/throughput or
+bounded-driver-shutdown qualification. Existing offline workflows are preserved.

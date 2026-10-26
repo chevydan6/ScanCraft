@@ -2095,3 +2095,14 @@ See docs/SEQUENCE_PROJECT_REFERENCES.md and sequence-references-runtime evidence
 Raw sources/full reports stay external; fingerprints do not qualify original
 recording completeness, semantic replay, binding, synchronization or physical
 accuracy. No hardware/calibration/firmware change or new dependency.
+
+## Native live stereo pipeline implementation
+
+Added finite scan-live-stereo CLI acquisition -> raw recordings -> bounded
+association -> existing reconstruction/tracking/fusion -> project/PLY bundle.
+Synthetic injected sources exercise complete publication and cleanup; physical
+entry rejects synthetic calibration. Configured source binding, equal rawPTS and
+host-window association do not establish calibration/exposure accuracy. Actual
+Raptor operation and live GUI integration remain unverified/unimplemented here;
+no physical calibration, firmware or illumination operation was performed.
+See docs/LIVE_STEREO_SCAN.md and developer review responses for evidence scope.
