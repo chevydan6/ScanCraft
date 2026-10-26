@@ -1036,3 +1036,25 @@ sourceb9f934a passed580tests/fmt/strictClippy/release,exit0. Log
 evidence. Cachefailure wasreproducedonlywithshared olderworktreeartifacts;
 source unchanged by cleanup. NewactualCodeRabbitreview of correctedsource
 remains pendingcapacity; App478completion isnot transferred to9a/b9.
+
+## SCAN-REV-015 — independent resolution acknowledged
+
+Reviewer136 independently verified9a071e2 andresolved015;137–139 verified exact
+sourcepatch propagation to16/15/14. No developer registerchange. Existing005
+remainsOpen; no approval/merge inferred.
+
+## Developer milestone — measured paired map concurrency
+
+Original Rust orchestration only: StereoImageMaps largeoutputusesone scoped
+helper, callerprocessesothermap; same UndistortMap sampler/numericalmath unchanged.
+Smallmaps/CPUhint<2/queryfailure/spawnerror staysequential. Explicit sequential
+API retained. Bothownerscomplete before pairedresult; helperjoinedonright-error.
+Three focusedtests +full583Rusttests/fmt/strictClippy/releasePASS. Benchmark
+initially hadClippy let-and-return; fixedwithoutweakeninglint. Final actualAPI
+20rounds+warmups, alternatingorder, eachfloatbit/maskmatchedreference. Fullsize
+median89.930msseqvs43.795adaptive on16reportedCPUs; smallcaseunchanged. SingleCPU
+childfallbackpasses; RLIMIT_NPROC0childthread-denialverifiedfallbackwith16CPUs.
+No parent/userprocesspolicychanged. No hardware, accuracy or liveFPS claim.
+Evidence docs/benchmarks/paired-remap-2026-10-27.json, PAIRED_REMAP_CONCURRENCY.md;
+code image/stereo.rs +benchmarkexample. No dependency/license/versionchange.
+Automatedreviewpendingincludedcapacity; notindependentlyapproved ormerged.

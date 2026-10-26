@@ -126,3 +126,13 @@ Evidence docs/benchmarks/undistort-baseline-2026-10-27.json records source/examp
 hashes and original output. This is a repeated component baseline, not a speedup,
 paired-camera measurement, full-pipeline FPS or hardware accuracy/latency gate.
 No optimized implementation is selected from this result alone.
+
+## Measured paired image preparation
+
+Large stereo maps now use one scoped helper when at least two CPUs are reported;
+small/one-CPU/resource-limited cases retain sequential processing. Sampling math
+is unchanged. On this workstation, the production API’s synthetic1920×1200pair
+median changed from89.930to43.795ms with bit-identical outputs/masks.583-test gate
+passes; single-CPU and thread-denied child fallbacks passed. This is not full
+scan throughput, accuracy or RSS qualification. See docs/PAIRED_REMAP_CONCURRENCY.md
+and docs/benchmarks/paired-remap-2026-10-27.json. Automated review remains pending.

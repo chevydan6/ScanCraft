@@ -463,3 +463,13 @@ are counted separately; disconnect errors are retained.579-test gate passes,
 including3new injected-read policy tests. This cannot preempt synchronous ioctls
 or establish a shutdown deadline;005 staysOpen. See docs/COOPERATIVE_CAPTURE_STOP.md.
 Actual scanner timing/driver-stall qualification remains unavailable.
+
+## Measured paired image preparation
+
+Large stereo maps now use one scoped helper when at least two CPUs are reported;
+small/one-CPU/resource-limited cases retain sequential processing. Sampling math
+is unchanged. On this workstation, the production API’s synthetic1920×1200pair
+median changed from89.930to43.795ms with bit-identical outputs/masks.583-test gate
+passes; single-CPU and thread-denied child fallbacks passed. This is not full
+scan throughput, accuracy or RSS qualification. See docs/PAIRED_REMAP_CONCURRENCY.md
+and docs/benchmarks/paired-remap-2026-10-27.json. Automated review remains pending.
