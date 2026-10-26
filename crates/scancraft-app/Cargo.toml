@@ -7,6 +7,8 @@ repository.workspace = true
 description = "ScanCraft native Linux scanning and geometry workflows"
 
 [dependencies]
+serde_json.workspace = true
+scancraft-acquisition = { path = "../scancraft-acquisition" }
 scancraft-core.workspace = true
 scancraft-device.workspace = true
 scancraft-recording.workspace = true
@@ -19,8 +21,6 @@ scancraft-workflow = { path = "../scancraft-workflow" }
 
 scancraft-image = { path = "../scancraft-image" }
 
-[dev-dependencies]
-serde_json.workspace = true
 
 [[bin]]
 name = "scancraft"

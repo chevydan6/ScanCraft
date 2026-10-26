@@ -2103,6 +2103,17 @@ association -> existing reconstruction/tracking/fusion -> project/PLY bundle.
 Synthetic injected sources exercise complete publication and cleanup; physical
 entry rejects synthetic calibration. Configured source binding, equal rawPTS and
 host-window association do not establish calibration/exposure accuracy. Actual
-Raptor operation and live GUI integration remain unverified/unimplemented here;
+Raptor operation remains unverified. Live GUI integration is now implemented
+and synthetically validated as described in the following milestone;
 no physical calibration, firmware or illumination operation was performed.
 See docs/LIVE_STEREO_SCAN.md and developer review responses for evidence scope.
+
+## Experimental live GUI milestone
+
+The live GUI now shares native device/session ownership through the local
+`scancraft-acquisition` crate. It offers reconstruction pause/resume, graceful
+stop/save, abort, bounded camera/cloud previews and guarded editor handover.
+See [behavior and validation](docs/LIVE_STEREO_GUI.md). The frozen Rust gate
+passed 571 tests; actual release-GUI interaction and busy-window close passed
+with synthetic sources only. Real calibrated reconstruction, source binding,
+synchronization, accuracy and bounded kernel shutdown remain unqualified.

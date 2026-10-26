@@ -1,7 +1,10 @@
 //! Reusable finite acquisition/recording/reconstruction runner. Hardware adapters
 //! own their own device semantics; the caller restores group settings after all
 //! sources close and before publication. Driver shutdown is not time bounded.
-use super::{Association, Processor, Sample, Side};
+use super::{
+    Association, Pair, Processor, Sample, Side,
+    control::{self, Control, Phase},
+};
 use crate::output::{publish, staging};
 use scancraft_core::{Frame, StreamProfile, uvc_pts};
 use scancraft_geometry::{Editor, formats::save_project, work::WorkControl, write_ply};
@@ -50,6 +53,7 @@ fn combine<T>(result: Result<T>, cleanup: Result<()>) -> Result<T> {
         (Err(e), Err(c)) => Err(format!("{e}; cleanup: {c}")),
     }
 }
+#[cfg(test)]
 fn record<S: Source>(
     profile: StreamProfile,
     path: &Path,
@@ -59,6 +63,26 @@ fn record<S: Source>(
     side: Side,
     open: impl FnOnce() -> Result<S>,
 ) -> Result<SourceReport> {
+    record_controlled(
+        profile,
+        path,
+        maximum,
+        (stop, &Control::default()),
+        sender,
+        side,
+        open,
+    )
+}
+fn record_controlled<S: Source>(
+    profile: StreamProfile,
+    path: &Path,
+    maximum: usize,
+    signals: (&AtomicBool, &Control),
+    sender: SyncSender<Event>,
+    side: Side,
+    open: impl FnOnce() -> Result<S>,
+) -> Result<SourceReport> {
+    let (stop, control) = signals;
     let mut source = open()?;
     let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
         let file = OpenOptions::new()
@@ -77,7 +101,7 @@ fn record<S: Source>(
             statistics: Value::Null,
         };
         for index in 0..maximum {
-            if stop.load(Ordering::Relaxed) {
+            if stop.load(Ordering::Relaxed) || control.stop_requested() {
                 break;
             }
             let Some(frame) = source.next()? else {
@@ -85,14 +109,19 @@ fn record<S: Source>(
             };
             writer.push(&frame).map_err(|e| e.to_string())?;
             report.recorded_frames += 1;
+            control.recorded[side.index()].fetch_add(1, Ordering::Relaxed);
             match sender.try_send(Event {
                 side,
                 sample: Sample { index, frame },
             }) {
                 Ok(()) => report.queued_frames += 1,
-                Err(TrySendError::Full(_)) => report.processing_queue_drops += 1,
+                Err(TrySendError::Full(_)) => {
+                    report.processing_queue_drops += 1;
+                    control.queue_drops[side.index()].fetch_add(1, Ordering::Relaxed);
+                }
                 Err(TrySendError::Disconnected(_)) => {
                     report.processing_queue_drops += 1;
+                    control.queue_drops[side.index()].fetch_add(1, Ordering::Relaxed);
                     break;
                 }
             }
@@ -188,12 +217,37 @@ impl Drop for Workers {
         }
     }
 }
+fn sync_requested_pause(processor: &mut Processor, control: &Control) -> Result<()> {
+    let paused = control.pause_requested();
+    processor.set_paused(paused)?;
+    control.set_phase(if control.stop_requested() {
+        Phase::Stopping
+    } else if paused {
+        Phase::Paused
+    } else {
+        Phase::Running
+    });
+    Ok(())
+}
+fn process_pair(
+    processor: &mut Processor,
+    pair: &Pair,
+    work: &WorkControl,
+    control: &Control,
+) -> Result<Value> {
+    // Receive/association may have waited since the loop's previous command sample.
+    // A command arriving during this pair's processing applies at the next boundary.
+    sync_requested_pause(processor, control)?;
+    processor.process(pair, work).map_err(|e| e.to_string())
+}
 fn execute<S: Source + 'static>(
     processor: &mut Processor,
     partial: &Path,
     work: &WorkControl,
     open: impl Fn(Side, StreamProfile) -> Result<S> + Send + Sync + 'static,
+    control: &Arc<Control>,
 ) -> Result<Value> {
+    work.check()?;
     let mut association = Association::new(
         processor.profiles().clone(),
         processor.config().maximum_frames_per_camera,
@@ -211,6 +265,7 @@ fn execute<S: Source + 'static>(
         let sender = sender.clone();
         let stop = stop.clone();
         let open = open.clone();
+        let control = control.clone();
         let profile = processor.profiles()[side.index()].clone();
         let path = partial.join(if side.index() == 0 {
             "left.raptor"
@@ -222,9 +277,15 @@ fn execute<S: Source + 'static>(
             .name(format!("scancraft-live-{}", side.index()))
             .spawn(move || {
                 let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                    record(profile.clone(), &path, maximum, &stop, sender, side, || {
-                        open(side, profile)
-                    })
+                    record_controlled(
+                        profile.clone(),
+                        &path,
+                        maximum,
+                        (&stop, &control),
+                        sender,
+                        side,
+                        || open(side, profile),
+                    )
                 }))
                 .unwrap_or_else(|_| {
                     Err("capture worker panicked; recording may require recovery".into())
@@ -242,6 +303,7 @@ fn execute<S: Source + 'static>(
         }
     }
     drop(sender);
+    let mut latest_pair = None;
     let processing = (|| {
         if let Some(error) = spawn_error {
             return Err(error);
@@ -249,15 +311,33 @@ fn execute<S: Source + 'static>(
         let mut reports = Vec::new();
         loop {
             work.check()?;
-
+            sync_requested_pause(processor, control)?;
+            if control.stop_requested() {
+                stop.store(true, Ordering::Relaxed);
+            }
             match receiver.recv_timeout(Duration::from_millis(20)) {
                 Ok(event) => {
                     if let Some(pair) = association.push(event.side, event.sample)? {
-                        let result = processor.process(&pair, work).map_err(|e| e.to_string())?;
+                        let result = process_pair(processor, &pair, work, control)?;
+                        if control.wants_preview() {
+                            let (total, cloud) =
+                                processor.preview_cloud(work).map_err(|e| e.to_string())?;
+                            control.offer(control::snapshot(
+                                &pair,
+                                processor.profiles(),
+                                reports.len(),
+                                cloud,
+                                total,
+                                result["tracking"].clone(),
+                            ));
+                        }
                         let name = format!("pair-{:04}.json", reports.len());
                         json_file(&partial.join(&name), &result)?;
                         reports.push(json!({"pair_id":result["pair_id"],"left_index":result["left_index"],"right_index":result["right_index"],
                         "raw_pts":result["raw_pts"],"tracking":result["tracking"],"report":name}));
+                        if control.preview_enabled() {
+                            latest_pair = Some(pair);
+                        }
                         eprintln!(
                             "{}",
                             json!({"event":"live_stereo_pair","pairs":reports.len(),"tracking":result["tracking"]})
@@ -291,6 +371,7 @@ fn execute<S: Source + 'static>(
             Err(errors.join("; "))
         },
     )?;
+    control.set_phase(Phase::Finishing);
     for source in &sources {
         verify_recording(
             &partial.join(if source.interface == 0 {
@@ -301,6 +382,21 @@ fn execute<S: Source + 'static>(
             source.recorded_frames,
             work,
         )?;
+    }
+    if let Some(pair) = latest_pair {
+        let (total, cloud) = processor.preview_cloud(work).map_err(|e| e.to_string())?;
+        let tracking = reports
+            .last()
+            .map(|r| r["tracking"].clone())
+            .unwrap_or(Value::Null);
+        control.offer(control::snapshot(
+            &pair,
+            processor.profiles(),
+            reports.len() - 1,
+            cloud,
+            total,
+            tracking,
+        ));
     }
     let cloud = processor.finish(work).map_err(|e| e.to_string())?;
     if !cloud.points.is_empty() {
@@ -316,7 +412,7 @@ fn execute<S: Source + 'static>(
         json!({"schema_version":1,"kind":if matches!(processor.source(),scancraft_depth::MatchSource::SyntheticFixture){"synthetic_live_stereo_pipeline"}else{"native_live_stereo_candidate_scan"},"declared_source":processor.source(),"session_id":processor.config().session_id,
         "source_binding_verified":false,"synchronization_verified":false,"physical_accuracy_qualified":false,
         "pair_policy":"unique equal raw PTS and explicit host window; not verified exposures",
-        "pending_capacity_per_side":2,"processing_channel_capacity":4,"association":association.counts,"unmatched_pending":association.remaining(),
+        "graceful_stop_requested":control.stop_requested(),"pause_requested_at_end":control.pause_requested(),"skipped_display_previews":control.skipped_previews(),"pending_capacity_per_side":2,"processing_channel_capacity":4,"association":association.counts,"unmatched_pending":association.remaining(),
         "sources":sources,"pairs":reports,"fused_points":cloud.points.len(),"geometry_exported":!cloud.points.is_empty(),
         "project_scope":"derived editable cloud only; retain raw recordings, calibration, request and pair reports"}),
     )
@@ -332,6 +428,41 @@ pub fn bundle<S: Source + 'static>(
     open: impl Fn(Side, StreamProfile) -> Result<S> + Send + Sync + 'static,
     restore: impl FnOnce() -> Result<()>,
 ) -> Result<Value> {
+    bundle_controlled(
+        processor,
+        target,
+        work,
+        open,
+        restore,
+        &Arc::new(Control::default()),
+    )
+}
+/// Single-session pause/resume, graceful stop and bounded display snapshots.
+pub fn bundle_controlled<S: Source + 'static>(
+    processor: &mut Processor,
+    target: &Path,
+    work: &WorkControl,
+    open: impl Fn(Side, StreamProfile) -> Result<S> + Send + Sync + 'static,
+    restore: impl FnOnce() -> Result<()>,
+    control: &Arc<Control>,
+) -> Result<Value> {
+    control.begin()?;
+    let outcome = bundle_inner(processor, target, work, open, restore, control);
+    control.set_phase(if outcome.is_ok() {
+        Phase::Complete
+    } else {
+        Phase::Failed
+    });
+    outcome
+}
+fn bundle_inner<S: Source + 'static>(
+    processor: &mut Processor,
+    target: &Path,
+    work: &WorkControl,
+    open: impl Fn(Side, StreamProfile) -> Result<S> + Send + Sync + 'static,
+    restore: impl FnOnce() -> Result<()>,
+    control: &Arc<Control>,
+) -> Result<Value> {
     require_new_target(target)?;
     let partial = staging(target).map_err(|e| e.to_string())?;
     let mut published = false;
@@ -342,7 +473,7 @@ pub fn bundle<S: Source + 'static>(
                     out.write_all(bytes).map_err(|e| e.to_string())
                 })?;
             }
-            execute(processor, &partial, work, open)
+            execute(processor, &partial, work, open, control)
         }))
         .unwrap_or_else(|_| Err("live reconstruction coordinator panicked".into()));
         // Restore and verify group settings before publishing a successful scan.
@@ -654,6 +785,54 @@ mod tests {
         );
         assert_eq!(opened.load(Ordering::Relaxed), 0);
         assert_eq!(fs::read(target.join("project.orproj")).unwrap(), project);
+    }
+    #[test]
+    fn pair_boundary_observes_pause_and_resume_after_the_initial_state_sample() {
+        let temp = Temp::new();
+        let work = WorkControl::default();
+        let mut processor = processor(&temp.0, &work);
+        let control = Arc::new(Control::default());
+        sync_requested_pause(&mut processor, &control).unwrap();
+        assert_eq!(control.phase(), Phase::Running);
+        let (sender, receiver) = mpsc::sync_channel(0);
+        let requested = control.clone();
+        let producer = thread::spawn(move || {
+            requested.set_paused(true).unwrap();
+            sender
+                .send(Pair {
+                    left: Sample {
+                        index: 0,
+                        frame: frame(0, Side::Left),
+                    },
+                    right: Sample {
+                        index: 0,
+                        frame: frame(0, Side::Right),
+                    },
+                    pts: 1000,
+                })
+                .unwrap();
+        });
+        let pair = receiver.recv().unwrap();
+        producer.join().unwrap();
+        let paused = process_pair(&mut processor, &pair, &work, &control).unwrap();
+        assert_eq!(paused["tracking"]["state"], "paused");
+        assert_eq!(paused["tracking"]["integrated"], false);
+        assert_eq!(control.phase(), Phase::Paused);
+        control.set_paused(false).unwrap();
+        let pair = Pair {
+            left: Sample {
+                index: 1,
+                frame: frame(1, Side::Left),
+            },
+            right: Sample {
+                index: 1,
+                frame: frame(1, Side::Right),
+            },
+            pts: 34333,
+        };
+        let resumed = process_pair(&mut processor, &pair, &work, &control).unwrap();
+        assert_eq!(resumed["tracking"]["integrated"], true);
+        assert_eq!(control.phase(), Phase::Running);
     }
     fn processor_for_retry(root: &Path, work: &WorkControl) -> Processor {
         processor(root, work)

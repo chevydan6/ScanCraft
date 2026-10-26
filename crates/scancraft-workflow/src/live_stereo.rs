@@ -1,5 +1,6 @@
 //! Bounded candidate association and incremental reconstruction, independent of USB/UI.
 //! Equal raw PTS plus a host-window policy never attests simultaneous exposures.
+pub mod control;
 pub mod runner;
 use crate::{Error, Request, bounded};
 use scancraft_calibration::storage;
@@ -330,6 +331,14 @@ impl Processor {
         {
             return Err("pair does not satisfy explicit raw-PTS/host-window policy".into());
         }
+        if self.session.state() == scancraft_geometry::session::SessionState::Paused {
+            let result = json!({"pair_id":self.attempts,"left_index":pair.left.index,"right_index":pair.right.index,
+                "raw_pts":pair.pts,"left_host_us":hosts[0],"right_host_us":hosts[1],"synchronization_verified":false,"physical_accuracy_qualified":false,
+                "reconstruction":null,"tracking":{"integrated":false,"state":"paused","reason":"reconstruction paused; raw recording continues"}});
+            self.attempts += 1;
+            self.last_pair = Some((indices, hosts, pair.pts));
+            return Ok(result);
+        }
         let report = Self::reconstruct(
             &self.stereo,
             &self.request,
@@ -359,6 +368,18 @@ impl Processor {
         self.attempts += 1;
         self.last_pair = Some((indices, hosts, pair.pts));
         Ok(result)
+    }
+    pub fn set_paused(&mut self, paused: bool) -> Result<(), String> {
+        use scancraft_geometry::session::SessionState;
+        match (paused, self.session.state()) {
+            (true, SessionState::Running) => self.session.pause(),
+            (false, SessionState::Paused) => self.session.resume(),
+            (_, SessionState::Stopped) => Err("scan is already stopped".into()),
+            _ => Ok(()),
+        }
+    }
+    pub fn preview_cloud(&self, work: &WorkControl) -> Result<(usize, Cloud), String> {
+        self.session.preview_cloud(50_000, work)
     }
     pub fn finish(&mut self, work: &WorkControl) -> Result<Cloud, Error> {
         self.session.stop()?;

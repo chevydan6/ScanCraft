@@ -129,8 +129,11 @@ open**. Do not claim a full shutdown time bound from hardware-free worker tests.
   explicit input-mode guards, cached stereo processing and session updates.
 - `crates/scancraft-workflow/src/live_stereo/runner.rs`: source trait, worker ownership,
   raw recording, bounded channel, replay, cleanup and publication.
-- `crates/scancraft-cli/src/live_scan.rs`: native source adapter, signal ownership,
-  session lock and settings lease. Future GUI integration can call the same runner.
+- `crates/scancraft-acquisition/src/lib.rs`: native source adapter, session lock
+  and settings lease shared by GUI and CLI.
+- `crates/scancraft-cli/src/live_scan.rs`: CLI signal ownership and cancellation.
+- `crates/scancraft-app/src/live_ui.rs`: live controls and bounded previews.
+  See [live GUI behavior](LIVE_STEREO_GUI.md).
 
 New tests cover PTS wrap/order/corruption, pending/host-window accounting,
 physical-mode fixture rejection, repeated-pair protection, cancellation,

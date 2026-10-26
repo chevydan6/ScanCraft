@@ -423,3 +423,13 @@ The CLI supplies the native Capture adapter; the workflow has no device or GUI
 dependency and can serve later GUI integration. See [live stereo](docs/LIVE_STEREO_SCAN.md).
 This is a finite candidate-scan path, not hardware/calibration/throughput or
 bounded-driver-shutdown qualification. Existing offline workflows are preserved.
+
+## Experimental live GUI milestone
+
+The live GUI now shares native device/session ownership through the local
+`scancraft-acquisition` crate. It offers reconstruction pause/resume, graceful
+stop/save, abort, bounded camera/cloud previews and guarded editor handover.
+See [behavior and validation](docs/LIVE_STEREO_GUI.md). The frozen Rust gate
+passed 571 tests; actual release-GUI interaction and busy-window close passed
+with synthetic sources only. Real calibrated reconstruction, source binding,
+synchronization, accuracy and bounded kernel shutdown remain unqualified.

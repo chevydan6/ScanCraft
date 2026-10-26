@@ -164,6 +164,17 @@ impl CloudUi {
         self.statistical_after_open = Some((neighbors, sigma));
         self.open_startup(path);
     }
+    /// Completed live scans use the same unsaved-document guard as other imports.
+    pub fn request_open(&mut self, path: PathBuf) -> bool {
+        if self.is_busy() {
+            return false;
+        }
+        self.submit(Operation::Load {
+            path,
+            unit_scale: None,
+        });
+        true
+    }
     pub fn open_startup(&mut self, path: PathBuf) {
         self.path = path.to_string_lossy().into_owned();
         self.message = "Opening geometry file or verifying scan folder…".into();
@@ -1032,11 +1043,11 @@ impl CloudUi {
         }
     }
 }
-struct View {
-    yaw: f32,
-    pitch: f32,
-    zoom: f32,
-    pan: egui::Vec2,
+pub(crate) struct View {
+    pub(crate) yaw: f32,
+    pub(crate) pitch: f32,
+    pub(crate) zoom: f32,
+    pub(crate) pan: egui::Vec2,
 }
 fn projection(preview: &Preview, rect: egui::Rect, view: &View) -> Option<OrthographicProjection> {
     OrthographicProjection::new(
@@ -1053,7 +1064,7 @@ fn projection(preview: &Preview, rect: egui::Rect, view: &View) -> Option<Orthog
     )
     .ok()
 }
-fn draw(
+pub(crate) fn draw(
     preview: &Preview,
     p: &egui::Painter,
     rect: egui::Rect,
@@ -1560,6 +1571,28 @@ mod tests {
             circles
                 .iter()
                 .all(|c| c.center.x.is_finite() && c.center.y.is_finite())
+        );
+    }
+    #[test]
+    fn completed_live_scan_import_keeps_unsaved_document_until_explicit_decision() {
+        let mut ui = CloudUi::default();
+        let cloud = scancraft_geometry::Cloud {
+            points: vec![scancraft_geometry::Point {
+                position: [1., 2., 3.],
+                color: None,
+                normal: None,
+            }],
+        };
+        ui.document.as_mut().unwrap().editor =
+            Some(scancraft_geometry::Editor::new(cloud.clone(), 32).unwrap());
+        ui.dirty = true;
+        assert!(ui.request_open("completed-scan/project.orproj".into()));
+        assert!(matches!(ui.pending_import, Some(Operation::Load { .. })));
+        assert!(ui.job.is_none());
+        assert!(ui.dirty);
+        assert_eq!(
+            ui.document.as_ref().unwrap().editor.as_ref().unwrap().cloud,
+            cloud
         );
     }
 }

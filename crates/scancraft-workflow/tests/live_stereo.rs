@@ -224,3 +224,32 @@ fn wrong_depth_loses_tracking_without_fusion_then_recovers() {
     let recovered = p.process(&pair(2, &original), &work).unwrap();
     assert_eq!(recovered["tracking"]["integrated"], true);
 }
+
+#[test]
+fn pause_retains_raw_pair_lineage_without_geometry_then_resumes_in_same_world() {
+    let t = Temp::new();
+    let work = WorkControl::default();
+    let mut p = processor(&t, &work);
+    let pixels = images();
+    p.set_paused(true).unwrap();
+    let paused = p.process(&pair(0, &pixels), &work).unwrap();
+    assert_eq!(paused["tracking"]["state"], "paused");
+    assert!(paused["reconstruction"].is_null());
+    assert_eq!(p.preview_cloud(&work).unwrap().0, 0);
+    p.set_paused(false).unwrap();
+    assert_eq!(
+        p.process(&pair(1, &pixels), &work).unwrap()["tracking"]["integrated"],
+        true
+    );
+    let before = p.preview_cloud(&work).unwrap();
+    p.set_paused(true).unwrap();
+    p.process(&pair(2, &pixels), &work).unwrap();
+    assert_eq!(p.preview_cloud(&work).unwrap(), before);
+    p.set_paused(false).unwrap();
+    assert_eq!(
+        p.process(&pair(3, &pixels), &work).unwrap()["tracking"]["integrated"],
+        true
+    );
+    p.finish(&work).unwrap();
+    assert!(p.set_paused(false).is_err());
+}

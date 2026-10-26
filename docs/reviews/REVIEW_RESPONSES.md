@@ -862,3 +862,72 @@ Corrected typography only; no production/test/parameter change. Verified exact
 line diff and git diff --check; no new numerical test or paidreview warranted.
 Existing560test evidence applies to unchanged executable source. Original App
 comment/register untouched; only independent reviewer may close findings.
+
+## Developer milestone — live GUI controls (uncommitted)
+
+Independent013 resolution acknowledged; typography-only commit84b89f4 remains
+unchanged. Independent012 rejection acknowledged; idempotent restore semantics
+retained in the shared acquisition adapter. No reviewer status edited.
+
+Developer implementation adds one-slot previews, pause/resume, graceful stop
+versus abort, shared native acquisition ownership and guarded completed-project
+handover. Source: app/live_ui.rs, workflow/live_stereo/control.rs and runner.rs,
+geometry/fusion.rs and session.rs, new acquisition crate; CLI retains signals.
+571-test gate passed before final documentation; final gate is running.
+Actual release GUI on private authenticated X display passed synthetic pause/
+resume/stop-save/editor-open interactions. Report46pairs,16paused,46rawframes
+per side,6fusedpoints,zeroprocessingdrops,gracefulStoptrue; no camera/USBfds.
+Evidence: evidence/2026-10-27-live-gui-runtime.json and LIVE_STEREO_GUI.md.
+This is developer evidence on uncommitted source, not independent closure,
+physical qualification or benchmark.005 remains unbounded-driver limitation;
+006 physical binding/accuracy remains unproven. Exact source commit/review pending.
+
+## CodeRabbit live GUI source review — accepted minor corrections
+
+Source5aa93c35ce911f83bde8b5103e5be049e2101cc1 versus84b89f4 completed
+23files,2minor,0blocking,major gatePASS,exit0.
+CR-LIVE-FINAL-PREVIEW accepted: tick previously drained before polling completion,
+so a final offer between those operations could be abandoned when job cleared.
+Poll/join now precedes mailbox drain; an unfinished worker retains the job for
+future ticks, while a finished worker can make no later offer. Source live_ui.rs.
+This developer-observed race was independently also identified by CodeRabbit.
+CR-LIVE-STATUS-CONTRADICTION accepted: PROJECT_STATUS preceding paragraph now
+states GUI exists with synthetic validation; hardware remains unverified.
+No reviewer-owned finding status changed. Existing final-snapshot runner and
+worker lifecycle regressions apply; full gate after corrections follows.
+
+Correction506c01c1c69378d6e31339944969213213f43e3e passed the full571-test,
+fmt/strictClippy/release gate. Incremental CodeRabbit review versus5aa93c3
+completed4files,0findings,majorPASS,exit0. Source tree4fc3b4b unchanged.
+Freeincluded1/billinginactive checked beforehand; no paidconsent. Sanitized
+metadata added to live-gui-review.json; rawreports remain local. PR13 ready:
+https://github.com/chevydan6/ScanCraft/pull/13 base dev/live-stereo-scan.
+No auto-merge or ownerapproval inferred. App/current-headCI checked separately.
+
+## SCAN-REV-014 — accepted remaining completion-counter correction
+
+Assignment110 is accepted. Correction506c01c fixed mailbox loss but still read
+recorded/drop/skipped counters before completion polling. live_ui.rs now polls
+and joins before reading every final display value and draining the mailbox.
+A synchronized GUI-consumer regression releases the real one-pair synthetic
+runner only after tick reaches its poll boundary, waits for worker completion,
+and checks recorded1/1, final preview/thumbnails, completed project and no job.
+The old ordering failed deterministically with counters0/0 instead of1/1:
+/tmp/scancraft-live-counter-red.log, exit101. No scanner opened. The fixture
+helper accepts a private frame limit so this regression uses one existing
+analytic pair; ordinary diagnostic startup remains100frames. Production native
+acquisition is unchanged. Full corrected gate/results/commit follow. Only the
+independent reviewer may verify/close014; original findings remain untouched.
+
+Corrected complete frozen gate passed572Rusttests, formatting, strictalltarget
+Clippy and releasebuild, exit0 (/tmp/scancraft-live-counter-final-gate.log).
+New regression checks actual displayed cloud count as well as counters; no
+threshold or lifecycle guard weakened. Source/docs fullcontext secret scanPASS.
+
+SCAN-REV-014 correction committed/pushed as
+beb962816ca817cd9b12f1ae13a04954fe1a1adb tree2882e56d4ae8e6c6a00eee176e4ffd8147de1de6.
+CodeRabbit CLI incremental review versus9e8a21e completed3files,0findings,
+majorPASS,exit0. Head/tree unchanged. Fresh includedcapacity1/billinginactive
+confirmed before execution; no paidflags/consent. Numerical/GUI gate572tests
+and regression red/green log hashes recorded in live-gui-review.json.
+This provides requested developer evidence, not independent closure of014.

@@ -5,14 +5,14 @@ use std::{
     thread::{self, JoinHandle},
 };
 
-type Outcome = Result<String, String>;
-pub(crate) struct Worker {
-    result: Receiver<Outcome>,
-    pending: Option<Outcome>,
+type Outcome<T> = Result<T, String>;
+pub(crate) struct Worker<T = String> {
+    result: Receiver<Outcome<T>>,
+    pending: Option<Outcome<T>>,
     thread: Option<JoinHandle<()>>,
 }
-impl Worker {
-    pub(crate) fn spawn(run: impl FnOnce() -> Outcome + Send + 'static) -> io::Result<Self> {
+impl<T: Send + 'static> Worker<T> {
+    pub(crate) fn spawn(run: impl FnOnce() -> Outcome<T> + Send + 'static) -> io::Result<Self> {
         let (sender, result) = mpsc::channel();
         let thread = thread::Builder::new()
             .name("scancraft-capture".into())
@@ -28,7 +28,7 @@ impl Worker {
     /// Never joins a live thread. A result can precede final thread cleanup.
     /// Disconnection alone does not permit a replacement capture while cleanup
     /// is still running. Panics override any previously sent success message.
-    pub(crate) fn poll(&mut self) -> Option<Outcome> {
+    pub(crate) fn poll(&mut self) -> Option<Outcome<T>> {
         self.receive_result();
         self.finish_if_ready()
     }
@@ -41,7 +41,7 @@ impl Worker {
             Err(_) => {}
         }
     }
-    fn finish_if_ready(&mut self) -> Option<Outcome> {
+    fn finish_if_ready(&mut self) -> Option<Outcome<T>> {
         if !self.thread.as_ref()?.is_finished() {
             return None;
         }
@@ -73,7 +73,7 @@ mod tests {
     fn repeated_immediate_success_keeps_the_actual_completion() {
         let deadline = std::time::Instant::now() + Duration::from_secs(10);
         for _ in 0..256 {
-            let mut worker = Worker::spawn(|| Ok("success".into())).unwrap();
+            let mut worker = Worker::<String>::spawn(|| Ok("success".into())).unwrap();
             let outcome = loop {
                 if let Some(result) = worker.poll() {
                     break result;
@@ -87,7 +87,7 @@ mod tests {
     #[test]
     fn late_result_between_empty_receive_and_thread_finish_is_retained() {
         let (release, wait) = mpsc::channel();
-        let mut worker = Worker::spawn(move || {
+        let mut worker = Worker::<String>::spawn(move || {
             wait.recv().unwrap();
             Ok("late completion".into())
         })
@@ -114,7 +114,7 @@ mod tests {
             let _ = wait.recv();
         });
         started.recv_timeout(Duration::from_secs(5)).unwrap();
-        let mut worker = Worker {
+        let mut worker: Worker<String> = Worker {
             result,
             pending: None,
             thread: Some(thread),
@@ -137,7 +137,7 @@ mod tests {
     fn clean_exit_without_result_reports_disconnection() {
         let (sender, result) = mpsc::channel();
         let thread = thread::spawn(move || drop(sender));
-        let mut worker = Worker {
+        let mut worker: Worker<String> = Worker {
             result,
             pending: None,
             thread: Some(thread),
