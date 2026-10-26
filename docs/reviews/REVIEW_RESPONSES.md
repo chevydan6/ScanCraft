@@ -320,3 +320,32 @@ evidence in evidence/2026-10-26-subpixel-rotated-review.json. Included capacity 
 no paid consent. Both GitHub test jobs passed at earlier f33dcfd; later heads require
 their own CI. No fresh review is inferred from a skipped GitHub App badge.
 Evidence-only follow-up does not alter reviewed tests or production source.
+
+## DEV-TIMING-001 — recorded stereo timing investigation
+
+Developer-identified mission gap, not an independent finding. Accepted: provide a
+read-only native CLI report of nearest host-value candidates, ambiguity, reuse,
+raw PTS equality and explicit unknown clock/synchronization/physical qualification.
+No automatic reconstruction pairing or changes to hardware/calibration. Complete
+recording validation and playback source guards precede final reports.
+
+Sources: recording/src/indexed.rs cached FrameTiming, workflow recording_playback.rs
+and recording_timing.rs, CLI main.rs and tests/recording_timing.rs. Method independently
+implemented standard binary search, no upstream source import/dependency. Details
+and memory cost: docs/RECORDING_TIMING.md. The index cache adds per-frame memory to
+all indexed playback; no measured memory/performance advantage is claimed.
+
+Tests: exhaustive independent-distance comparison, ties/reuse/endpoints/u64 limits,
+capped samples, cancellation, corrupt suffix/profile rejection, source byte
+preservation, cached reads after seeking and actual native CLI JSON. Full gate and
+commit/review outcomes follow. Initial compilation exposed missing profile accessor
+and CLI path/return errors; these were corrected before passing verification.
+Clock domains, physical exposure pairing and real geometry remain unqualified;
+no existing reviewer finding is closed or changed.
+
+DEV-TIMING-001 full gate: 524 Rust tests, fmt, strict Clippy and release PASS; log
+/tmp/scancraft-recording-timing-final-checks.log. Read-only genuine replay at a
+caller-selected 1000us limit found 6 unique nearest candidates / 94 outside among
+100 left and 100 right frames, no ties/reuse, 3 equal raw PTS candidates. Both
+source SHA256s unchanged. Aggregate-only evidence is published; no private images
+or timestamps. These observations do not establish shared clocks or exposures.

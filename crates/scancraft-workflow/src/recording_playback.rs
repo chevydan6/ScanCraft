@@ -69,6 +69,16 @@ impl Playback {
         }
         Ok(playback)
     }
+    /// Profile validated while indexing; does not attest the physical sensor.
+    pub fn profile(&self) -> &scancraft_core::StreamProfile {
+        self.recording.profile()
+    }
+    /// Cached observations from full indexing; source guards remain mandatory.
+    pub fn timings(
+        &self,
+    ) -> impl ExactSizeIterator<Item = scancraft_recording::indexed::FrameTiming> + '_ {
+        self.recording.timings()
+    }
     pub fn len(&self) -> usize {
         self.recording.len()
     }

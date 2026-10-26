@@ -609,3 +609,5 @@ pub mod source_verification;
 pub mod project_bundle;
 
 pub mod recording_archive;
+
+pub mod recording_timing;

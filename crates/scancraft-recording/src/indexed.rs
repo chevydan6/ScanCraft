@@ -9,7 +9,16 @@ use scancraft_core::{Frame, StreamProfile};
 use std::io::{self, Read, Seek, SeekFrom};
 
 pub const MAX_INDEX_FRAMES: usize = 1_000_000;
+/// Timestamp values observed during complete recording validation. Clock domains,
+/// tick frequency and exposure timing are not established by these numbers.
+#[derive(Debug, Clone, Copy, serde::Serialize, PartialEq, Eq)]
+pub struct FrameTiming {
+    pub sequence: u32,
+    pub host_timestamp_us: u64,
+    pub sensor_pts: u32,
+}
 struct Entry {
+    timing: FrameTiming,
     offset: u64,
     end: u64,
     previous: Option<(u32, u64, u32)>,
@@ -48,6 +57,13 @@ impl<R: Read + Seek> IndexedRecording<R> {
                 return Err(invalid("recording exceeds index frame budget"));
             }
             entries.push(Entry {
+                timing: FrameTiming {
+                    sequence: frame.sequence,
+                    host_timestamp_us: frame.host_timestamp_us,
+                    sensor_pts: scancraft_core::uvc_pts(&frame.metadata)
+                        .map_err(invalid)?
+                        .ok_or_else(|| invalid("missing sensor PTS"))?,
+                },
                 offset,
                 end: reader.input.stream_position()?,
                 previous,
@@ -76,6 +92,11 @@ impl<R: Read + Seek> IndexedRecording<R> {
     }
     pub fn is_empty(&self) -> bool {
         self.entries.is_empty()
+    }
+    /// Historical timing observations from indexing, without rereading payloads.
+    /// Caller must guard source identity; this is not a fresh integrity check.
+    pub fn timings(&self) -> impl ExactSizeIterator<Item = FrameTiming> + '_ {
+        self.entries.iter().map(|entry| entry.timing)
     }
     /// Read one frame, without rescanning other image payloads. CRC/order and
     /// fingerprint checks remain mandatory. A failed seek/read can be retried;
@@ -174,12 +195,28 @@ mod tests {
         assert_eq!(index.len(), 10);
         assert_eq!(index.version(), 2);
         assert!(index.context().is_some());
+        let timings: Vec<_> = index.timings().collect();
+        assert_eq!(
+            timings[5],
+            FrameTiming {
+                sequence: 5,
+                host_timestamp_us: 1100,
+                sensor_pts: 200
+            }
+        );
         for i in [9, 0, 5, 9] {
             let before = bytes.get();
             let frame = index.read_frame(i).unwrap();
             assert_eq!(frame.data, vec![i as u8; 4]);
             assert_eq!(bytes.get() - before, 52);
         }
+        let before = bytes.get();
+        assert_eq!(index.timings().collect::<Vec<_>>(), timings);
+        assert_eq!(
+            bytes.get(),
+            before,
+            "timing inspection must not reread payloads"
+        );
         assert!(index.read_frame(10).is_err());
         assert_eq!(index.read_frame(0).unwrap().sequence, 0);
     }
