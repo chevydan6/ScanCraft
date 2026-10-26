@@ -716,3 +716,22 @@ read0included, billinginactive, next availability approximately18minutes at chec
 No paid review attempted; initial72c5 review must not be transferred to this delta.
 Publish as draft for source inspection while required final automated review is
 pending. No approval/merge or finding closure claimed.
+
+## Developer investigation: SDK byte mirror numerical reference
+
+Related SCAN-REV-006: continue narrowing unverified runtime orientation without
+physical calibration. New optional tools/probe_sdk_byte_mirror.py and
+sdk_byte_mirror_probe.c execute only an exact-hash93-byte private arithmetic
+leaf on synthetic pixels under device-inaccessible/network-isolated bubblewrap.
+No DLL loaded or vendor bytes published; no production code/settings changed.
+The leaf matches horizontal row reflection over2,304,075pixels/sixshapes in each
+direction, with exact involution. docs/MIRROR_STATUS.md records static accessor/
+dispatch addresses and limits. Evidence under reviews/evidence records DLL/leaf/
+helper hashes. This is actual vendor-leaf execution, not proof of Raptor runtime
+orientation, active mirror flag, calibration convention, geometry or accuracy.
+Helpers are project-original diagnostics, not translations of vendor code.
+Three hardware-free negative-input tests PASS, Python syntax PASS, and frozen
+fullgate544Rust tests/fmt/strictClippy/release PASS. Automated review pending
+included quota; no paid usage. Independent Assignment73 separately confirms
+PR10 diagnostic source and30device tests, with005 still Open.
+Independent register remains untouched and006 is not claimed resolved.
