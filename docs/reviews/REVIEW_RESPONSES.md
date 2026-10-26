@@ -312,3 +312,11 @@ Production source is unchanged. Sources: depth/tests/subpixel.rs; docs updated.
 Focused test and full frozen gate pass: 519 Rust tests, fmt, strict Clippy/release;
 log /tmp/scancraft-subpixel-rotated-checks.log. Synthetic rotations are not real
 Raptor mode/calibration or physical accuracy qualification. Commit/review follows.
+
+Rotated regression committed at `264960d5dc719c4e3fc42fa84649221abb58bf4e`.
+CodeRabbit completed the four-file incremental review against f33dcfd, zero
+findings, passed major gate and exit 0. Head/tree unchanged before/after; operator
+evidence in evidence/2026-10-26-subpixel-rotated-review.json. Included capacity only,
+no paid consent. Both GitHub test jobs passed at earlier f33dcfd; later heads require
+their own CI. No fresh review is inferred from a skipped GitHub App badge.
+Evidence-only follow-up does not alter reviewed tests or production source.
