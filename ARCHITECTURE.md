@@ -382,3 +382,12 @@ event (egui 0.33.3 viewport.rs, ViewportCommand::Close). Capture errors cancel c
 intent and stay visible. A ten-second explanatory notice is not a shutdown deadline.
 Pending close disables replacement capture. This is a normal-window-path mitigation,
 not process isolation: forced teardown/App::drop can still wait on driver cleanup.
+
+Optional stereo refinement: matching/subpixel.rs fits supported ZNCC neighbors
+only after integer confidence/reverse checks. MatchConfig defaults to None, keeping
+legacy settings/results. PixelMatch exposes the fractional right coordinate;
+pipeline.rs maps it through rectification before original-camera triangulation.
+Requested unavailable/inconsistent fits are rejected with explicit reasons.
+Four additional patch reads per pair are included in the bounded work budget.
+See docs/SUBPIXEL_STEREO.md for provenance, units, compatibility and synthetic-only
+validation. Hardware timing and physical qualification flags remain unverified.

@@ -1,0 +1,31 @@
+{
+  "recorded_utc": "2026-10-26T10:51:57.372709+00:00",
+  "head": "264960d5dc719c4e3fc42fa84649221abb58bf4e",
+  "tree": "0831365a0fefaa435e16298cd7ef27710118cef1",
+  "base": "f33dcfd6990c72e0420aaa38160e3ff997573cf7",
+  "completion": {
+    "type": "complete",
+    "status": "review_completed",
+    "findings": 0,
+    "gate": {
+      "threshold": "major",
+      "status": "passed",
+      "blockingFindings": 0
+    },
+    "reviewedFiles": [
+      "PROJECT_STATUS.md",
+      "crates/scancraft-depth/tests/subpixel.rs",
+      "docs/SUBPIXEL_STEREO.md",
+      "docs/reviews/REVIEW_RESPONSES.md"
+    ],
+    "outcome": "completed",
+    "message": "Review completed"
+  },
+  "report_sha256": "789570b745f71ea4779f28afeefd72d448a288ea4489e0bb91a7dff3dec45e6d",
+  "validation_log_sha256": "7ebd3ee593a0fbe7e1c2b35b3b5e3c22dd4e19eff2f28d99b629f8acc6624e4c",
+  "exit_code": 0,
+  "validation": "519 Rust tests; frozen fmt, strict Clippy and release build pass",
+  "scope": "Synthetic rotated source camera regression and documentation; no production change, no hardware qualification",
+  "billing": "Separately checked included capacity 1, billing inactive; no paid flag or consent",
+  "binding": "Operator-observed unchanged head/tree, not CodeRabbit server attestation"
+}

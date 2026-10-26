@@ -35,7 +35,9 @@ to establish uniqueness. Search independently in reverse, require the same
 thresholds and require its winner to be the original seed. Repeated texture,
 occlusions and weak matches can still defeat local matching; passing these
 checks is a heuristic confidence result, not proof of a correct physical match.
-No subpixel refinement, dense cost aggregation or learned inference is present.
+The default remains integer-only. Optional bounded subpixel refinement is described
+in [SUBPIXEL_STEREO.md](SUBPIXEL_STEREO.md). No dense cost aggregation or learned
+inference is present.
 
 The reference concepts are documented by OpenCV's official
 [stereo correspondence API](https://docs.opencv.org/5.0.0-alpha/dd/d86/group__stereo.html)

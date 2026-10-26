@@ -262,3 +262,61 @@ application source and does not receive an invented fresh-review claim. The prio
 independent 004/008 resolutions remain the reviewer's decisions. 005 remains only
 mitigated on normal close, not qualified for bounded forced teardown. No merge,
 protection change, paid consent, firmware or physical calibration operation.
+
+## DEV-RECON-001 — optional fractional stereo observations
+
+Developer-identified reconstruction work, not an independent finding. Accepted:
+add opt-in three-sample quadratic ZNCC peak refinement while retaining integer
+winners, coarse confidence checks, old JSON defaults and provenance flags. The
+processor uses fractional observations for original-camera triangulation. New
+curvature, support, bidirectional consistency and work-budget checks reject
+unsupported fits. Independently derived Rust mathematics; no copied upstream code.
+
+Sources: depth/src/matching.rs, matching/subpixel.rs, pipeline.rs; depth tests and
+reference example; CLI tests/subpixel_reconstruction.rs; tools/check_subpixel_reference.py.
+Detailed method, compatibility and reproduction: docs/SUBPIXEL_STEREO.md.
+
+Validation: frozen formatting, strict all-target Clippy, workspace tests (518 pass)
+and release build; final log /tmp/scancraft-subpixel-final-checks.log. Independent
+NumPy polynomial-fit oracle agrees within 7.4e-15 on four synthetic signed shifts;
+legacy integer OpenCV comparison passes. Native CLI integration saves/reopens
+synthetic geometry, preserves inputs and rejects overwrite. These are synthetic
+results, not physical scanner accuracy. No firmware/calibration operation.
+
+Implementation commit and automated review evidence follow after immutable commit.
+Limitations: local parabolic bias, horizontal-only refinement, additional patch
+work and inline optional diagnostics memory (not benchmarked), no live qualification.
+SCAN-REV-006 remains unqualified; no reviewer status is changed.
+
+DEV-RECON-001 implementation: `61e4c931476f055fb1d008d49a46675c9d4bc523`,
+stacked PR https://github.com/chevydan6/ScanCraft/pull/4. CodeRabbit CLI completed
+13 files against cc1322b with zero findings and passed major gate, exit 0. Head/tree
+observed unchanged before/after; operator evidence and report hash are in
+evidence/2026-10-26-subpixel-validation.json, not a server head attestation.
+Included capacity only, inactive billing, no paid consent. GUI startup/render of
+legacy three-point project passed on private display, visually inspected, no camera
+FDs. This is not manual end-to-end GUI or hardware scanning qualification.
+GitHub CI was pending at recording; skipped draft CodeRabbit badge is not review.
+Later evidence-only bookkeeping does not change the reviewed implementation.
+Independent reviewer retains verification/closure authority.
+
+### DEV-RECON-001 rotated-source regression follow-up
+
+Accepted developer-identified evidence gap: prior fractional pipeline regression
+used aligned cameras. Added a test with both sensors rotated clockwise and with
+the right sensor inverted. Expected source pixel coordinates are computed directly
+from image rotation formulas, independently of rectification mapping helpers. The
+test requires fractional source y in the vertical case, preserves unqualified
+flags, and checks all three triangulated points against analytic plane depth.
+Production source is unchanged. Sources: depth/tests/subpixel.rs; docs updated.
+Focused test and full frozen gate pass: 519 Rust tests, fmt, strict Clippy/release;
+log /tmp/scancraft-subpixel-rotated-checks.log. Synthetic rotations are not real
+Raptor mode/calibration or physical accuracy qualification. Commit/review follows.
+
+Rotated regression committed at `264960d5dc719c4e3fc42fa84649221abb58bf4e`.
+CodeRabbit completed the four-file incremental review against f33dcfd, zero
+findings, passed major gate and exit 0. Head/tree unchanged before/after; operator
+evidence in evidence/2026-10-26-subpixel-rotated-review.json. Included capacity only,
+no paid consent. Both GitHub test jobs passed at earlier f33dcfd; later heads require
+their own CI. No fresh review is inferred from a skipped GitHub App badge.
+Evidence-only follow-up does not alter reviewed tests or production source.
