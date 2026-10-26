@@ -364,6 +364,18 @@ impl CloudUi {
         let mut verify_directory = None;
         let mut verify_recordings = None;
         let mut export_bundle = None;
+        if let Some(sequence) = self.document.as_ref().and_then(|d|d.editor.as_ref()).and_then(|e|e.sequence()) {
+            egui::CollapsingHeader::new("Recorded sequence sources").default_open(self.source_open).show(ui, |ui| {
+                ui.label(format!("Session {} · {} selected pairs · {} retained artifact references",sequence.session_id,sequence.frames.len(),sequence.artifacts.len()));
+                ui.label(format!("Declared source: {} · Calibration: {}", sequence.source_kind, sequence.calibration_record_id));
+                ui.small(format!("Recorded folder: {}", sequence.directory_display));
+                ui.label("References survive edits and reopening. External bytes are not checked on load; binding, synchronization and physical accuracy remain unqualified.");
+                ui.add_enabled_ui(self.job.is_none(), |ui| {
+                    ui.horizontal(|ui| {ui.label("Folder to verify:");ui.text_edit_singleline(&mut self.source_directory);if ui.button("Use recorded location").clicked(){self.source_directory=sequence.directory_display.clone();}});
+                    if ui.button("Verify sequence sources on disk").clicked(){verify_directory=Some(PathBuf::from(&self.source_directory));}
+                });
+            });
+        }
         if let Some(origin) = self
             .document
             .as_ref()

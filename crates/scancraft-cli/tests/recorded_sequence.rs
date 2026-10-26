@@ -108,6 +108,21 @@ fn native_recorded_sequence_saves_fused_project_and_preserves_input_bytes() {
         summary["points"].as_u64().unwrap()
     );
     assert!(target.join("frame-0002/right-frame.raptor").is_file());
+    assert!(editor.sequence().is_some());
+    let verified = Command::new(env!("CARGO_BIN_EXE_scancraft-cli"))
+        .arg("verify-source-bundle")
+        .arg(target.join("project.orproj"))
+        .arg(&target)
+        .output()
+        .unwrap();
+    assert!(
+        verified.status.success(),
+        "{}",
+        String::from_utf8_lossy(&verified.stderr)
+    );
+    let checked: serde_json::Value = serde_json::from_slice(&verified.stdout).unwrap();
+    assert_eq!(checked["passed"], true);
+    assert_eq!(checked["artifacts"].as_array().unwrap().len(), 27);
     assert!(!run().status.success());
     assert_eq!(fs::read(target.join("project.orproj")).unwrap(), project);
     for (name, original) in names.iter().zip(originals) {

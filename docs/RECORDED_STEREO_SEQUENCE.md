@@ -157,3 +157,10 @@ publication with late cancellation/source mutation. A private-display helper can
 exercise the full synthetic startup operation with `--reconstruct-recorded-sequence`
 on a dataset directory containing calibration.rapcal, left/right.raptor, request.json
 and sequence.json. It never controls the user's desktop or opens camera hardware.
+
+Subsequent project-format milestone: ORPROJ07 now retains initial multi-frame
+references across editing and save/reopen, with explicit chosen-folder verification.
+Raw sources and complete reports remain external; no automatic verification or
+physical qualification is inferred. See [SEQUENCE_PROJECT_REFERENCES.md](SEQUENCE_PROJECT_REFERENCES.md)
+for current persistence, compatibility and fingerprint scope. Earlier geometry-only
+project limitations above describe the initial implementation checkpoint.

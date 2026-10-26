@@ -550,3 +550,47 @@ Four premerge checks passed and one warning remains; no all-checks-pass claim.
 Current implementation remains1bed149;3129761 and later evidence-only bookkeeping
 do not change app code. Full538gate and GUI/CLI29file equivalence remain recorded
 with their actual scopes. Independent reviewer retains all finding/closure authority.
+
+## DEV-SEQUENCE-REF-001 — durable initial sequence references
+
+Accepted developer mission gap: fused project previously lost multi-frame metadata
+on standalone save. Added bounded typed sequence references in Editor/ORPROJ07,
+kept outside geometry history, retained in the producer's saved/live GUI editor.
+Old02..06save/load behavior remains when sequence metadata absent; strictv7 headers
+and safe complete artifact sets prevent downgrade/silent loss. No filesystem I/O
+on project load. Raw files/reports remain external; initial references do not claim
+current per-point correspondence or qualified physical data.
+
+Sources: geometry sequence_references.rs/lib.rs/formats.rs; workflow recorded_sequence.rs
+and source_verification.rs; app source panel/verification/editor creation; CLI/GUI
+and workflow regressions. Existing serde/CRC implementation reused, no imported
+algorithm or dependency. Artifact fingerprints captured at writing; project/root
+manifest excluded from embedded references to avoid checksum cycles. Explicit
+verify-source-bundle now handles sequence folders, rejects symlink parents and
+checks nested directory/file stamps. It verifies bytes, not semantic replay or
+cryptographic/historical/device authenticity. Details: SEQUENCE_PROJECT_REFERENCES.md.
+
+Tests cover metadata and CRC-valid format rejection, old/no-source round trips,
+trim/undo/redo/save/reopen, moved-folder verification, changed source bytes and
+symlink-parent refusal, plus native CLI and live/saved GUI reference equality.
+Initial shared verifier refactor shadowed artifact count in progress reporting;
+compile caught it and total count now captured before loop. Final full gate, runtime
+and automated review outcomes follow. Reviewer register remains untouched; all
+physical/merge/protection/paid constraints preserved.
+
+DEV-SEQUENCE-REF-001 final full gate541Rusttests/fmt/strictClippy/release PASS:
+/tmp/scancraft-sequence-references-final-source-checks.log. Synthetic release proof
+createsv7, preserves exact references through native filtering/save, moves sources
+and verifies27artifacts in CLI and GUI; inputSHA256s unchanged. GUI screenshot
+/tmp/scancraft-sequence-ref-verify-gui/window-2.png visually inspected. All27non-
+location-dependent files match GUI/CLI; normalized projects and root-manifest
+project fingerprint differences behave as documented. Aggregate evidence:
+evidence/2026-10-26-sequence-references-runtime.json. Runtime preceded only added
+parent-loop cancellation checks/deduplicated stat calls; final541gate covers those.
+No live physical, whole-original-recording, semantic replay or authentication claim.
+
+Independent Assignment55 inspected stable uncommitted snapshot, passed30targeted
+tests including8legacy origin tests, newformat/history/verification tests and
+nativeCLI/GUI; no actionable defect in that scope. It is not committed-head/bot
+attestation or full541rerun. No finding status changed. Fresh included review
+capacity/billing will be checked before one incremental review; no paid consent.

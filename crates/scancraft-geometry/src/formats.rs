@@ -195,7 +195,9 @@ pub fn save_project(editor: &Editor, mut out: impl Write) -> io::Result<()> {
         editor: &'a Editor,
     }
     let view = View {
-        version: if editor.recordings().is_some() {
+        version: if editor.sequence().is_some() {
+            7
+        } else if editor.recordings().is_some() {
             6
         } else if editor.origin().is_some() {
             5
@@ -222,8 +224,10 @@ pub fn save_project(editor: &Editor, mut out: impl Write) -> io::Result<()> {
         b"ORPROJ04"
     } else if view.version == 5 {
         b"ORPROJ05"
-    } else {
+    } else if view.version == 6 {
         b"ORPROJ06"
+    } else {
+        b"ORPROJ07"
     })?;
     out.write_all(&(count.length as u32).to_le_bytes())?;
     out.write_all(&count.hash.finalize().to_le_bytes())?;
@@ -280,7 +284,7 @@ pub fn load_project(input: impl Read) -> io::Result<Editor> {
         || bytes.len() > 64 * 1024 * 1024 + 16
         || !matches!(
             &bytes[..8],
-            b"ORPROJ02" | b"ORPROJ03" | b"ORPROJ04" | b"ORPROJ05" | b"ORPROJ06"
+            b"ORPROJ02" | b"ORPROJ03" | b"ORPROJ04" | b"ORPROJ05" | b"ORPROJ06" | b"ORPROJ07"
         )
     {
         return Err(invalid("unsupported or oversized project file"));
@@ -296,16 +300,22 @@ pub fn load_project(input: impl Read) -> io::Result<Editor> {
         b"ORPROJ03" => 3,
         b"ORPROJ04" => 4,
         b"ORPROJ05" => 5,
-        _ => 6,
+        b"ORPROJ06" => 6,
+        _ => 7,
     };
     if p.version != version
         || p.units != "millimeters"
         || (version == 2 && !p.editor.measurements().is_empty())
         || (version < 4 && p.editor.has_measurement_history())
         || (version < 5 && p.editor.origin().is_some())
-        || (version >= 5 && p.editor.origin().is_none())
+        || ((5..=6).contains(&version) && p.editor.origin().is_none())
         || (version < 6 && p.editor.recordings().is_some())
         || (version == 6 && p.editor.recordings().is_none())
+        || (version < 7 && p.editor.sequence().is_some())
+        || (version == 7
+            && (p.editor.sequence().is_none()
+                || p.editor.origin().is_some()
+                || p.editor.recordings().is_some()))
     {
         return Err(invalid("unsupported project schema or units"));
     }

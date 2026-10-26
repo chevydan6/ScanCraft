@@ -406,3 +406,10 @@ Sequence `prepare` returns a staged bundle/cloud; the worker builds Editor/Previ
 before `publish_prepared` rechecks sources/cancellation and atomically publishes.
 Only then is the live document replaced. Existing dirty-document and busy guards
 apply. CLI run composes the same phases; no live acquisition is introduced.
+
+Recorded sequence publication now builds a reference-bearing Editor shared by saved
+and live GUI state. ORPROJ07 persists bounded initial sequence selections/decisions
+and retained-artifact fingerprints outside cloud edit history. Geometry-only and
+single-frame project versions retain their old schemas. Source verification remains
+explicit; the loader never follows external references. Root/project manifest cycles
+are avoided by excluding project/root-manifest fingerprints from embedded metadata.
