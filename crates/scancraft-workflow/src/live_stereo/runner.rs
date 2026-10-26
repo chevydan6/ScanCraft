@@ -2,7 +2,7 @@
 //! own their own device semantics; the caller restores group settings after all
 //! sources close and before publication. Driver shutdown is not time bounded.
 use super::{
-    Association, Processor, Sample, Side,
+    Association, Pair, Processor, Sample, Side,
     control::{self, Control, Phase},
 };
 use crate::output::{publish, staging};
@@ -217,6 +217,29 @@ impl Drop for Workers {
         }
     }
 }
+fn sync_requested_pause(processor: &mut Processor, control: &Control) -> Result<()> {
+    let paused = control.pause_requested();
+    processor.set_paused(paused)?;
+    control.set_phase(if control.stop_requested() {
+        Phase::Stopping
+    } else if paused {
+        Phase::Paused
+    } else {
+        Phase::Running
+    });
+    Ok(())
+}
+fn process_pair(
+    processor: &mut Processor,
+    pair: &Pair,
+    work: &WorkControl,
+    control: &Control,
+) -> Result<Value> {
+    // Receive/association may have waited since the loop's previous command sample.
+    // A command arriving during this pair's processing applies at the next boundary.
+    sync_requested_pause(processor, control)?;
+    processor.process(pair, work).map_err(|e| e.to_string())
+}
 fn execute<S: Source + 'static>(
     processor: &mut Processor,
     partial: &Path,
@@ -288,22 +311,14 @@ fn execute<S: Source + 'static>(
         let mut reports = Vec::new();
         loop {
             work.check()?;
-            let paused = control.pause_requested();
-            processor.set_paused(paused)?;
+            sync_requested_pause(processor, control)?;
             if control.stop_requested() {
                 stop.store(true, Ordering::Relaxed);
-                control.set_phase(Phase::Stopping);
-            } else {
-                control.set_phase(if paused {
-                    Phase::Paused
-                } else {
-                    Phase::Running
-                });
             }
             match receiver.recv_timeout(Duration::from_millis(20)) {
                 Ok(event) => {
                     if let Some(pair) = association.push(event.side, event.sample)? {
-                        let result = processor.process(&pair, work).map_err(|e| e.to_string())?;
+                        let result = process_pair(processor, &pair, work, control)?;
                         if control.wants_preview() {
                             let (total, cloud) =
                                 processor.preview_cloud(work).map_err(|e| e.to_string())?;
@@ -906,6 +921,54 @@ mod tests {
                 .unwrap()
                 .passed
         );
+    }
+    #[test]
+    fn pair_boundary_observes_pause_and_resume_after_the_initial_state_sample() {
+        let temp = Temp::new();
+        let work = WorkControl::default();
+        let mut processor = processor(&temp.0, &work);
+        let control = Arc::new(Control::default());
+        sync_requested_pause(&mut processor, &control).unwrap();
+        assert_eq!(control.phase(), Phase::Running);
+        let (sender, receiver) = mpsc::sync_channel(0);
+        let requested = control.clone();
+        let producer = thread::spawn(move || {
+            requested.set_paused(true).unwrap();
+            sender
+                .send(Pair {
+                    left: Sample {
+                        index: 0,
+                        frame: frame(0, Side::Left),
+                    },
+                    right: Sample {
+                        index: 0,
+                        frame: frame(0, Side::Right),
+                    },
+                    pts: 1000,
+                })
+                .unwrap();
+        });
+        let pair = receiver.recv().unwrap();
+        producer.join().unwrap();
+        let paused = process_pair(&mut processor, &pair, &work, &control).unwrap();
+        assert_eq!(paused["tracking"]["state"], "paused");
+        assert_eq!(paused["tracking"]["integrated"], false);
+        assert_eq!(control.phase(), Phase::Paused);
+        control.set_paused(false).unwrap();
+        let pair = Pair {
+            left: Sample {
+                index: 1,
+                frame: frame(1, Side::Left),
+            },
+            right: Sample {
+                index: 1,
+                frame: frame(1, Side::Right),
+            },
+            pts: 34333,
+        };
+        let resumed = process_pair(&mut processor, &pair, &work, &control).unwrap();
+        assert_eq!(resumed["tracking"]["integrated"], true);
+        assert_eq!(control.phase(), Phase::Running);
     }
     fn processor_for_retry(root: &Path, work: &WorkControl) -> Processor {
         processor(root, work)
