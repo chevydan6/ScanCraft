@@ -81,11 +81,16 @@ fail instead of being downloaded. Rustup/toolchain setup is a separate online st
 
 ## Repository controls
 
-Main protection requires the `test` CI check, an up-to-date branch, one approval,
+Main protection requires the `test` CI check, an up-to-date branch, the PR requirement,
 conversation resolution, and applies to administrators. Force pushes and deletion
 are disabled. GitHub reviews are distinct from the owner's explicit merge approval.
-A sole author cannot approve their own PR; another eligible reviewer is needed for
-the GitHub approval requirement. Never bypass that requirement automatically.
+The owner authorized reducing the approving-review count to zero after the
+independent reviewer demonstrated a single-maintainer deadlock. The PR requirement,
+CI, conversations and administrator enforcement remain. Explicit owner consent is
+still required before merge. Shared owner ADMIN credentials mean this consent is
+procedural, not a technical permission boundary; genuine separation needs a distinct
+developer identity with fork-only write access and owner authority outside this
+runtime. Do not claim the present runtime is technically unable to merge.
 
 CodeRabbit automatic approvals are disabled. No GitHub Actions API-key review job,
 paid usage flag, recurring polling daemon, code autofix task or auto-merge bot is

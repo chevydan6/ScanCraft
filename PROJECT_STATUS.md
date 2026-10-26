@@ -1955,3 +1955,12 @@ recovery; CLI/GUI output artifacts match. Bias and an initial failed unsupported
 test expectation are retained in evidence. See docs/POINT_TO_PLANE_ICP.md and
 huber-plane-* evidence. No genuine geometry, global alignment, live scanning,
 transport or physical accuracy gate is advanced. Calibration remains deferred.
+
+
+Development checkpoint 2026-10-26: exact coincident-point k-neighbor pruning added
+with brute-force/order and structural work-bound regression tests. All 499 Rust
+tests and six NumPy statistical-filter comparisons pass. The 4000-coincident-point
+CLI workload median improved from 534.388 ms to 39.297 ms (three runs each); this
+is not general scanner or million-point qualification. See docs/benchmarks/COINCIDENT_NEIGHBORS.md
+and developer-owned docs/reviews/REVIEW_RESPONSES.md. Independent shared findings
+were absent and were not created by development. Hardware discovery remains empty.

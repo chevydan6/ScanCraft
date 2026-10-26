@@ -23,3 +23,18 @@ No proprietary binaries, firmware, private scans, calibration dumps, credentials
 personal data in commits, PRs or review uploads. Preserve third-party notices and
 old project/recording compatibility. Record source provenance for imported methods.
 Passing synthetic tests does not establish real hardware accuracy or live scanning.
+
+## Independent reviewer communication
+
+Before every meaningful task, read docs/reviews/REVIEW_FINDINGS.md if it exists.
+That file belongs exclusively to the independent reviewer: development must never
+create, edit, delete, rename, reset, stage, or otherwise modify it, including via
+scripts or Git operations. Its absence is not permission to create it. Preserve
+its current bytes across development actions. Only the reviewer may change finding
+severity/status/conclusions or independently verify and close findings.
+
+Development maintains docs/reviews/REVIEW_RESPONSES.md with finding identifiers,
+accepted/disputed decisions, technical reasons, source changes, commits, tests and
+limitations. Developer-identified issues must be labeled separately, never invented
+as independent findings. Synchronize at meaningful commits; do not wait after trivial
+edits. Owner approval and existing protected-main requirements remain mandatory.

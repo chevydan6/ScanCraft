@@ -1,0 +1,83 @@
+{
+  "workload": "Synthetic coincident ASCII PLY; CLI filter-statistical k=4 sigma=1; includes process startup, input parsing, indexing, filtering, project validation, serialization and filesystem sync; not isolated kNN throughput.",
+  "platform": "Linux-7.2.11-6900hs-lto-x86_64-with-glibc2.43",
+  "before_commit": "ba5ec7ca187fe9da6aa94e0dbc706e96c3ee15ae",
+  "after_source_sha256": "d01420e1f50c71f46cbcfe891c99b31576dc80efc362597de2fb092b7d704f85",
+  "after_cli_sha256": "14fb9fc8d9174bb31cc3bef7688825aba1c9a2a19c4c72df81fda9c874210b6c",
+  "before": [
+    {
+      "points": 500,
+      "seconds": [
+        0.015706957012298517,
+        0.015309333000914194,
+        0.011500665001221932
+      ],
+      "median_seconds": 0.015309333000914194
+    },
+    {
+      "points": 1000,
+      "seconds": [
+        0.042102489998796955,
+        0.039790872993762605,
+        0.04447385801177006
+      ],
+      "median_seconds": 0.042102489998796955
+    },
+    {
+      "points": 2000,
+      "seconds": [
+        0.14556990101118572,
+        0.11974186199950054,
+        0.14360612699238118
+      ],
+      "median_seconds": 0.14360612699238118
+    },
+    {
+      "points": 4000,
+      "seconds": [
+        0.5343880720029119,
+        0.546100984007353,
+        0.5226507249899441
+      ],
+      "median_seconds": 0.5343880720029119
+    }
+  ],
+  "after": [
+    {
+      "points": 500,
+      "seconds": [
+        0.008291247999295592,
+        0.011053458001697436,
+        0.008561302995076403
+      ],
+      "median_seconds": 0.008561302995076403
+    },
+    {
+      "points": 1000,
+      "seconds": [
+        0.008544391006580554,
+        0.009935595997376367,
+        0.010150208006962202
+      ],
+      "median_seconds": 0.009935595997376367
+    },
+    {
+      "points": 2000,
+      "seconds": [
+        0.02116020400717389,
+        0.021649649992468767,
+        0.022112947001005523
+      ],
+      "median_seconds": 0.021649649992468767
+    },
+    {
+      "points": 4000,
+      "seconds": [
+        0.03929729999799747,
+        0.038989112988929264,
+        0.03966850398865063
+      ],
+      "median_seconds": 0.03929729999799747
+    }
+  ]
+}
