@@ -931,3 +931,27 @@ majorPASS,exit0. Head/tree unchanged. Fresh includedcapacity1/billinginactive
 confirmed before execution; no paidflags/consent. Numerical/GUI gate572tests
 and regression red/green log hashes recorded in live-gui-review.json.
 This provides requested developer evidence, not independent closure of014.
+
+## Developer milestone — live-session provenance integration (WIP)
+
+014 independently Resolved by Assignment113 acknowledged; developer does not
+change the register. New live-session lineage addresses the mission’s retained
+raw/project relationship without forcing fused sessions into single-pair or
+frame-directory schemas. Added optional Editor metadata and ORPROJ08; legacy
+02–07 remain readable. Live runner retains the Editor until raw/report fingerprints
+exist, attaches references, saves project, then outermanifest. No fullcloudreload
+or added exportclone is needed. Explicit CLI and GUI sourceverification reuse
+existing guarded checker; loading never follows external paths.
+Geometry focused2tests and live runner10tests passed, including new edit/save/
+reopen/movedfolder/raw+cal+reporttamper/symlink checks. Full gate pending.
+No hardware, physical binding, synchronization or accuracy claim; CRC notauthenticity.
+No independent finding invented, no new library/version or copiedvendorcode.
+
+Live-lineage final gate passed574Rusttests,fmt,strictalltargetClippy,release
+exit0 (/tmp/scancraft-live-lineage-integrated-gate.log). Actual releaseexample
+publishedORPROJ08; releaseCLI verify-source-bundle passed8artifacts (exit0),
+modifiedraw failed(exit1), rawbytesrestored. Aggregate evidence
+evidence/2026-10-27-live-lineage-runtime.json. Newexternaldependencies:none.
+CodeRabbit preflight reports0includedreviews, nextslot~2796247ms; billinginactive.
+No actualreview requested while unavailable and no paidconsent. Source review
+remains pending; do not describe this feature as independently approved.

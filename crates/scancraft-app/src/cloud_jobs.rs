@@ -384,7 +384,9 @@ fn execute(
             .editor
             .as_ref()
             .ok_or("no editable project is open")?;
-        let checked = if let Some(sequence) = editor.sequence() {
+        let checked = if let Some(live) = editor.live_session() {
+            scancraft_workflow::source_verification::verify_live(live, directory, work)
+        } else if let Some(sequence) = editor.sequence() {
             scancraft_workflow::source_verification::verify_sequence(sequence, directory, work)
         } else {
             scancraft_workflow::source_verification::verify(

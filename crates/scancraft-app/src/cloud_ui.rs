@@ -375,6 +375,18 @@ impl CloudUi {
         let mut verify_directory = None;
         let mut verify_recordings = None;
         let mut export_bundle = None;
+        if let Some(live) = self.document.as_ref().and_then(|d|d.editor.as_ref()).and_then(|e|e.live_session()) {
+            egui::CollapsingHeader::new("Live session sources").default_open(self.source_open).show(ui, |ui| {
+                ui.label(format!("Session {} · {} candidate pairs · raw frames {}/{}", live.session_id, live.pairs.len(), live.recorded_frames[0], live.recorded_frames[1]));
+                ui.label(if live.synthetic { "Synthetic fixture session" } else { "Declared physical observations; binding unverified" });
+                ui.small(format!("Recorded folder: {}",live.directory_display));
+                ui.label("References survive edits. External bytes are not checked on load; synchronization and physical accuracy remain unqualified.");
+                ui.add_enabled_ui(self.job.is_none(), |ui| {
+                    ui.horizontal(|ui| {ui.label("Folder to verify:");ui.text_edit_singleline(&mut self.source_directory);if ui.button("Use recorded location").clicked(){self.source_directory=live.directory_display.clone();}});
+                    if ui.add_enabled(!self.source_directory.trim().is_empty(), egui::Button::new("Verify live session sources on disk")).clicked(){verify_directory=Some(PathBuf::from(&self.source_directory));}
+                });
+            });
+        }
         if let Some(sequence) = self.document.as_ref().and_then(|d|d.editor.as_ref()).and_then(|e|e.sequence()) {
             egui::CollapsingHeader::new("Recorded sequence sources").default_open(self.source_open).show(ui, |ui| {
                 ui.label(format!("Session {} · {} selected pairs · {} retained artifact references",sequence.session_id,sequence.frames.len(),sequence.artifacts.len()));

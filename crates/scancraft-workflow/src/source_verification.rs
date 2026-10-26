@@ -75,6 +75,25 @@ pub fn verify_sequence(
         .collect();
     verify_artifacts(&expected, directory, work, &|| Ok(()))
 }
+/// Explicit live-session verification against saved fingerprints; no automatic path following.
+pub fn verify_live(
+    live: &scancraft_geometry::live_references::LiveSession,
+    directory: &Path,
+    work: &WorkControl,
+) -> Result<Report, Error> {
+    work.check()?;
+    live.validate()?;
+    let expected: Vec<_> = live
+        .artifacts
+        .iter()
+        .map(|a| scancraft_geometry::project_origin::Artifact {
+            name: a.name.clone(),
+            bytes: a.bytes,
+            crc32: a.crc32,
+        })
+        .collect();
+    verify_artifacts(&expected, directory, work, &|| Ok(()))
+}
 fn verify_artifacts(
     expected: &[scancraft_geometry::project_origin::Artifact],
     directory: &Path,
@@ -236,6 +255,9 @@ pub fn verify_project(
         return Err("verification requires a regular bounded project".into());
     }
     let editor = scancraft_geometry::formats::load_project(std::io::BufReader::new(file))?;
+    if let Some(live) = editor.live_session() {
+        return verify_live(live, directory, work);
+    }
     if let Some(sequence) = editor.sequence() {
         return verify_sequence(sequence, directory, work);
     }

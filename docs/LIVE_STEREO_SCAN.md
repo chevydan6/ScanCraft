@@ -102,8 +102,10 @@ A successful new bundle contains exact calibration/request/scan-settings bytes,
 `report.json`, and an artifact length/CRC manifest. Nonempty fusion also produces
 `points.ply` in declared millimeters and `project.orproj`. No-geometry runs keep
 raw data and diagnostics without inventing a model. The project contains the
-derived editable cloud, not resumable fusion weights or embedded raw lineage;
-retain the whole bundle. Existing project/recording formats are unchanged.
+derived editable cloud and initial live-session source references (ORPROJ08),
+not resumable fusion weights or embedded raw recordings. Retain the whole bundle;
+see [live-session references](LIVE_SESSION_REFERENCES.md). Legacy project and raw
+recording formats remain readable.
 
 All capture workers are joined, including on coordinator failure/unwind. Source
 read/recording panics are caught so explicit source closure is still attempted;

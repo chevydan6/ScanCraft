@@ -2117,3 +2117,14 @@ See [behavior and validation](docs/LIVE_STEREO_GUI.md). The frozen Rust gate
 passed 571 tests; actual release-GUI interaction and busy-window close passed
 with synthetic sources only. Real calibrated reconstruction, source binding,
 synchronization, accuracy and bounded kernel shutdown remain unqualified.
+
+## Live-session lineage persistence
+
+Live geometry projects now use ORPROJ08 to retain initial session/pair decisions
+and full raw/calibration/settings/report artifact fingerprints through edits and
+reopening. Legacy02–07 remain readable. Explicit GUI/CLI verification supports
+user-chosen moved folders; loading never follows recorded paths. Raw bytes stay
+external and fusion weights are not resumable. See docs/LIVE_SESSION_REFERENCES.md.
+The full frozen gate passed574tests; actual release synthetic runner and CLI
+verification passed8artifacts and rejected a modified raw recording (exit1).
+These are software/byte-identity checks, not hardware qualification.

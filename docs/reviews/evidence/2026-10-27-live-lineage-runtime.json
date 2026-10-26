@@ -1,0 +1,16 @@
+{
+  "scope": "actual release synthetic live runner and CLI source verification; no hardware",
+  "source_state": "uncommitted dev/live-session-lineage",
+  "project_magic": "ORPROJ08",
+  "source_artifacts": 8,
+  "good_cli_exit": 0,
+  "good_cli_passed": true,
+  "modified_raw_cli_exit": 1,
+  "modified_raw_cli_passed": false,
+  "raw_restored_sha256": "e175082c36e39c78fa9eadfb8c5389973fd3802604764581aedb49c7b982b328",
+  "project_sha256": "51738fc573296d1df43fd4626023aa685fac71a037cac712300aa4359d30e76d",
+  "cli_sha256": "885acf23a037e78f68f78f4ecaa6d08f4304d4f49b06093391ff512bd06ad1e8",
+  "gate_log_sha256": "ed534585f1283f2c045ccd37b945d8186318bad39baec43eba33a32cd68037ae",
+  "tests_passed": 574,
+  "physical_accuracy_qualified": false
+}

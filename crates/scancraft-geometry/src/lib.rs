@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 pub mod coordinate_frame;
 pub mod cylinder;
 pub mod fusion;
+pub mod live_references;
 pub mod measurement;
 mod measurement_history;
 pub mod measurement_snapshot;
@@ -194,6 +195,8 @@ impl Cloud {
 #[serde(deny_unknown_fields)]
 pub struct Editor {
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    live_session: Option<live_references::LiveSession>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     sequence: Option<sequence_references::Sequence>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     recordings: Option<recording_references::Recordings>,
@@ -212,6 +215,14 @@ pub struct Editor {
 }
 impl Editor {
     pub fn validate_history(&self) -> Result<(), String> {
+        if let Some(live) = &self.live_session {
+            live.validate()?;
+            if self.origin.is_some() || self.recordings.is_some() || self.sequence.is_some() {
+                return Err(
+                    "live-session and other reconstruction provenance cannot coexist".into(),
+                );
+            }
+        }
         if let Some(sequence) = &self.sequence {
             sequence.validate()?;
             if self.origin.is_some() || self.recordings.is_some() {
@@ -259,6 +270,7 @@ impl Editor {
             return Err("history limit exceeds 32".into());
         }
         Ok(Self {
+            live_session: None,
             sequence: None,
             origin: None,
             recordings: None,
@@ -311,7 +323,7 @@ impl Editor {
     /// it describes initial inputs, not current per-point correspondence.
     pub fn attach_origin(&mut self, origin: project_origin::Origin) -> Result<(), String> {
         origin.validate()?;
-        if self.origin.is_some() || self.sequence.is_some() {
+        if self.origin.is_some() || self.sequence.is_some() || self.live_session.is_some() {
             return Err("initial project origin is already attached".into());
         }
         if !self.undo.is_empty()
@@ -338,6 +350,7 @@ impl Editor {
         if self.origin.is_some()
             || self.recordings.is_some()
             || self.sequence.is_some()
+            || self.live_session.is_some()
             || !self.undo.is_empty()
             || !self.redo.is_empty()
             || !self.measurements.is_empty()
@@ -346,6 +359,30 @@ impl Editor {
             return Err("attach sequence provenance once before editing or measuring".into());
         }
         self.sequence = Some(sequence);
+        Ok(())
+    }
+    pub fn live_session(&self) -> Option<&live_references::LiveSession> {
+        self.live_session.as_ref()
+    }
+    /// Attach initial live-session metadata once, before edits/measurements; no filesystem I/O.
+    pub fn attach_live_session(
+        &mut self,
+        live: live_references::LiveSession,
+    ) -> Result<(), String> {
+        self.validate_history()?;
+        live.validate()?;
+        if self.live_session.is_some()
+            || self.sequence.is_some()
+            || self.origin.is_some()
+            || self.recordings.is_some()
+            || !self.undo.is_empty()
+            || !self.redo.is_empty()
+            || !self.measurements.is_empty()
+            || self.has_measurement_history()
+        {
+            return Err("attach live-session provenance once before editing or measuring".into());
+        }
+        self.live_session = Some(live);
         Ok(())
     }
     pub fn measurements(&self) -> &[measurement_snapshot::Snapshot] {

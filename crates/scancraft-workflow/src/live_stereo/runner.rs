@@ -223,7 +223,7 @@ fn execute<S: Source + 'static>(
     work: &WorkControl,
     open: impl Fn(Side, StreamProfile) -> Result<S> + Send + Sync + 'static,
     control: &Arc<Control>,
-) -> Result<Value> {
+) -> Result<(Value, Option<Editor>)> {
     work.check()?;
     let mut association = Association::new(
         processor.profiles().clone(),
@@ -388,19 +388,22 @@ fn execute<S: Source + 'static>(
         file(&partial.join("points.ply"), |out| {
             write_ply(&cloud, out).map_err(|e| e.to_string())
         })?;
-        let editor = Editor::new(cloud.clone(), 32)?;
-        file(&partial.join("project.orproj"), |out| {
-            save_project(&editor, out).map_err(|e| e.to_string())
-        })?;
     }
-    Ok(
+    let count = cloud.points.len();
+    let editor = if count > 0 {
+        Some(Editor::new(cloud, 32)?)
+    } else {
+        None
+    };
+    Ok((
         json!({"schema_version":1,"kind":if matches!(processor.source(),scancraft_depth::MatchSource::SyntheticFixture){"synthetic_live_stereo_pipeline"}else{"native_live_stereo_candidate_scan"},"declared_source":processor.source(),"session_id":processor.config().session_id,
         "source_binding_verified":false,"synchronization_verified":false,"physical_accuracy_qualified":false,
         "pair_policy":"unique equal raw PTS and explicit host window; not verified exposures",
         "graceful_stop_requested":control.stop_requested(),"pause_requested_at_end":control.pause_requested(),"skipped_display_previews":control.skipped_previews(),"pending_capacity_per_side":2,"processing_channel_capacity":4,"association":association.counts,"unmatched_pending":association.remaining(),
-        "sources":sources,"pairs":reports,"fused_points":cloud.points.len(),"geometry_exported":!cloud.points.is_empty(),
-        "project_scope":"derived editable cloud only; retain raw recordings, calibration, request and pair reports"}),
-    )
+        "sources":sources,"pairs":reports,"fused_points":count,"geometry_exported":count>0,
+        "project_scope":"derived editable cloud with initial live-session references; external raw recordings and reports required for verification; not resumable fusion"}),
+        editor,
+    ))
 }
 
 /// Append raw frames before bounded processing delivery; restore all sources
@@ -440,6 +443,31 @@ pub fn bundle_controlled<S: Source + 'static>(
     });
     outcome
 }
+fn fingerprint(path: &Path, work: &WorkControl) -> Result<Value> {
+    let mut input = OpenOptions::new()
+        .read(true)
+        .custom_flags(libc::O_NOFOLLOW | libc::O_NONBLOCK | libc::O_CLOEXEC)
+        .open(path)
+        .map_err(|e| e.to_string())?;
+    if !input.metadata().map_err(|e| e.to_string())?.is_file() {
+        return Err("live artifacts must be regular files".into());
+    }
+    let mut hash = crc32fast::Hasher::new();
+    let mut bytes = 0;
+    let mut buffer = [0; 65536];
+    loop {
+        work.check()?;
+        let n = input.read(&mut buffer).map_err(|e| e.to_string())?;
+        if n == 0 {
+            break;
+        }
+        hash.update(&buffer[..n]);
+        bytes += n as u64;
+    }
+    Ok(
+        json!({"name":path.file_name().ok_or("artifact lacks name")?.to_string_lossy(),"bytes":bytes,"crc32":hash.finalize()}),
+    )
+}
 fn bundle_inner<S: Source + 'static>(
     processor: &mut Processor,
     target: &Path,
@@ -463,7 +491,7 @@ fn bundle_inner<S: Source + 'static>(
         .unwrap_or_else(|_| Err("live reconstruction coordinator panicked".into()));
         // Restore and verify group settings before publishing a successful scan.
         let result = combine(outcome, restore());
-        let mut report = result?;
+        let (mut report, editor) = result?;
         report["reported_stream_settings_restoration"] = json!("PASS");
         json_file(&partial.join("report.json"), &report)?;
         let mut artifacts = Vec::new();
@@ -485,7 +513,7 @@ fn bundle_inner<S: Source + 'static>(
             names.push(format!("pair-{index:04}.json"));
         }
         if report["geometry_exported"] == true {
-            names.extend(["points.ply".into(), "project.orproj".into()]);
+            names.push("points.ply".into());
         }
         let actual: HashSet<_> = fs::read_dir(&partial)
             .map_err(|e| e.to_string())?
@@ -505,28 +533,75 @@ fn bundle_inner<S: Source + 'static>(
         }
         for name in names {
             work.check()?;
-            let path = partial.join(&name);
-            let mut input = OpenOptions::new()
-                .read(true)
-                .custom_flags(libc::O_NOFOLLOW | libc::O_NONBLOCK | libc::O_CLOEXEC)
-                .open(&path)
+            artifacts.push(fingerprint(&partial.join(name), work)?);
+        }
+        if let Some(mut editor) = editor {
+            use scancraft_geometry::{
+                live_references::LiveSession,
+                sequence_references::{Artifact, Frame},
+            };
+            let pairs = report["pairs"]
+                .as_array()
+                .ok_or("missing live pairs")?
+                .iter()
+                .map(|pair| -> Result<Frame> {
+                    Ok(Frame {
+                        id: pair["pair_id"].as_u64().ok_or("invalid pair id")?,
+                        left_index: usize::try_from(
+                            pair["left_index"].as_u64().ok_or("invalid left index")?,
+                        )
+                        .map_err(|e| e.to_string())?,
+                        right_index: usize::try_from(
+                            pair["right_index"].as_u64().ok_or("invalid right index")?,
+                        )
+                        .map_err(|e| e.to_string())?,
+                        integrated: pair["tracking"]["integrated"]
+                            .as_bool()
+                            .ok_or("missing pair integration decision")?,
+                    })
+                })
+                .collect::<Result<Vec<_>>>()?;
+            let mut recorded_frames = [0; 2];
+            for source in report["sources"].as_array().ok_or("missing live sources")? {
+                let index = match source["interface"].as_u64() {
+                    Some(0) => 0,
+                    Some(2) => 1,
+                    _ => return Err("invalid live interface".into()),
+                };
+                recorded_frames[index] = usize::try_from(
+                    source["recorded_frames"]
+                        .as_u64()
+                        .ok_or("invalid raw count")?,
+                )
                 .map_err(|e| e.to_string())?;
-            if !input.metadata().map_err(|e| e.to_string())?.is_file() {
-                return Err("live artifacts must be regular files".into());
             }
-            let mut hash = crc32fast::Hasher::new();
-            let mut bytes = 0;
-            let mut buffer = [0; 65536];
-            loop {
-                work.check()?;
-                let n = input.read(&mut buffer).map_err(|e| e.to_string())?;
-                if n == 0 {
-                    break;
-                }
-                hash.update(&buffer[..n]);
-                bytes += n as u64;
-            }
-            artifacts.push(json!({"name":path.file_name().unwrap().to_string_lossy(),"bytes":bytes,"crc32":hash.finalize()}));
+            let references: Vec<Artifact> = artifacts
+                .iter()
+                .cloned()
+                .map(|v| serde_json::from_value(v).map_err(|e| e.to_string()))
+                .collect::<Result<_>>()?;
+            editor.attach_live_session(LiveSession {
+                schema_version: 1,
+                directory_display: std::path::absolute(target)
+                    .map_err(|e| e.to_string())?
+                    .display()
+                    .to_string(),
+                session_id: processor.config().session_id.clone(),
+                synthetic: matches!(
+                    processor.source(),
+                    scancraft_depth::MatchSource::SyntheticFixture
+                ),
+                recorded_frames,
+                pairs,
+                artifacts: references,
+                source_device_binding_verified: false,
+                synchronization_verified: false,
+                physical_accuracy_qualified: false,
+            })?;
+            file(&partial.join("project.orproj"), |out| {
+                save_project(&editor, out).map_err(|e| e.to_string())
+            })?;
+            artifacts.push(fingerprint(&partial.join("project.orproj"), work)?);
         }
         artifacts.sort_by(|a, b| a["name"].as_str().cmp(&b["name"].as_str()));
         json_file(
@@ -770,6 +845,67 @@ mod tests {
         );
         assert_eq!(opened.load(Ordering::Relaxed), 0);
         assert_eq!(fs::read(target.join("project.orproj")).unwrap(), project);
+        assert_eq!(&project[..8], b"ORPROJ08");
+        let lineage = editor.live_session().unwrap();
+        assert_eq!(lineage.recorded_frames, [1, 1]);
+        assert_eq!(lineage.pairs.len(), 1);
+        assert!(lineage.pairs[0].integrated);
+        assert_eq!(lineage.directory_display, target.display().to_string());
+        assert_eq!(lineage.artifacts.len(), 8);
+        let moved = t.0.join("moved-scan");
+        fs::rename(&target, &moved).unwrap();
+        let mut edited = editor;
+        edited.trim(&[0], false).unwrap();
+        let mut saved = Vec::new();
+        save_project(&edited, &mut saved).unwrap();
+        let reopened = scancraft_geometry::formats::load_project(saved.as_slice()).unwrap();
+        let live = reopened.live_session().unwrap();
+        assert!(
+            crate::source_verification::verify_live(live, &moved, &work)
+                .unwrap()
+                .passed
+        );
+        let standalone = t.0.join("edited.orproj");
+        fs::write(&standalone, &saved).unwrap();
+        assert!(
+            crate::source_verification::verify_project(&standalone, &moved, &work)
+                .unwrap()
+                .passed
+        );
+        for name in [
+            "left.raptor",
+            "calibration.rapcal",
+            "report.json",
+            "pair-0000.json",
+        ] {
+            let path = moved.join(name);
+            let original = fs::read(&path).unwrap();
+            let mut altered = original.clone();
+            altered[0] ^= 1;
+            fs::write(&path, altered).unwrap();
+            assert!(
+                !crate::source_verification::verify_live(live, &moved, &work)
+                    .unwrap()
+                    .passed
+            );
+            fs::write(&path, original).unwrap();
+        }
+        let raw = moved.join("left.raptor");
+        let retained = t.0.join("retained-raw");
+        fs::rename(&raw, &retained).unwrap();
+        std::os::unix::fs::symlink(&retained, &raw).unwrap();
+        assert!(
+            !crate::source_verification::verify_live(live, &moved, &work)
+                .unwrap()
+                .passed
+        );
+        fs::remove_file(&raw).unwrap();
+        fs::rename(&retained, &raw).unwrap();
+        assert!(
+            crate::source_verification::verify_live(live, &moved, &work)
+                .unwrap()
+                .passed
+        );
     }
     fn processor_for_retry(root: &Path, work: &WorkControl) -> Processor {
         processor(root, work)
