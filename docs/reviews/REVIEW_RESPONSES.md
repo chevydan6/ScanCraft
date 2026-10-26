@@ -287,3 +287,15 @@ Implementation commit and automated review evidence follow after immutable commi
 Limitations: local parabolic bias, horizontal-only refinement, additional patch
 work and inline optional diagnostics memory (not benchmarked), no live qualification.
 SCAN-REV-006 remains unqualified; no reviewer status is changed.
+
+DEV-RECON-001 implementation: `61e4c931476f055fb1d008d49a46675c9d4bc523`,
+stacked PR https://github.com/chevydan6/ScanCraft/pull/4. CodeRabbit CLI completed
+13 files against cc1322b with zero findings and passed major gate, exit 0. Head/tree
+observed unchanged before/after; operator evidence and report hash are in
+evidence/2026-10-26-subpixel-validation.json, not a server head attestation.
+Included capacity only, inactive billing, no paid consent. GUI startup/render of
+legacy three-point project passed on private display, visually inspected, no camera
+FDs. This is not manual end-to-end GUI or hardware scanning qualification.
+GitHub CI was pending at recording; skipped draft CodeRabbit badge is not review.
+Later evidence-only bookkeeping does not change the reviewed implementation.
+Independent reviewer retains verification/closure authority.

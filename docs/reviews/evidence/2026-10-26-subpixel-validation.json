@@ -1,0 +1,78 @@
+{
+  "scope": "synthetic fractional image correlation/fit only; no physical accuracy qualification",
+  "numpy_version": "2.5.4",
+  "fixture_sha256": "d825eb9fde2f034993ef6052bf3a7d3eec9d56d4d0b524ecb9826ff53465fccc",
+  "cases": [
+    {
+      "disparity": 4.2,
+      "accepted": 3,
+      "maximum_refined_pixel_error": 0.015450293169426033,
+      "maximum_integer_pixel_error": 0.20000000000000284,
+      "maximum_reference_difference": 3.885780586188048e-15
+    },
+    {
+      "disparity": 4.25,
+      "accepted": 3,
+      "maximum_refined_pixel_error": 0.014439235449469123,
+      "maximum_integer_pixel_error": 0.25,
+      "maximum_reference_difference": 5.2735593669694936e-15
+    },
+    {
+      "disparity": 4.3,
+      "accepted": 3,
+      "maximum_refined_pixel_error": 0.013113071595117987,
+      "maximum_integer_pixel_error": 0.3000000000000007,
+      "maximum_reference_difference": 7.216449660063518e-15
+    },
+    {
+      "disparity": -4.25,
+      "accepted": 3,
+      "maximum_refined_pixel_error": 0.012264730719437011,
+      "maximum_integer_pixel_error": 0.25,
+      "maximum_reference_difference": 7.355227538141662e-15
+    }
+  ],
+  "passed": true,
+  "implementation_commit": "61e4c931476f055fb1d008d49a46675c9d4bc523",
+  "implementation_tree": "c08d4c2b6e32d1fb599fb09cc4ba68c933e9a44c",
+  "recorded_utc": "2026-10-26T10:48:04.131174+00:00",
+  "validation_log_sha256": "c59ad855dda684281e595f929f3f6d39709ff2fbbafdf2d3889aa57bc0a24623",
+  "validation": "518 Rust tests, fmt, strict Clippy and release build; private-display startup/render only also passed",
+  "binding": "Operator-recorded source identity, not service attestation or hardware qualification",
+  "coderabbit": {
+    "base_commit": "cc1322b797d44b51182fbb30f7ed8da6e38e59ff",
+    "head_observed_before_and_after": "61e4c931476f055fb1d008d49a46675c9d4bc523",
+    "tree_observed_before_and_after": "c08d4c2b6e32d1fb599fb09cc4ba68c933e9a44c",
+    "report_sha256": "f9b16d456d6a6ea7d334b9804d9560e5b1c5970b4b758a5c7680c0ba995ef60f",
+    "exit_code": 0,
+    "completion": {
+      "type": "complete",
+      "status": "review_completed",
+      "findings": 0,
+      "gate": {
+        "threshold": "major",
+        "status": "passed",
+        "blockingFindings": 0
+      },
+      "reviewedFiles": [
+        "ARCHITECTURE.md",
+        "crates/scancraft-cli/tests/subpixel_reconstruction.rs",
+        "crates/scancraft-depth/examples/stereo_reference.rs",
+        "crates/scancraft-depth/examples/subpixel_reference.rs",
+        "crates/scancraft-depth/src/matching.rs",
+        "crates/scancraft-depth/src/matching/subpixel.rs",
+        "crates/scancraft-depth/src/pipeline.rs",
+        "crates/scancraft-depth/tests/subpixel.rs",
+        "crates/scancraft-depth/tests/support/subpixel_scene.rs",
+        "docs/STEREO_MATCHING.md",
+        "docs/SUBPIXEL_STEREO.md",
+        "docs/reviews/REVIEW_RESPONSES.md",
+        "tools/check_subpixel_reference.py"
+      ],
+      "outcome": "completed",
+      "message": "Review completed"
+    },
+    "billing": "Included capacity checked before launch; billing inactive; no paid consent/flags",
+    "limitation": "CLI output does not attest immutable head; identity observations are operator-recorded"
+  }
+}
