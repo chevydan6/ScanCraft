@@ -146,14 +146,22 @@ impl LiveUi {
     }
     /// Returns true on a newly finished failure, so root-close intent stays cancelled.
     pub fn tick(&mut self, ctx: &egui::Context) -> bool {
+        self.tick_poll(ctx, Worker::poll)
+    }
+    // The completion boundary is injectable for synchronized, device-free lifecycle tests.
+    fn tick_poll(
+        &mut self,
+        ctx: &egui::Context,
+        poll: impl FnOnce(&mut Worker<Value>) -> Option<Result<Value, String>>,
+    ) -> bool {
         let Some(job) = &mut self.job else {
             return false;
         };
+        // A completed poll joins the owner: counters and the final mailbox are stable.
+        let finished = poll(&mut job.worker);
         self.recorded = job.control.recorded_frames();
         self.drops = job.control.processing_drops();
         self.skipped = job.control.skipped_previews();
-        // A completed poll joins the owner: no final offer can race the mailbox drain.
-        let finished = job.worker.poll();
         if let Some(snapshot) = job.control.take_preview() {
             self.fused = snapshot.fused_points;
             self.tracking = snapshot.tracking["state"]
@@ -350,6 +358,14 @@ fn synthetic_run(
     work: &WorkControl,
     control: &Arc<Control>,
 ) -> Result<Value, String> {
+    synthetic_run_limited(target, work, control, 100)
+}
+fn synthetic_run_limited(
+    target: &std::path::Path,
+    work: &WorkControl,
+    control: &Arc<Control>,
+    maximum_frames: u32,
+) -> Result<Value, String> {
     use scancraft_core::{Frame, StreamProfile};
     use scancraft_recording::CaptureContext;
     use scancraft_workflow::live_stereo::{
@@ -359,6 +375,7 @@ fn synthetic_run(
     use serde_json::json;
     struct Fixture {
         index: u32,
+        maximum_frames: u32,
         side: Side,
         pixels: Vec<u8>,
     }
@@ -371,7 +388,7 @@ fn synthetic_run(
             })
         }
         fn next(&mut self) -> Result<Option<Frame>, String> {
-            if self.index == 100 {
+            if self.index == self.maximum_frames {
                 return Ok(None);
             }
             std::thread::sleep(std::time::Duration::from_millis(500));
@@ -410,7 +427,7 @@ fn synthetic_run(
         .map_err(|e| e.to_string())?,
     );
     let settings = temp.0.join("scan.json");
-    std::fs::write(&settings,serde_json::to_vec(&json!({"schema_version":1,"session_id":"synthetic-gui","fps":30,"maximum_frames_per_camera":100,"maximum_host_delta_us":1000,
+    std::fs::write(&settings,serde_json::to_vec(&json!({"schema_version":1,"session_id":"synthetic-gui","fps":30,"maximum_frames_per_camera":maximum_frames,"maximum_host_delta_us":1000,
         "tracking_samples":32,"voxel_mm":0.1,"maximum_voxels":1000,"tracking":{"max_correspondence_mm":10.0,"max_rms_mm":0.01,"minimum_overlap":0.8,"max_step_translation_mm":1.0,"max_step_rotation_rad":0.1,"iterations":40,"tolerance_mm":1e-8}})).map_err(|e|e.to_string())?).map_err(|e|e.to_string())?;
     let root =
         std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../evidence/offline-cli-dataset");
@@ -437,6 +454,7 @@ fn synthetic_run(
             .into_raw();
             Ok(Fixture {
                 index: 0,
+                maximum_frames,
                 side,
                 pixels,
             })
@@ -444,4 +462,47 @@ fn synthetic_run(
         || Ok(()),
         control,
     )
+}
+
+#[cfg(test)]
+mod completion_tests {
+    use super::*;
+    #[test]
+    fn completion_refreshes_counters_and_final_preview_after_poll_boundary() {
+        let root = scancraft_workflow::output::staging(
+            &std::env::temp_dir().join("live-ui-completion-regression"),
+        )
+        .unwrap();
+        let target = root.join("scan");
+        let out = target.clone();
+        let (release, wait) = std::sync::mpsc::channel();
+        let mut ui = LiveUi::default();
+        ui.spawn(target, true, move |work, control| {
+            wait.recv().map_err(|e| e.to_string())?;
+            synthetic_run_limited(&out, &work, &control, 1)
+        });
+        assert_eq!(ui.job.as_ref().unwrap().control.recorded_frames(), [0, 0]);
+        let failed = ui.tick_poll(&egui::Context::default(), |worker| {
+            // Producer cannot update anything before the consumer reaches poll.
+            release.send(()).unwrap();
+            let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+            loop {
+                if let Some(result) = worker.poll() {
+                    break Some(result);
+                }
+                assert!(std::time::Instant::now() < deadline);
+                std::thread::yield_now();
+            }
+        });
+        assert!(!failed);
+        assert_eq!(ui.recorded, [1, 1]);
+        assert!(ui.job.is_none());
+        assert!(ui.complete_project.is_some());
+        assert_eq!(ui.fused, 3);
+        assert_eq!(ui.preview.total, 3);
+        assert_eq!(ui.preview.points.len(), 3);
+        assert_eq!(ui.tracking, "Tracking");
+        assert!(ui.cameras.iter().all(Option::is_some));
+        std::fs::remove_dir_all(root).unwrap();
+    }
 }

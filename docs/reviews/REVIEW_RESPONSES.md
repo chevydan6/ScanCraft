@@ -903,3 +903,23 @@ Freeincluded1/billinginactive checked beforehand; no paidconsent. Sanitized
 metadata added to live-gui-review.json; rawreports remain local. PR13 ready:
 https://github.com/chevydan6/ScanCraft/pull/13 base dev/live-stereo-scan.
 No auto-merge or ownerapproval inferred. App/current-headCI checked separately.
+
+## SCAN-REV-014 — accepted remaining completion-counter correction
+
+Assignment110 is accepted. Correction506c01c fixed mailbox loss but still read
+recorded/drop/skipped counters before completion polling. live_ui.rs now polls
+and joins before reading every final display value and draining the mailbox.
+A synchronized GUI-consumer regression releases the real one-pair synthetic
+runner only after tick reaches its poll boundary, waits for worker completion,
+and checks recorded1/1, final preview/thumbnails, completed project and no job.
+The old ordering failed deterministically with counters0/0 instead of1/1:
+/tmp/scancraft-live-counter-red.log, exit101. No scanner opened. The fixture
+helper accepts a private frame limit so this regression uses one existing
+analytic pair; ordinary diagnostic startup remains100frames. Production native
+acquisition is unchanged. Full corrected gate/results/commit follow. Only the
+independent reviewer may verify/close014; original findings remain untouched.
+
+Corrected complete frozen gate passed572Rusttests, formatting, strictalltarget
+Clippy and releasebuild, exit0 (/tmp/scancraft-live-counter-final-gate.log).
+New regression checks actual displayed cloud count as well as counters; no
+threshold or lifecycle guard weakened. Source/docs fullcontext secret scanPASS.

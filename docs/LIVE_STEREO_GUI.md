@@ -66,3 +66,13 @@ Private test captures and outputs are retained locally, not distributed as scann
 data. A second private-display run sent WM_DELETE_WINDOW during active capture. The
 application saved five frames per side with graceful stop requested and exited
 zero. This injected-source result does not establish physical shutdown timing.
+
+### Completion ordering regression
+
+Independent finding SCAN-REV-014 identified stale final counters in addition to
+the final mailbox race. The GUI now polls/joins before reading counters and
+draining the mailbox. A synchronized test releases the actual one-pair fixture
+runner at the poll boundary: the prior ordering deterministically displayed
+zero recorded frames instead of one per side. The corrected test also checks
+the final three-point preview, thumbnails, tracking and completed-project path.
+This regression exercises the GUI consumer, not just the runner mailbox.
