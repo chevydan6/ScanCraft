@@ -1,0 +1,85 @@
+{
+  "binding_verification": "source declaration validated by reconstruction pipeline; recording context cross-checked where present; device binding not independently attested",
+  "left": {
+    "context": {
+      "calibration_bytes": null,
+      "calibration_status": "synthetic_fixture_not_a_scanner_capture",
+      "controls": {
+        "synthetic": true
+      },
+      "device_identity": "synthetic recorded stereo fixture"
+    },
+    "host_timestamp_us": 34333,
+    "metadata_crc32": 2292836088,
+    "payload_crc32": 4042046966,
+    "profile": {
+      "fourcc": [
+        71,
+        82,
+        69,
+        89
+      ],
+      "fps": 30,
+      "height": 32,
+      "interface": 0,
+      "width": 64
+    },
+    "selected_frame_index": 1,
+    "sensor_pts": 34333,
+    "sequence": 11,
+    "source_file_identity_checked": true,
+    "source_header_crc_verified": true,
+    "source_integrity": "all frames, order, footer and EOF validated before selection",
+    "source_path_display": "evidence/recorded-stereo-dataset/left.raptor",
+    "source_path_display_is_lossy": false,
+    "source_total_frames": 3,
+    "source_version": 2
+  },
+  "pair_selection": "explicit user-selected frame indices; no automatic exposure pairing",
+  "physical_accuracy_qualified": false,
+  "recovery_provenance": "keep original recovery reports; complete recording footer does not prove original scan completeness",
+  "retained_frame_format": 2,
+  "retained_frames": [
+    "left-frame.raptor",
+    "right-frame.raptor"
+  ],
+  "right": {
+    "context": {
+      "calibration_bytes": null,
+      "calibration_status": "synthetic_fixture_not_a_scanner_capture",
+      "controls": {
+        "synthetic": true
+      },
+      "device_identity": "synthetic recorded stereo fixture"
+    },
+    "host_timestamp_us": 67666,
+    "metadata_crc32": 3111037272,
+    "payload_crc32": 657072394,
+    "profile": {
+      "fourcc": [
+        71,
+        82,
+        69,
+        89
+      ],
+      "fps": 30,
+      "height": 32,
+      "interface": 2,
+      "width": 64
+    },
+    "selected_frame_index": 2,
+    "sensor_pts": 67666,
+    "sequence": 12,
+    "source_file_identity_checked": true,
+    "source_header_crc_verified": true,
+    "source_integrity": "all frames, order, footer and EOF validated before selection",
+    "source_path_display": "evidence/recorded-stereo-dataset/right.raptor",
+    "source_path_display_is_lossy": false,
+    "source_total_frames": 3,
+    "source_version": 2
+  },
+  "schema_version": 1,
+  "source_device_binding_verified": false,
+  "source_paths_are_references_not_immutable_snapshots": true,
+  "synchronization_verified": false
+}

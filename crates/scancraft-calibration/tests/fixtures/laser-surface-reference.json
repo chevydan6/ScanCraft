@@ -1,0 +1,124 @@
+{
+  "captured_source_sha256": "6163b6d8448a01317e7336e761bbc9bce8bc4f65dc665deaa4e733cbba1a1f49",
+  "fragment_sha256": "03f4b261c781a6fb2a32a66ff0e73530a6557866d549cd14ab6ecfcbefccbcd4",
+  "device": "AMD Radeon 680M (radeonsi, rembrandt, ACO, DRM 3.64, 7.2.11-6900hs-lto)",
+  "options": "-cl-std=CL1.2 -cl-single-precision-constant",
+  "synthetic_only": true,
+  "factory_record_binding_verified": false,
+  "fragment_only_not_full_kernel": true,
+  "reference_adds_quadratic_epsilon": 1e-10,
+  "cases": [
+    {
+      "coefficients": [
+        0.0,
+        0.0,
+        0.0,
+        100.0
+      ],
+      "normalized_ray": [
+        0.25,
+        0.10000000149011612
+      ],
+      "reference_roots": [
+        2499999488.0,
+        400.0000915527344
+      ]
+    },
+    {
+      "coefficients": [
+        0.0,
+        0.0,
+        -0.4000000059604645,
+        80.0
+      ],
+      "normalized_ray": [
+        0.10000000149011612,
+        0.20000000298023224
+      ],
+      "reference_roots": [
+        5000000000.0,
+        160.0
+      ]
+    },
+    {
+      "coefficients": [
+        0.0010000000474974513,
+        0.019999999552965164,
+        -0.30000001192092896,
+        100.0
+      ],
+      "normalized_ray": [
+        0.05000000074505806,
+        0.20000000298023224
+      ],
+      "reference_roots": [
+        8350.5986328125,
+        299.37896728515625
+      ]
+    },
+    {
+      "coefficients": [
+        0.0010000000474974513,
+        0.0,
+        0.0,
+        100.0
+      ],
+      "normalized_ray": [
+        1.0,
+        1.0
+      ],
+      "reference_roots": [
+        887.2981567382812,
+        112.70166778564453
+      ]
+    },
+    {
+      "coefficients": [
+        1.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "normalized_ray": [
+        2.0,
+        1.0
+      ],
+      "reference_roots": [
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "coefficients": [
+        1.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "normalized_ray": [
+        0.0,
+        1.0
+      ],
+      "reference_roots": [
+        null,
+        null
+      ]
+    },
+    {
+      "coefficients": [
+        0.0,
+        0.0,
+        0.0,
+        100.0
+      ],
+      "normalized_ray": [
+        -0.25,
+        0.10000000149011612
+      ],
+      "reference_roots": [
+        -2499999488.0,
+        -400.0000915527344
+      ]
+    }
+  ]
+}

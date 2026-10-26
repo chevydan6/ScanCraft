@@ -1,0 +1,20 @@
+/target/
+/evidence/private/
+*.raptor
+__pycache__/
+/evidence/cargo-metadata.json
+/.venv-reference/
+
+# Local captures, credentials, research inputs and build evidence
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.dll
+*.exe
+*.so
+*.bin
+*.firmware
+/validation-local/
+/vendor-private/

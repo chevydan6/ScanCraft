@@ -1,0 +1,102 @@
+PROJECT RAPTOR — ASTRA MASTER MISSION
+Native Rust Linux 3D Scanning, Reconstruction, and Editing
+
+OBJECTIVE
+Build, test, optimize, document, and publish a fully native open-source Rust replacement for CrealityScan, initially for the Creality CR-Scan Raptor. The final product must independently acquire real sensor data, reconstruct dimensionally accurate 3D geometry, provide full point-cloud and mesh editing, and export usable models without Windows, Wine, CrealityScan, or proprietary Creality runtime dependencies. This is a working software deliverable, not a GUI mockup or research report.
+
+EXISTING RESOURCES
+The Raptor is physically connected and already communicates through Linux. CrealityScan is installed and runs under Wine. Verify exactly which acquisition and scanning functions work; preserve the current functioning environment. Use CrealityScan as a behavioral reference, the physical scanner for hardware validation, and established open-source libraries as algorithmic and numerical references. Distinguish verified findings from hypotheses.
+
+AUTONOMY
+Work independently and continuously while the authorized runtime allows. Inspect the Wine installation, dependencies, application behavior, USB transfers, calibration, and processing. Use appropriate diagnostic and reverse-engineering tools (Ghidra, Wine tracing, strace, GDB, USB captures). Research, implement, compile, test, benchmark, debug, document, and commit code. Continue after milestones without unnecessary requests for routine permission. If physical action is required, record the blocker and continue other feasible work. Do not modify firmware, perform destructive operations, bypass security controls, or publish proprietary assets without explicit authorization. Never invent progress or measurements. Escalate difficult technical problems to stronger reasoning models when available with concise evidence-based handoffs.
+
+RUST POLICY
+Rust is the primary and final target language for device communication, acquisition, calibration, image processing, depth reconstruction, registration, point clouds, mesh algorithms, editing, measurement, GPU orchestration, rendering, GUI, storage, and tests. Evaluate rusb, nalgebra, glam, rayon, wgpu, serde, tracing, criterion, Slint, and egui. Prefer proven Rust crates where adequate. Study OpenCV, Open3D, PCL, CloudCompare, MeshLab, Eigen, and Ceres as references. Port or independently implement necessary algorithms in Rust while complying with licenses and attribution. Temporary C/C++ dependencies may accelerate early milestones but maintain a roadmap to eliminate mandatory C++ reconstruction runtime dependencies before stable release. Do not delay working acquisition merely to rewrite mature libraries. Favor safe idiomatic Rust and isolate/test unavoidable unsafe code.
+
+ARCHITECTURE
+Create a modular Rust workspace separating device interface, acquisition, recording/replay, calibration, image processing, depth, point-cloud representation, registration/tracking, point-cloud editing, mesh reconstruction, mesh editing, measurements, GPU rendering/compute, GUI, project persistence/import/export, and automated tests. Keep scanner hardware, reconstruction, and visualization decoupled. Use bounded queues, reusable buffers, documented coordinate systems, and versioned formats. Design for future scanners.
+
+CREALITYSCAN ANALYSIS
+Identify version, executable architecture, libraries, device initialization, USB interfaces, camera synchronization, blue-laser and near-infrared modes, exposure/projector controls, calibration formats, image preprocessing, depth reconstruction, point-cloud tracking and fusion, mesh generation, GPU usage, project/export formats, and editing features. Observe behavior under controlled experiments and document evidence. Do not assume identical internal algorithms are necessary; independently recreate functional results using established methods. Do not copy or redistribute proprietary code or assets.
+
+NATIVE HARDWARE
+Implement Raptor discovery, connect/disconnect, initialization, mode selection, exposure/gain, laser/projector controls where supported, valid frame capture, synchronization, calibration, status, and recovery. Determine which operations occur in scanner hardware versus host software. Distinguish mere USB communication from correctly decoded sensor frames. FIRST HARDWARE MILESTONE: capture and save genuine validated Raptor frames using Rust with Wine and CrealityScan closed.
+
+RECORD AND REPLAY
+Create a versioned format preserving raw frames, timestamps, settings, calibration metadata, modes, and relevant device state. Support integrity checks, controlled corrupted-file handling, repeatable offline replay, algorithm comparisons, and regression benchmarks without rescanning. Minimize memory copying. Preserve redistributable test datasets where lawful.
+
+RECONSTRUCTION ENGINE
+Implement image decoding, undistortion, denoising, exposure normalization, feature and laser-line detection, structured-light decoding where required, synchronization, calibration, coordinate transforms, triangulation, depth estimation, point-cloud generation, normals, confidence filtering, and invalid-point rejection. Implement correspondences, point-to-point/point-to-plane ICP, robust outlier rejection, manual and multi-frame registration, global alignment, pose optimization, tracking-loss detection/recovery, fusion, spatial indexing, voxel methods, surface reconstruction, mesh generation, simplification, and supported color mapping. Compare outputs against reference algorithms and physical ground truth.
+
+LIVE SCANNING
+Provide live camera and point-cloud previews; start/pause/resume/stop; scan-mode selection; continuous registration; tracking status/recovery; multi-session acquisition; progress; save/load; and performance diagnostics. Decouple acquisition, reconstruction, and rendering so slow stages do not freeze the UI or silently discard data. Define queue backpressure and frame-drop reporting.
+
+POINT-CLOUD EDITING
+Provide rectangle, freehand lasso, polygon, brush, 3D box, plane trimming, clipping planes, visible-only/through selection, delete/keep/invert, hide/isolate, previews, undo/redo. Implement statistical/radius outlier filtering, duplicate/isolated point removal, voxel downsampling, density filtering, smoothing, background/table removal, disconnected-component removal, and normal correction. Preserve originals, support non-destructive edits, expose parameters, and protect small legitimate details.
+
+MESH EDITING
+Implement surface reconstruction, smoothing, decimation, trimming, plane cuts, hole detection/selective filling, normal recalculation, non-manifold detection, mesh repair, disconnected component removal, merging/splitting, watertightness checks, and quality analysis. Provide previews and reversible operations; never silently fill intentional openings or distort precision features.
+
+MEASUREMENT AND REVERSE ENGINEERING
+Provide point distances, point-to-plane distances, angles, bounding boxes, cross sections, plane/cylinder/sphere fitting, hole centers, diameter estimation, coordinate alignment, origin repositioning, scale verification, millimeter/inch units, and deviation visualization. Investigate future primitive recognition, mechanical feature extraction, reference-model comparison, CAD-oriented fitting, and parametric reconstruction. Do not label triangle meshes as parametric CAD.
+
+NATIVE GUI
+Evaluate Slint, egui, and appropriate Rust-native UI options. Provide scanner controls, acquisition, live visualization, point-cloud/mesh editing, measurement, projects, import/export, settings, diagnostics, progress, cancellation, and clear errors. GPU viewport must support orbit/pan/zoom, perspective/orthographic, point size/color, normals, wireframe/shaded meshes, selection highlighting, clipping planes, and large datasets. Keep UI responsive; prioritize usability over copying CrealityScan's appearance.
+
+FILES AND PROJECTS
+Support PLY, STL, OBJ, PCD, XYZ, and GLB/glTF as applicable, preserving units, normals, color, and metadata where supported. Create a versioned project format for raw scans, calibration, sessions, edit history, parameters, transforms, meshes, measurements, and recovery. Test round trips and corrupt-file handling.
+
+OPTIMIZATION
+Profile correctness first. Investigate AVX2 and supported SIMD, rayon parallelism, cache locality, efficient layouts, buffer reuse, fewer allocations, lock contention, parallel filtering/registration, architecture-specific paths, wgpu/Vulkan compute, async CPU/GPU overlap, streaming, compact representations, and spatial partitioning. Benchmark CPU versus GPU and retain portable CPU fallbacks. Never accept speedups that violate geometric accuracy.
+
+MEASURABLE ACCEPTANCE GATES
+The following are PROVISIONAL engineering thresholds, not manufacturer claims. Benchmark CrealityScan per mode and calibrated physical ground truth first; document hardware, datasets, test methods, uncertainty, and any justified revisions. Track PASS/FAIL/BLOCKED with evidence, never assume PASS.
+- Device: 20/20 discovery; >=19/20 initialization; normal reconnection <=10 seconds; >=10 minutes continuous valid acquisition; <0.1% corrupted frames (report drops separately); zero qualification crashes.
+- Recording: 100% saved-frame integrity; required metadata preserved; 100 successful replay runs; controlled truncated/corrupted-file errors.
+- Geometry: dimensional error <=0.20 mm or <=0.20%, whichever permits larger absolute error; plane-fit RMS <=0.15 mm; repeated measurement standard deviation <=0.10 mm; qualified registration RMS <=0.25 mm; scale deviation <=0.20%; zero NaN/infinite exported coordinates. Adjust only with documented reference and uncertainty evidence.
+- Live: >=90% of valid incoming frame rate processed; >=20 FPS preview on designated hardware; p95 preview latency <=150 ms; >=30-minute continuous scan; tracking failures detected; zero qualification crashes.
+- Editing: >=99.9% selection accuracy on labeled synthetic data with boundary tolerances; exact selected-index delete/keep; 100% geometry restoration by undo/redo; <=500 ms trim of one million points on designated hardware; 100 edit/undo cycles without crashes.
+- Registration: synthetic translation error <=0.10 mm; rotation error <=0.10 degrees; >=95% convergence on qualified data; bad alignments flagged.
+- Mesh: >=95% reconstruction success on qualified datasets; zero invalid vertices; <=0.20 mm surface deviation on designated references; export/import precision documented; non-manifold conditions reported.
+- Performance: no unbounded memory growth in a 60-minute workload; >=90% of CrealityScan comparable throughput and >=90% of its geometric quality against independent ground truth where meaningful; accuracy never sacrificed.
+- Rust: all independently developed production reconstruction modules in Rust by stable release; no mandatory C++ reconstruction runtime dependencies; zero release-CI compiler warnings; all mandatory tests pass; unsafe code reviewed; dependency licenses verified.
+
+TESTING
+Automate unit, integration, hardware, decoding, calibration, geometry, registration, reconstruction, editing, serialization, memory-safety, stability, and benchmark tests. Compare identical datasets with open-source numerical reference implementations and CrealityScan behavior wherever feasible. Use calibrated objects for independent truth. Include noise, partial overlap, symmetry, and difficult surfaces. Add regression tests for significant defects. No feature is complete merely because it compiles or looks correct.
+
+FAILURE HANDLING
+Capture diagnostics, isolate causes, research alternatives, form testable hypotheses, run controlled experiments, analyze outcomes, fix or pivot, and add regression coverage. Do not repeat identical failed attempts without a changed hypothesis. Escalate difficult issues when available, then resume implementation. Continue independent work when hardware interaction is blocked.
+
+PROJECT CONTINUITY
+Maintain PROJECT_STATUS.md, ACCEPTANCE_RESULTS.md, ARCHITECTURE.md, PROTOCOL_FINDINGS.md, BENCHMARKS.md, and ROADMAP.md. Record verified facts versus hypotheses, completed milestones, defects, evidence, benchmark methods/results, hardware blockers, and next actions. Commit working progress and preserve known-good versions. Advance automatically within the authorized runtime.
+
+MILESTONES
+M1 native valid Raptor acquisition; M2 first independent genuine point cloud; M3 live tracking and visualization; M4 trimming/filtering/undo/project persistence; M5 accurate mesh reconstruction/export; M6 advanced editing, alignment, measurements; M7 CPU/GPU/memory optimization; M8 Rust independence; M9 qualification; M10 documented, licensed, packaged public release. Parallelize independent tasks where useful without destabilizing working milestones.
+
+RELEASE REQUIREMENTS
+Stable 1.0 requires: (A) native Raptor connection, controls, real acquisition, safe recovery, and at least one fully validated scanning mode; clearly label other modes supported/experimental/unsupported; (B) GUI workflow for scan, preview, record, trim, filter, align, mesh, repair, measure, save/reopen, and export; (C) mandatory point-cloud selection/trimming, outlier filtering, voxel downsampling, mesh repair/simplification, measurements, undo/redo; (D) Rust application and reconstruction engine without mandatory C++ reconstruction runtime or Creality runtime; (E) approved mode-specific accuracy and performance gates with recorded calibrated evidence; (F) all reliability trials and no unresolved critical defects; (G) automated tests, static checks, formatting, and build verification pass, separating hardware tests from offline tests; (H) public-ready source, compatible license, dependency notices, installation/build instructions, hardware matrix, architecture, authorized protocol documentation, benchmark/test methodology, limitations, roadmap, release notes, and reproducible build; (I) responsive usable GUI, clear errors, cancellation, project integrity, no silent data loss. Never distribute proprietary Creality files or private scan data.
+
+FINAL END-TO-END QUALIFICATION
+Without Wine or CrealityScan: connect and initialize Raptor; select a supported mode and load calibration; scan a calibrated object with live preview; record/save raw data; trim table/background; filter noise; perform a second scan; align/merge sessions; reconstruct mesh; repair defects; measure known dimensions against approved tolerances; export STL and PLY; save editable project; close/restart; reopen and verify geometry, measurements, edit state, and integrity. Repeat the complete workflow 10 times across designated qualification objects. Require 10/10 passes, all mandatory numerical gates, no unexpected crashes, no unresolved critical defects, and evidence for every result.
+
+RELEASE STAGES
+Experimental: early acquisition/reconstruction prototypes.
+Alpha: real native Raptor point cloud and export without CrealityScan.
+Beta: complete native GUI workflow with qualification incomplete.
+Release Candidate: mandatory functionality and automated tests complete, documentation ready, final hardware qualification underway.
+Stable 1.0: approved accuracy/reliability thresholds and all 10 end-to-end qualifications passed. Clearly disclose future-mode and advanced-CAD limitations outside the agreed 1.0 scope.
+
+DEFINITION OF SUCCESS
+A Linux user installs the Rust application, connects the Raptor, acquires a real scan, reconstructs accurate geometry, trims/cleans point clouds, aligns sessions, generates/repairs meshes, measures features, and exports usable models without Wine or CrealityScan. The result is stable, independently validated, documented, legally distributable, open-source, and extensible.
+
+IMMEDIATE EXECUTION ORDER
+1. Inspect and verify the working CrealityScan Wine installation, version, and actual supported functions.
+2. Verify and preserve existing Linux Raptor communication.
+3. Capture reference behavior and baseline measurements where possible.
+4. Create the Rust workspace, recording/replay architecture, status and acceptance files.
+5. Implement independent genuine sensor capture and frame validation.
+6. Reconstruct the first real point cloud and continue through the milestone sequence.
+7. Automatically advance to the next feasible task, preserving evidence and tested working code.
+
+FINAL DIRECTIVE
+BEGIN EXECUTION NOW. Continue autonomous, evidence-driven engineering within the available authorized runtime until the defined stable release requirements are satisfied. Do not stop at research, mockups, or unverified claims. This is the complete mission directive.

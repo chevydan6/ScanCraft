@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "status": "geometry_produced",
+  "points": 3,
+  "mesh_triangles": 0,
+  "rejected_seeds": 1,
+  "mapping_failures": 0,
+  "rejected_geometry": 0,
+  "synchronization_verified": false,
+  "physical_accuracy_qualified": false,
+  "inputs": [
+    {
+      "role": "calibration",
+      "bytes": 702,
+      "crc32": 2903535094
+    },
+    {
+      "role": "request",
+      "bytes": 842,
+      "crc32": 3247559221
+    },
+    {
+      "role": "left_raw_payload",
+      "bytes": 2048,
+      "crc32": 4042046966
+    },
+    {
+      "role": "left_raw_metadata",
+      "bytes": 16,
+      "crc32": 2292836088
+    },
+    {
+      "role": "right_raw_payload",
+      "bytes": 2048,
+      "crc32": 657072394
+    },
+    {
+      "role": "right_raw_metadata",
+      "bytes": 16,
+      "crc32": 3111037272
+    }
+  ],
+  "artifacts": [
+    {
+      "role": "report.json",
+      "bytes": 9661,
+      "crc32": 3169743808
+    },
+    {
+      "role": "calibration.rapcal",
+      "bytes": 702,
+      "crc32": 2903535094
+    },
+    {
+      "role": "request.json",
+      "bytes": 842,
+      "crc32": 3247559221
+    },
+    {
+      "role": "recording-sources.json",
+      "bytes": 2617,
+      "crc32": 465731695
+    },
+    {
+      "role": "left-frame.raptor",
+      "bytes": 2390,
+      "crc32": 1041467941
+    },
+    {
+      "role": "right-frame.raptor",
+      "bytes": 2390,
+      "crc32": 1032096098
+    },
+    {
+      "role": "points.ply",
+      "bytes": 297,
+      "crc32": 3882995319
+    },
+    {
+      "role": "project.orproj",
+      "bytes": 4235,
+      "crc32": 2939997674
+    }
+  ]
+}

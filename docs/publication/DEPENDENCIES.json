@@ -1,0 +1,5275 @@
+[
+  {
+    "name": "ab_glyph",
+    "version": "0.2.32",
+    "license": "Apache-2.0",
+    "repository": "https://github.com/alexheretic/ab-glyph",
+    "notices": [
+      "THIRD_PARTY_LICENSES/ab_glyph-0.2.32/LICENSE"
+    ],
+    "upstream_revision": "ffde4c677fa1095ac355174c1aa2919d7d53eff3",
+    "upstream_path": "glyph",
+    "authors": [
+      "Alex Butler <alexheretic@gmail.com>"
+    ]
+  },
+  {
+    "name": "ab_glyph_rasterizer",
+    "version": "0.1.10",
+    "license": "Apache-2.0",
+    "repository": "https://github.com/alexheretic/ab-glyph",
+    "notices": [
+      "THIRD_PARTY_LICENSES/ab_glyph_rasterizer-0.1.10/LICENSE"
+    ],
+    "upstream_revision": "971e5a9b337fbae3edb1ac3ac44d84351d24e8b8",
+    "upstream_path": "rasterizer",
+    "authors": [
+      "Alex Butler <alexheretic@gmail.com>"
+    ]
+  },
+  {
+    "name": "adler2",
+    "version": "2.0.1",
+    "license": "0BSD OR MIT OR Apache-2.0",
+    "repository": "https://github.com/oyvindln/adler2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/adler2-2.0.1/LICENSE-0BSD",
+      "THIRD_PARTY_LICENSES/adler2-2.0.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/adler2-2.0.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "89a031a0f42eeff31c70dc598b398cbf31f1680f",
+    "upstream_path": "",
+    "authors": [
+      "Jonas Schievink <jonasschievink@gmail.com>",
+      "oyvindln <oyvindln@users.noreply.github.com>"
+    ]
+  },
+  {
+    "name": "ahash",
+    "version": "0.8.12",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/tkaitchuck/ahash",
+    "notices": [
+      "THIRD_PARTY_LICENSES/ahash-0.8.12/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/ahash-0.8.12/LICENSE-MIT"
+    ],
+    "upstream_revision": "9aa1ba20f05ed582eda04ea625d5658c92195a57",
+    "upstream_path": "",
+    "authors": [
+      "Tom Kaitchuck <Tom.Kaitchuck@gmail.com>"
+    ]
+  },
+  {
+    "name": "aho-corasick",
+    "version": "1.1.5",
+    "license": "Unlicense OR MIT",
+    "repository": "https://github.com/BurntSushi/aho-corasick",
+    "notices": [
+      "THIRD_PARTY_LICENSES/aho-corasick-1.1.5/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/aho-corasick-1.1.5/UNLICENSE"
+    ],
+    "upstream_revision": "5178060ce73d91938f8582d0360e3be031380440",
+    "upstream_path": "",
+    "authors": [
+      "Andrew Gallant <jamslam@gmail.com>"
+    ]
+  },
+  {
+    "name": "android-activity",
+    "version": "0.6.1",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-mobile/android-activity",
+    "notices": [
+      "THIRD_PARTY_LICENSES/android-activity-0.6.1/LICENSE",
+      "THIRD_PARTY_LICENSES/android-activity-0.6.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/android-activity-0.6.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "b4ddf059b77be12cdb955d394e65a92e7568d936",
+    "upstream_path": "android-activity",
+    "authors": []
+  },
+  {
+    "name": "android-properties",
+    "version": "0.2.2",
+    "license": "MIT",
+    "repository": "https://github.com/miklelappo/android-properties",
+    "notices": [
+      "THIRD_PARTY_LICENSES/android-properties-0.2.2/LICENSE"
+    ],
+    "upstream_revision": "35f123fa53be399307eb861b033a62f0ed193d83",
+    "upstream_path": "",
+    "authors": [
+      "Mikhail Lappo <mikhail.lappo@esrlabs.com>"
+    ]
+  },
+  {
+    "name": "approx",
+    "version": "0.5.1",
+    "license": "Apache-2.0",
+    "repository": "https://github.com/brendanzab/approx",
+    "notices": [
+      "THIRD_PARTY_LICENSES/approx-0.5.1/LICENSE"
+    ],
+    "upstream_revision": "13fcbc78dcda4d0136de07c36a7979d545f08e38",
+    "upstream_path": "",
+    "authors": [
+      "Brendan Zabarauskas <bjzaba@yahoo.com.au>"
+    ]
+  },
+  {
+    "name": "arboard",
+    "version": "3.7.0",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/1Password/arboard",
+    "notices": [
+      "THIRD_PARTY_LICENSES/arboard-3.7.0/LICENSE-APACHE.txt",
+      "THIRD_PARTY_LICENSES/arboard-3.7.0/LICENSE-MIT.txt"
+    ],
+    "upstream_revision": "5f5c8637911ba219edee619105a19b4f74e66a9f",
+    "upstream_path": "",
+    "authors": []
+  },
+  {
+    "name": "arrayvec",
+    "version": "0.7.8",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/bluss/arrayvec",
+    "notices": [
+      "THIRD_PARTY_LICENSES/arrayvec-0.7.8/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/arrayvec-0.7.8/LICENSE-MIT"
+    ],
+    "upstream_revision": "0cb664cf505844348538230479b0040b44f3faf1",
+    "upstream_path": "",
+    "authors": [
+      "bluss"
+    ]
+  },
+  {
+    "name": "as-raw-xcb-connection",
+    "version": "1.0.1",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/psychon/as-raw-xcb-connection",
+    "notices": [
+      "THIRD_PARTY_LICENSES/as-raw-xcb-connection-1.0.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/as-raw-xcb-connection-1.0.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "0f7d9bf88fc3e68a66c4e2f5130cddbdd2ae43f0",
+    "upstream_path": "",
+    "authors": []
+  },
+  {
+    "name": "atomic-waker",
+    "version": "1.1.2",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/smol-rs/atomic-waker",
+    "notices": [
+      "THIRD_PARTY_LICENSES/atomic-waker-1.1.2/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/atomic-waker-1.1.2/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/atomic-waker-1.1.2/LICENSE-THIRD-PARTY"
+    ],
+    "upstream_revision": "9969a29ccd1fe298e2df7346849c0095ba303a64",
+    "upstream_path": "",
+    "authors": [
+      "Stjepan Glavina <stjepang@gmail.com>",
+      "Contributors to futures-rs"
+    ]
+  },
+  {
+    "name": "autocfg",
+    "version": "1.5.1",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/cuviper/autocfg",
+    "notices": [
+      "THIRD_PARTY_LICENSES/autocfg-1.5.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/autocfg-1.5.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "2799b09c24e6632f8e653c5cd8fc303e85a906ba",
+    "upstream_path": "",
+    "authors": [
+      "Josh Stone <cuviper@gmail.com>"
+    ]
+  },
+  {
+    "name": "bindgen",
+    "version": "0.65.1",
+    "license": "BSD-3-Clause",
+    "repository": "https://github.com/rust-lang/rust-bindgen",
+    "notices": [
+      "THIRD_PARTY_LICENSES/bindgen-0.65.1/LICENSE"
+    ],
+    "upstream_revision": "7d243056d335fdc4537f7bca73c06d01aae24ddc",
+    "upstream_path": "bindgen",
+    "authors": [
+      "Jyun-Yan You <jyyou.tw@gmail.com>",
+      "Emilio Cobos \u00c1lvarez <emilio@crisal.io>",
+      "Nick Fitzgerald <fitzgen@gmail.com>",
+      "The Servo project developers"
+    ]
+  },
+  {
+    "name": "bit-set",
+    "version": "0.8.0",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/contain-rs/bit-set",
+    "notices": [
+      "THIRD_PARTY_LICENSES/bit-set-0.8.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/bit-set-0.8.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "2b8861d23b53d63d326d2694ddabde6e7b19fbd0",
+    "upstream_path": "",
+    "authors": [
+      "Alexis Beingessner <a.beingessner@gmail.com>"
+    ]
+  },
+  {
+    "name": "bit-vec",
+    "version": "0.8.0",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/contain-rs/bit-vec",
+    "notices": [
+      "THIRD_PARTY_LICENSES/bit-vec-0.8.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/bit-vec-0.8.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "16d8d5ed27e9d379ae5d531ffcf7535cd02ef8f3",
+    "upstream_path": "",
+    "authors": [
+      "Alexis Beingessner <a.beingessner@gmail.com>"
+    ]
+  },
+  {
+    "name": "bitflags",
+    "version": "1.3.2",
+    "license": "MIT/Apache-2.0",
+    "repository": "https://github.com/bitflags/bitflags",
+    "notices": [
+      "THIRD_PARTY_LICENSES/bitflags-1.3.2/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/bitflags-1.3.2/LICENSE-MIT"
+    ],
+    "upstream_revision": "ed185cfb1c447c1b4bd6ac021c9ec3bb02c9e2f2",
+    "upstream_path": "",
+    "authors": [
+      "The Rust Project Developers"
+    ]
+  },
+  {
+    "name": "bitflags",
+    "version": "2.13.2",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/bitflags/bitflags",
+    "notices": [
+      "THIRD_PARTY_LICENSES/bitflags-2.13.2/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/bitflags-2.13.2/LICENSE-MIT"
+    ],
+    "upstream_revision": "80ce9b545acb0bd42150695fc351889cac1d8eb4",
+    "upstream_path": "",
+    "authors": [
+      "The Rust Project Developers"
+    ]
+  },
+  {
+    "name": "block2",
+    "version": "0.5.1",
+    "license": "MIT",
+    "repository": "https://github.com/madsmtm/objc2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/block2-0.5.1/LICENSE.txt"
+    ],
+    "upstream_revision": "4fc083f1c6d6784577e38b0ee8dbd344481e2fd2",
+    "upstream_path": "crates/block2",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/madsmtm/objc2/4fc083f1c6d6784577e38b0ee8dbd344481e2fd2/LICENSE.txt",
+        "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+      }
+    ],
+    "authors": [
+      "Steven Sheldon",
+      "Mads Marquart <mads@marquart.dk>"
+    ]
+  },
+  {
+    "name": "bumpalo",
+    "version": "3.20.3",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/fitzgen/bumpalo",
+    "notices": [
+      "THIRD_PARTY_LICENSES/bumpalo-3.20.3/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/bumpalo-3.20.3/LICENSE-MIT"
+    ],
+    "upstream_revision": "84654ace6be4444da3ff102a0a0af3b38c4df4fb",
+    "upstream_path": "",
+    "authors": [
+      "Nick Fitzgerald <fitzgen@gmail.com>"
+    ]
+  },
+  {
+    "name": "bytemuck",
+    "version": "1.25.2",
+    "license": "Zlib OR Apache-2.0 OR MIT",
+    "repository": "https://github.com/Lokathor/bytemuck",
+    "notices": [
+      "THIRD_PARTY_LICENSES/bytemuck-1.25.2/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/bytemuck-1.25.2/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/bytemuck-1.25.2/LICENSE-ZLIB"
+    ],
+    "upstream_revision": "f363643e951a7ac9e4b9921de982f2b0918902e3",
+    "upstream_path": "",
+    "authors": [
+      "Lokathor <zefria@gmail.com>"
+    ]
+  },
+  {
+    "name": "bytemuck_derive",
+    "version": "1.12.1",
+    "license": "Zlib OR Apache-2.0 OR MIT",
+    "repository": "https://github.com/Lokathor/bytemuck",
+    "notices": [
+      "THIRD_PARTY_LICENSES/bytemuck_derive-1.12.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/bytemuck_derive-1.12.1/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/bytemuck_derive-1.12.1/LICENSE-ZLIB"
+    ],
+    "upstream_revision": "839ee557dd9b1ac5a0b0155cabba71f96b4ccd06",
+    "upstream_path": "derive",
+    "authors": [
+      "Lokathor <zefria@gmail.com>"
+    ]
+  },
+  {
+    "name": "byteorder-lite",
+    "version": "0.1.0",
+    "license": "Unlicense OR MIT",
+    "repository": "https://github.com/image-rs/byteorder-lite",
+    "notices": [
+      "THIRD_PARTY_LICENSES/byteorder-lite-0.1.0/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/byteorder-lite-0.1.0/UNLICENSE"
+    ],
+    "upstream_revision": "7d44da06a48fe10d7e23efd9a932d18a7a2def63",
+    "upstream_path": "",
+    "authors": []
+  },
+  {
+    "name": "bytes",
+    "version": "1.12.1",
+    "license": "MIT",
+    "repository": "https://github.com/tokio-rs/bytes",
+    "notices": [
+      "THIRD_PARTY_LICENSES/bytes-1.12.1/LICENSE"
+    ],
+    "upstream_revision": "76c0fbb54ed4336caf9d2311658a2f4a5627c21d",
+    "upstream_path": "",
+    "authors": [
+      "Carl Lerche <me@carllerche.com>",
+      "Sean McArthur <sean@seanmonstar.com>"
+    ]
+  },
+  {
+    "name": "calloop",
+    "version": "0.13.0",
+    "license": "MIT",
+    "repository": "https://github.com/Smithay/calloop",
+    "notices": [
+      "THIRD_PARTY_LICENSES/calloop-0.13.0/LICENSE.txt"
+    ],
+    "upstream_revision": "72ab703e65681001aa69df798cf9fcd729b78a74",
+    "upstream_path": "",
+    "authors": [
+      "Elinor Berger <elinor@safaradeg.net>"
+    ]
+  },
+  {
+    "name": "calloop",
+    "version": "0.14.5",
+    "license": "MIT",
+    "repository": "https://github.com/Smithay/calloop",
+    "notices": [
+      "THIRD_PARTY_LICENSES/calloop-0.14.5/LICENSE.txt"
+    ],
+    "upstream_revision": "c0d9940eb4764e6a244f0ee46bc99e988f9d9b7c",
+    "upstream_path": "",
+    "authors": [
+      "Elinor Berger <elinor@safaradeg.net>"
+    ]
+  },
+  {
+    "name": "calloop-wayland-source",
+    "version": "0.3.0",
+    "license": "MIT",
+    "repository": "https://github.com/smithay/calloop-wayland-source",
+    "notices": [
+      "THIRD_PARTY_LICENSES/calloop-wayland-source-0.3.0/LICENSE.txt"
+    ],
+    "upstream_revision": "47ce61c2629c102bb37e893640037610e29dfd38",
+    "upstream_path": "",
+    "authors": [
+      "Kirill Chibisov <contact@kchibisov.com>"
+    ]
+  },
+  {
+    "name": "calloop-wayland-source",
+    "version": "0.4.1",
+    "license": "MIT",
+    "repository": "https://github.com/smithay/calloop-wayland-source",
+    "notices": [
+      "THIRD_PARTY_LICENSES/calloop-wayland-source-0.4.1/LICENSE.txt"
+    ],
+    "upstream_revision": "9828ce382a6b3a2b4b688048314939f7c517bcc3",
+    "upstream_path": "",
+    "authors": [
+      "Kirill Chibisov <contact@kchibisov.com>"
+    ]
+  },
+  {
+    "name": "cc",
+    "version": "1.10.0",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-lang/cc-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/cc-1.10.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/cc-1.10.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "8d06fcb73f6938c35c9bc59edbdcb9fb56f04d71",
+    "upstream_path": "",
+    "authors": []
+  },
+  {
+    "name": "cexpr",
+    "version": "0.6.0",
+    "license": "Apache-2.0/MIT",
+    "repository": "https://github.com/jethrogb/rust-cexpr",
+    "notices": [
+      "THIRD_PARTY_LICENSES/cexpr-0.6.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/cexpr-0.6.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "c7ccdfbc37b508cfda1171ab4f89afaeb72e82f3",
+    "upstream_path": "",
+    "authors": [
+      "Jethro Beekman <jethro@jbeekman.nl>"
+    ]
+  },
+  {
+    "name": "cfg-if",
+    "version": "1.0.5",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-lang/cfg-if",
+    "notices": [
+      "THIRD_PARTY_LICENSES/cfg-if-1.0.5/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/cfg-if-1.0.5/LICENSE-MIT"
+    ],
+    "upstream_revision": "8b0a2b0fc1fa3b3741b9e72895f390cf499fe36f",
+    "upstream_path": "",
+    "authors": [
+      "Alex Crichton <alex@alexcrichton.com>"
+    ]
+  },
+  {
+    "name": "cfg_aliases",
+    "version": "0.2.2",
+    "license": "MIT",
+    "repository": "https://github.com/katharostech/cfg_aliases",
+    "notices": [
+      "THIRD_PARTY_LICENSES/cfg_aliases-0.2.2/LICENSE",
+      "THIRD_PARTY_LICENSES/cfg_aliases-0.2.2/NOTICES.md"
+    ],
+    "upstream_revision": "e069ce61e00fee423ac1dbe6a897f228f1774716",
+    "upstream_path": "",
+    "authors": [
+      "Zicklag <zicklag@katharostech.com>"
+    ]
+  },
+  {
+    "name": "cgl",
+    "version": "0.3.2",
+    "license": "MIT / Apache-2.0",
+    "repository": "https://github.com/servo/cgl-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/cgl-0.3.2/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/cgl-0.3.2/LICENSE-MIT"
+    ],
+    "upstream_revision": "46348b6c10543dd6465d47a7e14ee0f37516e08e",
+    "upstream_path": "",
+    "authors": [
+      "The Servo Project Developers"
+    ]
+  },
+  {
+    "name": "clang-sys",
+    "version": "1.9.1",
+    "license": "Apache-2.0",
+    "repository": "https://github.com/KyleMayes/clang-sys",
+    "notices": [
+      "THIRD_PARTY_LICENSES/clang-sys-1.9.1/LICENSE.txt"
+    ],
+    "upstream_revision": "8844c21292e54818d200980cd90a5498e2a5a644",
+    "upstream_path": "",
+    "authors": [
+      "Kyle Mayes <kyle@mayeses.com>"
+    ]
+  },
+  {
+    "name": "clipboard-win",
+    "version": "5.4.3",
+    "license": "BSL-1.0",
+    "repository": "https://github.com/DoumanAsh/clipboard-win",
+    "notices": [
+      "THIRD_PARTY_LICENSES/clipboard-win-5.4.3/LICENSE"
+    ],
+    "upstream_revision": "ed27008ae5d1f10cfbb266de039f0fb35fd05a56",
+    "upstream_path": "",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/DoumanAsh/clipboard-win/ed27008ae5d1f10cfbb266de039f0fb35fd05a56/LICENSE",
+        "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566"
+      }
+    ],
+    "authors": [
+      "Douman <douman@gmx.se>"
+    ]
+  },
+  {
+    "name": "codespan-reporting",
+    "version": "0.12.0",
+    "license": "Apache-2.0",
+    "repository": "https://github.com/brendanzab/codespan",
+    "notices": [
+      "THIRD_PARTY_LICENSES/codespan-reporting-0.12.0/LICENSE"
+    ],
+    "upstream_revision": "3d3a03a8fcc30cc10b783b16c62029d5c232059b",
+    "upstream_path": "codespan-reporting",
+    "authors": [
+      "Brendan Zabarauskas <bjzaba@yahoo.com.au>"
+    ]
+  },
+  {
+    "name": "combine",
+    "version": "4.6.9",
+    "license": "MIT",
+    "repository": "https://github.com/Marwes/combine",
+    "notices": [
+      "THIRD_PARTY_LICENSES/combine-4.6.9/LICENSE"
+    ],
+    "upstream_revision": "a2da738ca628bb2e2ef9881fce8e35cbafc455b2",
+    "upstream_path": "",
+    "authors": [
+      "Markus Westerlind <marwes91@gmail.com>"
+    ]
+  },
+  {
+    "name": "concurrent-queue",
+    "version": "2.5.0",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/smol-rs/concurrent-queue",
+    "notices": [
+      "THIRD_PARTY_LICENSES/concurrent-queue-2.5.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/concurrent-queue-2.5.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "e874f701f8413de01948c4903f894e5c845d8950",
+    "upstream_path": "",
+    "authors": [
+      "Stjepan Glavina <stjepang@gmail.com>",
+      "Taiki Endo <te316e89@gmail.com>",
+      "John Nunley <dev@notgull.net>"
+    ]
+  },
+  {
+    "name": "core-foundation",
+    "version": "0.9.4",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/servo/core-foundation-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/core-foundation-0.9.4/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/core-foundation-0.9.4/LICENSE-MIT"
+    ],
+    "upstream_revision": "795398aa3775bbdaf03419fcd2cc0dad7ebbc4dc",
+    "upstream_path": "core-foundation",
+    "authors": [
+      "The Servo Project Developers"
+    ]
+  },
+  {
+    "name": "core-foundation",
+    "version": "0.10.1",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/servo/core-foundation-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/core-foundation-0.10.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/core-foundation-0.10.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "548b65cd3046bb46fc5cebb9f39e7bfd56eaeaa2",
+    "upstream_path": "core-foundation",
+    "authors": [
+      "The Servo Project Developers"
+    ]
+  },
+  {
+    "name": "core-foundation-sys",
+    "version": "0.8.7",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/servo/core-foundation-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/core-foundation-sys-0.8.7/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/core-foundation-sys-0.8.7/LICENSE-MIT"
+    ],
+    "upstream_revision": "652bab0a62d87df8a974ffad2ad9f7be218a8b56",
+    "upstream_path": "core-foundation-sys",
+    "authors": [
+      "The Servo Project Developers"
+    ]
+  },
+  {
+    "name": "core-graphics",
+    "version": "0.23.2",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/servo/core-foundation-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/core-graphics-0.23.2/COPYRIGHT",
+      "THIRD_PARTY_LICENSES/core-graphics-0.23.2/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/core-graphics-0.23.2/LICENSE-MIT"
+    ],
+    "upstream_revision": "07be553c3f1d435b5087c16e787d73cb24b65efb",
+    "upstream_path": "core-graphics",
+    "authors": [
+      "The Servo Project Developers"
+    ]
+  },
+  {
+    "name": "core-graphics-types",
+    "version": "0.1.3",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/servo/core-foundation-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/core-graphics-types-0.1.3/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/core-graphics-types-0.1.3/LICENSE-MIT"
+    ],
+    "upstream_revision": "d4ce710182f1756c9d874ab917283fe1a1b7a011",
+    "upstream_path": "core-graphics-types",
+    "authors": [
+      "The Servo Project Developers"
+    ]
+  },
+  {
+    "name": "crc32fast",
+    "version": "1.5.3",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/srijs/rust-crc32fast",
+    "notices": [
+      "THIRD_PARTY_LICENSES/crc32fast-1.5.3/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/crc32fast-1.5.3/LICENSE-MIT"
+    ],
+    "upstream_revision": "d2363eab95ebc85fcf726d1c8fa845148e474591",
+    "upstream_path": "",
+    "authors": [
+      "Sam Rijs <srijs@airpost.net>",
+      "Alex Crichton <alex@alexcrichton.com>"
+    ]
+  },
+  {
+    "name": "crossbeam-utils",
+    "version": "0.8.23",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/crossbeam-rs/crossbeam",
+    "notices": [
+      "THIRD_PARTY_LICENSES/crossbeam-utils-0.8.23/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/crossbeam-utils-0.8.23/LICENSE-MIT"
+    ],
+    "upstream_revision": "2920c984290229ab4e0ca0452ef09e48a82063f3",
+    "upstream_path": "crossbeam-utils",
+    "authors": []
+  },
+  {
+    "name": "crunchy",
+    "version": "0.2.4",
+    "license": "MIT",
+    "repository": "https://github.com/eira-fransham/crunchy",
+    "notices": [
+      "THIRD_PARTY_LICENSES/crunchy-0.2.4/LICENSE"
+    ],
+    "upstream_revision": "ba7b86cea6ba89ccfc72ccb24cc4a4ac6d9c6272",
+    "upstream_path": "",
+    "authors": [
+      "Eira Fransham <jackefransham@gmail.com>"
+    ]
+  },
+  {
+    "name": "cursor-icon",
+    "version": "1.2.0",
+    "license": "MIT OR Apache-2.0 OR Zlib",
+    "repository": "https://github.com/rust-windowing/cursor-icon",
+    "notices": [
+      "THIRD_PARTY_LICENSES/cursor-icon-1.2.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/cursor-icon-1.2.0/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/cursor-icon-1.2.0/LICENSE-ZLIB"
+    ],
+    "upstream_revision": "766287581de8b4895d018c2d15ada77627a954f0",
+    "upstream_path": "",
+    "authors": [
+      "Kirill Chibisov <contact@kchibisov.com>"
+    ]
+  },
+  {
+    "name": "dispatch",
+    "version": "0.2.0",
+    "license": "MIT",
+    "repository": "http://github.com/SSheldon/rust-dispatch",
+    "notices": [],
+    "upstream_revision": "82d6c7a5b75dc0c71c3f46f87bb6c16a476f7748",
+    "upstream_path": "",
+    "notice_sources": [],
+    "authors": [
+      "Steven Sheldon"
+    ],
+    "notice_status": "No license text in packaged crate or inspected exact-revision upstream root; declared SPDX license retained, optional non-Linux or inactive dependency, not vendored."
+  },
+  {
+    "name": "dispatch2",
+    "version": "0.3.1",
+    "license": "Zlib OR Apache-2.0 OR MIT",
+    "repository": "https://github.com/madsmtm/objc2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/dispatch2-0.3.1/LICENSE.md"
+    ],
+    "upstream_revision": "8852b424193ca41602281b3d7540d7c8ed51e49a",
+    "upstream_path": "crates/dispatch2",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/madsmtm/objc2/8852b424193ca41602281b3d7540d7c8ed51e49a/LICENSE.md",
+        "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54"
+      }
+    ],
+    "authors": [
+      "Mads Marquart <mads@marquart.dk>",
+      "Mary <mary@mary.zone>"
+    ]
+  },
+  {
+    "name": "displaydoc",
+    "version": "0.2.7",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/yaahc/displaydoc",
+    "notices": [
+      "THIRD_PARTY_LICENSES/displaydoc-0.2.7/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/displaydoc-0.2.7/LICENSE-MIT"
+    ],
+    "upstream_revision": "20016487354a96b22a7b97974483ae4f51a1bddc",
+    "upstream_path": "",
+    "authors": [
+      "Jane Lusby <jlusby@yaah.dev>"
+    ]
+  },
+  {
+    "name": "dlib",
+    "version": "0.5.3",
+    "license": "MIT",
+    "repository": "https://github.com/elinorbgr/dlib",
+    "notices": [
+      "THIRD_PARTY_LICENSES/dlib-0.5.3/LICENSE.txt"
+    ],
+    "upstream_revision": "ab1a79fd8b92a331a5f123be9e1dcbbcbd48dbf8",
+    "upstream_path": "",
+    "authors": [
+      "Elinor Berger <elinor@safaradeg.net>"
+    ]
+  },
+  {
+    "name": "document-features",
+    "version": "0.2.12",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/slint-ui/document-features",
+    "notices": [
+      "THIRD_PARTY_LICENSES/document-features-0.2.12/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/document-features-0.2.12/LICENSE-MIT"
+    ],
+    "upstream_revision": "721e708012254b81760bd2befdae0970e7a2615e",
+    "upstream_path": "",
+    "authors": [
+      "Slint Developers <info@slint.dev>"
+    ]
+  },
+  {
+    "name": "downcast-rs",
+    "version": "1.2.1",
+    "license": "MIT/Apache-2.0",
+    "repository": "https://github.com/marcianx/downcast-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/downcast-rs-1.2.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/downcast-rs-1.2.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "c4c48bad50482df2544115ba971acfd5916e6140",
+    "upstream_path": "",
+    "authors": [
+      "Ashish Myles <marcianx@gmail.com>",
+      "Runji Wang <wangrunji0408@163.com>"
+    ]
+  },
+  {
+    "name": "dpi",
+    "version": "0.1.2",
+    "license": "Apache-2.0 AND MIT",
+    "repository": "https://github.com/rust-windowing/winit",
+    "notices": [
+      "THIRD_PARTY_LICENSES/dpi-0.1.2/LICENSE",
+      "THIRD_PARTY_LICENSES/dpi-0.1.2/LICENSE-LIBM-MIT"
+    ],
+    "upstream_revision": "587ade844dfb0eada3696ba1cb263c66eea80581",
+    "upstream_path": "dpi",
+    "authors": []
+  },
+  {
+    "name": "ecolor",
+    "version": "0.33.3",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/emilk/egui",
+    "notices": [
+      "THIRD_PARTY_LICENSES/ecolor-0.33.3/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/ecolor-0.33.3/LICENSE-APACHE"
+    ],
+    "upstream_revision": "44cdd653e2317d300fb8a6c9c36b03f23991e803",
+    "upstream_path": "crates/ecolor",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/emilk/egui/44cdd653e2317d300fb8a6c9c36b03f23991e803/LICENSE-MIT",
+        "sha256": "95ca92f5f8ea5231f1580b3a2a799e8260af3114b900e1def5355a7f44bcf60c"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/emilk/egui/44cdd653e2317d300fb8a6c9c36b03f23991e803/LICENSE-APACHE",
+        "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90"
+      }
+    ],
+    "authors": [
+      "Emil Ernerfeldt <emil.ernerfeldt@gmail.com>",
+      "Andreas Reich <reichandreas@gmx.de>"
+    ]
+  },
+  {
+    "name": "eframe",
+    "version": "0.33.3",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/emilk/egui/tree/main/crates/eframe",
+    "notices": [
+      "THIRD_PARTY_LICENSES/eframe-0.33.3/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/eframe-0.33.3/LICENSE-APACHE"
+    ],
+    "upstream_revision": "44cdd653e2317d300fb8a6c9c36b03f23991e803",
+    "upstream_path": "crates/eframe",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/emilk/egui/44cdd653e2317d300fb8a6c9c36b03f23991e803/LICENSE-MIT",
+        "sha256": "95ca92f5f8ea5231f1580b3a2a799e8260af3114b900e1def5355a7f44bcf60c"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/emilk/egui/44cdd653e2317d300fb8a6c9c36b03f23991e803/LICENSE-APACHE",
+        "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90"
+      }
+    ],
+    "authors": [
+      "Emil Ernerfeldt <emil.ernerfeldt@gmail.com>"
+    ]
+  },
+  {
+    "name": "egui",
+    "version": "0.33.3",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/emilk/egui",
+    "notices": [
+      "THIRD_PARTY_LICENSES/egui-0.33.3/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/egui-0.33.3/LICENSE-APACHE"
+    ],
+    "upstream_revision": "44cdd653e2317d300fb8a6c9c36b03f23991e803",
+    "upstream_path": "crates/egui",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/emilk/egui/44cdd653e2317d300fb8a6c9c36b03f23991e803/LICENSE-MIT",
+        "sha256": "95ca92f5f8ea5231f1580b3a2a799e8260af3114b900e1def5355a7f44bcf60c"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/emilk/egui/44cdd653e2317d300fb8a6c9c36b03f23991e803/LICENSE-APACHE",
+        "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90"
+      }
+    ],
+    "authors": [
+      "Emil Ernerfeldt <emil.ernerfeldt@gmail.com>"
+    ]
+  },
+  {
+    "name": "egui-wgpu",
+    "version": "0.33.3",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/emilk/egui/tree/main/crates/egui-wgpu",
+    "notices": [
+      "THIRD_PARTY_LICENSES/egui-wgpu-0.33.3/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/egui-wgpu-0.33.3/LICENSE-APACHE"
+    ],
+    "upstream_revision": "44cdd653e2317d300fb8a6c9c36b03f23991e803",
+    "upstream_path": "crates/egui-wgpu",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/emilk/egui/44cdd653e2317d300fb8a6c9c36b03f23991e803/LICENSE-MIT",
+        "sha256": "95ca92f5f8ea5231f1580b3a2a799e8260af3114b900e1def5355a7f44bcf60c"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/emilk/egui/44cdd653e2317d300fb8a6c9c36b03f23991e803/LICENSE-APACHE",
+        "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90"
+      }
+    ],
+    "authors": [
+      "Nils Hasenbanck <nils@hasenbanck.de>",
+      "embotech <opensource@embotech.com>",
+      "Emil Ernerfeldt <emil.ernerfeldt@gmail.com>"
+    ]
+  },
+  {
+    "name": "egui-winit",
+    "version": "0.33.3",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/emilk/egui/tree/main/crates/egui-winit",
+    "notices": [
+      "THIRD_PARTY_LICENSES/egui-winit-0.33.3/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/egui-winit-0.33.3/LICENSE-APACHE"
+    ],
+    "upstream_revision": "44cdd653e2317d300fb8a6c9c36b03f23991e803",
+    "upstream_path": "crates/egui-winit",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/emilk/egui/44cdd653e2317d300fb8a6c9c36b03f23991e803/LICENSE-MIT",
+        "sha256": "95ca92f5f8ea5231f1580b3a2a799e8260af3114b900e1def5355a7f44bcf60c"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/emilk/egui/44cdd653e2317d300fb8a6c9c36b03f23991e803/LICENSE-APACHE",
+        "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90"
+      }
+    ],
+    "authors": [
+      "Emil Ernerfeldt <emil.ernerfeldt@gmail.com>"
+    ]
+  },
+  {
+    "name": "egui_glow",
+    "version": "0.33.3",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/emilk/egui/tree/main/crates/egui_glow",
+    "notices": [
+      "THIRD_PARTY_LICENSES/egui_glow-0.33.3/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/egui_glow-0.33.3/LICENSE-APACHE"
+    ],
+    "upstream_revision": "44cdd653e2317d300fb8a6c9c36b03f23991e803",
+    "upstream_path": "crates/egui_glow",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/emilk/egui/44cdd653e2317d300fb8a6c9c36b03f23991e803/LICENSE-MIT",
+        "sha256": "95ca92f5f8ea5231f1580b3a2a799e8260af3114b900e1def5355a7f44bcf60c"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/emilk/egui/44cdd653e2317d300fb8a6c9c36b03f23991e803/LICENSE-APACHE",
+        "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90"
+      }
+    ],
+    "authors": [
+      "Emil Ernerfeldt <emil.ernerfeldt@gmail.com>"
+    ]
+  },
+  {
+    "name": "either",
+    "version": "1.19.0",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rayon-rs/either",
+    "notices": [
+      "THIRD_PARTY_LICENSES/either-1.19.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/either-1.19.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "1e4326df5972eb4a0ced66cb3b67fa0c5aca8493",
+    "upstream_path": "",
+    "authors": []
+  },
+  {
+    "name": "emath",
+    "version": "0.33.3",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/emilk/egui/tree/main/crates/emath",
+    "notices": [
+      "THIRD_PARTY_LICENSES/emath-0.33.3/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/emath-0.33.3/LICENSE-APACHE"
+    ],
+    "upstream_revision": "44cdd653e2317d300fb8a6c9c36b03f23991e803",
+    "upstream_path": "crates/emath",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/emilk/egui/44cdd653e2317d300fb8a6c9c36b03f23991e803/LICENSE-MIT",
+        "sha256": "95ca92f5f8ea5231f1580b3a2a799e8260af3114b900e1def5355a7f44bcf60c"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/emilk/egui/44cdd653e2317d300fb8a6c9c36b03f23991e803/LICENSE-APACHE",
+        "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90"
+      }
+    ],
+    "authors": [
+      "Emil Ernerfeldt <emil.ernerfeldt@gmail.com>"
+    ]
+  },
+  {
+    "name": "epaint",
+    "version": "0.33.3",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/emilk/egui/tree/main/crates/epaint",
+    "notices": [
+      "THIRD_PARTY_LICENSES/epaint-0.33.3/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/epaint-0.33.3/LICENSE-APACHE"
+    ],
+    "upstream_revision": "44cdd653e2317d300fb8a6c9c36b03f23991e803",
+    "upstream_path": "crates/epaint",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/emilk/egui/44cdd653e2317d300fb8a6c9c36b03f23991e803/LICENSE-MIT",
+        "sha256": "95ca92f5f8ea5231f1580b3a2a799e8260af3114b900e1def5355a7f44bcf60c"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/emilk/egui/44cdd653e2317d300fb8a6c9c36b03f23991e803/LICENSE-APACHE",
+        "sha256": "8173d5c29b4f956d532781d2b86e4e30f83e6b7878dce18c919451d6ba707c90"
+      }
+    ],
+    "authors": [
+      "Emil Ernerfeldt <emil.ernerfeldt@gmail.com>"
+    ]
+  },
+  {
+    "name": "epaint_default_fonts",
+    "version": "0.33.3",
+    "license": "(MIT OR Apache-2.0) AND OFL-1.1 AND Ubuntu-font-1.0",
+    "repository": "https://github.com/emilk/egui/tree/main/crates/epaint_default_fonts",
+    "notices": [
+      "THIRD_PARTY_LICENSES/epaint_default_fonts-0.33.3/fonts/Hack-Regular.txt",
+      "THIRD_PARTY_LICENSES/epaint_default_fonts-0.33.3/fonts/OFL.txt",
+      "THIRD_PARTY_LICENSES/epaint_default_fonts-0.33.3/fonts/UFL.txt",
+      "THIRD_PARTY_LICENSES/epaint_default_fonts-0.33.3/fonts/emoji-icon-font-mit-license.txt"
+    ],
+    "upstream_revision": "44cdd653e2317d300fb8a6c9c36b03f23991e803",
+    "upstream_path": "crates/epaint_default_fonts",
+    "authors": [
+      "Emil Ernerfeldt <emil.ernerfeldt@gmail.com>"
+    ]
+  },
+  {
+    "name": "equivalent",
+    "version": "1.0.3",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/indexmap-rs/equivalent",
+    "notices": [
+      "THIRD_PARTY_LICENSES/equivalent-1.0.3/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/equivalent-1.0.3/LICENSE-MIT"
+    ],
+    "upstream_revision": "4ee88130bd4ab3229e785533da2af641be22deac",
+    "upstream_path": "",
+    "authors": []
+  },
+  {
+    "name": "errno",
+    "version": "0.3.14",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/lambda-fairy/rust-errno",
+    "notices": [
+      "THIRD_PARTY_LICENSES/errno-0.3.14/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/errno-0.3.14/LICENSE-MIT"
+    ],
+    "upstream_revision": "ffc03bfb9eb491013567115e6eea560948cd9e52",
+    "upstream_path": "",
+    "authors": [
+      "Chris Wong <lambda.fairy@gmail.com>",
+      "Dan Gohman <dev@sunfishcode.online>"
+    ]
+  },
+  {
+    "name": "error-code",
+    "version": "3.4.0",
+    "license": "BSL-1.0",
+    "repository": "https://github.com/DoumanAsh/error-code",
+    "notices": [
+      "THIRD_PARTY_LICENSES/error-code-3.4.0/LICENSE"
+    ],
+    "upstream_revision": "e4615e514db3ff64f5f1b328b4865b20a3dcdbc3",
+    "upstream_path": "",
+    "authors": [
+      "Douman <douman@gmx.se>"
+    ]
+  },
+  {
+    "name": "fax",
+    "version": "0.2.7",
+    "license": "MIT",
+    "repository": "https://github.com/pdf-rs/fax",
+    "notices": [
+      "THIRD_PARTY_LICENSES/fax-0.2.7/LICENSE"
+    ],
+    "upstream_revision": "ac2a4b2237d98830ea1fd37c7d280eec0e87c1d8",
+    "upstream_path": "",
+    "authors": [
+      "Sebastian K <s3bk@protonmail.com>"
+    ]
+  },
+  {
+    "name": "fdeflate",
+    "version": "0.3.7",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/image-rs/fdeflate",
+    "notices": [
+      "THIRD_PARTY_LICENSES/fdeflate-0.3.7/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/fdeflate-0.3.7/LICENSE-MIT"
+    ],
+    "upstream_revision": "c365c7e6ffa81feb2e1fb762eed7299f05c9b0ca",
+    "upstream_path": "",
+    "authors": [
+      "The image-rs Developers"
+    ]
+  },
+  {
+    "name": "find-msvc-tools",
+    "version": "0.1.15",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-lang/cc-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/find-msvc-tools-0.1.15/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/find-msvc-tools-0.1.15/LICENSE-MIT"
+    ],
+    "upstream_revision": "ffbb10da608f715ed69a4561c4cbdca7c6fbbba6",
+    "upstream_path": "find-msvc-tools",
+    "authors": []
+  },
+  {
+    "name": "flate2",
+    "version": "1.1.10",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-lang/flate2-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/flate2-1.1.10/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/flate2-1.1.10/LICENSE-MIT"
+    ],
+    "upstream_revision": "ed93d4fc60eaf876c6aded741bf992d524551930",
+    "upstream_path": "",
+    "authors": [
+      "Alex Crichton <alex@alexcrichton.com>",
+      "Josh Triplett <josh@joshtriplett.org>"
+    ]
+  },
+  {
+    "name": "foldhash",
+    "version": "0.2.0",
+    "license": "Zlib",
+    "repository": "https://github.com/orlp/foldhash",
+    "notices": [
+      "THIRD_PARTY_LICENSES/foldhash-0.2.0/LICENSE"
+    ],
+    "upstream_revision": "8f878c636fda9c9e93384824ea45e06d03f009f5",
+    "upstream_path": "",
+    "authors": [
+      "Orson Peters <orsonpeters@gmail.com>"
+    ]
+  },
+  {
+    "name": "foreign-types",
+    "version": "0.5.0",
+    "license": "MIT/Apache-2.0",
+    "repository": "https://github.com/sfackler/foreign-types",
+    "notices": [
+      "THIRD_PARTY_LICENSES/foreign-types-0.5.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/foreign-types-0.5.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "c5a90ed3f39dd5fe8b5af6e9cee1bc446746272c",
+    "upstream_path": "",
+    "authors": [
+      "Steven Fackler <sfackler@gmail.com>"
+    ]
+  },
+  {
+    "name": "foreign-types-macros",
+    "version": "0.2.4",
+    "license": "MIT/Apache-2.0",
+    "repository": "https://github.com/sfackler/foreign-types",
+    "notices": [
+      "THIRD_PARTY_LICENSES/foreign-types-macros-0.2.4/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/foreign-types-macros-0.2.4/LICENSE-MIT"
+    ],
+    "upstream_revision": "2d5077646c441fb089662e9ac439bec45c0d84b5",
+    "upstream_path": "foreign-types-macros",
+    "authors": [
+      "Steven Fackler <sfackler@gmail.com>"
+    ]
+  },
+  {
+    "name": "foreign-types-shared",
+    "version": "0.3.1",
+    "license": "MIT/Apache-2.0",
+    "repository": "https://github.com/sfackler/foreign-types",
+    "notices": [
+      "THIRD_PARTY_LICENSES/foreign-types-shared-0.3.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/foreign-types-shared-0.3.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "bdce800c23ce73b33a337833611e0e5fdf83ce9f",
+    "upstream_path": "foreign-types-shared",
+    "authors": [
+      "Steven Fackler <sfackler@gmail.com>"
+    ]
+  },
+  {
+    "name": "form_urlencoded",
+    "version": "1.2.2",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/servo/rust-url",
+    "notices": [
+      "THIRD_PARTY_LICENSES/form_urlencoded-1.2.2/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/form_urlencoded-1.2.2/LICENSE-MIT"
+    ],
+    "upstream_revision": "91377f48bf35011d042aa5abef9e7f2a0a625aaa",
+    "upstream_path": "form_urlencoded",
+    "authors": [
+      "The rust-url developers"
+    ]
+  },
+  {
+    "name": "futures-core",
+    "version": "0.3.34",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-lang/futures-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/futures-core-0.3.34/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/futures-core-0.3.34/LICENSE-MIT"
+    ],
+    "upstream_revision": "705e6b5c0f06535b1aac1cb1989a172b3d45be8c",
+    "upstream_path": "futures-core",
+    "authors": []
+  },
+  {
+    "name": "futures-task",
+    "version": "0.3.34",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-lang/futures-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/futures-task-0.3.34/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/futures-task-0.3.34/LICENSE-MIT"
+    ],
+    "upstream_revision": "705e6b5c0f06535b1aac1cb1989a172b3d45be8c",
+    "upstream_path": "futures-task",
+    "authors": []
+  },
+  {
+    "name": "futures-util",
+    "version": "0.3.34",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-lang/futures-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/futures-util-0.3.34/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/futures-util-0.3.34/LICENSE-MIT"
+    ],
+    "upstream_revision": "705e6b5c0f06535b1aac1cb1989a172b3d45be8c",
+    "upstream_path": "futures-util",
+    "authors": []
+  },
+  {
+    "name": "gethostname",
+    "version": "1.1.0",
+    "license": "Apache-2.0",
+    "repository": "https://codeberg.org/swsnr/gethostname.rs.git",
+    "notices": [
+      "THIRD_PARTY_LICENSES/gethostname-1.1.0/LICENSE"
+    ],
+    "upstream_revision": "7cffc339711704f29f72d51ebc483b3f28f10099",
+    "upstream_path": "",
+    "authors": [
+      "Sebastian Wiesner <sebastian@swsnr.de>"
+    ]
+  },
+  {
+    "name": "getrandom",
+    "version": "0.3.4",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-random/getrandom",
+    "notices": [
+      "THIRD_PARTY_LICENSES/getrandom-0.3.4/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/getrandom-0.3.4/LICENSE-MIT"
+    ],
+    "upstream_revision": "38e4ad38309a85b56eef4fc759535ccfc322ba9a",
+    "upstream_path": "",
+    "authors": [
+      "The Rand Project Developers"
+    ]
+  },
+  {
+    "name": "getrandom",
+    "version": "0.4.3",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-random/getrandom",
+    "notices": [
+      "THIRD_PARTY_LICENSES/getrandom-0.4.3/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/getrandom-0.4.3/LICENSE-MIT"
+    ],
+    "upstream_revision": "5e7cd5733536844a9856dc7259bd4696bbe5e3ae",
+    "upstream_path": "",
+    "authors": [
+      "The Rand Project Developers"
+    ]
+  },
+  {
+    "name": "gl_generator",
+    "version": "0.14.0",
+    "license": "Apache-2.0",
+    "repository": "https://github.com/brendanzab/gl-rs/",
+    "notices": [
+      "THIRD_PARTY_LICENSES/gl_generator-0.14.0/LICENSE"
+    ],
+    "upstream_revision": "ea503e8d5fb6d73c6030e6191ce738cd3bf3433e",
+    "upstream_path": "",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/brendanzab/gl-rs/ea503e8d5fb6d73c6030e6191ce738cd3bf3433e/LICENSE",
+        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+      }
+    ],
+    "authors": [
+      "Brendan Zabarauskas <bjzaba@yahoo.com.au>",
+      "Corey Richardson",
+      "Arseny Kapoulkine"
+    ]
+  },
+  {
+    "name": "glam",
+    "version": "0.30.10",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/bitshifter/glam-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/glam-0.30.10/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/glam-0.30.10/LICENSE-MIT"
+    ],
+    "upstream_revision": "990737c58c8c6f4315a4ad09806aa55aa141a503",
+    "upstream_path": "",
+    "authors": [
+      "Cameron Hart <cameron.hart@gmail.com>"
+    ]
+  },
+  {
+    "name": "glam",
+    "version": "0.31.1",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/bitshifter/glam-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/glam-0.31.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/glam-0.31.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "2f54355b7ecb4670685f103a9742747784af90e4",
+    "upstream_path": "",
+    "authors": [
+      "Cameron Hart <cameron.hart@gmail.com>"
+    ]
+  },
+  {
+    "name": "glam",
+    "version": "0.32.1",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/bitshifter/glam-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/glam-0.32.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/glam-0.32.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "e8ed32dcd0232b8078b2be91d6fd8f3b99c28842",
+    "upstream_path": "",
+    "authors": [
+      "Cameron Hart <cameron.hart@gmail.com>"
+    ]
+  },
+  {
+    "name": "glam",
+    "version": "0.33.12",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/bitshifter/glam-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/glam-0.33.12/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/glam-0.33.12/LICENSE-MIT"
+    ],
+    "upstream_revision": "e7d680ed34c051cfa8741f76821628a925161280",
+    "upstream_path": "",
+    "authors": []
+  },
+  {
+    "name": "glob",
+    "version": "0.3.4",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-lang/glob",
+    "notices": [
+      "THIRD_PARTY_LICENSES/glob-0.3.4/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/glob-0.3.4/LICENSE-MIT"
+    ],
+    "upstream_revision": "cfa2a58f2e44373573f657ec25b3621e44714dee",
+    "upstream_path": "",
+    "authors": [
+      "The Rust Project Developers"
+    ]
+  },
+  {
+    "name": "glow",
+    "version": "0.16.0",
+    "license": "MIT OR Apache-2.0 OR Zlib",
+    "repository": "https://github.com/grovesNL/glow",
+    "notices": [
+      "THIRD_PARTY_LICENSES/glow-0.16.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/glow-0.16.0/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/glow-0.16.0/LICENSE-ZLIB"
+    ],
+    "upstream_revision": "83c7b9b59ec4b26942801b3d0164db6d396a8c74",
+    "upstream_path": "",
+    "authors": [
+      "Joshua Groves <josh@joshgroves.com>",
+      "Dzmitry Malyshau <kvarkus@gmail.com>"
+    ]
+  },
+  {
+    "name": "glutin",
+    "version": "0.32.3",
+    "license": "Apache-2.0",
+    "repository": "https://github.com/rust-windowing/glutin",
+    "notices": [
+      "THIRD_PARTY_LICENSES/glutin-0.32.3/LICENSE"
+    ],
+    "upstream_revision": "20d1c103172aa4025f02cc94ca16a3169bea789c",
+    "upstream_path": "glutin",
+    "authors": [
+      "Kirill Chibisov <contact@kchibisov.com>"
+    ]
+  },
+  {
+    "name": "glutin-winit",
+    "version": "0.5.0",
+    "license": "MIT",
+    "repository": "https://github.com/rust-windowing/glutin",
+    "notices": [
+      "THIRD_PARTY_LICENSES/glutin-winit-0.5.0/LICENSE"
+    ],
+    "upstream_revision": "0811b6c753334f1681c7db8a48e407596cfa9366",
+    "upstream_path": "glutin-winit",
+    "authors": [
+      "Kirill Chibisov <contact@kchibisov.com>"
+    ]
+  },
+  {
+    "name": "glutin_egl_sys",
+    "version": "0.7.1",
+    "license": "Apache-2.0",
+    "repository": "https://github.com/rust-windowing/glutin",
+    "notices": [
+      "THIRD_PARTY_LICENSES/glutin_egl_sys-0.7.1/LICENSE"
+    ],
+    "upstream_revision": "d9b4fd7036386c5f23b0a1015a31a986805d4db3",
+    "upstream_path": "glutin_egl_sys",
+    "authors": [
+      "Kirill Chibisov <contact@kchibisov.com>"
+    ]
+  },
+  {
+    "name": "glutin_glx_sys",
+    "version": "0.6.1",
+    "license": "Apache-2.0",
+    "repository": "https://github.com/rust-windowing/glutin",
+    "notices": [
+      "THIRD_PARTY_LICENSES/glutin_glx_sys-0.6.1/LICENSE"
+    ],
+    "upstream_revision": "d9b4fd7036386c5f23b0a1015a31a986805d4db3",
+    "upstream_path": "glutin_glx_sys",
+    "authors": [
+      "Kirill Chibisov <contact@kchibisov.com>"
+    ]
+  },
+  {
+    "name": "glutin_wgl_sys",
+    "version": "0.6.1",
+    "license": "Apache-2.0",
+    "repository": "https://github.com/rust-windowing/glutin",
+    "notices": [
+      "THIRD_PARTY_LICENSES/glutin_wgl_sys-0.6.1/LICENSE"
+    ],
+    "upstream_revision": "d9b4fd7036386c5f23b0a1015a31a986805d4db3",
+    "upstream_path": "glutin_wgl_sys",
+    "authors": [
+      "Kirill Chibisov <contact@kchibisov.com>"
+    ]
+  },
+  {
+    "name": "half",
+    "version": "2.7.1",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/VoidStarKat/half-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/half-2.7.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/half-2.7.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "8cc891f3e4aad956eca7fa79b1f42f87ecd141ae",
+    "upstream_path": "",
+    "authors": [
+      "Kathryn Long <squeeself@gmail.com>"
+    ]
+  },
+  {
+    "name": "hashbrown",
+    "version": "0.16.1",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-lang/hashbrown",
+    "notices": [
+      "THIRD_PARTY_LICENSES/hashbrown-0.16.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/hashbrown-0.16.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "1876e4f02708b93903d55ef598f68e82a826518f",
+    "upstream_path": "",
+    "authors": [
+      "Amanieu d'Antras <amanieu@gmail.com>"
+    ]
+  },
+  {
+    "name": "hashbrown",
+    "version": "0.17.1",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-lang/hashbrown",
+    "notices": [
+      "THIRD_PARTY_LICENSES/hashbrown-0.17.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/hashbrown-0.17.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "c62a63a61b7caf2de8f9ecb7b06a66b0ab6bdf3d",
+    "upstream_path": "",
+    "authors": []
+  },
+  {
+    "name": "hermit-abi",
+    "version": "0.5.3",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/hermit-os/hermit-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/hermit-abi-0.5.3/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/hermit-abi-0.5.3/LICENSE-MIT"
+    ],
+    "upstream_revision": "c0b97d12a2f1f65610ba84e6f23fbb69fc70c0f7",
+    "upstream_path": "hermit-abi",
+    "authors": []
+  },
+  {
+    "name": "hexf-parse",
+    "version": "0.2.1",
+    "license": "CC0-1.0",
+    "repository": "https://github.com/lifthrasiir/hexf",
+    "notices": [],
+    "upstream_revision": "4225763d744183d720f575ae96d04161b4d08ea0",
+    "upstream_path": "",
+    "notice_sources": [],
+    "authors": [
+      "Kang Seonghoon <public+rust@mearie.org>"
+    ],
+    "notice_status": "No license text in packaged crate or inspected exact-revision upstream root; declared SPDX license retained, optional non-Linux or inactive dependency, not vendored."
+  },
+  {
+    "name": "home",
+    "version": "0.5.12",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-lang/cargo",
+    "notices": [
+      "THIRD_PARTY_LICENSES/home-0.5.12/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/home-0.5.12/LICENSE-MIT"
+    ],
+    "upstream_revision": "4f15cc8882fb34bf70c945e9c8ae91d6c8c91757",
+    "upstream_path": "crates/home",
+    "authors": [
+      "Brian Anderson <andersrb@gmail.com>"
+    ]
+  },
+  {
+    "name": "icu_collections",
+    "version": "2.4.0",
+    "license": "Unicode-3.0",
+    "repository": "https://github.com/unicode-org/icu4x",
+    "notices": [
+      "THIRD_PARTY_LICENSES/icu_collections-2.4.0/LICENSE"
+    ],
+    "upstream_revision": "031d9e89f6a3fd26a14491e090729d46094328fd",
+    "upstream_path": "components/collections",
+    "authors": [
+      "The ICU4X Project Developers"
+    ]
+  },
+  {
+    "name": "icu_locale_core",
+    "version": "2.4.0",
+    "license": "Unicode-3.0",
+    "repository": "https://github.com/unicode-org/icu4x",
+    "notices": [
+      "THIRD_PARTY_LICENSES/icu_locale_core-2.4.0/LICENSE"
+    ],
+    "upstream_revision": "031d9e89f6a3fd26a14491e090729d46094328fd",
+    "upstream_path": "components/locale_core",
+    "authors": [
+      "The ICU4X Project Developers"
+    ]
+  },
+  {
+    "name": "icu_normalizer",
+    "version": "2.4.0",
+    "license": "Unicode-3.0",
+    "repository": "https://github.com/unicode-org/icu4x",
+    "notices": [
+      "THIRD_PARTY_LICENSES/icu_normalizer-2.4.0/LICENSE"
+    ],
+    "upstream_revision": "031d9e89f6a3fd26a14491e090729d46094328fd",
+    "upstream_path": "components/normalizer",
+    "authors": [
+      "The ICU4X Project Developers"
+    ]
+  },
+  {
+    "name": "icu_normalizer_data",
+    "version": "2.4.0",
+    "license": "Unicode-3.0",
+    "repository": "https://github.com/unicode-org/icu4x",
+    "notices": [
+      "THIRD_PARTY_LICENSES/icu_normalizer_data-2.4.0/LICENSE"
+    ],
+    "upstream_revision": "031d9e89f6a3fd26a14491e090729d46094328fd",
+    "upstream_path": "provider/data/normalizer",
+    "authors": [
+      "The ICU4X Project Developers"
+    ]
+  },
+  {
+    "name": "icu_properties",
+    "version": "2.4.0",
+    "license": "Unicode-3.0",
+    "repository": "https://github.com/unicode-org/icu4x",
+    "notices": [
+      "THIRD_PARTY_LICENSES/icu_properties-2.4.0/LICENSE"
+    ],
+    "upstream_revision": "031d9e89f6a3fd26a14491e090729d46094328fd",
+    "upstream_path": "components/properties",
+    "authors": [
+      "The ICU4X Project Developers"
+    ]
+  },
+  {
+    "name": "icu_properties_data",
+    "version": "2.4.0",
+    "license": "Unicode-3.0",
+    "repository": "https://github.com/unicode-org/icu4x",
+    "notices": [
+      "THIRD_PARTY_LICENSES/icu_properties_data-2.4.0/LICENSE"
+    ],
+    "upstream_revision": "031d9e89f6a3fd26a14491e090729d46094328fd",
+    "upstream_path": "provider/data/properties",
+    "authors": [
+      "The ICU4X Project Developers"
+    ]
+  },
+  {
+    "name": "icu_provider",
+    "version": "2.4.0",
+    "license": "Unicode-3.0",
+    "repository": "https://github.com/unicode-org/icu4x",
+    "notices": [
+      "THIRD_PARTY_LICENSES/icu_provider-2.4.0/LICENSE"
+    ],
+    "upstream_revision": "031d9e89f6a3fd26a14491e090729d46094328fd",
+    "upstream_path": "provider/core",
+    "authors": [
+      "The ICU4X Project Developers"
+    ]
+  },
+  {
+    "name": "idna",
+    "version": "1.1.0",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/servo/rust-url/",
+    "notices": [
+      "THIRD_PARTY_LICENSES/idna-1.1.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/idna-1.1.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "91377f48bf35011d042aa5abef9e7f2a0a625aaa",
+    "upstream_path": "idna",
+    "authors": [
+      "The rust-url developers"
+    ]
+  },
+  {
+    "name": "idna_adapter",
+    "version": "1.2.2",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/hsivonen/idna_adapter",
+    "notices": [
+      "THIRD_PARTY_LICENSES/idna_adapter-1.2.2/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/idna_adapter-1.2.2/LICENSE-MIT"
+    ],
+    "upstream_revision": "1d9782f32c9e29218542b4a9411a82b35ec5c8cb",
+    "upstream_path": "",
+    "authors": [
+      "The rust-url developers"
+    ]
+  },
+  {
+    "name": "image",
+    "version": "0.25.10",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/image-rs/image",
+    "notices": [
+      "THIRD_PARTY_LICENSES/image-0.25.10/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/image-0.25.10/LICENSE-MIT"
+    ],
+    "upstream_revision": "76e57184f22772dad1138e96954e57945406b15e",
+    "upstream_path": "",
+    "authors": [
+      "The image-rs Developers"
+    ]
+  },
+  {
+    "name": "indexmap",
+    "version": "2.14.2",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/indexmap-rs/indexmap",
+    "notices": [
+      "THIRD_PARTY_LICENSES/indexmap-2.14.2/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/indexmap-2.14.2/LICENSE-MIT"
+    ],
+    "upstream_revision": "41a870887c4c77adf665886e63df08f406bfe37a",
+    "upstream_path": "",
+    "authors": []
+  },
+  {
+    "name": "io-kit-sys",
+    "version": "0.5.0",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/jtakakura/io-kit-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/io-kit-sys-0.5.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/io-kit-sys-0.5.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "1c969a9d17b9d98ae7fe2d3f958c7547e4380a74",
+    "upstream_path": "io-kit-sys",
+    "authors": [
+      "Junji Takakura <j.takakura@gmail.com>"
+    ]
+  },
+  {
+    "name": "itoa",
+    "version": "1.0.18",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/dtolnay/itoa",
+    "notices": [
+      "THIRD_PARTY_LICENSES/itoa-1.0.18/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/itoa-1.0.18/LICENSE-MIT"
+    ],
+    "upstream_revision": "af77385d0daf4d0e949e81f2588be2e44f69f086",
+    "upstream_path": "",
+    "authors": [
+      "David Tolnay <dtolnay@gmail.com>"
+    ]
+  },
+  {
+    "name": "jni",
+    "version": "0.22.4",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/jni-rs/jni-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/jni-0.22.4/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/jni-0.22.4/LICENSE-APACHE"
+    ],
+    "upstream_revision": "5ae9458a4ec44c5318f37ddc7569c1d4ae8a69e7",
+    "upstream_path": "crates/jni",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/jni-rs/jni-rs/5ae9458a4ec44c5318f37ddc7569c1d4ae8a69e7/LICENSE-MIT",
+        "sha256": "fea1d5bf3dd71605ce5d7d2ff695c1837e914c77195e523a86b5391716477960"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/jni-rs/jni-rs/5ae9458a4ec44c5318f37ddc7569c1d4ae8a69e7/LICENSE-APACHE",
+        "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+      }
+    ],
+    "authors": [
+      "jni team"
+    ]
+  },
+  {
+    "name": "jni-macros",
+    "version": "0.22.4",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/jni-rs/jni-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/jni-macros-0.22.4/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/jni-macros-0.22.4/LICENSE-APACHE"
+    ],
+    "upstream_revision": "33045a124105c939d1e2cbdcb5a39e5d868ffa03",
+    "upstream_path": "crates/jni-macros",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/jni-rs/jni-rs/33045a124105c939d1e2cbdcb5a39e5d868ffa03/LICENSE-MIT",
+        "sha256": "fea1d5bf3dd71605ce5d7d2ff695c1837e914c77195e523a86b5391716477960"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/jni-rs/jni-rs/33045a124105c939d1e2cbdcb5a39e5d868ffa03/LICENSE-APACHE",
+        "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+      }
+    ],
+    "authors": []
+  },
+  {
+    "name": "jni-sys",
+    "version": "0.3.1",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/jni-rs/jni-sys",
+    "notices": [
+      "THIRD_PARTY_LICENSES/jni-sys-0.3.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/jni-sys-0.3.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "1985e8bdd087b768032e03bbc8b6cd574a574ffd",
+    "upstream_path": "",
+    "authors": [
+      "Steven Fackler <sfackler@gmail.com>"
+    ]
+  },
+  {
+    "name": "jni-sys",
+    "version": "0.4.1",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/jni-rs/jni-sys",
+    "notices": [
+      "THIRD_PARTY_LICENSES/jni-sys-0.4.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/jni-sys-0.4.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "65ea279041232aec345dbd9483b3956c788862aa",
+    "upstream_path": "",
+    "authors": [
+      "Steven Fackler <sfackler@gmail.com>",
+      "Robert Bragg <robert@sixbynine.org>"
+    ]
+  },
+  {
+    "name": "jni-sys-macros",
+    "version": "0.4.1",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/jni-rs/jni-sys",
+    "notices": [
+      "THIRD_PARTY_LICENSES/jni-sys-macros-0.4.1/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/jni-sys-macros-0.4.1/LICENSE-APACHE"
+    ],
+    "upstream_revision": "64d77b7a5f119d7b55b4e2c169a4668067ff59e6",
+    "upstream_path": "jni-sys-macros",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/jni-rs/jni-sys/64d77b7a5f119d7b55b4e2c169a4668067ff59e6/LICENSE-MIT",
+        "sha256": "1d85bd754b04ceec93e98e890edd1fa3c6a22e81bcb32135806beeccefa51cd1"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/jni-rs/jni-sys/64d77b7a5f119d7b55b4e2c169a4668067ff59e6/LICENSE-APACHE",
+        "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08"
+      }
+    ],
+    "authors": [
+      "Robert Bragg <robert@sixbynine.org>"
+    ]
+  },
+  {
+    "name": "jobserver",
+    "version": "0.1.35",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-lang/jobserver-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/jobserver-0.1.35/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/jobserver-0.1.35/LICENSE-MIT"
+    ],
+    "upstream_revision": "85ba04e3cf89e5c10e7b82de69f6be6dff9d3ec3",
+    "upstream_path": "",
+    "authors": [
+      "Alex Crichton <alex@alexcrichton.com>"
+    ]
+  },
+  {
+    "name": "js-sys",
+    "version": "0.3.106",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/js-sys",
+    "notices": [
+      "THIRD_PARTY_LICENSES/js-sys-0.3.106/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/js-sys-0.3.106/LICENSE-MIT"
+    ],
+    "upstream_revision": "165586f854c852bcbc4d14d8a75a0a0e0d0abc12",
+    "upstream_path": "crates/js-sys",
+    "authors": [
+      "The wasm-bindgen Developers"
+    ]
+  },
+  {
+    "name": "khronos_api",
+    "version": "3.1.0",
+    "license": "Apache-2.0",
+    "repository": "https://github.com/brendanzab/gl-rs/",
+    "notices": [
+      "THIRD_PARTY_LICENSES/khronos_api-3.1.0/LICENSE"
+    ],
+    "upstream_revision": "f150967b1c44ae888e6676f93f639ebc82771bdc",
+    "upstream_path": "",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/brendanzab/gl-rs/f150967b1c44ae888e6676f93f639ebc82771bdc/LICENSE",
+        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+      }
+    ],
+    "authors": [
+      "Brendan Zabarauskas <bjzaba@yahoo.com.au>",
+      "Corey Richardson",
+      "Arseny Kapoulkine",
+      "Pierre Krieger <pierre.krieger1708@gmail.com>"
+    ]
+  },
+  {
+    "name": "lazy_static",
+    "version": "1.5.1",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-lang-nursery/lazy-static.rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/lazy_static-1.5.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/lazy_static-1.5.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "4c1b9a170c157d679592e2682b13cc780c1db814",
+    "upstream_path": "",
+    "authors": [
+      "Marvin L\u00f6bel <loebel.marvin@gmail.com>"
+    ]
+  },
+  {
+    "name": "lazycell",
+    "version": "1.3.0",
+    "license": "MIT/Apache-2.0",
+    "repository": "https://github.com/indiv0/lazycell",
+    "notices": [
+      "THIRD_PARTY_LICENSES/lazycell-1.3.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/lazycell-1.3.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "b78f3f10c0d005b81d97011fd7f98fc3cdff5982",
+    "upstream_path": "",
+    "authors": [
+      "Alex Crichton <alex@alexcrichton.com>",
+      "Nikita Pekin <contact@nikitapek.in>"
+    ]
+  },
+  {
+    "name": "libc",
+    "version": "0.2.191",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-lang/libc",
+    "notices": [
+      "THIRD_PARTY_LICENSES/libc-0.2.191/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/libc-0.2.191/LICENSE-MIT"
+    ],
+    "upstream_revision": "ccc2ff4aaab962f7fde7b8edda7379c045b1ca12",
+    "upstream_path": "",
+    "authors": []
+  },
+  {
+    "name": "libloading",
+    "version": "0.8.9",
+    "license": "ISC",
+    "repository": "https://github.com/nagisa/rust_libloading/",
+    "notices": [
+      "THIRD_PARTY_LICENSES/libloading-0.8.9/LICENSE"
+    ],
+    "upstream_revision": "f4ec9e702de2d0778bccff8525dc44e4cacac2d1",
+    "upstream_path": "",
+    "authors": [
+      "Simonas Kazlauskas <libloading@kazlauskas.me>"
+    ]
+  },
+  {
+    "name": "libm",
+    "version": "0.2.16",
+    "license": "MIT",
+    "repository": "https://github.com/rust-lang/compiler-builtins",
+    "notices": [
+      "THIRD_PARTY_LICENSES/libm-0.2.16/LICENSE.txt"
+    ],
+    "upstream_revision": "dfd2203a4d6110820ad7bb65cafe1bf331a03a3d",
+    "upstream_path": "libm",
+    "authors": [
+      "Alex Crichton <alex@alexcrichton.com>",
+      "Amanieu d'Antras <amanieu@gmail.com>",
+      "Jorge Aparicio <japaricious@gmail.com>",
+      "Trevor Gross <tg@trevorgross.com>"
+    ]
+  },
+  {
+    "name": "libredox",
+    "version": "0.1.25",
+    "license": "MIT",
+    "repository": "https://gitlab.redox-os.org/redox-os/libredox.git",
+    "notices": [
+      "THIRD_PARTY_LICENSES/libredox-0.1.25/LICENSE"
+    ],
+    "upstream_revision": "9a9fc664b027a93a2fa5b27167858956c7566d2d",
+    "upstream_path": "",
+    "authors": [
+      "4lDO2 <4lDO2@protonmail.com>"
+    ]
+  },
+  {
+    "name": "linux-raw-sys",
+    "version": "0.4.15",
+    "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+    "repository": "https://github.com/sunfishcode/linux-raw-sys",
+    "notices": [
+      "THIRD_PARTY_LICENSES/linux-raw-sys-0.4.15/COPYRIGHT",
+      "THIRD_PARTY_LICENSES/linux-raw-sys-0.4.15/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/linux-raw-sys-0.4.15/LICENSE-Apache-2.0_WITH_LLVM-exception",
+      "THIRD_PARTY_LICENSES/linux-raw-sys-0.4.15/LICENSE-MIT"
+    ],
+    "upstream_revision": "77e4a4223b14957ad8fa2958ea411cd4b54314e7",
+    "upstream_path": "",
+    "authors": [
+      "Dan Gohman <dev@sunfishcode.online>"
+    ]
+  },
+  {
+    "name": "linux-raw-sys",
+    "version": "0.12.1",
+    "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+    "repository": "https://github.com/sunfishcode/linux-raw-sys",
+    "notices": [
+      "THIRD_PARTY_LICENSES/linux-raw-sys-0.12.1/COPYRIGHT",
+      "THIRD_PARTY_LICENSES/linux-raw-sys-0.12.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/linux-raw-sys-0.12.1/LICENSE-Apache-2.0_WITH_LLVM-exception",
+      "THIRD_PARTY_LICENSES/linux-raw-sys-0.12.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "0e2918cf3e366d9c923d4ca05f169b49d826db56",
+    "upstream_path": "",
+    "authors": [
+      "Dan Gohman <dev@sunfishcode.online>"
+    ]
+  },
+  {
+    "name": "litemap",
+    "version": "0.8.3",
+    "license": "Unicode-3.0",
+    "repository": "https://github.com/unicode-org/icu4x",
+    "notices": [
+      "THIRD_PARTY_LICENSES/litemap-0.8.3/LICENSE"
+    ],
+    "upstream_revision": "a14f2dad852be26bad277ae704abf27a15cbfed1",
+    "upstream_path": "utils/litemap",
+    "authors": [
+      "The ICU4X Project Developers"
+    ]
+  },
+  {
+    "name": "litrs",
+    "version": "1.0.1",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/LukasKalbertodt/litrs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/litrs-1.0.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/litrs-1.0.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "510d5d778413d51da7d11f8e498d27bba86739e1",
+    "upstream_path": "",
+    "authors": [
+      "Lukas Kalbertodt <lukas.kalbertodt@gmail.com>"
+    ]
+  },
+  {
+    "name": "lock_api",
+    "version": "0.4.14",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/Amanieu/parking_lot",
+    "notices": [
+      "THIRD_PARTY_LICENSES/lock_api-0.4.14/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/lock_api-0.4.14/LICENSE-MIT"
+    ],
+    "upstream_revision": "d7828fff7b5d6327ae608e82db45f888b344449a",
+    "upstream_path": "lock_api",
+    "authors": [
+      "Amanieu d'Antras <amanieu@gmail.com>"
+    ]
+  },
+  {
+    "name": "log",
+    "version": "0.4.34",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-lang/log",
+    "notices": [
+      "THIRD_PARTY_LICENSES/log-0.4.34/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/log-0.4.34/LICENSE-MIT"
+    ],
+    "upstream_revision": "8034743dd9d7f7583bd9a670271483d176130911",
+    "upstream_path": "",
+    "authors": [
+      "The Rust Project Developers"
+    ]
+  },
+  {
+    "name": "mach2",
+    "version": "0.5.0",
+    "license": "BSD-2-Clause OR MIT OR Apache-2.0",
+    "repository": "https://github.com/JohnTitor/mach2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/mach2-0.5.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/mach2-0.5.0/LICENSE-BSD",
+      "THIRD_PARTY_LICENSES/mach2-0.5.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "d623c364252ce4dd9d7731bf0ca2d842c5252d1e",
+    "upstream_path": "",
+    "authors": []
+  },
+  {
+    "name": "matrixmultiply",
+    "version": "0.3.11",
+    "license": "MIT/Apache-2.0",
+    "repository": "https://github.com/bluss/matrixmultiply/",
+    "notices": [
+      "THIRD_PARTY_LICENSES/matrixmultiply-0.3.11/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/matrixmultiply-0.3.11/LICENSE-MIT"
+    ],
+    "upstream_revision": "07f968c20e0df41e3fd694e9c47ef5368ec9eee1",
+    "upstream_path": "",
+    "authors": [
+      "bluss",
+      "R. Janis Goldschmidt"
+    ]
+  },
+  {
+    "name": "memchr",
+    "version": "2.8.3",
+    "license": "Unlicense OR MIT",
+    "repository": "https://github.com/BurntSushi/memchr",
+    "notices": [
+      "THIRD_PARTY_LICENSES/memchr-2.8.3/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/memchr-2.8.3/UNLICENSE"
+    ],
+    "upstream_revision": "5fdb40c054e1fff359a2f7bdf7f87a13b34b465d",
+    "upstream_path": "",
+    "authors": [
+      "Andrew Gallant <jamslam@gmail.com>",
+      "bluss"
+    ]
+  },
+  {
+    "name": "memmap2",
+    "version": "0.9.12",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/RazrFalcon/memmap2-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/memmap2-0.9.12/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/memmap2-0.9.12/LICENSE-MIT"
+    ],
+    "upstream_revision": "4692b056b327aa08dace3a7e345a99e4cff77534",
+    "upstream_path": "",
+    "authors": [
+      "Dan Burkert <dan@danburkert.com>",
+      "Yevhenii Reizner <razrfalcon@gmail.com>",
+      "The Contributors"
+    ]
+  },
+  {
+    "name": "memoffset",
+    "version": "0.9.1",
+    "license": "MIT",
+    "repository": "https://github.com/Gilnaa/memoffset",
+    "notices": [
+      "THIRD_PARTY_LICENSES/memoffset-0.9.1/LICENSE"
+    ],
+    "upstream_revision": "153fc3d50f03755be53148bc3eb97390f9011e45",
+    "upstream_path": "",
+    "authors": [
+      "Gilad Naaman <gilad.naaman@gmail.com>"
+    ]
+  },
+  {
+    "name": "minimal-lexical",
+    "version": "0.2.1",
+    "license": "MIT/Apache-2.0",
+    "repository": "https://github.com/Alexhuszagh/minimal-lexical",
+    "notices": [
+      "THIRD_PARTY_LICENSES/minimal-lexical-0.2.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/minimal-lexical-0.2.1/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/minimal-lexical-0.2.1/LICENSE.md"
+    ],
+    "upstream_revision": "e997c46656ebe83e696b866bd954da1fa3f64eef",
+    "upstream_path": "",
+    "authors": [
+      "Alex Huszagh <ahuszagh@gmail.com>"
+    ]
+  },
+  {
+    "name": "miniz_oxide",
+    "version": "0.8.9",
+    "license": "MIT OR Zlib OR Apache-2.0",
+    "repository": "https://github.com/Frommi/miniz_oxide/tree/master/miniz_oxide",
+    "notices": [
+      "THIRD_PARTY_LICENSES/miniz_oxide-0.8.9/LICENSE",
+      "THIRD_PARTY_LICENSES/miniz_oxide-0.8.9/LICENSE-APACHE.md",
+      "THIRD_PARTY_LICENSES/miniz_oxide-0.8.9/LICENSE-MIT.md",
+      "THIRD_PARTY_LICENSES/miniz_oxide-0.8.9/LICENSE-ZLIB.md"
+    ],
+    "upstream_revision": "44e43c7786e379b2b1a7fde4aa0e63be719e583d",
+    "upstream_path": "miniz_oxide",
+    "authors": [
+      "Frommi <daniil.liferenko@gmail.com>",
+      "oyvindln <oyvindln@users.noreply.github.com>",
+      "Rich Geldreich richgel99@gmail.com"
+    ]
+  },
+  {
+    "name": "miniz_oxide",
+    "version": "0.9.1",
+    "license": "MIT OR Zlib OR Apache-2.0",
+    "repository": "https://github.com/Frommi/miniz_oxide/tree/master/miniz_oxide",
+    "notices": [
+      "THIRD_PARTY_LICENSES/miniz_oxide-0.9.1/LICENSE",
+      "THIRD_PARTY_LICENSES/miniz_oxide-0.9.1/LICENSE-APACHE.md",
+      "THIRD_PARTY_LICENSES/miniz_oxide-0.9.1/LICENSE-MIT.md",
+      "THIRD_PARTY_LICENSES/miniz_oxide-0.9.1/LICENSE-ZLIB.md"
+    ],
+    "upstream_revision": "4e582392df3a739d2b0dfd2c537dc33e8942be38",
+    "upstream_path": "miniz_oxide",
+    "authors": [
+      "Frommi <daniil.liferenko@gmail.com>",
+      "oyvindln <oyvindln@users.noreply.github.com>",
+      "Rich Geldreich richgel99@gmail.com"
+    ]
+  },
+  {
+    "name": "moxcms",
+    "version": "0.8.1",
+    "license": "BSD-3-Clause OR Apache-2.0",
+    "repository": "https://github.com/awxkee/moxcms.git",
+    "notices": [
+      "THIRD_PARTY_LICENSES/moxcms-0.8.1/LICENSE-APACHE.md",
+      "THIRD_PARTY_LICENSES/moxcms-0.8.1/LICENSE.md"
+    ],
+    "upstream_revision": "c4affa196727d17f21a7f6f148a558867decb470",
+    "upstream_path": "",
+    "authors": [
+      "Radzivon Bartoshyk"
+    ]
+  },
+  {
+    "name": "naga",
+    "version": "27.0.3",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/gfx-rs/wgpu",
+    "notices": [
+      "THIRD_PARTY_LICENSES/naga-27.0.3/LICENSE.APACHE",
+      "THIRD_PARTY_LICENSES/naga-27.0.3/LICENSE.MIT"
+    ],
+    "upstream_revision": "d61dc3af8856f0cd9023c5e888b791d1b7118559",
+    "upstream_path": "naga",
+    "authors": [
+      "gfx-rs developers"
+    ]
+  },
+  {
+    "name": "nalgebra",
+    "version": "0.35.0",
+    "license": "Apache-2.0",
+    "repository": "https://github.com/dimforge/nalgebra",
+    "notices": [
+      "THIRD_PARTY_LICENSES/nalgebra-0.35.0/LICENSE"
+    ],
+    "upstream_revision": "5f927f6c821d0ced07a0e086e5f37251cab2a8c3",
+    "upstream_path": "",
+    "authors": [
+      "S\u00e9bastien Crozet <developer@crozet.re>"
+    ]
+  },
+  {
+    "name": "ndk",
+    "version": "0.9.0",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-mobile/ndk",
+    "notices": [
+      "THIRD_PARTY_LICENSES/ndk-0.9.0/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/ndk-0.9.0/LICENSE-APACHE"
+    ],
+    "upstream_revision": "49bbbba16c58ff63cb8a0ad0eca5a9fb7ecaec25",
+    "upstream_path": "ndk",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/rust-mobile/ndk/49bbbba16c58ff63cb8a0ad0eca5a9fb7ecaec25/LICENSE-MIT",
+        "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/rust-mobile/ndk/49bbbba16c58ff63cb8a0ad0eca5a9fb7ecaec25/LICENSE-APACHE",
+        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      }
+    ],
+    "authors": [
+      "The Rust Mobile contributors"
+    ]
+  },
+  {
+    "name": "ndk-context",
+    "version": "0.1.1",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-windowing/android-ndk-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/ndk-context-0.1.1/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/ndk-context-0.1.1/LICENSE-APACHE"
+    ],
+    "upstream_revision": "10f2ba388fca20f7349996ebae26ccda7a6fda5c",
+    "upstream_path": "ndk-context",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/rust-windowing/android-ndk-rs/10f2ba388fca20f7349996ebae26ccda7a6fda5c/LICENSE-MIT",
+        "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/rust-windowing/android-ndk-rs/10f2ba388fca20f7349996ebae26ccda7a6fda5c/LICENSE-APACHE",
+        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      }
+    ],
+    "authors": [
+      "The Rust Windowing contributors"
+    ]
+  },
+  {
+    "name": "ndk-sys",
+    "version": "0.6.0+11769913",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-mobile/ndk",
+    "notices": [
+      "THIRD_PARTY_LICENSES/ndk-sys-0.6.0+11769913/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/ndk-sys-0.6.0+11769913/LICENSE-APACHE"
+    ],
+    "upstream_revision": "49bbbba16c58ff63cb8a0ad0eca5a9fb7ecaec25",
+    "upstream_path": "ndk-sys",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/rust-mobile/ndk/49bbbba16c58ff63cb8a0ad0eca5a9fb7ecaec25/LICENSE-MIT",
+        "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/rust-mobile/ndk/49bbbba16c58ff63cb8a0ad0eca5a9fb7ecaec25/LICENSE-APACHE",
+        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      }
+    ],
+    "authors": [
+      "The Rust Windowing contributors"
+    ]
+  },
+  {
+    "name": "nohash-hasher",
+    "version": "0.2.0",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/paritytech/nohash-hasher",
+    "notices": [
+      "THIRD_PARTY_LICENSES/nohash-hasher-0.2.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/nohash-hasher-0.2.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "99b021664e9d7fd3e1f7ffb8633a137e21e12149",
+    "upstream_path": "",
+    "authors": [
+      "Parity Technologies <admin@parity.io>"
+    ]
+  },
+  {
+    "name": "nom",
+    "version": "7.1.3",
+    "license": "MIT",
+    "repository": "https://github.com/Geal/nom",
+    "notices": [
+      "THIRD_PARTY_LICENSES/nom-7.1.3/LICENSE"
+    ],
+    "upstream_revision": "869f8972a4383b13cf89574fda28cb7dbfd56517",
+    "upstream_path": "",
+    "authors": [
+      "contact@geoffroycouprie.com"
+    ]
+  },
+  {
+    "name": "num-bigint",
+    "version": "0.4.8",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-num/num-bigint",
+    "notices": [
+      "THIRD_PARTY_LICENSES/num-bigint-0.4.8/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/num-bigint-0.4.8/LICENSE-MIT"
+    ],
+    "upstream_revision": "65330056d6c00def4c6cda78c87453f4c2a76913",
+    "upstream_path": "",
+    "authors": [
+      "The Rust Project Developers"
+    ]
+  },
+  {
+    "name": "num-complex",
+    "version": "0.4.6",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-num/num-complex",
+    "notices": [
+      "THIRD_PARTY_LICENSES/num-complex-0.4.6/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/num-complex-0.4.6/LICENSE-MIT"
+    ],
+    "upstream_revision": "91fdc06356c0c868cb88b5a180859023c57e6e50",
+    "upstream_path": "",
+    "authors": [
+      "The Rust Project Developers"
+    ]
+  },
+  {
+    "name": "num-integer",
+    "version": "0.1.47",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-num/num-integer",
+    "notices": [
+      "THIRD_PARTY_LICENSES/num-integer-0.1.47/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/num-integer-0.1.47/LICENSE-MIT"
+    ],
+    "upstream_revision": "765fd9b3eb9397471d41b9f613e530f6d9d6383f",
+    "upstream_path": "",
+    "authors": [
+      "The Rust Project Developers"
+    ]
+  },
+  {
+    "name": "num-rational",
+    "version": "0.4.2",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-num/num-rational",
+    "notices": [
+      "THIRD_PARTY_LICENSES/num-rational-0.4.2/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/num-rational-0.4.2/LICENSE-MIT"
+    ],
+    "upstream_revision": "4d55ad22ac86ebbc4cb45d79a956e4a1f7af57d1",
+    "upstream_path": "",
+    "authors": [
+      "The Rust Project Developers"
+    ]
+  },
+  {
+    "name": "num-traits",
+    "version": "0.2.19",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-num/num-traits",
+    "notices": [
+      "THIRD_PARTY_LICENSES/num-traits-0.2.19/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/num-traits-0.2.19/LICENSE-MIT"
+    ],
+    "upstream_revision": "7ec3d41d39b28190ec1d42db38021107b3951f3a",
+    "upstream_path": "",
+    "authors": [
+      "The Rust Project Developers"
+    ]
+  },
+  {
+    "name": "num_enum",
+    "version": "0.7.6",
+    "license": "BSD-3-Clause OR MIT OR Apache-2.0",
+    "repository": "https://github.com/illicitonion/num_enum",
+    "notices": [
+      "THIRD_PARTY_LICENSES/num_enum-0.7.6/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/num_enum-0.7.6/LICENSE-BSD",
+      "THIRD_PARTY_LICENSES/num_enum-0.7.6/LICENSE-MIT"
+    ],
+    "upstream_revision": "f11d81c6cb644489f8a0fc24f9eea9a53d66f92e",
+    "upstream_path": "num_enum",
+    "authors": [
+      "Daniel Wagner-Hall <dawagner@gmail.com>",
+      "Daniel Henry-Mantilla <daniel.henry.mantilla@gmail.com>",
+      "Vincent Esche <regexident@gmail.com>"
+    ]
+  },
+  {
+    "name": "num_enum_derive",
+    "version": "0.7.6",
+    "license": "BSD-3-Clause OR MIT OR Apache-2.0",
+    "repository": "https://github.com/illicitonion/num_enum",
+    "notices": [
+      "THIRD_PARTY_LICENSES/num_enum_derive-0.7.6/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/num_enum_derive-0.7.6/LICENSE-BSD",
+      "THIRD_PARTY_LICENSES/num_enum_derive-0.7.6/LICENSE-MIT"
+    ],
+    "upstream_revision": "f11d81c6cb644489f8a0fc24f9eea9a53d66f92e",
+    "upstream_path": "num_enum_derive",
+    "authors": [
+      "Daniel Wagner-Hall <dawagner@gmail.com>",
+      "Daniel Henry-Mantilla <daniel.henry.mantilla@gmail.com>",
+      "Vincent Esche <regexident@gmail.com>"
+    ]
+  },
+  {
+    "name": "nusb",
+    "version": "0.2.9",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/kevinmehall/nusb",
+    "notices": [
+      "THIRD_PARTY_LICENSES/nusb-0.2.9/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/nusb-0.2.9/LICENSE-MIT"
+    ],
+    "upstream_revision": "5dfee4c1f82a1fdf019c3b5935ee4cd887908093",
+    "upstream_path": "",
+    "authors": [
+      "Kevin Mehall <km@kevinmehall.net>"
+    ]
+  },
+  {
+    "name": "objc-sys",
+    "version": "0.3.5",
+    "license": "MIT",
+    "repository": "https://github.com/madsmtm/objc2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/objc-sys-0.3.5/LICENSE.txt"
+    ],
+    "upstream_revision": "4fc083f1c6d6784577e38b0ee8dbd344481e2fd2",
+    "upstream_path": "crates/objc-sys",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/madsmtm/objc2/4fc083f1c6d6784577e38b0ee8dbd344481e2fd2/LICENSE.txt",
+        "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+      }
+    ],
+    "authors": [
+      "Mads Marquart <mads@marquart.dk>"
+    ]
+  },
+  {
+    "name": "objc2",
+    "version": "0.5.3",
+    "license": "MIT",
+    "repository": "https://github.com/madsmtm/objc2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/objc2-0.5.3/LICENSE.txt"
+    ],
+    "upstream_revision": "5237cbf081d04ef75a1f6a207b4018e7c1ae7438",
+    "upstream_path": "crates/objc2",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/madsmtm/objc2/5237cbf081d04ef75a1f6a207b4018e7c1ae7438/LICENSE.txt",
+        "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+      }
+    ],
+    "authors": [
+      "Steven Sheldon",
+      "Mads Marquart <mads@marquart.dk>"
+    ]
+  },
+  {
+    "name": "objc2",
+    "version": "0.6.5",
+    "license": "MIT",
+    "repository": "https://github.com/madsmtm/objc2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/objc2-0.6.5/LICENSE.md"
+    ],
+    "upstream_revision": "d7d2fa23ceaa5e6096c923b081040e5d81b3b9df",
+    "upstream_path": "crates/objc2",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/madsmtm/objc2/d7d2fa23ceaa5e6096c923b081040e5d81b3b9df/LICENSE.md",
+        "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54"
+      }
+    ],
+    "authors": [
+      "Mads Marquart <mads@marquart.dk>"
+    ]
+  },
+  {
+    "name": "objc2-app-kit",
+    "version": "0.2.2",
+    "license": "MIT",
+    "repository": "https://github.com/madsmtm/objc2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/objc2-app-kit-0.2.2/LICENSE.txt"
+    ],
+    "upstream_revision": "e282618be4c3a3b9542957e0c8540e9588472ce8",
+    "upstream_path": "framework-crates/objc2-app-kit",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+        "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+      }
+    ],
+    "authors": []
+  },
+  {
+    "name": "objc2-app-kit",
+    "version": "0.3.2",
+    "license": "Zlib OR Apache-2.0 OR MIT",
+    "repository": "https://github.com/madsmtm/objc2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/objc2-app-kit-0.3.2/LICENSE.md"
+    ],
+    "upstream_revision": "7b1abfd750a2cacaea71d6a56ecfb83cb7de560b",
+    "upstream_path": "framework-crates/objc2-app-kit",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/madsmtm/objc2/7b1abfd750a2cacaea71d6a56ecfb83cb7de560b/LICENSE.md",
+        "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54"
+      }
+    ],
+    "authors": []
+  },
+  {
+    "name": "objc2-cloud-kit",
+    "version": "0.2.2",
+    "license": "MIT",
+    "repository": "https://github.com/madsmtm/objc2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/objc2-cloud-kit-0.2.2/LICENSE.txt"
+    ],
+    "upstream_revision": "e282618be4c3a3b9542957e0c8540e9588472ce8",
+    "upstream_path": "framework-crates/objc2-cloud-kit",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+        "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+      }
+    ],
+    "authors": []
+  },
+  {
+    "name": "objc2-contacts",
+    "version": "0.2.2",
+    "license": "MIT",
+    "repository": "https://github.com/madsmtm/objc2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/objc2-contacts-0.2.2/LICENSE.txt"
+    ],
+    "upstream_revision": "e282618be4c3a3b9542957e0c8540e9588472ce8",
+    "upstream_path": "framework-crates/objc2-contacts",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+        "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+      }
+    ],
+    "authors": []
+  },
+  {
+    "name": "objc2-core-data",
+    "version": "0.2.2",
+    "license": "MIT",
+    "repository": "https://github.com/madsmtm/objc2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/objc2-core-data-0.2.2/LICENSE.txt"
+    ],
+    "upstream_revision": "e282618be4c3a3b9542957e0c8540e9588472ce8",
+    "upstream_path": "framework-crates/objc2-core-data",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+        "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+      }
+    ],
+    "authors": []
+  },
+  {
+    "name": "objc2-core-foundation",
+    "version": "0.3.2",
+    "license": "Zlib OR Apache-2.0 OR MIT",
+    "repository": "https://github.com/madsmtm/objc2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/objc2-core-foundation-0.3.2/LICENSE.md"
+    ],
+    "upstream_revision": "7b1abfd750a2cacaea71d6a56ecfb83cb7de560b",
+    "upstream_path": "framework-crates/objc2-core-foundation",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/madsmtm/objc2/7b1abfd750a2cacaea71d6a56ecfb83cb7de560b/LICENSE.md",
+        "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54"
+      }
+    ],
+    "authors": []
+  },
+  {
+    "name": "objc2-core-graphics",
+    "version": "0.3.2",
+    "license": "Zlib OR Apache-2.0 OR MIT",
+    "repository": "https://github.com/madsmtm/objc2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/objc2-core-graphics-0.3.2/LICENSE.md"
+    ],
+    "upstream_revision": "7b1abfd750a2cacaea71d6a56ecfb83cb7de560b",
+    "upstream_path": "framework-crates/objc2-core-graphics",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/madsmtm/objc2/7b1abfd750a2cacaea71d6a56ecfb83cb7de560b/LICENSE.md",
+        "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54"
+      }
+    ],
+    "authors": []
+  },
+  {
+    "name": "objc2-core-image",
+    "version": "0.2.2",
+    "license": "MIT",
+    "repository": "https://github.com/madsmtm/objc2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/objc2-core-image-0.2.2/LICENSE.txt"
+    ],
+    "upstream_revision": "e282618be4c3a3b9542957e0c8540e9588472ce8",
+    "upstream_path": "framework-crates/objc2-core-image",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+        "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+      }
+    ],
+    "authors": []
+  },
+  {
+    "name": "objc2-core-location",
+    "version": "0.2.2",
+    "license": "MIT",
+    "repository": "https://github.com/madsmtm/objc2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/objc2-core-location-0.2.2/LICENSE.txt"
+    ],
+    "upstream_revision": "e282618be4c3a3b9542957e0c8540e9588472ce8",
+    "upstream_path": "framework-crates/objc2-core-location",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+        "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+      }
+    ],
+    "authors": []
+  },
+  {
+    "name": "objc2-encode",
+    "version": "4.1.0",
+    "license": "MIT",
+    "repository": "https://github.com/madsmtm/objc2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/objc2-encode-4.1.0/LICENSE.md"
+    ],
+    "upstream_revision": "8d214f5477365ffcbcbb7de058c86ed9a518efb7",
+    "upstream_path": "crates/objc2-encode",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/madsmtm/objc2/8d214f5477365ffcbcbb7de058c86ed9a518efb7/LICENSE.md",
+        "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54"
+      }
+    ],
+    "authors": [
+      "Mads Marquart <mads@marquart.dk>"
+    ]
+  },
+  {
+    "name": "objc2-foundation",
+    "version": "0.2.2",
+    "license": "MIT",
+    "repository": "https://github.com/madsmtm/objc2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/objc2-foundation-0.2.2/LICENSE.txt"
+    ],
+    "upstream_revision": "e282618be4c3a3b9542957e0c8540e9588472ce8",
+    "upstream_path": "framework-crates/objc2-foundation",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+        "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+      }
+    ],
+    "authors": []
+  },
+  {
+    "name": "objc2-foundation",
+    "version": "0.3.2",
+    "license": "MIT",
+    "repository": "https://github.com/madsmtm/objc2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/objc2-foundation-0.3.2/LICENSE.md"
+    ],
+    "upstream_revision": "7b1abfd750a2cacaea71d6a56ecfb83cb7de560b",
+    "upstream_path": "framework-crates/objc2-foundation",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/madsmtm/objc2/7b1abfd750a2cacaea71d6a56ecfb83cb7de560b/LICENSE.md",
+        "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54"
+      }
+    ],
+    "authors": []
+  },
+  {
+    "name": "objc2-io-surface",
+    "version": "0.3.2",
+    "license": "Zlib OR Apache-2.0 OR MIT",
+    "repository": "https://github.com/madsmtm/objc2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/objc2-io-surface-0.3.2/LICENSE.md"
+    ],
+    "upstream_revision": "7b1abfd750a2cacaea71d6a56ecfb83cb7de560b",
+    "upstream_path": "framework-crates/objc2-io-surface",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/madsmtm/objc2/7b1abfd750a2cacaea71d6a56ecfb83cb7de560b/LICENSE.md",
+        "sha256": "7f976f7e9cb2d87df7230606feb932c3f21ac0e664045a775b600046ff850c54"
+      }
+    ],
+    "authors": []
+  },
+  {
+    "name": "objc2-link-presentation",
+    "version": "0.2.2",
+    "license": "MIT",
+    "repository": "https://github.com/madsmtm/objc2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/objc2-link-presentation-0.2.2/LICENSE.txt"
+    ],
+    "upstream_revision": "e282618be4c3a3b9542957e0c8540e9588472ce8",
+    "upstream_path": "framework-crates/objc2-link-presentation",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+        "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+      }
+    ],
+    "authors": []
+  },
+  {
+    "name": "objc2-metal",
+    "version": "0.2.2",
+    "license": "MIT",
+    "repository": "https://github.com/madsmtm/objc2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/objc2-metal-0.2.2/LICENSE.txt"
+    ],
+    "upstream_revision": "e282618be4c3a3b9542957e0c8540e9588472ce8",
+    "upstream_path": "framework-crates/objc2-metal",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+        "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+      }
+    ],
+    "authors": []
+  },
+  {
+    "name": "objc2-quartz-core",
+    "version": "0.2.2",
+    "license": "MIT",
+    "repository": "https://github.com/madsmtm/objc2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/objc2-quartz-core-0.2.2/LICENSE.txt"
+    ],
+    "upstream_revision": "e282618be4c3a3b9542957e0c8540e9588472ce8",
+    "upstream_path": "framework-crates/objc2-quartz-core",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+        "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+      }
+    ],
+    "authors": []
+  },
+  {
+    "name": "objc2-symbols",
+    "version": "0.2.2",
+    "license": "MIT",
+    "repository": "https://github.com/madsmtm/objc2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/objc2-symbols-0.2.2/LICENSE.txt"
+    ],
+    "upstream_revision": "e282618be4c3a3b9542957e0c8540e9588472ce8",
+    "upstream_path": "framework-crates/objc2-symbols",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+        "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+      }
+    ],
+    "authors": []
+  },
+  {
+    "name": "objc2-ui-kit",
+    "version": "0.2.2",
+    "license": "MIT",
+    "repository": "https://github.com/madsmtm/objc2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/objc2-ui-kit-0.2.2/LICENSE.txt"
+    ],
+    "upstream_revision": "e282618be4c3a3b9542957e0c8540e9588472ce8",
+    "upstream_path": "framework-crates/objc2-ui-kit",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+        "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+      }
+    ],
+    "authors": []
+  },
+  {
+    "name": "objc2-uniform-type-identifiers",
+    "version": "0.2.2",
+    "license": "MIT",
+    "repository": "https://github.com/madsmtm/objc2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/objc2-uniform-type-identifiers-0.2.2/LICENSE.txt"
+    ],
+    "upstream_revision": "e282618be4c3a3b9542957e0c8540e9588472ce8",
+    "upstream_path": "framework-crates/objc2-uniform-type-identifiers",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+        "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+      }
+    ],
+    "authors": []
+  },
+  {
+    "name": "objc2-user-notifications",
+    "version": "0.2.2",
+    "license": "MIT",
+    "repository": "https://github.com/madsmtm/objc2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/objc2-user-notifications-0.2.2/LICENSE.txt"
+    ],
+    "upstream_revision": "e282618be4c3a3b9542957e0c8540e9588472ce8",
+    "upstream_path": "framework-crates/objc2-user-notifications",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/madsmtm/objc2/e282618be4c3a3b9542957e0c8540e9588472ce8/LICENSE.txt",
+        "sha256": "e353f37b12aefbb9f9b29490e837cfee05d9bda70804b3562839a3285c1df1e5"
+      }
+    ],
+    "authors": []
+  },
+  {
+    "name": "once_cell",
+    "version": "1.21.4",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/matklad/once_cell",
+    "notices": [
+      "THIRD_PARTY_LICENSES/once_cell-1.21.4/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/once_cell-1.21.4/LICENSE-MIT"
+    ],
+    "upstream_revision": "80fe900b21f6d76c1a2ed74d3343e8a3a88c46d0",
+    "upstream_path": "",
+    "authors": [
+      "Aleksey Kladov <aleksey.kladov@gmail.com>"
+    ]
+  },
+  {
+    "name": "orbclient",
+    "version": "0.3.55",
+    "license": "MIT",
+    "repository": "https://gitlab.redox-os.org/redox-os/orbclient",
+    "notices": [
+      "THIRD_PARTY_LICENSES/orbclient-0.3.55/LICENSE",
+      "THIRD_PARTY_LICENSES/orbclient-0.3.55/res/unifont-license.txt"
+    ],
+    "upstream_revision": "5e16bc813e6c53fe40a6145975b2566fb0e890b6",
+    "upstream_path": "",
+    "authors": [
+      "Jeremy Soller <jackpot51@gmail.com>"
+    ]
+  },
+  {
+    "name": "owned_ttf_parser",
+    "version": "0.25.1",
+    "license": "Apache-2.0",
+    "repository": "https://github.com/alexheretic/owned-ttf-parser",
+    "notices": [
+      "THIRD_PARTY_LICENSES/owned_ttf_parser-0.25.1/LICENSE"
+    ],
+    "upstream_revision": "3abee95150b4c32f16ffbaf1bb922a68b465d48b",
+    "upstream_path": "",
+    "authors": [
+      "Alex Butler <alexheretic@gmail.com>"
+    ]
+  },
+  {
+    "name": "parking_lot",
+    "version": "0.12.5",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/Amanieu/parking_lot",
+    "notices": [
+      "THIRD_PARTY_LICENSES/parking_lot-0.12.5/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/parking_lot-0.12.5/LICENSE-MIT"
+    ],
+    "upstream_revision": "d7828fff7b5d6327ae608e82db45f888b344449a",
+    "upstream_path": "",
+    "authors": [
+      "Amanieu d'Antras <amanieu@gmail.com>"
+    ]
+  },
+  {
+    "name": "parking_lot_core",
+    "version": "0.9.12",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/Amanieu/parking_lot",
+    "notices": [
+      "THIRD_PARTY_LICENSES/parking_lot_core-0.9.12/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/parking_lot_core-0.9.12/LICENSE-MIT"
+    ],
+    "upstream_revision": "d7828fff7b5d6327ae608e82db45f888b344449a",
+    "upstream_path": "core",
+    "authors": [
+      "Amanieu d'Antras <amanieu@gmail.com>"
+    ]
+  },
+  {
+    "name": "peeking_take_while",
+    "version": "0.1.2",
+    "license": "Apache-2.0/MIT",
+    "repository": "https://github.com/fitzgen/peeking_take_while",
+    "notices": [
+      "THIRD_PARTY_LICENSES/peeking_take_while-0.1.2/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/peeking_take_while-0.1.2/LICENSE-MIT"
+    ],
+    "authors": [
+      "Nick Fitzgerald <fitzgen@gmail.com>"
+    ]
+  },
+  {
+    "name": "percent-encoding",
+    "version": "2.3.2",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/servo/rust-url/",
+    "notices": [
+      "THIRD_PARTY_LICENSES/percent-encoding-2.3.2/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/percent-encoding-2.3.2/LICENSE-MIT"
+    ],
+    "upstream_revision": "91377f48bf35011d042aa5abef9e7f2a0a625aaa",
+    "upstream_path": "percent_encoding",
+    "authors": [
+      "The rust-url developers"
+    ]
+  },
+  {
+    "name": "pin-project",
+    "version": "1.1.13",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/taiki-e/pin-project",
+    "notices": [
+      "THIRD_PARTY_LICENSES/pin-project-1.1.13/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/pin-project-1.1.13/LICENSE-MIT"
+    ],
+    "upstream_revision": "c3b6b85f7e1674602c0ed693da985b33b2452c3c",
+    "upstream_path": "",
+    "authors": []
+  },
+  {
+    "name": "pin-project-internal",
+    "version": "1.1.13",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/taiki-e/pin-project",
+    "notices": [
+      "THIRD_PARTY_LICENSES/pin-project-internal-1.1.13/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/pin-project-internal-1.1.13/LICENSE-MIT"
+    ],
+    "upstream_revision": "c3b6b85f7e1674602c0ed693da985b33b2452c3c",
+    "upstream_path": "pin-project-internal",
+    "authors": []
+  },
+  {
+    "name": "pin-project-lite",
+    "version": "0.2.17",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/taiki-e/pin-project-lite",
+    "notices": [
+      "THIRD_PARTY_LICENSES/pin-project-lite-0.2.17/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/pin-project-lite-0.2.17/LICENSE-MIT"
+    ],
+    "upstream_revision": "3bdf763446aa78f90e3bdac1ef583e014832ab4c",
+    "upstream_path": "",
+    "authors": []
+  },
+  {
+    "name": "pkg-config",
+    "version": "0.3.34",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-lang/pkg-config-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/pkg-config-0.3.34/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/pkg-config-0.3.34/LICENSE-MIT"
+    ],
+    "upstream_revision": "a8852cc148f8f7d504bf3a62444c298dcd3637f0",
+    "upstream_path": "",
+    "authors": [
+      "Alex Crichton <alex@alexcrichton.com>"
+    ]
+  },
+  {
+    "name": "plain",
+    "version": "0.2.3",
+    "license": "MIT/Apache-2.0",
+    "repository": "https://github.com/randomites/plain",
+    "notices": [
+      "THIRD_PARTY_LICENSES/plain-0.2.3/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/plain-0.2.3/LICENSE-MIT"
+    ],
+    "authors": [
+      "jzr"
+    ]
+  },
+  {
+    "name": "png",
+    "version": "0.18.1",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/image-rs/image-png",
+    "notices": [
+      "THIRD_PARTY_LICENSES/png-0.18.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/png-0.18.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "2a3f980245e3ae38b82ade96533e7b450e8477bb",
+    "upstream_path": "",
+    "authors": [
+      "The image-rs Developers"
+    ]
+  },
+  {
+    "name": "polling",
+    "version": "3.11.0",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/smol-rs/polling",
+    "notices": [
+      "THIRD_PARTY_LICENSES/polling-3.11.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/polling-3.11.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "f404d08dd2a61994ac5fe0ed663bc051bd94c053",
+    "upstream_path": "",
+    "authors": [
+      "Stjepan Glavina <stjepang@gmail.com>",
+      "John Nunley <dev@notgull.net>"
+    ]
+  },
+  {
+    "name": "portable-atomic",
+    "version": "1.15.0",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/taiki-e/portable-atomic",
+    "notices": [
+      "THIRD_PARTY_LICENSES/portable-atomic-1.15.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/portable-atomic-1.15.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "e4595528211f1d53b7f4d93e528ef84b491fc871",
+    "upstream_path": "",
+    "authors": []
+  },
+  {
+    "name": "portable-atomic-util",
+    "version": "0.2.8",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/taiki-e/portable-atomic-util",
+    "notices": [
+      "THIRD_PARTY_LICENSES/portable-atomic-util-0.2.8/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/portable-atomic-util-0.2.8/LICENSE-MIT"
+    ],
+    "upstream_revision": "6fb276aeaee508914ef33918f2e3f003d6808ada",
+    "upstream_path": "",
+    "authors": []
+  },
+  {
+    "name": "potential_utf",
+    "version": "0.1.6",
+    "license": "Unicode-3.0",
+    "repository": "https://github.com/unicode-org/icu4x",
+    "notices": [
+      "THIRD_PARTY_LICENSES/potential_utf-0.1.6/LICENSE"
+    ],
+    "upstream_revision": "a14f2dad852be26bad277ae704abf27a15cbfed1",
+    "upstream_path": "utils/potential_utf",
+    "authors": [
+      "The ICU4X Project Developers"
+    ]
+  },
+  {
+    "name": "prettyplease",
+    "version": "0.2.37",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/dtolnay/prettyplease",
+    "notices": [
+      "THIRD_PARTY_LICENSES/prettyplease-0.2.37/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/prettyplease-0.2.37/LICENSE-MIT"
+    ],
+    "upstream_revision": "c971184fa8c5ef5a2828196e35bd99469455b46b",
+    "upstream_path": "",
+    "authors": [
+      "David Tolnay <dtolnay@gmail.com>"
+    ]
+  },
+  {
+    "name": "proc-macro-crate",
+    "version": "3.5.0",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/bkchr/proc-macro-crate",
+    "notices": [
+      "THIRD_PARTY_LICENSES/proc-macro-crate-3.5.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/proc-macro-crate-3.5.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "8f3d8b04539f732e09c07907f138a248c8d0eed9",
+    "upstream_path": "",
+    "authors": [
+      "Bastian K\u00f6cher <git@kchr.de>"
+    ]
+  },
+  {
+    "name": "proc-macro2",
+    "version": "1.0.107",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/dtolnay/proc-macro2",
+    "notices": [
+      "THIRD_PARTY_LICENSES/proc-macro2-1.0.107/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/proc-macro2-1.0.107/LICENSE-MIT"
+    ],
+    "upstream_revision": "ed8a5497669cd63db33bf24646f261b012bbbc4a",
+    "upstream_path": "",
+    "authors": [
+      "David Tolnay <dtolnay@gmail.com>",
+      "Alex Crichton <alex@alexcrichton.com>"
+    ]
+  },
+  {
+    "name": "profiling",
+    "version": "1.0.18",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/aclysma/profiling",
+    "notices": [
+      "THIRD_PARTY_LICENSES/profiling-1.0.18/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/profiling-1.0.18/LICENSE-APACHE"
+    ],
+    "upstream_revision": "8271551172eb6fa4cba47369aedd93790c623df9",
+    "upstream_path": "profiling",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/aclysma/profiling/8271551172eb6fa4cba47369aedd93790c623df9/LICENSE-MIT",
+        "sha256": "c8167fdeeed46d3f244d3f85c5bf998ce889343691c32be2c61a8bc4b5c08333"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/aclysma/profiling/8271551172eb6fa4cba47369aedd93790c623df9/LICENSE-APACHE",
+        "sha256": "10d30a673cd5e9349bdc02aeb48f14b3386d27d0da32df8f0a555d4aa16aa551"
+      }
+    ],
+    "authors": [
+      "Philip Degarmo <aclysma@gmail.com>"
+    ]
+  },
+  {
+    "name": "pxfm",
+    "version": "0.1.30",
+    "license": "BSD-3-Clause OR Apache-2.0",
+    "repository": "https://github.com/awxkee/pxfm",
+    "notices": [
+      "THIRD_PARTY_LICENSES/pxfm-0.1.30/LICENSE-APACHE.md",
+      "THIRD_PARTY_LICENSES/pxfm-0.1.30/LICENSE.md"
+    ],
+    "upstream_revision": "acf7acd00cfc845307eda7b7b2de19e42303de82",
+    "upstream_path": "",
+    "authors": [
+      "Radzivon Bartoshyk"
+    ]
+  },
+  {
+    "name": "quick-error",
+    "version": "2.0.1",
+    "license": "MIT/Apache-2.0",
+    "repository": "http://github.com/tailhook/quick-error",
+    "notices": [
+      "THIRD_PARTY_LICENSES/quick-error-2.0.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/quick-error-2.0.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "25ab982bb0c43130ae48485151f4a232eeab7d0c",
+    "upstream_path": "",
+    "authors": [
+      "Paul Colomiets <paul@colomiets.name>",
+      "Colin Kiegel <kiegel@gmx.de>"
+    ]
+  },
+  {
+    "name": "quick-xml",
+    "version": "0.41.0",
+    "license": "MIT",
+    "repository": "https://github.com/tafia/quick-xml",
+    "notices": [
+      "THIRD_PARTY_LICENSES/quick-xml-0.41.0/LICENSE-MIT.md"
+    ],
+    "upstream_revision": "4deda08abeffdc188c269360229cf47e12a77a9f",
+    "upstream_path": "",
+    "authors": []
+  },
+  {
+    "name": "quote",
+    "version": "1.0.47",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/dtolnay/quote",
+    "notices": [
+      "THIRD_PARTY_LICENSES/quote-1.0.47/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/quote-1.0.47/LICENSE-MIT"
+    ],
+    "upstream_revision": "723dcb47d3f0ddc896e17287c8a8d3f2ea2317d5",
+    "upstream_path": "",
+    "authors": [
+      "David Tolnay <dtolnay@gmail.com>"
+    ]
+  },
+  {
+    "name": "r-efi",
+    "version": "5.3.0",
+    "license": "MIT OR Apache-2.0 OR LGPL-2.1-or-later",
+    "repository": "https://github.com/r-efi/r-efi",
+    "notices": [],
+    "upstream_revision": "97b55bed1c2c91dcbf787674849f05337ff80b33",
+    "upstream_path": "",
+    "notice_sources": [],
+    "authors": [],
+    "notice_status": "No license text in packaged crate or inspected exact-revision upstream root; declared SPDX license retained, optional non-Linux or inactive dependency, not vendored."
+  },
+  {
+    "name": "r-efi",
+    "version": "6.0.0",
+    "license": "MIT OR Apache-2.0 OR LGPL-2.1-or-later",
+    "repository": "https://github.com/r-efi/r-efi",
+    "notices": [],
+    "upstream_revision": "7e1b0322d31d625f81a5656096330934f9cd835d",
+    "upstream_path": "",
+    "notice_sources": [],
+    "authors": [],
+    "notice_status": "No license text in packaged crate or inspected exact-revision upstream root; declared SPDX license retained, optional non-Linux or inactive dependency, not vendored."
+  },
+  {
+    "name": "raw-window-handle",
+    "version": "0.6.2",
+    "license": "MIT OR Apache-2.0 OR Zlib",
+    "repository": "https://github.com/rust-windowing/raw-window-handle",
+    "notices": [
+      "THIRD_PARTY_LICENSES/raw-window-handle-0.6.2/LICENSE-APACHE.md",
+      "THIRD_PARTY_LICENSES/raw-window-handle-0.6.2/LICENSE-MIT.md",
+      "THIRD_PARTY_LICENSES/raw-window-handle-0.6.2/LICENSE-ZLIB.md"
+    ],
+    "upstream_revision": "5fda8e8420b069368e9450e70c2869e32dcdffc1",
+    "upstream_path": "",
+    "authors": [
+      "Osspial <osspial@gmail.com>"
+    ]
+  },
+  {
+    "name": "rawpointer",
+    "version": "0.2.1",
+    "license": "MIT/Apache-2.0",
+    "repository": "https://github.com/bluss/rawpointer/",
+    "notices": [
+      "THIRD_PARTY_LICENSES/rawpointer-0.2.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/rawpointer-0.2.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "e4f5800e86acc8cb610430a3f361977480e2b0a6",
+    "upstream_path": "",
+    "authors": [
+      "bluss"
+    ]
+  },
+  {
+    "name": "redox_syscall",
+    "version": "0.4.1",
+    "license": "MIT",
+    "repository": "https://gitlab.redox-os.org/redox-os/syscall",
+    "notices": [
+      "THIRD_PARTY_LICENSES/redox_syscall-0.4.1/LICENSE"
+    ],
+    "upstream_revision": "f94a5a7dcafdcbcd8d43af586a637148515bc86a",
+    "upstream_path": "",
+    "authors": [
+      "Jeremy Soller <jackpot51@gmail.com>"
+    ]
+  },
+  {
+    "name": "redox_syscall",
+    "version": "0.5.18",
+    "license": "MIT",
+    "repository": "https://gitlab.redox-os.org/redox-os/syscall",
+    "notices": [
+      "THIRD_PARTY_LICENSES/redox_syscall-0.5.18/LICENSE"
+    ],
+    "upstream_revision": "15aa8e32ef0f3328dd9d48cc8ca02e148a362069",
+    "upstream_path": "",
+    "authors": [
+      "Jeremy Soller <jackpot51@gmail.com>"
+    ]
+  },
+  {
+    "name": "redox_syscall",
+    "version": "0.9.5",
+    "license": "MIT",
+    "repository": "https://gitlab.redox-os.org/redox-os/kernel",
+    "notices": [
+      "THIRD_PARTY_LICENSES/redox_syscall-0.9.5/LICENSE"
+    ],
+    "upstream_revision": "716a8f83f452054b8adc8bf568f7bd35d46a5f31",
+    "upstream_path": "syscall",
+    "authors": [
+      "Jeremy Soller <jackpot51@gmail.com>"
+    ]
+  },
+  {
+    "name": "regex",
+    "version": "1.13.1",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-lang/regex",
+    "notices": [
+      "THIRD_PARTY_LICENSES/regex-1.13.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/regex-1.13.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "2b527599eb9eea0dcc288c704584f242f26a5c61",
+    "upstream_path": "",
+    "authors": [
+      "The Rust Project Developers",
+      "Andrew Gallant <jamslam@gmail.com>"
+    ]
+  },
+  {
+    "name": "regex-automata",
+    "version": "0.4.18",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-lang/regex",
+    "notices": [
+      "THIRD_PARTY_LICENSES/regex-automata-0.4.18/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/regex-automata-0.4.18/LICENSE-MIT"
+    ],
+    "upstream_revision": "e6ad938198e68339a593f85d228f2d44cb54718f",
+    "upstream_path": "regex-automata",
+    "authors": [
+      "The Rust Project Developers",
+      "Andrew Gallant <jamslam@gmail.com>"
+    ]
+  },
+  {
+    "name": "regex-syntax",
+    "version": "0.8.11",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-lang/regex",
+    "notices": [
+      "THIRD_PARTY_LICENSES/regex-syntax-0.8.11/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/regex-syntax-0.8.11/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/regex-syntax-0.8.11/src/unicode_tables/LICENSE-UNICODE"
+    ],
+    "upstream_revision": "140167995737fa11dfe11b8af8b9aa143b790b4e",
+    "upstream_path": "regex-syntax",
+    "authors": [
+      "The Rust Project Developers",
+      "Andrew Gallant <jamslam@gmail.com>"
+    ]
+  },
+  {
+    "name": "renderdoc-sys",
+    "version": "1.1.0",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/ebkalderon/renderdoc-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/renderdoc-sys-1.1.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/renderdoc-sys-1.1.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "0276afc3686dd3ee9475798ed8ab89026d74143d",
+    "upstream_path": "renderdoc-sys",
+    "authors": [
+      "Eyal Kalderon <ebkalderon@gmail.com>"
+    ]
+  },
+  {
+    "name": "rustc-hash",
+    "version": "1.1.0",
+    "license": "Apache-2.0/MIT",
+    "repository": "https://github.com/rust-lang-nursery/rustc-hash",
+    "notices": [
+      "THIRD_PARTY_LICENSES/rustc-hash-1.1.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/rustc-hash-1.1.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "6fc9a706a9312ee801c7e77ca06c0782fa9eadef",
+    "upstream_path": "",
+    "authors": [
+      "The Rust Project Developers"
+    ]
+  },
+  {
+    "name": "rustc-hash",
+    "version": "2.1.3",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/rust-lang/rustc-hash",
+    "notices": [
+      "THIRD_PARTY_LICENSES/rustc-hash-2.1.3/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/rustc-hash-2.1.3/LICENSE-MIT"
+    ],
+    "upstream_revision": "c13e7ccca705e6255387a2ebc6dca142d6881621",
+    "upstream_path": "",
+    "authors": [
+      "The Rust Project Developers"
+    ]
+  },
+  {
+    "name": "rustc_version",
+    "version": "0.4.1",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/djc/rustc-version-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/rustc_version-0.4.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/rustc_version-0.4.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "eeca449cca83e24150e46739e797aa82e9142809",
+    "upstream_path": "",
+    "authors": []
+  },
+  {
+    "name": "rustix",
+    "version": "0.38.44",
+    "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+    "repository": "https://github.com/bytecodealliance/rustix",
+    "notices": [
+      "THIRD_PARTY_LICENSES/rustix-0.38.44/COPYRIGHT",
+      "THIRD_PARTY_LICENSES/rustix-0.38.44/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/rustix-0.38.44/LICENSE-Apache-2.0_WITH_LLVM-exception",
+      "THIRD_PARTY_LICENSES/rustix-0.38.44/LICENSE-MIT"
+    ],
+    "upstream_revision": "acf4a284ea893efa93953e1ff2f2f0ab00be1cdc",
+    "upstream_path": "",
+    "authors": [
+      "Dan Gohman <dev@sunfishcode.online>",
+      "Jakub Konka <kubkon@jakubkonka.com>"
+    ]
+  },
+  {
+    "name": "rustix",
+    "version": "1.1.5",
+    "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+    "repository": "https://github.com/bytecodealliance/rustix",
+    "notices": [
+      "THIRD_PARTY_LICENSES/rustix-1.1.5/COPYRIGHT",
+      "THIRD_PARTY_LICENSES/rustix-1.1.5/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/rustix-1.1.5/LICENSE-Apache-2.0_WITH_LLVM-exception",
+      "THIRD_PARTY_LICENSES/rustix-1.1.5/LICENSE-MIT"
+    ],
+    "upstream_revision": "287214b889865d8e1406a0ee71cc409b6f6191c8",
+    "upstream_path": "",
+    "authors": [
+      "Dan Gohman <dev@sunfishcode.online>",
+      "Jakub Konka <kubkon@jakubkonka.com>"
+    ]
+  },
+  {
+    "name": "rustversion",
+    "version": "1.0.23",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/dtolnay/rustversion",
+    "notices": [
+      "THIRD_PARTY_LICENSES/rustversion-1.0.23/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/rustversion-1.0.23/LICENSE-MIT"
+    ],
+    "upstream_revision": "3a7c76605450b9a7299c6502a421909de9126a59",
+    "upstream_path": "",
+    "authors": [
+      "David Tolnay <dtolnay@gmail.com>"
+    ]
+  },
+  {
+    "name": "safe_arch",
+    "version": "1.2.0",
+    "license": "Zlib OR Apache-2.0 OR MIT",
+    "repository": "https://github.com/Lokathor/safe_arch",
+    "notices": [
+      "THIRD_PARTY_LICENSES/safe_arch-1.2.0/LICENSE-APACHE.md",
+      "THIRD_PARTY_LICENSES/safe_arch-1.2.0/LICENSE-MIT.md",
+      "THIRD_PARTY_LICENSES/safe_arch-1.2.0/LICENSE-ZLIB.md"
+    ],
+    "upstream_revision": "d45ee8c53c38fdddee2eade0a5ddef1a3c677b4c",
+    "upstream_path": "",
+    "authors": [
+      "Lokathor <zefria@gmail.com>"
+    ]
+  },
+  {
+    "name": "same-file",
+    "version": "1.0.6",
+    "license": "Unlicense/MIT",
+    "repository": "https://github.com/BurntSushi/same-file",
+    "notices": [
+      "THIRD_PARTY_LICENSES/same-file-1.0.6/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/same-file-1.0.6/UNLICENSE"
+    ],
+    "upstream_revision": "5799cd323b8eefd17a089c950dac113f66c89c9e",
+    "upstream_path": "",
+    "authors": [
+      "Andrew Gallant <jamslam@gmail.com>"
+    ]
+  },
+  {
+    "name": "scoped-tls",
+    "version": "1.0.1",
+    "license": "MIT/Apache-2.0",
+    "repository": "https://github.com/alexcrichton/scoped-tls",
+    "notices": [
+      "THIRD_PARTY_LICENSES/scoped-tls-1.0.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/scoped-tls-1.0.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "c0ff7bf6d33e568353ed863d90f893e7e80a0ed1",
+    "upstream_path": "",
+    "authors": [
+      "Alex Crichton <alex@alexcrichton.com>"
+    ]
+  },
+  {
+    "name": "scopeguard",
+    "version": "1.2.0",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/bluss/scopeguard",
+    "notices": [
+      "THIRD_PARTY_LICENSES/scopeguard-1.2.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/scopeguard-1.2.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "bb988222848d39b0b9037b29da3a3a1eb05ebf4b",
+    "upstream_path": "",
+    "authors": [
+      "bluss"
+    ]
+  },
+  {
+    "name": "semver",
+    "version": "1.0.28",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/dtolnay/semver",
+    "notices": [
+      "THIRD_PARTY_LICENSES/semver-1.0.28/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/semver-1.0.28/LICENSE-MIT"
+    ],
+    "upstream_revision": "7625c7aa3f0e8ba21e099d1765bcebcb72aa8816",
+    "upstream_path": "",
+    "authors": [
+      "David Tolnay <dtolnay@gmail.com>"
+    ]
+  },
+  {
+    "name": "serde",
+    "version": "1.0.229",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/serde-rs/serde",
+    "notices": [
+      "THIRD_PARTY_LICENSES/serde-1.0.229/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/serde-1.0.229/LICENSE-MIT"
+    ],
+    "upstream_revision": "7fc3b4c30c94f73a96ebd1553f2b090d928fc3a8",
+    "upstream_path": "serde",
+    "authors": [
+      "Erick Tryzelaar <erick.tryzelaar@gmail.com>",
+      "David Tolnay <dtolnay@gmail.com>"
+    ]
+  },
+  {
+    "name": "serde_core",
+    "version": "1.0.229",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/serde-rs/serde",
+    "notices": [
+      "THIRD_PARTY_LICENSES/serde_core-1.0.229/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/serde_core-1.0.229/LICENSE-MIT"
+    ],
+    "upstream_revision": "7fc3b4c30c94f73a96ebd1553f2b090d928fc3a8",
+    "upstream_path": "serde_core",
+    "authors": [
+      "Erick Tryzelaar <erick.tryzelaar@gmail.com>",
+      "David Tolnay <dtolnay@gmail.com>"
+    ]
+  },
+  {
+    "name": "serde_derive",
+    "version": "1.0.229",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/serde-rs/serde",
+    "notices": [
+      "THIRD_PARTY_LICENSES/serde_derive-1.0.229/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/serde_derive-1.0.229/LICENSE-MIT"
+    ],
+    "upstream_revision": "7fc3b4c30c94f73a96ebd1553f2b090d928fc3a8",
+    "upstream_path": "serde_derive",
+    "authors": [
+      "Erick Tryzelaar <erick.tryzelaar@gmail.com>",
+      "David Tolnay <dtolnay@gmail.com>"
+    ]
+  },
+  {
+    "name": "serde_json",
+    "version": "1.0.154",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/serde-rs/json",
+    "notices": [
+      "THIRD_PARTY_LICENSES/serde_json-1.0.154/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/serde_json-1.0.154/LICENSE-MIT"
+    ],
+    "upstream_revision": "20572a6d066958542d79cdd6cf1a7cd9f0c8e1f8",
+    "upstream_path": "",
+    "authors": []
+  },
+  {
+    "name": "shlex",
+    "version": "1.3.0",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/comex/rust-shlex",
+    "notices": [
+      "THIRD_PARTY_LICENSES/shlex-1.3.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/shlex-1.3.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "4a0724b0b62ef715467875b040a890ce75a8a829",
+    "upstream_path": "",
+    "authors": [
+      "comex <comexk@gmail.com>",
+      "Fenhl <fenhl@fenhl.net>",
+      "Adrian Taylor <adetaylor@chromium.org>",
+      "Alex Touchet <alextouchet@outlook.com>",
+      "Daniel Parks <dp+git@oxidized.org>",
+      "Garrett Berg <googberg@gmail.com>"
+    ]
+  },
+  {
+    "name": "shlex",
+    "version": "2.0.1",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/comex/rust-shlex",
+    "notices": [
+      "THIRD_PARTY_LICENSES/shlex-2.0.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/shlex-2.0.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "e82b1411beb7c92871c2c078c9ab415bbcf207ef",
+    "upstream_path": "",
+    "authors": [
+      "comex <comexk@gmail.com>",
+      "Fenhl <fenhl@fenhl.net>",
+      "Adrian Taylor <adetaylor@chromium.org>",
+      "Alex Touchet <alextouchet@outlook.com>",
+      "Daniel Parks <dp+git@oxidized.org>",
+      "Garrett Berg <googberg@gmail.com>"
+    ]
+  },
+  {
+    "name": "simba",
+    "version": "0.10.2",
+    "license": "Apache-2.0",
+    "repository": "https://github.com/dimforge/simba",
+    "notices": [
+      "THIRD_PARTY_LICENSES/simba-0.10.2/LICENSE"
+    ],
+    "upstream_revision": "16a77ffd653f5842028c53681460e20386428966",
+    "upstream_path": "",
+    "authors": [
+      "sebcrozet <developer@crozet.re>"
+    ]
+  },
+  {
+    "name": "simd-adler32",
+    "version": "0.3.10",
+    "license": "MIT",
+    "repository": "https://github.com/mcountryman/simd-adler32",
+    "notices": [
+      "THIRD_PARTY_LICENSES/simd-adler32-0.3.10/LICENSE.md"
+    ],
+    "upstream_revision": "d93164f98d7fe2daf883f2e1bec82778dd26199a",
+    "upstream_path": "",
+    "authors": [
+      "Marvin Countryman <me@maar.vin>"
+    ]
+  },
+  {
+    "name": "simd_cesu8",
+    "version": "1.2.0",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/seancroach/simd_cesu8",
+    "notices": [
+      "THIRD_PARTY_LICENSES/simd_cesu8-1.2.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/simd_cesu8-1.2.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "b7977cfbebc962b6fa68969bac9c863ae55a8233",
+    "upstream_path": "",
+    "authors": [
+      "Sean C. Roach <me@seancroach.dev>"
+    ]
+  },
+  {
+    "name": "simdutf8",
+    "version": "0.1.5",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rusticstuff/simdutf8",
+    "notices": [
+      "THIRD_PARTY_LICENSES/simdutf8-0.1.5/LICENSE-Apache",
+      "THIRD_PARTY_LICENSES/simdutf8-0.1.5/LICENSE-MIT"
+    ],
+    "upstream_revision": "87ee8d9d20b849eae1974a82b248ee6fe7491bcc",
+    "upstream_path": "",
+    "authors": [
+      "Hans Kratz <hans@appfour.com>"
+    ]
+  },
+  {
+    "name": "slab",
+    "version": "0.4.12",
+    "license": "MIT",
+    "repository": "https://github.com/tokio-rs/slab",
+    "notices": [
+      "THIRD_PARTY_LICENSES/slab-0.4.12/LICENSE"
+    ],
+    "upstream_revision": "a1e4346070a48c936d808de75191dee5d01e433c",
+    "upstream_path": "",
+    "authors": [
+      "Carl Lerche <me@carllerche.com>"
+    ]
+  },
+  {
+    "name": "slotmap",
+    "version": "1.1.1",
+    "license": "Zlib",
+    "repository": "https://github.com/orlp/slotmap",
+    "notices": [
+      "THIRD_PARTY_LICENSES/slotmap-1.1.1/LICENSE"
+    ],
+    "upstream_revision": "2d56154b9b628f7d7a506f24ebc4f55a13ec8fed",
+    "upstream_path": "",
+    "authors": [
+      "Orson Peters <orsonpeters@gmail.com>"
+    ]
+  },
+  {
+    "name": "smallvec",
+    "version": "1.16.4",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/servo/rust-smallvec",
+    "notices": [
+      "THIRD_PARTY_LICENSES/smallvec-1.16.4/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/smallvec-1.16.4/LICENSE-MIT"
+    ],
+    "upstream_revision": "eab77462eda2767d2386f1d251928f474827e1c7",
+    "upstream_path": "",
+    "authors": [
+      "The Servo Project Developers"
+    ]
+  },
+  {
+    "name": "smithay-client-toolkit",
+    "version": "0.19.2",
+    "license": "MIT",
+    "repository": "https://github.com/smithay/client-toolkit",
+    "notices": [
+      "THIRD_PARTY_LICENSES/smithay-client-toolkit-0.19.2/LICENSE.txt"
+    ],
+    "upstream_revision": "c583de8dd5651f8168c6513cd282137c42aae049",
+    "upstream_path": "",
+    "authors": [
+      "Elinor Berger <elinor@safaradeg.net>",
+      "i509VCB <mail@i509.me>",
+      "Ashley Wulber <ashley@system76.com>"
+    ]
+  },
+  {
+    "name": "smithay-client-toolkit",
+    "version": "0.20.0",
+    "license": "MIT",
+    "repository": "https://github.com/smithay/client-toolkit",
+    "notices": [
+      "THIRD_PARTY_LICENSES/smithay-client-toolkit-0.20.0/LICENSE.txt"
+    ],
+    "upstream_revision": "8a0b33616145b38c7f989f8e468d57e69a2a6748",
+    "upstream_path": "",
+    "authors": [
+      "Elinor Berger <elinor@safaradeg.net>",
+      "i509VCB <mail@i509.me>",
+      "Ashley Wulber <ashley@system76.com>"
+    ]
+  },
+  {
+    "name": "smithay-clipboard",
+    "version": "0.7.3",
+    "license": "MIT",
+    "repository": "https://github.com/smithay/smithay-clipboard",
+    "notices": [
+      "THIRD_PARTY_LICENSES/smithay-clipboard-0.7.3/LICENSE"
+    ],
+    "upstream_revision": "26c2f53f15f6bdc4f41a442d0ae2c2d63bbc617c",
+    "upstream_path": "",
+    "authors": [
+      "Kirill Chibisov <contact@kchibisov.com>",
+      "Elinor Berger <elinor@safaradeg.net>"
+    ]
+  },
+  {
+    "name": "smol_str",
+    "version": "0.2.2",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/rust-analyzer/smol_str",
+    "notices": [
+      "THIRD_PARTY_LICENSES/smol_str-0.2.2/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/smol_str-0.2.2/LICENSE-MIT"
+    ],
+    "upstream_revision": "aea39b4974f55e9380556272b1335e2f6fd13cc7",
+    "upstream_path": "",
+    "authors": [
+      "Aleksey Kladov <aleksey.kladov@gmail.com>"
+    ]
+  },
+  {
+    "name": "stable_deref_trait",
+    "version": "1.2.1",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/storyyeller/stable_deref_trait",
+    "notices": [
+      "THIRD_PARTY_LICENSES/stable_deref_trait-1.2.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/stable_deref_trait-1.2.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "30002b4228f7cdee309217b6bf6eee099dda0b00",
+    "upstream_path": "",
+    "authors": [
+      "Robert Grosse <n210241048576@gmail.com>"
+    ]
+  },
+  {
+    "name": "static_assertions",
+    "version": "1.1.0",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/nvzqz/static-assertions-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/static_assertions-1.1.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/static_assertions-1.1.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "18bc65a094d890fe1faa5d3ccb70f12b89eabf56",
+    "upstream_path": "",
+    "authors": [
+      "Nikolai Vazquez"
+    ]
+  },
+  {
+    "name": "syn",
+    "version": "2.0.119",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/dtolnay/syn",
+    "notices": [
+      "THIRD_PARTY_LICENSES/syn-2.0.119/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/syn-2.0.119/LICENSE-MIT"
+    ],
+    "upstream_revision": "3295f9e9841785ac88a5e558c884854d5fb7d67f",
+    "upstream_path": "",
+    "authors": [
+      "David Tolnay <dtolnay@gmail.com>"
+    ]
+  },
+  {
+    "name": "syn",
+    "version": "3.0.9",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/dtolnay/syn",
+    "notices": [
+      "THIRD_PARTY_LICENSES/syn-3.0.9/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/syn-3.0.9/LICENSE-MIT"
+    ],
+    "upstream_revision": "7c44a5565b4421035101cc16184e9af08ab5fc77",
+    "upstream_path": "",
+    "authors": [
+      "David Tolnay <dtolnay@gmail.com>"
+    ]
+  },
+  {
+    "name": "synstructure",
+    "version": "0.14.0",
+    "license": "MIT",
+    "repository": "https://github.com/mystor/synstructure",
+    "notices": [
+      "THIRD_PARTY_LICENSES/synstructure-0.14.0/LICENSE"
+    ],
+    "upstream_revision": "30cfafe36e42405e717a8e55da042a2835a698d7",
+    "upstream_path": "",
+    "authors": [
+      "Nika Layzell <nika@thelayzells.com>"
+    ]
+  },
+  {
+    "name": "thiserror",
+    "version": "1.0.69",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/dtolnay/thiserror",
+    "notices": [
+      "THIRD_PARTY_LICENSES/thiserror-1.0.69/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/thiserror-1.0.69/LICENSE-MIT"
+    ],
+    "upstream_revision": "41938bd3a03a70d34ed8e53d99c89c770c7c9c41",
+    "upstream_path": "",
+    "authors": [
+      "David Tolnay <dtolnay@gmail.com>"
+    ]
+  },
+  {
+    "name": "thiserror",
+    "version": "2.0.21",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/dtolnay/thiserror",
+    "notices": [
+      "THIRD_PARTY_LICENSES/thiserror-2.0.21/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/thiserror-2.0.21/LICENSE-MIT"
+    ],
+    "upstream_revision": "b1827ee06f81a7d7f954e676771e19a97f9f8e3b",
+    "upstream_path": "",
+    "authors": [
+      "David Tolnay <dtolnay@gmail.com>"
+    ]
+  },
+  {
+    "name": "thiserror-impl",
+    "version": "1.0.69",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/dtolnay/thiserror",
+    "notices": [
+      "THIRD_PARTY_LICENSES/thiserror-impl-1.0.69/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/thiserror-impl-1.0.69/LICENSE-MIT"
+    ],
+    "upstream_revision": "41938bd3a03a70d34ed8e53d99c89c770c7c9c41",
+    "upstream_path": "impl",
+    "authors": [
+      "David Tolnay <dtolnay@gmail.com>"
+    ]
+  },
+  {
+    "name": "thiserror-impl",
+    "version": "2.0.21",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/dtolnay/thiserror",
+    "notices": [
+      "THIRD_PARTY_LICENSES/thiserror-impl-2.0.21/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/thiserror-impl-2.0.21/LICENSE-MIT"
+    ],
+    "upstream_revision": "b1827ee06f81a7d7f954e676771e19a97f9f8e3b",
+    "upstream_path": "impl",
+    "authors": [
+      "David Tolnay <dtolnay@gmail.com>"
+    ]
+  },
+  {
+    "name": "tiff",
+    "version": "0.11.3",
+    "license": "MIT",
+    "repository": "https://github.com/image-rs/image-tiff",
+    "notices": [
+      "THIRD_PARTY_LICENSES/tiff-0.11.3/LICENSE",
+      "THIRD_PARTY_LICENSES/tiff-0.11.3/tests/COPYRIGHT"
+    ],
+    "upstream_revision": "e41159ce058bf193718b017599e2d7d53e9ccc92",
+    "upstream_path": "",
+    "authors": [
+      "The image-rs Developers"
+    ]
+  },
+  {
+    "name": "tinystr",
+    "version": "0.8.5",
+    "license": "Unicode-3.0",
+    "repository": "https://github.com/unicode-org/icu4x",
+    "notices": [
+      "THIRD_PARTY_LICENSES/tinystr-0.8.5/LICENSE"
+    ],
+    "upstream_revision": "031d9e89f6a3fd26a14491e090729d46094328fd",
+    "upstream_path": "utils/tinystr",
+    "authors": [
+      "The ICU4X Project Developers"
+    ]
+  },
+  {
+    "name": "tokio",
+    "version": "1.54.1",
+    "license": "MIT",
+    "repository": "https://github.com/tokio-rs/tokio",
+    "notices": [
+      "THIRD_PARTY_LICENSES/tokio-1.54.1/LICENSE"
+    ],
+    "upstream_revision": "b53b2001ed2ccfd9b87e32a0c6da1a1eebdc80b8",
+    "upstream_path": "tokio",
+    "authors": [
+      "Tokio Contributors <team@tokio.rs>"
+    ]
+  },
+  {
+    "name": "toml_datetime",
+    "version": "1.1.2+spec-1.1.0",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/toml-rs/toml",
+    "notices": [
+      "THIRD_PARTY_LICENSES/toml_datetime-1.1.2+spec-1.1.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/toml_datetime-1.1.2+spec-1.1.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "f72038c2508112dfaaedb227a511f91bf9b2015c",
+    "upstream_path": "crates/toml_datetime",
+    "authors": []
+  },
+  {
+    "name": "toml_edit",
+    "version": "0.25.17+spec-1.1.0",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/toml-rs/toml",
+    "notices": [
+      "THIRD_PARTY_LICENSES/toml_edit-0.25.17+spec-1.1.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/toml_edit-0.25.17+spec-1.1.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "ceac6e4412420d5a5c19e4f7293ad005cf1a31b2",
+    "upstream_path": "crates/toml_edit",
+    "authors": []
+  },
+  {
+    "name": "toml_parser",
+    "version": "1.1.5+spec-1.1.0",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/toml-rs/toml",
+    "notices": [
+      "THIRD_PARTY_LICENSES/toml_parser-1.1.5+spec-1.1.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/toml_parser-1.1.5+spec-1.1.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "ceac6e4412420d5a5c19e4f7293ad005cf1a31b2",
+    "upstream_path": "crates/toml_parser",
+    "authors": []
+  },
+  {
+    "name": "tracing",
+    "version": "0.1.44",
+    "license": "MIT",
+    "repository": "https://github.com/tokio-rs/tracing",
+    "notices": [
+      "THIRD_PARTY_LICENSES/tracing-0.1.44/LICENSE"
+    ],
+    "upstream_revision": "2d55f6faf9be83e7e4634129fb96813241aac2b8",
+    "upstream_path": "tracing",
+    "authors": [
+      "Eliza Weisman <eliza@buoyant.io>",
+      "Tokio Contributors <team@tokio.rs>"
+    ]
+  },
+  {
+    "name": "tracing-core",
+    "version": "0.1.36",
+    "license": "MIT",
+    "repository": "https://github.com/tokio-rs/tracing",
+    "notices": [
+      "THIRD_PARTY_LICENSES/tracing-core-0.1.36/LICENSE",
+      "THIRD_PARTY_LICENSES/tracing-core-0.1.36/src/spin/LICENSE"
+    ],
+    "upstream_revision": "10a9e838a35e6ded79d66af246be2ee05417136d",
+    "upstream_path": "tracing-core",
+    "authors": [
+      "Tokio Contributors <team@tokio.rs>"
+    ]
+  },
+  {
+    "name": "ttf-parser",
+    "version": "0.25.1",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/harfbuzz/ttf-parser",
+    "notices": [
+      "THIRD_PARTY_LICENSES/ttf-parser-0.25.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/ttf-parser-0.25.1/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/ttf-parser-0.25.1/tests/fonts/colr_1_LICENSE"
+    ],
+    "upstream_revision": "56c33b910b03ca152f78363ec471c5dfd97c3069",
+    "upstream_path": "",
+    "authors": [
+      "Caleb Maclennan <caleb@alerque.com>",
+      "Laurenz Stampfl <laurenz.stampfl@gmail.com>",
+      "Yevhenii Reizner <razrfalcon@gmail.com>",
+      "\u062e\u0627\u0644\u062f \u062d\u0633\u0646\u064a (Khaled Hosny) <khaled@aliftype.com>"
+    ]
+  },
+  {
+    "name": "type-map",
+    "version": "0.5.1",
+    "license": "MIT/Apache-2.0",
+    "repository": "https://github.com/kardeiz/type-map",
+    "notices": [
+      "THIRD_PARTY_LICENSES/type-map-0.5.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/type-map-0.5.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "d3ab3e642736d87f3fa8b1e6c8f13a93fcfb72e1",
+    "upstream_path": "",
+    "authors": [
+      "Jacob Brown <kardeiz@gmail.com>"
+    ]
+  },
+  {
+    "name": "typenum",
+    "version": "1.20.1",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/paholg/typenum",
+    "notices": [
+      "THIRD_PARTY_LICENSES/typenum-1.20.1/LICENSE",
+      "THIRD_PARTY_LICENSES/typenum-1.20.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/typenum-1.20.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "0db9a0f731981f29266b63586c29fa07e4477b1a",
+    "upstream_path": "",
+    "authors": []
+  },
+  {
+    "name": "unicode-ident",
+    "version": "1.0.27",
+    "license": "(MIT OR Apache-2.0) AND Unicode-3.0",
+    "repository": "https://github.com/dtolnay/unicode-ident",
+    "notices": [
+      "THIRD_PARTY_LICENSES/unicode-ident-1.0.27/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/unicode-ident-1.0.27/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/unicode-ident-1.0.27/LICENSE-UNICODE"
+    ],
+    "upstream_revision": "c1ac3afb721f3cea6527bc2255340a04d0de3ca0",
+    "upstream_path": "",
+    "authors": [
+      "David Tolnay <dtolnay@gmail.com>"
+    ]
+  },
+  {
+    "name": "unicode-segmentation",
+    "version": "1.13.3",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/unicode-rs/unicode-segmentation",
+    "notices": [
+      "THIRD_PARTY_LICENSES/unicode-segmentation-1.13.3/COPYRIGHT",
+      "THIRD_PARTY_LICENSES/unicode-segmentation-1.13.3/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/unicode-segmentation-1.13.3/LICENSE-MIT"
+    ],
+    "upstream_revision": "66a032fd8d667bc47ac5b640b151dff3f5356d07",
+    "upstream_path": "",
+    "authors": [
+      "kwantam <kwantam@gmail.com>",
+      "Manish Goregaokar <manishsmail@gmail.com>"
+    ]
+  },
+  {
+    "name": "unicode-width",
+    "version": "0.2.2",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/unicode-rs/unicode-width",
+    "notices": [
+      "THIRD_PARTY_LICENSES/unicode-width-0.2.2/COPYRIGHT",
+      "THIRD_PARTY_LICENSES/unicode-width-0.2.2/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/unicode-width-0.2.2/LICENSE-MIT"
+    ],
+    "upstream_revision": "9d98411769fe13c7c18cab0b3fbbab29ba8350ea",
+    "upstream_path": "",
+    "authors": [
+      "kwantam <kwantam@gmail.com>",
+      "Manish Goregaokar <manishsmail@gmail.com>"
+    ]
+  },
+  {
+    "name": "url",
+    "version": "2.5.8",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/servo/rust-url",
+    "notices": [
+      "THIRD_PARTY_LICENSES/url-2.5.8/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/url-2.5.8/LICENSE-MIT"
+    ],
+    "upstream_revision": "d6ea13c5f8e7e6e627f6390161b3e185bda5e5ce",
+    "upstream_path": "url",
+    "authors": [
+      "The rust-url developers"
+    ]
+  },
+  {
+    "name": "utf8_iter",
+    "version": "1.0.4",
+    "license": "Apache-2.0 OR MIT",
+    "repository": "https://github.com/hsivonen/utf8_iter",
+    "notices": [
+      "THIRD_PARTY_LICENSES/utf8_iter-1.0.4/COPYRIGHT",
+      "THIRD_PARTY_LICENSES/utf8_iter-1.0.4/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/utf8_iter-1.0.4/LICENSE-MIT"
+    ],
+    "upstream_revision": "6b604ea2365bd535fb66eb4bfe92a9e00e333090",
+    "upstream_path": "",
+    "authors": [
+      "Henri Sivonen <hsivonen@hsivonen.fi>"
+    ]
+  },
+  {
+    "name": "v4l2-sys-mit",
+    "version": "0.3.0",
+    "license": "MIT",
+    "repository": null,
+    "notices": [
+      "THIRD_PARTY_LICENSES/v4l2-sys-mit-0.3.0/LICENSE.txt"
+    ],
+    "upstream_revision": "cf6d4125d3f37f24d18c325fd369f503d9f12a88",
+    "upstream_path": "v4l2-sys",
+    "notice_sources": [
+      {
+        "url": "https://raw.githubusercontent.com/raymanfx/libv4l-rs/cf6d4125d3f37f24d18c325fd369f503d9f12a88/LICENSE.txt",
+        "sha256": "72fe16a8dceb87e834b7841d10581f544bb7345e6f8e471ac34fde37317b04a6"
+      }
+    ],
+    "authors": [
+      "Christopher N. Hesse <raymanfx@gmail.com>"
+    ]
+  },
+  {
+    "name": "version_check",
+    "version": "0.9.5",
+    "license": "MIT/Apache-2.0",
+    "repository": "https://github.com/SergioBenitez/version_check",
+    "notices": [
+      "THIRD_PARTY_LICENSES/version_check-0.9.5/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/version_check-0.9.5/LICENSE-MIT"
+    ],
+    "upstream_revision": "d77ef9f27cc336719b2d839d09ee6635dd22f758",
+    "upstream_path": "",
+    "authors": [
+      "Sergio Benitez <sb@sergio.bz>"
+    ]
+  },
+  {
+    "name": "walkdir",
+    "version": "2.5.0",
+    "license": "Unlicense/MIT",
+    "repository": "https://github.com/BurntSushi/walkdir",
+    "notices": [
+      "THIRD_PARTY_LICENSES/walkdir-2.5.0/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/walkdir-2.5.0/UNLICENSE"
+    ],
+    "upstream_revision": "4f26be4d450910916ea11533b2efc52b9a6483bc",
+    "upstream_path": "",
+    "authors": [
+      "Andrew Gallant <jamslam@gmail.com>"
+    ]
+  },
+  {
+    "name": "wasip2",
+    "version": "1.0.4+wasi-0.2.12",
+    "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+    "repository": "https://github.com/bytecodealliance/wasi-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/wasip2-1.0.4+wasi-0.2.12/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/wasip2-1.0.4+wasi-0.2.12/LICENSE-Apache-2.0_WITH_LLVM-exception",
+      "THIRD_PARTY_LICENSES/wasip2-1.0.4+wasi-0.2.12/LICENSE-MIT"
+    ],
+    "upstream_revision": "1edbc7add705b075d28436b26057ca9aa5a5a492",
+    "upstream_path": "crates/wasip2",
+    "authors": []
+  },
+  {
+    "name": "wasm-bindgen",
+    "version": "0.2.129",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/wasm-bindgen/wasm-bindgen",
+    "notices": [
+      "THIRD_PARTY_LICENSES/wasm-bindgen-0.2.129/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/wasm-bindgen-0.2.129/LICENSE-MIT"
+    ],
+    "upstream_revision": "165586f854c852bcbc4d14d8a75a0a0e0d0abc12",
+    "upstream_path": "",
+    "authors": [
+      "The wasm-bindgen Developers"
+    ]
+  },
+  {
+    "name": "wasm-bindgen-futures",
+    "version": "0.4.79",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/futures",
+    "notices": [
+      "THIRD_PARTY_LICENSES/wasm-bindgen-futures-0.4.79/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/wasm-bindgen-futures-0.4.79/LICENSE-MIT"
+    ],
+    "upstream_revision": "165586f854c852bcbc4d14d8a75a0a0e0d0abc12",
+    "upstream_path": "crates/futures",
+    "authors": [
+      "The wasm-bindgen Developers"
+    ]
+  },
+  {
+    "name": "wasm-bindgen-macro",
+    "version": "0.2.129",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/macro",
+    "notices": [
+      "THIRD_PARTY_LICENSES/wasm-bindgen-macro-0.2.129/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/wasm-bindgen-macro-0.2.129/LICENSE-MIT"
+    ],
+    "upstream_revision": "165586f854c852bcbc4d14d8a75a0a0e0d0abc12",
+    "upstream_path": "crates/macro",
+    "authors": [
+      "The wasm-bindgen Developers"
+    ]
+  },
+  {
+    "name": "wasm-bindgen-macro-support",
+    "version": "0.2.129",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/wasm-bindgen/wasm-bindgen/tree/main/crates/macro-support",
+    "notices": [
+      "THIRD_PARTY_LICENSES/wasm-bindgen-macro-support-0.2.129/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/wasm-bindgen-macro-support-0.2.129/LICENSE-MIT"
+    ],
+    "upstream_revision": "165586f854c852bcbc4d14d8a75a0a0e0d0abc12",
+    "upstream_path": "crates/macro-support",
+    "authors": [
+      "The wasm-bindgen Developers"
+    ]
+  },
+  {
+    "name": "wasm-bindgen-shared",
+    "version": "0.2.129",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/shared",
+    "notices": [
+      "THIRD_PARTY_LICENSES/wasm-bindgen-shared-0.2.129/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/wasm-bindgen-shared-0.2.129/LICENSE-MIT"
+    ],
+    "upstream_revision": "165586f854c852bcbc4d14d8a75a0a0e0d0abc12",
+    "upstream_path": "crates/shared",
+    "authors": [
+      "The wasm-bindgen Developers"
+    ]
+  },
+  {
+    "name": "wayland-backend",
+    "version": "0.3.17",
+    "license": "MIT",
+    "repository": "https://github.com/smithay/wayland-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/wayland-backend-0.3.17/LICENSE.txt"
+    ],
+    "upstream_revision": "72f7fe0d9e99cb720ed57ade0c3077aec533b6ab",
+    "upstream_path": "wayland-backend",
+    "authors": [
+      "Elinor Berger <elinor@safaradeg.net>"
+    ]
+  },
+  {
+    "name": "wayland-client",
+    "version": "0.31.15",
+    "license": "MIT",
+    "repository": "https://github.com/smithay/wayland-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/wayland-client-0.31.15/LICENSE.txt"
+    ],
+    "upstream_revision": "05196740da57e41b60a9e9f8e35079e9bd29b89a",
+    "upstream_path": "wayland-client",
+    "authors": [
+      "Elinor Berger <elinor@safaradeg.net>"
+    ]
+  },
+  {
+    "name": "wayland-csd-frame",
+    "version": "0.3.0",
+    "license": "MIT",
+    "repository": "https://github.com/rust-windowing/wayland-csd-frame",
+    "notices": [
+      "THIRD_PARTY_LICENSES/wayland-csd-frame-0.3.0/LICENSE"
+    ],
+    "upstream_revision": "e9a510b13a96e9a1fabb31d3bf3f28cab702d003",
+    "upstream_path": "",
+    "authors": [
+      "Kirill Chibisov <contact@kchibisov.com>"
+    ]
+  },
+  {
+    "name": "wayland-cursor",
+    "version": "0.31.14",
+    "license": "MIT",
+    "repository": "https://github.com/smithay/wayland-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/wayland-cursor-0.31.14/LICENSE.txt"
+    ],
+    "upstream_revision": "a3d7927d87799b2955bf491b51c7c2a3a82da661",
+    "upstream_path": "wayland-cursor",
+    "authors": [
+      "Elinor Berger <elinor@safaradeg.net>"
+    ]
+  },
+  {
+    "name": "wayland-protocols",
+    "version": "0.32.13",
+    "license": "MIT",
+    "repository": "https://github.com/smithay/wayland-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/wayland-protocols-0.32.13/LICENSE.txt"
+    ],
+    "upstream_revision": "661cf141f5de4ec83559125b3d8bb1c79f25116b",
+    "upstream_path": "wayland-protocols",
+    "authors": [
+      "Elinor Berger <elinor@safaradeg.net>"
+    ]
+  },
+  {
+    "name": "wayland-protocols-experimental",
+    "version": "20250721.0.1",
+    "license": "MIT",
+    "repository": "https://github.com/smithay/wayland-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/wayland-protocols-experimental-20250721.0.1/LICENSE.txt"
+    ],
+    "upstream_revision": "3a45d67679d763cb813062530d50d0538f4312ae",
+    "upstream_path": "wayland-protocols-experimental",
+    "authors": [
+      "Elinor Berger <elinor@safaradeg.net>"
+    ]
+  },
+  {
+    "name": "wayland-protocols-misc",
+    "version": "0.3.12",
+    "license": "MIT",
+    "repository": "https://github.com/smithay/wayland-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/wayland-protocols-misc-0.3.12/LICENSE.txt"
+    ],
+    "upstream_revision": "a3d7927d87799b2955bf491b51c7c2a3a82da661",
+    "upstream_path": "wayland-protocols-misc",
+    "authors": [
+      "Elinor Berger <elinor@safaradeg.net>"
+    ]
+  },
+  {
+    "name": "wayland-protocols-plasma",
+    "version": "0.3.12",
+    "license": "MIT",
+    "repository": "https://github.com/smithay/wayland-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/wayland-protocols-plasma-0.3.12/LICENSE.txt"
+    ],
+    "upstream_revision": "a3d7927d87799b2955bf491b51c7c2a3a82da661",
+    "upstream_path": "wayland-protocols-plasma",
+    "authors": [
+      "Elinor Berger <elinor@safaradeg.net>"
+    ]
+  },
+  {
+    "name": "wayland-protocols-wlr",
+    "version": "0.3.12",
+    "license": "MIT",
+    "repository": "https://github.com/smithay/wayland-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/wayland-protocols-wlr-0.3.12/LICENSE.txt"
+    ],
+    "upstream_revision": "a3d7927d87799b2955bf491b51c7c2a3a82da661",
+    "upstream_path": "wayland-protocols-wlr",
+    "authors": [
+      "Elinor Berger <elinor@safaradeg.net>"
+    ]
+  },
+  {
+    "name": "wayland-scanner",
+    "version": "0.31.11",
+    "license": "MIT",
+    "repository": "https://github.com/smithay/wayland-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/wayland-scanner-0.31.11/LICENSE.txt"
+    ],
+    "upstream_revision": "05196740da57e41b60a9e9f8e35079e9bd29b89a",
+    "upstream_path": "wayland-scanner",
+    "authors": [
+      "Elinor Berger <elinor@safaradeg.net>"
+    ]
+  },
+  {
+    "name": "wayland-sys",
+    "version": "0.31.11",
+    "license": "MIT",
+    "repository": "https://github.com/smithay/wayland-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/wayland-sys-0.31.11/LICENSE.txt"
+    ],
+    "upstream_revision": "a3d7927d87799b2955bf491b51c7c2a3a82da661",
+    "upstream_path": "wayland-sys",
+    "authors": [
+      "Elinor Berger <elinor@safaradeg.net>"
+    ]
+  },
+  {
+    "name": "web-sys",
+    "version": "0.3.106",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/web-sys",
+    "notices": [
+      "THIRD_PARTY_LICENSES/web-sys-0.3.106/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/web-sys-0.3.106/LICENSE-MIT"
+    ],
+    "upstream_revision": "165586f854c852bcbc4d14d8a75a0a0e0d0abc12",
+    "upstream_path": "crates/web-sys",
+    "authors": [
+      "The wasm-bindgen Developers"
+    ]
+  },
+  {
+    "name": "web-time",
+    "version": "1.1.0",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/daxpedda/web-time",
+    "notices": [
+      "THIRD_PARTY_LICENSES/web-time-1.1.0/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/web-time-1.1.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "2d200ded30bbcab66f6a4bfa277ac546685728db",
+    "upstream_path": "",
+    "authors": []
+  },
+  {
+    "name": "webbrowser",
+    "version": "1.2.5",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/amodm/webbrowser-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/webbrowser-1.2.5/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/webbrowser-1.2.5/LICENSE-MIT"
+    ],
+    "upstream_revision": "278ec1b5aeeb07f9fcbda569cb075e58727ba623",
+    "upstream_path": "",
+    "authors": [
+      "Amod Malviya @amodm"
+    ]
+  },
+  {
+    "name": "weezl",
+    "version": "0.1.12",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/image-rs/weezl",
+    "notices": [
+      "THIRD_PARTY_LICENSES/weezl-0.1.12/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/weezl-0.1.12/LICENSE-MIT"
+    ],
+    "upstream_revision": "c75ea1f6d935cc56bad8674396b7cb0dd7275f99",
+    "upstream_path": "",
+    "authors": [
+      "The image-rs Developers"
+    ]
+  },
+  {
+    "name": "wgpu",
+    "version": "27.0.1",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/gfx-rs/wgpu",
+    "notices": [
+      "THIRD_PARTY_LICENSES/wgpu-27.0.1/LICENSE.APACHE",
+      "THIRD_PARTY_LICENSES/wgpu-27.0.1/LICENSE.MIT"
+    ],
+    "upstream_revision": "c76dea031c688ecef0050dbf60506fff128fb23f",
+    "upstream_path": "wgpu",
+    "authors": [
+      "gfx-rs developers"
+    ]
+  },
+  {
+    "name": "wgpu-core",
+    "version": "27.0.3",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/gfx-rs/wgpu",
+    "notices": [
+      "THIRD_PARTY_LICENSES/wgpu-core-27.0.3/LICENSE.APACHE",
+      "THIRD_PARTY_LICENSES/wgpu-core-27.0.3/LICENSE.MIT"
+    ],
+    "upstream_revision": "d61dc3af8856f0cd9023c5e888b791d1b7118559",
+    "upstream_path": "wgpu-core",
+    "authors": [
+      "gfx-rs developers"
+    ]
+  },
+  {
+    "name": "wgpu-core-deps-windows-linux-android",
+    "version": "27.0.0",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/gfx-rs/wgpu",
+    "notices": [
+      "THIRD_PARTY_LICENSES/wgpu-core-deps-windows-linux-android-27.0.0/LICENSE.APACHE",
+      "THIRD_PARTY_LICENSES/wgpu-core-deps-windows-linux-android-27.0.0/LICENSE.MIT"
+    ],
+    "upstream_revision": "482a983e1006333dc249bd1a08b04db3e4a48230",
+    "upstream_path": "wgpu-core/platform-deps/windows-linux-android",
+    "authors": [
+      "gfx-rs developers"
+    ]
+  },
+  {
+    "name": "wgpu-hal",
+    "version": "27.0.4",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/gfx-rs/wgpu",
+    "notices": [
+      "THIRD_PARTY_LICENSES/wgpu-hal-27.0.4/LICENSE.APACHE",
+      "THIRD_PARTY_LICENSES/wgpu-hal-27.0.4/LICENSE.MIT"
+    ],
+    "upstream_revision": "af91efa93da2af9366b252ed7b9a089175f4874e",
+    "upstream_path": "wgpu-hal",
+    "authors": [
+      "gfx-rs developers"
+    ]
+  },
+  {
+    "name": "wgpu-types",
+    "version": "27.0.1",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/gfx-rs/wgpu",
+    "notices": [
+      "THIRD_PARTY_LICENSES/wgpu-types-27.0.1/LICENSE.APACHE",
+      "THIRD_PARTY_LICENSES/wgpu-types-27.0.1/LICENSE.MIT"
+    ],
+    "upstream_revision": "c76dea031c688ecef0050dbf60506fff128fb23f",
+    "upstream_path": "wgpu-types",
+    "authors": [
+      "gfx-rs developers"
+    ]
+  },
+  {
+    "name": "which",
+    "version": "4.4.2",
+    "license": "MIT",
+    "repository": "https://github.com/harryfei/which-rs.git",
+    "notices": [
+      "THIRD_PARTY_LICENSES/which-4.4.2/LICENSE.txt"
+    ],
+    "upstream_revision": "35196c186f8fbec8dc40919cffa726a8bfc10998",
+    "upstream_path": "",
+    "authors": [
+      "Harry Fei <tiziyuanfang@gmail.com>"
+    ]
+  },
+  {
+    "name": "wide",
+    "version": "1.7.1",
+    "license": "Zlib OR Apache-2.0 OR MIT",
+    "repository": "https://github.com/Lokathor/wide",
+    "notices": [
+      "THIRD_PARTY_LICENSES/wide-1.7.1/LICENSE-APACHE.txt",
+      "THIRD_PARTY_LICENSES/wide-1.7.1/LICENSE-MIT.txt",
+      "THIRD_PARTY_LICENSES/wide-1.7.1/LICENSE-ZLIB.txt"
+    ],
+    "upstream_revision": "a0519073776eb89579b8e12c6c7689df13f93c53",
+    "upstream_path": "",
+    "authors": [
+      "Lokathor <zefria@gmail.com>"
+    ]
+  },
+  {
+    "name": "winapi-util",
+    "version": "0.1.11",
+    "license": "Unlicense OR MIT",
+    "repository": "https://github.com/BurntSushi/winapi-util",
+    "notices": [
+      "THIRD_PARTY_LICENSES/winapi-util-0.1.11/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/winapi-util-0.1.11/UNLICENSE"
+    ],
+    "upstream_revision": "803874c57dc1f10ecd42f7c86d9de72f53818432",
+    "upstream_path": "",
+    "authors": [
+      "Andrew Gallant <jamslam@gmail.com>"
+    ]
+  },
+  {
+    "name": "windows-link",
+    "version": "0.2.1",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/microsoft/windows-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/windows-link-0.2.1/license-apache-2.0",
+      "THIRD_PARTY_LICENSES/windows-link-0.2.1/license-mit"
+    ],
+    "upstream_revision": "d468916ac27a36fb8a12bafc1bf5c0ec2fe92238",
+    "upstream_path": "crates/libs/link",
+    "authors": []
+  },
+  {
+    "name": "windows-sys",
+    "version": "0.52.0",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/microsoft/windows-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/windows-sys-0.52.0/license-apache-2.0",
+      "THIRD_PARTY_LICENSES/windows-sys-0.52.0/license-mit"
+    ],
+    "upstream_revision": "3a605cba064b26f2a198ac58085f8c8836f47c38",
+    "upstream_path": "crates/libs/sys",
+    "authors": [
+      "Microsoft"
+    ]
+  },
+  {
+    "name": "windows-sys",
+    "version": "0.59.0",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/microsoft/windows-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/windows-sys-0.59.0/license-apache-2.0",
+      "THIRD_PARTY_LICENSES/windows-sys-0.59.0/license-mit"
+    ],
+    "upstream_revision": "308e08ec259027ebbef11b8ef838923626bf821e",
+    "upstream_path": "crates/libs/sys",
+    "authors": [
+      "Microsoft"
+    ]
+  },
+  {
+    "name": "windows-sys",
+    "version": "0.61.2",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/microsoft/windows-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/windows-sys-0.61.2/license-apache-2.0",
+      "THIRD_PARTY_LICENSES/windows-sys-0.61.2/license-mit"
+    ],
+    "upstream_revision": "32c3144490c016fe496a0aed769bce60987a2e9d",
+    "upstream_path": "crates/libs/sys",
+    "authors": []
+  },
+  {
+    "name": "windows-targets",
+    "version": "0.52.6",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/microsoft/windows-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/windows-targets-0.52.6/license-apache-2.0",
+      "THIRD_PARTY_LICENSES/windows-targets-0.52.6/license-mit"
+    ],
+    "upstream_revision": "db06b51c2ebb743efb544d40e3064efa49f28d38",
+    "upstream_path": "crates/libs/targets",
+    "authors": [
+      "Microsoft"
+    ]
+  },
+  {
+    "name": "windows_aarch64_gnullvm",
+    "version": "0.52.6",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/microsoft/windows-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/windows_aarch64_gnullvm-0.52.6/license-apache-2.0",
+      "THIRD_PARTY_LICENSES/windows_aarch64_gnullvm-0.52.6/license-mit"
+    ],
+    "upstream_revision": "db06b51c2ebb743efb544d40e3064efa49f28d38",
+    "upstream_path": "crates/targets/aarch64_gnullvm",
+    "authors": [
+      "Microsoft"
+    ]
+  },
+  {
+    "name": "windows_aarch64_msvc",
+    "version": "0.52.6",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/microsoft/windows-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/windows_aarch64_msvc-0.52.6/license-apache-2.0",
+      "THIRD_PARTY_LICENSES/windows_aarch64_msvc-0.52.6/license-mit"
+    ],
+    "upstream_revision": "db06b51c2ebb743efb544d40e3064efa49f28d38",
+    "upstream_path": "crates/targets/aarch64_msvc",
+    "authors": [
+      "Microsoft"
+    ]
+  },
+  {
+    "name": "windows_i686_gnu",
+    "version": "0.52.6",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/microsoft/windows-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/windows_i686_gnu-0.52.6/license-apache-2.0",
+      "THIRD_PARTY_LICENSES/windows_i686_gnu-0.52.6/license-mit"
+    ],
+    "upstream_revision": "db06b51c2ebb743efb544d40e3064efa49f28d38",
+    "upstream_path": "crates/targets/i686_gnu",
+    "authors": [
+      "Microsoft"
+    ]
+  },
+  {
+    "name": "windows_i686_gnullvm",
+    "version": "0.52.6",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/microsoft/windows-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/windows_i686_gnullvm-0.52.6/license-apache-2.0",
+      "THIRD_PARTY_LICENSES/windows_i686_gnullvm-0.52.6/license-mit"
+    ],
+    "upstream_revision": "db06b51c2ebb743efb544d40e3064efa49f28d38",
+    "upstream_path": "crates/targets/i686_gnullvm",
+    "authors": [
+      "Microsoft"
+    ]
+  },
+  {
+    "name": "windows_i686_msvc",
+    "version": "0.52.6",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/microsoft/windows-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/windows_i686_msvc-0.52.6/license-apache-2.0",
+      "THIRD_PARTY_LICENSES/windows_i686_msvc-0.52.6/license-mit"
+    ],
+    "upstream_revision": "db06b51c2ebb743efb544d40e3064efa49f28d38",
+    "upstream_path": "crates/targets/i686_msvc",
+    "authors": [
+      "Microsoft"
+    ]
+  },
+  {
+    "name": "windows_x86_64_gnu",
+    "version": "0.52.6",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/microsoft/windows-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/windows_x86_64_gnu-0.52.6/license-apache-2.0",
+      "THIRD_PARTY_LICENSES/windows_x86_64_gnu-0.52.6/license-mit"
+    ],
+    "upstream_revision": "db06b51c2ebb743efb544d40e3064efa49f28d38",
+    "upstream_path": "crates/targets/x86_64_gnu",
+    "authors": [
+      "Microsoft"
+    ]
+  },
+  {
+    "name": "windows_x86_64_gnullvm",
+    "version": "0.52.6",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/microsoft/windows-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/windows_x86_64_gnullvm-0.52.6/license-apache-2.0",
+      "THIRD_PARTY_LICENSES/windows_x86_64_gnullvm-0.52.6/license-mit"
+    ],
+    "upstream_revision": "db06b51c2ebb743efb544d40e3064efa49f28d38",
+    "upstream_path": "crates/targets/x86_64_gnullvm",
+    "authors": [
+      "Microsoft"
+    ]
+  },
+  {
+    "name": "windows_x86_64_msvc",
+    "version": "0.52.6",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/microsoft/windows-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/windows_x86_64_msvc-0.52.6/license-apache-2.0",
+      "THIRD_PARTY_LICENSES/windows_x86_64_msvc-0.52.6/license-mit"
+    ],
+    "upstream_revision": "db06b51c2ebb743efb544d40e3064efa49f28d38",
+    "upstream_path": "crates/targets/x86_64_msvc",
+    "authors": [
+      "Microsoft"
+    ]
+  },
+  {
+    "name": "winit",
+    "version": "0.30.13",
+    "license": "Apache-2.0",
+    "repository": "https://github.com/rust-windowing/winit",
+    "notices": [
+      "THIRD_PARTY_LICENSES/winit-0.30.13/LICENSE"
+    ],
+    "upstream_revision": "e9809ef54b18499bb4f2cac945719ecc2a61061b",
+    "upstream_path": "",
+    "authors": [
+      "The winit contributors",
+      "Pierre Krieger <pierre.krieger1708@gmail.com>"
+    ]
+  },
+  {
+    "name": "winnow",
+    "version": "1.0.4",
+    "license": "MIT",
+    "repository": "https://github.com/winnow-rs/winnow",
+    "notices": [
+      "THIRD_PARTY_LICENSES/winnow-1.0.4/LICENSE-MIT"
+    ],
+    "upstream_revision": "7539ec0fc27144bfdcf9a68b0dbbec48bd0d5bae",
+    "upstream_path": "",
+    "authors": []
+  },
+  {
+    "name": "wit-bindgen",
+    "version": "0.57.1",
+    "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+    "repository": "https://github.com/bytecodealliance/wit-bindgen",
+    "notices": [
+      "THIRD_PARTY_LICENSES/wit-bindgen-0.57.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/wit-bindgen-0.57.1/LICENSE-Apache-2.0_WITH_LLVM-exception",
+      "THIRD_PARTY_LICENSES/wit-bindgen-0.57.1/LICENSE-MIT"
+    ],
+    "upstream_revision": "2e00369a643c0c8048b8636401e36b0cbf2dfb05",
+    "upstream_path": "crates/guest-rust",
+    "authors": [
+      "Alex Crichton <alex@alexcrichton.com>"
+    ]
+  },
+  {
+    "name": "writeable",
+    "version": "0.6.4",
+    "license": "Unicode-3.0",
+    "repository": "https://github.com/unicode-org/icu4x",
+    "notices": [
+      "THIRD_PARTY_LICENSES/writeable-0.6.4/LICENSE"
+    ],
+    "upstream_revision": "a14f2dad852be26bad277ae704abf27a15cbfed1",
+    "upstream_path": "utils/writeable",
+    "authors": [
+      "The ICU4X Project Developers"
+    ]
+  },
+  {
+    "name": "x11-dl",
+    "version": "2.21.0",
+    "license": "MIT",
+    "repository": "https://github.com/AltF02/x11-rs.git",
+    "notices": [
+      "THIRD_PARTY_LICENSES/x11-dl-2.21.0/LICENSE-MIT"
+    ],
+    "upstream_revision": "fced94ef6eb5935c892079a46812806f7b7a9237",
+    "upstream_path": "x11-dl",
+    "authors": [
+      "daggerbot <daggerbot@gmail.com>",
+      "Erle Pereira <erle@erlepereira.com>",
+      "AltF02 <contact@altf2.dev>"
+    ]
+  },
+  {
+    "name": "x11rb",
+    "version": "0.13.2",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/psychon/x11rb",
+    "notices": [
+      "THIRD_PARTY_LICENSES/x11rb-0.13.2/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/x11rb-0.13.2/LICENSE-MIT"
+    ],
+    "upstream_revision": "1b73245acc5dce4c4987c80dd7589e7b60af3532",
+    "upstream_path": "x11rb",
+    "authors": [
+      "Uli Schlachter <psychon@znc.in>",
+      "Eduardo S\u00e1nchez Mu\u00f1oz <eduardosm-dev@e64.io>",
+      "notgull <jtnunley01@gmail.com>"
+    ]
+  },
+  {
+    "name": "x11rb-protocol",
+    "version": "0.13.2",
+    "license": "MIT OR Apache-2.0",
+    "repository": "https://github.com/psychon/x11rb",
+    "notices": [
+      "THIRD_PARTY_LICENSES/x11rb-protocol-0.13.2/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/x11rb-protocol-0.13.2/LICENSE-MIT"
+    ],
+    "upstream_revision": "1b73245acc5dce4c4987c80dd7589e7b60af3532",
+    "upstream_path": "x11rb-protocol",
+    "authors": [
+      "Uli Schlachter <psychon@znc.in>",
+      "Eduardo S\u00e1nchez Mu\u00f1oz <eduardosm-dev@e64.io>",
+      "notgull <jtnunley01@gmail.com>"
+    ]
+  },
+  {
+    "name": "xcursor",
+    "version": "0.3.11",
+    "license": "MIT",
+    "repository": "https://github.com/esposm03/xcursor-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/xcursor-0.3.11/LICENSE"
+    ],
+    "upstream_revision": "4760fa50b9352168e1b740c1ff75f37697620423",
+    "upstream_path": "",
+    "authors": [
+      "Samuele Esposito"
+    ]
+  },
+  {
+    "name": "xkbcommon-dl",
+    "version": "0.4.2",
+    "license": "MIT",
+    "repository": "https://github.com/rust-windowing/xkbcommon-dl",
+    "notices": [
+      "THIRD_PARTY_LICENSES/xkbcommon-dl-0.4.2/LICENSE"
+    ],
+    "upstream_revision": "631fcaac6bb5607585527d8e89ddfc26fa8ec285",
+    "upstream_path": "",
+    "authors": [
+      "Francesca Frangipane <francesca@comfysoft.net>"
+    ]
+  },
+  {
+    "name": "xkeysym",
+    "version": "0.2.1",
+    "license": "MIT OR Apache-2.0 OR Zlib",
+    "repository": "https://github.com/notgull/xkeysym",
+    "notices": [
+      "THIRD_PARTY_LICENSES/xkeysym-0.2.1/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/xkeysym-0.2.1/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/xkeysym-0.2.1/LICENSE-ZLIB"
+    ],
+    "upstream_revision": "77596eb8319f8d7a97db6477f307a94a0905c439",
+    "upstream_path": "",
+    "authors": [
+      "John Nunley <jtnunley01@gmail.com>"
+    ]
+  },
+  {
+    "name": "xml-rs",
+    "version": "0.8.29",
+    "license": "MIT",
+    "repository": "https://github.com/kornelski/xml-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/xml-rs-0.8.29/LICENSE"
+    ],
+    "upstream_revision": "33cdf417b112c0ebd1f0858b2a67464b3712a4c6",
+    "upstream_path": "",
+    "authors": [
+      "Vladimir Matveev <vmatveev@citrine.cc>"
+    ]
+  },
+  {
+    "name": "yoke",
+    "version": "0.8.4",
+    "license": "Unicode-3.0",
+    "repository": "https://github.com/unicode-org/icu4x",
+    "notices": [
+      "THIRD_PARTY_LICENSES/yoke-0.8.4/LICENSE"
+    ],
+    "upstream_revision": "031d9e89f6a3fd26a14491e090729d46094328fd",
+    "upstream_path": "utils/yoke",
+    "authors": [
+      "Manish Goregaokar <manishsmail@gmail.com>"
+    ]
+  },
+  {
+    "name": "yoke-derive",
+    "version": "0.8.4",
+    "license": "Unicode-3.0",
+    "repository": "https://github.com/unicode-org/icu4x",
+    "notices": [
+      "THIRD_PARTY_LICENSES/yoke-derive-0.8.4/LICENSE"
+    ],
+    "upstream_revision": "a59ab860d4bda548e94dfbf992d87fe1f761bc55",
+    "upstream_path": "utils/yoke/derive",
+    "authors": [
+      "Manish Goregaokar <manishsmail@gmail.com>"
+    ]
+  },
+  {
+    "name": "zerocopy",
+    "version": "0.8.63",
+    "license": "BSD-2-Clause OR Apache-2.0 OR MIT",
+    "repository": "https://github.com/google/zerocopy",
+    "notices": [
+      "THIRD_PARTY_LICENSES/zerocopy-0.8.63/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/zerocopy-0.8.63/LICENSE-BSD",
+      "THIRD_PARTY_LICENSES/zerocopy-0.8.63/LICENSE-MIT"
+    ],
+    "upstream_revision": "c55af491426ef53f35fb8c6e83f220fa07712e66",
+    "upstream_path": "zerocopy",
+    "authors": []
+  },
+  {
+    "name": "zerocopy-derive",
+    "version": "0.8.63",
+    "license": "BSD-2-Clause OR Apache-2.0 OR MIT",
+    "repository": "https://github.com/google/zerocopy",
+    "notices": [
+      "THIRD_PARTY_LICENSES/zerocopy-derive-0.8.63/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/zerocopy-derive-0.8.63/LICENSE-BSD",
+      "THIRD_PARTY_LICENSES/zerocopy-derive-0.8.63/LICENSE-MIT"
+    ],
+    "upstream_revision": "c55af491426ef53f35fb8c6e83f220fa07712e66",
+    "upstream_path": "zerocopy/zerocopy-derive",
+    "authors": []
+  },
+  {
+    "name": "zerofrom",
+    "version": "0.1.8",
+    "license": "Unicode-3.0",
+    "repository": "https://github.com/unicode-org/icu4x",
+    "notices": [
+      "THIRD_PARTY_LICENSES/zerofrom-0.1.8/LICENSE"
+    ],
+    "upstream_revision": "e9575f7e4b5aeddfeeb87ada5d3e715950e8233e",
+    "upstream_path": "utils/zerofrom",
+    "authors": [
+      "The ICU4X Project Developers"
+    ]
+  },
+  {
+    "name": "zerofrom-derive",
+    "version": "0.1.8",
+    "license": "Unicode-3.0",
+    "repository": "https://github.com/unicode-org/icu4x",
+    "notices": [
+      "THIRD_PARTY_LICENSES/zerofrom-derive-0.1.8/LICENSE"
+    ],
+    "upstream_revision": "ce235d80cf7cbd028e8bd59920420e1203b205b3",
+    "upstream_path": "utils/zerofrom/derive",
+    "authors": [
+      "Manish Goregaokar <manishsmail@gmail.com>"
+    ]
+  },
+  {
+    "name": "zerotrie",
+    "version": "0.2.5",
+    "license": "Unicode-3.0",
+    "repository": "https://github.com/unicode-org/icu4x",
+    "notices": [
+      "THIRD_PARTY_LICENSES/zerotrie-0.2.5/LICENSE"
+    ],
+    "upstream_revision": "a14f2dad852be26bad277ae704abf27a15cbfed1",
+    "upstream_path": "utils/zerotrie",
+    "authors": [
+      "The ICU4X Project Developers"
+    ]
+  },
+  {
+    "name": "zerovec",
+    "version": "0.11.9",
+    "license": "Unicode-3.0",
+    "repository": "https://github.com/unicode-org/icu4x",
+    "notices": [
+      "THIRD_PARTY_LICENSES/zerovec-0.11.9/LICENSE"
+    ],
+    "upstream_revision": "031d9e89f6a3fd26a14491e090729d46094328fd",
+    "upstream_path": "utils/zerovec",
+    "authors": [
+      "The ICU4X Project Developers"
+    ]
+  },
+  {
+    "name": "zerovec-derive",
+    "version": "0.11.7",
+    "license": "Unicode-3.0",
+    "repository": "https://github.com/unicode-org/icu4x",
+    "notices": [
+      "THIRD_PARTY_LICENSES/zerovec-derive-0.11.7/LICENSE"
+    ],
+    "upstream_revision": "031d9e89f6a3fd26a14491e090729d46094328fd",
+    "upstream_path": "utils/zerovec/derive",
+    "authors": [
+      "Manish Goregaokar <manishsmail@gmail.com>"
+    ]
+  },
+  {
+    "name": "zlib-rs",
+    "version": "0.6.8",
+    "license": "Zlib",
+    "repository": "https://github.com/trifectatechfoundation/zlib-rs",
+    "notices": [
+      "THIRD_PARTY_LICENSES/zlib-rs-0.6.8/LICENSE"
+    ],
+    "upstream_revision": "0254e07204884bfc902d6ebb68c8b703d0ea49cf",
+    "upstream_path": "zlib-rs",
+    "authors": []
+  },
+  {
+    "name": "zmij",
+    "version": "1.0.23",
+    "license": "MIT",
+    "repository": "https://github.com/dtolnay/zmij",
+    "notices": [
+      "THIRD_PARTY_LICENSES/zmij-1.0.23/LICENSE-MIT"
+    ],
+    "upstream_revision": "7b7cc48b58028e8af7be87e94c0c1c8936f1a57c",
+    "upstream_path": "",
+    "authors": [
+      "David Tolnay <dtolnay@gmail.com>"
+    ]
+  },
+  {
+    "name": "zune-core",
+    "version": "0.5.3",
+    "license": "MIT OR Apache-2.0 OR Zlib",
+    "repository": "https://github.com/etemesi254/zune-image",
+    "notices": [
+      "THIRD_PARTY_LICENSES/zune-core-0.5.3/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/zune-core-0.5.3/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/zune-core-0.5.3/LICENSE-ZLIB"
+    ],
+    "upstream_revision": "de5dfc800cfa063116eb695edb6ccd01cb96ea7a",
+    "upstream_path": "crates/zune-core",
+    "authors": []
+  },
+  {
+    "name": "zune-jpeg",
+    "version": "0.5.15",
+    "license": "MIT OR Apache-2.0 OR Zlib",
+    "repository": "https://github.com/etemesi254/zune-image/tree/dev/crates/zune-jpeg",
+    "notices": [
+      "THIRD_PARTY_LICENSES/zune-jpeg-0.5.15/LICENSE-APACHE",
+      "THIRD_PARTY_LICENSES/zune-jpeg-0.5.15/LICENSE-MIT",
+      "THIRD_PARTY_LICENSES/zune-jpeg-0.5.15/LICENSE-ZLIB"
+    ],
+    "upstream_revision": "31d81fed7551c8ccea456d9d8e2b1fd8bebb6995",
+    "upstream_path": "crates/zune-jpeg",
+    "authors": [
+      "caleb <etemesicaleb@gmail.com>"
+    ]
+  }
+]

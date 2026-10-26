@@ -1,0 +1,13 @@
+[package]
+name = "scancraft-geometry"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "ScanCraft native Linux scanning and geometry workflows"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+nalgebra = { version = "0.35", default-features = false, features = ["std"] }
+crc32fast.workspace = true

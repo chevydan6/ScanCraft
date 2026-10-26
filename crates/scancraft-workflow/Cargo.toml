@@ -1,0 +1,20 @@
+[package]
+name = "scancraft-workflow"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "ScanCraft native Linux scanning and geometry workflows"
+
+[dependencies]
+scancraft-core.workspace = true
+scancraft-recording.workspace = true
+scancraft-calibration = { path = "../scancraft-calibration" }
+scancraft-depth = { path = "../scancraft-depth" }
+scancraft-geometry = { path = "../scancraft-geometry" }
+scancraft-image = { path = "../scancraft-image" }
+serde.workspace = true
+serde_json.workspace = true
+crc32fast.workspace = true
+libc.workspace = true
+image = { version = "0.25", default-features = false, features = ["jpeg", "png"] }

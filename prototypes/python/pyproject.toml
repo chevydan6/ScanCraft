@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scancraft"
+version = "0.1.0"
+description = "Native Linux camera workbench for the CR-Scan Raptor"
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = ["PySide6>=6.6"]
+
+[project.scripts]
+scancraft = "scancraft.app:main"
+
+[tool.setuptools.packages.find]
+include = ["scancraft*"]

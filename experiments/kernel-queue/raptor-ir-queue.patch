@@ -1,0 +1,129 @@
+--- a/uvcvideo.h
++++ b/uvcvideo.h
+@@ -52,6 +52,7 @@
+ 
+ /* Number of isochronous URBs. */
+ #define UVC_URBS		5
++#define UVC_MAX_URBS		32
+ /* Maximum number of packets per URB. */
+ #define UVC_MAX_PACKETS		32
+ 
+@@ -495,7 +496,7 @@
+ 		u32 max_payload_size;
+ 	} bulk;
+ 
+-	struct uvc_urb uvc_urb[UVC_URBS];
++	struct uvc_urb uvc_urb[UVC_MAX_URBS];
+ 	unsigned int urb_size;
+ 
+ 	u32 sequence;
+@@ -532,9 +533,12 @@
+ 	} clock;
+ };
+ 
++extern unsigned int uvc_scancraft_urbs;
++unsigned int uvc_num_urbs(const struct uvc_streaming *stream);
++
+ #define for_each_uvc_urb(uvc_urb, uvc_streaming) \
+ 	for ((uvc_urb) = &(uvc_streaming)->uvc_urb[0]; \
+-	     (uvc_urb) < &(uvc_streaming)->uvc_urb[UVC_URBS]; \
++	     (uvc_urb) < &(uvc_streaming)->uvc_urb[uvc_num_urbs(uvc_streaming)]; \
+ 	     ++(uvc_urb))
+ 
+ static inline u32 uvc_urb_index(const struct uvc_urb *uvc_urb)
+--- a/uvc_driver.c
++++ b/uvc_driver.c
+@@ -37,6 +37,33 @@
+ unsigned int uvc_dbg_param;
+ unsigned int uvc_timeout_param = UVC_CTRL_STREAMING_TIMEOUT;
+ bool uvc_allow_privacy_override_param;
++
++/* Diagnostic queue-depth override: original Raptor IR endpoints only. */
++unsigned int uvc_scancraft_urbs = UVC_URBS;
++static bool uvc_scancraft_urbs_frozen;
++
++static int uvc_scancraft_urbs_set(const char *val, const struct kernel_param *kp)
++{
++	unsigned int count;
++	int ret;
++
++	/* Active queue sizes must never change during stream lifetime. */
++	if (uvc_scancraft_urbs_frozen)
++		return -EPERM;
++	ret = kstrtouint(val, 0, &count);
++	if (ret || count < UVC_URBS || count > UVC_MAX_URBS)
++		return -EINVAL;
++	*(unsigned int *)kp->arg = count;
++	return 0;
++}
++
++static const struct kernel_param_ops uvc_scancraft_urbs_ops = {
++	.set = uvc_scancraft_urbs_set,
++	.get = param_get_uint,
++};
++module_param_cb(scancraft_urbs, &uvc_scancraft_urbs_ops, &uvc_scancraft_urbs, 0444);
++MODULE_PARM_DESC(scancraft_urbs,
++	"Original Raptor IR URB queue depth, load-time only (5-32, default 5)");
+ 
+ static struct usb_driver uvc_driver;
+ 
+@@ -3311,6 +3338,8 @@
+ {
+ 	int ret;
+ 
++	uvc_scancraft_urbs_frozen = true;
++
+ 	uvc_debugfs_init();
+ 
+ 	ret = usb_register(&uvc_driver);
+--- a/uvc_video.c
++++ b/uvc_video.c
+@@ -1833,6 +1833,18 @@
+ 	return !!uvc_urb->buffer;
+ }
+ 
++unsigned int uvc_num_urbs(const struct uvc_streaming *stream)
++{
++	const struct usb_device *udev = stream->dev->udev;
++	u8 interface = stream->intf->cur_altsetting->desc.bInterfaceNumber;
++
++	if (le16_to_cpu(udev->descriptor.idVendor) == 0x2bc5 &&
++	    le16_to_cpu(udev->descriptor.idProduct) == 0x06a8 &&
++	    (interface == 1 || interface == 3))
++		return uvc_scancraft_urbs;
++	return UVC_URBS;
++}
++
+ /*
+  * Allocate transfer buffers. This function can be called with buffers
+  * already allocated when resuming from suspend, in which case it will
+@@ -1848,6 +1860,7 @@
+ 	unsigned int size, unsigned int psize, gfp_t gfp_flags)
+ {
+ 	unsigned int npackets;
++	unsigned int nurbs = uvc_num_urbs(stream);
+ 	unsigned int i;
+ 
+ 	/* Buffers are already allocated, bail out. */
+@@ -1866,7 +1879,7 @@
+ 	for (; npackets > 0; npackets /= 2) {
+ 		unsigned int urb_size = psize * npackets;
+ 
+-		for (i = 0; i < UVC_URBS; ++i) {
++		for (i = 0; i < nurbs; ++i) {
+ 			struct uvc_urb *uvc_urb = &stream->uvc_urb[i];
+ 
+ 			if (!uvc_alloc_urb_buffer(stream, uvc_urb, urb_size,
+@@ -1878,10 +1891,10 @@
+ 			uvc_urb->stream = stream;
+ 		}
+ 
+-		if (i == UVC_URBS) {
++		if (i == nurbs) {
+ 			uvc_dbg(stream->dev, VIDEO,
+ 				"Allocated %u URB buffers of %ux%u bytes each\n",
+-				UVC_URBS, npackets, psize);
++				nurbs, npackets, psize);
+ 			stream->urb_size = urb_size;
+ 			return npackets;
+ 		}

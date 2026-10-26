@@ -1,0 +1,497 @@
+{
+  "schema_version": 1,
+  "synchronization_verified": false,
+  "physical_accuracy_qualified": false,
+  "calibration": {
+    "schema_version": 1,
+    "record_id": "synthetic-cli-reconstruction",
+    "units": "millimeters",
+    "camera_axes": "x_right_y_down_z_forward",
+    "provenance": "synthetic_fixture",
+    "binding": null,
+    "geometry": {
+      "left": {
+        "width": 64,
+        "height": 32,
+        "fx": 80.0,
+        "fy": 80.0,
+        "cx": 31.5,
+        "cy": 15.5,
+        "skew": 0.0,
+        "distortion": {
+          "k1": 0.0,
+          "k2": 0.0,
+          "k3": 0.0,
+          "p1": 0.0,
+          "p2": 0.0
+        },
+        "valid_radius": 1.0
+      },
+      "right": {
+        "width": 64,
+        "height": 32,
+        "fx": 80.0,
+        "fy": 80.0,
+        "cx": 31.5,
+        "cy": 15.5,
+        "skew": 0.0,
+        "distortion": {
+          "k1": 0.0,
+          "k2": 0.0,
+          "k3": 0.0,
+          "p1": 0.0,
+          "p2": 0.0
+        },
+        "valid_radius": 1.0
+      },
+      "right_from_left": {
+        "rotation": [
+          [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "translation_mm": [
+          20.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "notes": "Synthetic rotated-camera test. Not Raptor calibration."
+  },
+  "source": "synthetic_fixture",
+  "rectification": {
+    "source": {
+      "left": {
+        "width": 64,
+        "height": 32,
+        "fx": 80.0,
+        "fy": 80.0,
+        "cx": 31.5,
+        "cy": 15.5,
+        "skew": 0.0,
+        "distortion": {
+          "k1": 0.0,
+          "k2": 0.0,
+          "k3": 0.0,
+          "p1": 0.0,
+          "p2": 0.0
+        },
+        "valid_radius": 1.0
+      },
+      "right": {
+        "width": 64,
+        "height": 32,
+        "fx": 80.0,
+        "fy": 80.0,
+        "cx": 31.5,
+        "cy": 15.5,
+        "skew": 0.0,
+        "distortion": {
+          "k1": 0.0,
+          "k2": 0.0,
+          "k3": 0.0,
+          "p1": 0.0,
+          "p2": 0.0
+        },
+        "valid_radius": 1.0
+      },
+      "right_from_left": {
+        "rotation": [
+          [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "translation_mm": [
+          20.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "rectified": {
+      "left": {
+        "width": 64,
+        "height": 32,
+        "fx": 80.0,
+        "fy": 80.0,
+        "cx": 31.5,
+        "cy": 15.5,
+        "skew": 0.0,
+        "distortion": {
+          "k1": 0.0,
+          "k2": 0.0,
+          "k3": 0.0,
+          "p1": 0.0,
+          "p2": 0.0
+        },
+        "valid_radius": 1.0
+      },
+      "right": {
+        "width": 64,
+        "height": 32,
+        "fx": 80.0,
+        "fy": 80.0,
+        "cx": 31.5,
+        "cy": 15.5,
+        "skew": 0.0,
+        "distortion": {
+          "k1": 0.0,
+          "k2": 0.0,
+          "k3": 0.0,
+          "p1": 0.0,
+          "p2": 0.0
+        },
+        "valid_radius": 1.0
+      },
+      "right_from_left": {
+        "rotation": [
+          [
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "translation_mm": [
+          -20.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "left_from_rectified": {
+      "rotation": [
+        [
+          1.0,
+          -0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "translation_mm": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "right_from_rectified": {
+      "rotation": [
+        [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "translation_mm": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "matching": {
+    "rectified_geometry": {
+      "left": {
+        "width": 64,
+        "height": 32,
+        "fx": 80.0,
+        "fy": 80.0,
+        "cx": 31.5,
+        "cy": 15.5,
+        "skew": 0.0,
+        "distortion": {
+          "k1": 0.0,
+          "k2": 0.0,
+          "k3": 0.0,
+          "p1": 0.0,
+          "p2": 0.0
+        },
+        "valid_radius": 1.0
+      },
+      "right": {
+        "width": 64,
+        "height": 32,
+        "fx": 80.0,
+        "fy": 80.0,
+        "cx": 31.5,
+        "cy": 15.5,
+        "skew": 0.0,
+        "distortion": {
+          "k1": 0.0,
+          "k2": 0.0,
+          "k3": 0.0,
+          "p1": 0.0,
+          "p2": 0.0
+        },
+        "valid_radius": 1.0
+      },
+      "right_from_left": {
+        "rotation": [
+          [
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "translation_mm": [
+          -20.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "config": {
+      "patch_radius": 2,
+      "min_disparity": 1,
+      "max_disparity": 8,
+      "min_patch_stddev": 5.0,
+      "min_correlation": 0.9,
+      "min_uniqueness_margin": 0.05
+    },
+    "accepted": [
+      {
+        "seed_index": 1,
+        "left_pixel": [
+          20,
+          10
+        ],
+        "right_pixel": [
+          16,
+          10
+        ],
+        "correlation": 1.0,
+        "second_correlation": 0.1334706567262377,
+        "reverse_correlation": 1.0,
+        "reverse_second_correlation": 0.14638885814901076
+      },
+      {
+        "seed_index": 2,
+        "left_pixel": [
+          36,
+          20
+        ],
+        "right_pixel": [
+          32,
+          20
+        ],
+        "correlation": 0.9999999999999994,
+        "second_correlation": 0.2823768945350727,
+        "reverse_correlation": 0.9999999999999994,
+        "reverse_second_correlation": 0.2823768945350726
+      },
+      {
+        "seed_index": 3,
+        "left_pixel": [
+          50,
+          24
+        ],
+        "right_pixel": [
+          46,
+          24
+        ],
+        "correlation": 1.0,
+        "second_correlation": 0.1896741865040268,
+        "reverse_correlation": 1.0,
+        "reverse_second_correlation": 0.1896741865040268
+      }
+    ],
+    "rejected": [
+      {
+        "seed_index": 0,
+        "reason": "invalid_or_low_texture_seed"
+      }
+    ]
+  },
+  "seeds": [
+    [
+      0,
+      0
+    ],
+    [
+      20,
+      10
+    ],
+    [
+      36,
+      20
+    ],
+    [
+      50,
+      24
+    ]
+  ],
+  "automatic_sampling": null,
+  "mapped_matches": [
+    {
+      "seed_index": 1,
+      "rectified_match_index": 0,
+      "observations": {
+        "left_pixel": [
+          20.0,
+          10.0
+        ],
+        "right_pixel": [
+          47.0,
+          21.0
+        ],
+        "color": null
+      }
+    },
+    {
+      "seed_index": 2,
+      "rectified_match_index": 1,
+      "observations": {
+        "left_pixel": [
+          36.0,
+          20.0
+        ],
+        "right_pixel": [
+          31.0,
+          11.0
+        ],
+        "color": null
+      }
+    },
+    {
+      "seed_index": 3,
+      "rectified_match_index": 2,
+      "observations": {
+        "left_pixel": [
+          50.0,
+          24.0
+        ],
+        "right_pixel": [
+          17.0,
+          7.000000000000002
+        ],
+        "color": null
+      }
+    }
+  ],
+  "mapping_failures": [],
+  "reconstruction": {
+    "calibration_record_id": "synthetic-cli-reconstruction",
+    "calibration_provenance": "synthetic_fixture",
+    "source": "synthetic_fixture",
+    "units": "millimeters",
+    "camera_axes": "x_right_y_down_z_forward",
+    "limits": {
+      "min_depth_z_mm": 10.0,
+      "max_depth_z_mm": 1000.0,
+      "min_ray_angle_rad": 0.0001,
+      "max_ray_gap_mm": 0.01,
+      "max_reprojection_error_px": 0.01
+    },
+    "accepted": [
+      {
+        "source_index": 0,
+        "geometry": {
+          "position_mm": [
+            -57.499999999993726,
+            -27.49999999999745,
+            399.9999999999628
+          ],
+          "ray_gap_mm": 1.836752971939859e-12,
+          "ray_angle_rad": 0.048498726386311815,
+          "left_reprojection_px": 1.8474111129762605e-13,
+          "right_reprojection_px": 1.8474111129762605e-13
+        },
+        "color": null
+      },
+      {
+        "source_index": 1,
+        "geometry": {
+          "position_mm": [
+            22.500000000000476,
+            22.500000000000856,
+            400.00000000001523
+          ],
+          "ray_gap_mm": 7.624027534812611e-13,
+          "ray_angle_rad": 0.04986223242532584,
+          "left_reprojection_px": 7.815970093361102e-14,
+          "right_reprojection_px": 7.460698725481052e-14
+        },
+        "color": null
+      },
+      {
+        "source_index": 2,
+        "geometry": {
+          "position_mm": [
+            92.4999999999934,
+            42.49999999999659,
+            399.99999999996805
+          ],
+          "ray_gap_mm": 1.5612711408843894e-12,
+          "ray_angle_rad": 0.047705218712735954,
+          "left_reprojection_px": 1.5635976840162433e-13,
+          "right_reprojection_px": 1.5988198389056118e-13
+        },
+        "color": null
+      }
+    ],
+    "rejected": []
+  }
+}

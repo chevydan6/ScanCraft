@@ -1,0 +1,19 @@
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+repository = "https://github.com/chevydan6/ScanCraft"
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["float_roundtrip"] }
+crc32fast = "1"
+libc = "0.2"
+v4l2-sys-mit = "0.3"
+scancraft-core = { path = "crates/scancraft-core" }
+scancraft-device = { path = "crates/scancraft-device" }
+scancraft-recording = { path = "crates/scancraft-recording" }

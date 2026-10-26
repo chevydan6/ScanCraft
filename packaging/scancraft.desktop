@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=ScanCraft
+Comment=Independent experimental 3D scanning and geometry workbench
+Exec=scancraft %f
+Icon=camera-photo
+Terminal=false
+Categories=Graphics;3DGraphics;

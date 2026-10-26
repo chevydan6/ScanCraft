@@ -1,0 +1,17 @@
+[package]
+name = "scancraft-usb"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "ScanCraft native Linux scanning and geometry workflows"
+
+[dependencies]
+nusb = "0.2"
+scancraft-core.workspace = true
+scancraft-device.workspace = true
+serde_json.workspace = true
+
+[features]
+default = []
+hardware-experiment = []
