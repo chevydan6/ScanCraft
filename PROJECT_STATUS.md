@@ -1964,3 +1964,10 @@ CLI workload median improved from 534.388 ms to 39.297 ms (three runs each); thi
 is not general scanner or million-point qualification. See docs/benchmarks/COINCIDENT_NEIGHBORS.md
 and developer-owned docs/reviews/REVIEW_RESPONSES.md. Independent shared findings
 were absent and were not created by development. Hardware discovery remains empty.
+
+SCAN-REV-004 development correction: capture panic/disconnection now reaches an
+explicit stopped/error state after thread completion. Five hardware-free lifecycle
+regressions pass, including retained incomplete recording and replacement-worker
+availability; full workspace has 504 passing Rust tests. Await independent reviewer
+verification. SCAN-REV-005 shutdown-bound and physical scanning qualifications
+remain unresolved. No hardware, firmware or calibration writes performed.

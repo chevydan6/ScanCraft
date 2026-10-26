@@ -1,4 +1,5 @@
 mod archive_ui;
+mod capture_worker;
 mod cloud_jobs;
 mod cloud_ui;
 mod measurement_view;
@@ -20,7 +21,6 @@ use std::{
         atomic::{AtomicBool, AtomicU64, Ordering},
         mpsc::{self, Receiver, TrySendError},
     },
-    thread,
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 fn camera_texture(
@@ -53,8 +53,7 @@ struct Running {
     frames: Arc<AtomicU64>,
     preview_drops: Arc<AtomicU64>,
     rx: Receiver<Frame>,
-    result: Receiver<Result<String, String>>,
-    worker: Option<thread::JoinHandle<()>>,
+    worker: capture_worker::Worker,
 }
 struct App {
     recovery: recovery_ui::RecoveryUi,
@@ -111,6 +110,9 @@ impl Default for App {
 }
 impl App {
     fn start(&mut self) {
+        if self.running.is_some() {
+            return;
+        }
         let interface = self.interface;
         let record = self.record;
         let folder = self.folder.clone();
@@ -118,11 +120,10 @@ impl App {
         let frames = Arc::new(AtomicU64::new(0));
         let drops = Arc::new(AtomicU64::new(0));
         let (tx, rx) = mpsc::sync_channel(2);
-        let (done, result) = mpsc::channel();
         let c = cancel.clone();
         let f = frames.clone();
         let d = drops.clone();
-        let worker = thread::spawn(move || {
+        let worker = match capture_worker::Worker::spawn(move || {
             let run = || -> Result<String, String> {
                 let _locks = SessionLock::acquire().map_err(|e| e.to_string())?;
                 let profile = StreamProfile {
@@ -207,15 +208,21 @@ impl App {
                     output.map_or_else(|| "off".into(), |p| p.display().to_string())
                 ))
             };
-            let _ = done.send(run());
-        });
+            run()
+        }) {
+            Ok(worker) => worker,
+            Err(error) => {
+                self.status = "Capture not started".into();
+                self.log = format!("Could not create capture worker: {error}");
+                return;
+            }
+        };
         self.running = Some(Running {
             cancel,
             frames,
             preview_drops: drops,
             rx,
-            result,
-            worker: Some(worker),
+            worker,
         });
         self.status = "Starting native capture…".into();
     }
@@ -264,19 +271,14 @@ impl App {
             r.frames.load(Ordering::Relaxed),
             r.preview_drops.load(Ordering::Relaxed)
         );
-        if let Ok(result) = r.result.try_recv() {
+        if let Some(result) = self.running.as_mut().and_then(|r| r.worker.poll()) {
             self.log = match result {
                 Ok(s) => s,
                 Err(e) => {
                     format!("Capture failed: {e}. Any .partial file is an incomplete recording.")
                 }
             };
-            if let Some(mut r) = self.running.take()
-                && let Some(w) = r.worker.take()
-                && w.join().is_err()
-            {
-                self.log = "Capture worker panicked".into();
-            }
+            self.running = None;
             self.status = "Capture stopped".into();
         }
         ctx.request_repaint_after(Duration::from_millis(30));
@@ -426,9 +428,7 @@ impl Drop for App {
     fn drop(&mut self) {
         if let Some(r) = &mut self.running {
             r.cancel.store(true, Ordering::Relaxed);
-            if let Some(w) = r.worker.take() {
-                let _ = w.join();
-            }
+            let _ = r.worker.join();
         }
     }
 }
@@ -1042,5 +1042,85 @@ mod startup_tests {
         assert!(startup_args(args(&["--reconstruct", "calibration"])).is_err());
         assert!(startup_args(args(&["--unknown"])).is_err());
         assert!(startup_args(args(&["one", "two"])).is_err());
+    }
+}
+
+#[cfg(test)]
+mod capture_recovery_tests {
+    use super::*;
+    fn running(run: impl FnOnce() -> Result<String, String> + Send + 'static) -> Running {
+        let (_sender, rx) = mpsc::channel();
+        Running {
+            cancel: Arc::new(AtomicBool::new(false)),
+            frames: Arc::new(AtomicU64::new(0)),
+            preview_drops: Arc::new(AtomicU64::new(0)),
+            rx,
+            worker: capture_worker::Worker::spawn(run).unwrap(),
+        }
+    }
+    fn finish(app: &mut App) {
+        let deadline = std::time::Instant::now() + Duration::from_secs(5);
+        let context = egui::Context::default();
+        while app.running.is_some() {
+            app.receive(&context);
+            assert!(
+                std::time::Instant::now() < deadline,
+                "capture failed to leave running state"
+            );
+            std::thread::yield_now();
+        }
+    }
+    #[test]
+    fn capture_panic_restores_restart_state_and_preserves_partial_recording() {
+        static NEXT: AtomicU64 = AtomicU64::new(0);
+        let path = std::env::temp_dir().join(format!(
+            "scancraft-panic-{}-{}.raptor.partial",
+            std::process::id(),
+            NEXT.fetch_add(1, Ordering::Relaxed)
+        ));
+        let file = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&path)
+            .unwrap();
+        let profile = StreamProfile {
+            interface: 0,
+            width: 2,
+            height: 2,
+            fourcc: *b"GREY",
+            fps: 30,
+        };
+        let writer = Writer::new(file, profile).unwrap();
+        let before = std::fs::read(&path).unwrap();
+        let mut app = App::default();
+        app.running = Some(running(move || {
+            let _recording = writer;
+            panic!("injected capture failure");
+        }));
+        finish(&mut app);
+        assert_eq!(app.status, "Capture stopped");
+        assert!(app.log.contains("panicked"));
+        assert!(app.log.contains("incomplete recording"));
+        assert_eq!(std::fs::read(&path).unwrap(), before);
+        let mut reader =
+            scancraft_recording::Reader::new(std::fs::File::open(&path).unwrap()).unwrap();
+        assert!(
+            reader.read_frame().is_err(),
+            "partial recording must not become a completed recording"
+        );
+        // Start/interface controls use running.is_some(); a replacement worker
+        // can now complete. This test never opens a scanner or changes controls.
+        app.running = Some(running(|| Ok("replacement stopped".into())));
+        finish(&mut app);
+        assert_eq!(app.log, "replacement stopped");
+        std::fs::remove_file(path).unwrap();
+    }
+    #[test]
+    fn ordinary_capture_error_stops_and_remains_visible() {
+        let mut app = App::default();
+        app.running = Some(running(|| Err("injected capture error".into())));
+        finish(&mut app);
+        assert_eq!(app.status, "Capture stopped");
+        assert!(app.log.contains("injected capture error"));
     }
 }

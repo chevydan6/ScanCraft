@@ -363,3 +363,12 @@ normals, validates its millimeter delta, and retains independent Euclidean RMS,
 coverage and motion gates. Session normal handling and offline sequence settings
 share that method; default point-to-point and plain point-to-plane remain available.
 The independent SciPy nonlinear comparator is optional tooling, not app runtime.
+
+
+Capture completion recovery: `scancraft-app/src/capture_worker.rs` owns the one-shot
+result channel, pending outcome and thread handle. The GUI polls without joining
+an unfinished worker; disconnected senders and panics produce explicit terminal
+errors, and restart controls return only after the old thread finishes. A received
+result alone does not prove cleanup completed. App shutdown still joins owned
+capture cleanup synchronously; no driver-stall shutdown bound is established.
+Hardware-free regressions exercise panic/disconnection and partial-file retention.

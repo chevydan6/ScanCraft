@@ -21,7 +21,7 @@ answered separately below. Only the independent reviewer may verify/close them.
   improve exact ranked results; positive-distance behavior is unchanged.
 - Source: crates/scancraft-geometry/src/spatial.rs (Node, partition, search_k and
   two regression tests). AGENTS.md records the separate communication-file ownership.
-- Commit references: implementation commit recorded in the follow-up response update.
+- Implementation commit: `2b85187ada787b64031528600e35dcf48e70fa83`.
 - Tests: 499 Rust tests, formatting, strict all-target Clippy, frozen release workspace
   build and six independent NumPy statistical-filter reference cases pass.
 - Measurements: 4000 coincident points, median CLI time 534.388 ms before versus
@@ -74,15 +74,33 @@ and completion plus dispositions, and do not purchase capacity implicitly. No
 machine enforcement of completed-current-head review is claimed. No additional
 source change or independent closure is claimed at this checkpoint.
 
-## SCAN-REV-004 — accepted; next implementation priority
+## SCAN-REV-004 — accepted; implemented, awaiting independent verification
 
-The Ok-only capture result receive path can leave running set when a sender
-panics/disconnects. Plan: handle Empty versus Disconnected, join only finished
-workers without blocking the UI, surface termination errors and handle spawn
-failure. Add hardware-free regressions for panic/disconnection, restart state and
-retained partial files. No source correction or passing regression claimed yet.
-Affected: crates/scancraft-app/src/main.rs. Implementation evidence will be added
-in a subsequent meaningful commit; only the reviewer can close the finding.
+- Correction: a small capture_worker::Worker controller distinguishes Empty from
+  Disconnected and records completion separately from thread termination. It joins
+  only after is_finished, reports panic/disconnection, and lets App::receive clear
+  running and restore restart controls after actual termination. Thread creation
+  uses fallible Builder::spawn; errors leave capture inactive with a diagnostic.
+- Source: crates/scancraft-app/src/capture_worker.rs and src/main.rs (start, receive,
+  Drop adapter and capture_recovery_tests). No scanner protocol/control changes.
+- Tests: five hardware-free regressions pass: no-result clean disconnection,
+  result-before-cleanup poll returns while worker remains blocked, panic leaves a
+  byte-identical incomplete recording and permits a replacement worker, and normal
+  capture error restores stopped/error state. A deterministic receive/finish
+  interleaving checks that late completion is not misclassified. Partial recording is also checked
+  with the real recording reader and remains incomplete.
+- Full validation: 504 workspace tests, formatting, strict all-target Clippy and
+  frozen release workspace build pass. Logs remain local under /tmp/scancraft-
+  capture-recovery-*.log. Initial test compilation errors (Drop struct update and
+  a wrong Reader method name) were corrected before these passing runs. The late-
+  publication race regression initially failed, then passed after the final channel
+  read was inserted after join.
+- Commit: implementation hash will be added after committing this correction.
+- Limitations: operating-system thread-spawn failure is handled but not injected;
+  hardware streaming/reconnection was not exercised. App shutdown still joins
+  synchronously; SCAN-REV-005 remains distinct and unproven. No claim of a whole-app
+  shutdown bound or independent closure. CodeRabbit review is pending included
+  capacity; a rate-limit error is not a successful review.
 
 ## SCAN-REV-005 — accepted; shutdown bound remains unproven
 
