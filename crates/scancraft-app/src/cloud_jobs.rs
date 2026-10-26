@@ -360,9 +360,14 @@ fn execute(
             .map_err(|e| e.to_string())?;
         return Ok(report(
             format!(
-                "Exported project bundle with {} retained source artifacts to {}. Editable state replay-verified; active document and references unchanged. Selected raw frames only; physical accuracy remains unqualified.",
+                "Exported project bundle with {} retained source artifacts to {}. Editable state replay-verified; active document and references unchanged. {} Physical accuracy remains unqualified.",
                 summary["copied_source_artifacts"],
-                target.display()
+                target.display(),
+                if editor.live_session().is_some() {
+                    "Complete referenced live raw recordings included."
+                } else {
+                    "Selected raw frames only."
+                }
             ),
             None,
         ));

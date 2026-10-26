@@ -50,3 +50,30 @@ X display: the intact synthetic bundle reported8/8matches, while a copied bundle
 with modified left raw bytes reported7/8 and left.raptor:crc_mismatch. The
 three-point cloud and reference panel stayed loaded; no camera/USB descriptor
 was open. This is synthetic GUI verification evidence, not scanning qualification.
+
+## Export an edited live project with its raw session
+
+The Live session sources panel can export to an explicit new folder. The CLI
+uses the existing command with a live project:
+
+```sh
+scancraft-cli export-project-bundle EDITED.orproj SOURCE_LIVE_FOLDER NEW_FOLDER
+scancraft-cli verify-source-bundle NEW_FOLDER/project.orproj NEW_FOLDER
+```
+
+The exporter verifies saved source fingerprints, copies all referenced artifacts
+including both complete raw recordings, checks copied bytes, saves/reopens the
+complete edited state and rechecks original sources before atomic publication.
+Cancellation, changed sources or existing outputs do not publish over an existing
+folder. Incomplete staging remains available for diagnosis. The original project
+and its stored location are unchanged; only the exported copy refers to the new
+folder. Undo/redo and measurement history use the existing full-state serializer.
+Open the exported `project.orproj` explicitly. This is a project/source archive,
+not a resumable acquisition session or the older scan-container folder schema.
+If moved later, select the new folder explicitly for verification; stored paths
+are descriptive. Source PLY and reports describe initial reconstruction, while
+the project retains subsequent edits. No physical qualification is inferred.
+
+Tests include a synthetic byte-identity fixture for relocation and edit-history
+retention, cancellation and late source mutation, alongside unchanged single-frame
+export regressions. This fixture’s dummy raw bytes are not sensor replay evidence.

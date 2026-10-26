@@ -444,3 +444,13 @@ external and fusion weights are not resumable. See docs/LIVE_SESSION_REFERENCES.
 The full frozen gate passed574tests; actual release synthetic runner and CLI
 verification passed8artifacts and rejected a modified raw recording (exit1).
 These are software/byte-identity checks, not hardware qualification.
+
+## Live-session project archive export
+
+The existing project exporter now packages edited live projects with all
+referenced raw/calibration/settings/report artifacts. Original data/state stay
+unchanged; copied references relocate to the export. Full-state replay and
+source rechecks precede atomic publication. Explicit GUI/CLI workflows passed
+synthetic runtime verification and both raw replays;576-test gate passed.
+This is not resumable fusion or physical qualification. Automated independent
+review remains pending included service capacity.

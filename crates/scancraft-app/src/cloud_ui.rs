@@ -384,6 +384,8 @@ impl CloudUi {
                 ui.add_enabled_ui(self.job.is_none(), |ui| {
                     ui.horizontal(|ui| {ui.label("Folder to verify:");ui.text_edit_singleline(&mut self.source_directory);if ui.button("Use recorded location").clicked(){self.source_directory=live.directory_display.clone();}});
                     if ui.add_enabled(!self.source_directory.trim().is_empty(), egui::Button::new("Verify live session sources on disk")).clicked(){verify_directory=Some(PathBuf::from(&self.source_directory));}
+                    ui.horizontal(|ui| { ui.label("New bundle folder:");ui.text_edit_singleline(&mut self.bundle_target); });
+                    if ui.add_enabled(!self.source_directory.trim().is_empty()&&!self.bundle_target.trim().is_empty(), egui::Button::new("Export live project and raw session")).clicked(){export_bundle=Some((PathBuf::from(&self.source_directory),PathBuf::from(&self.bundle_target)));}
                 });
             });
         }
