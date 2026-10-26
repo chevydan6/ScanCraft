@@ -2057,3 +2057,21 @@ external bundle; fused standalone projects do not yet embed multi-frame lineage.
 Point-to-plane selection, meshing in this path, blank-frame recovery/resumption,
 dedicated GUI orchestration and genuine live/calibrated Raptor evidence remain
 unfinished. No scanner, firmware or physical calibration action was performed.
+
+## Native recorded-sequence GUI checkpoint
+
+The Point clouds panel now submits recorded stereo sequences to the existing
+bounded geometry worker, with stage progress/cancellation and the save/discard
+guard before replacing unsaved work. Preparation stages the complete sequence;
+Editor/Preview construction precedes source revalidation and atomic publication.
+Only successful publication replaces the live document. CLI run composes the
+same phases, and startup arguments support repeatable offline operation.
+
+538 Rust tests, formatting, strict Clippy and release build pass. Regressions
+cover late cancellation/source mutation between phases, GUI preservation on
+errors, unsaved guards and saved/live geometry equality. Actual private-display
+GUI operation produced all29files byte-identical to CLI output, integrated three
+synthetic frames, preserved inputSHA256s and opened no camera descriptors.
+See docs/RECORDED_STEREO_SEQUENCE.md and sequence-gui-equivalence evidence.
+This is not manual dialog/hardware qualification. Multi-frame project provenance
+remains external, live integration and physical accuracy remain unfinished.

@@ -629,3 +629,44 @@ fn recorded_sequence_no_geometry_keeps_current_raw_inputs_and_rejection_diagnost
     assert_eq!(report["matching"]["rejected"].as_array().unwrap().len(), 1);
     assert!(!frame.join("points.ply").exists());
 }
+
+#[test]
+fn recorded_sequence_deferred_publication_rechecks_cancellation_and_sources() {
+    let t = Temp::new();
+    let inputs = fixture(&t.0);
+    let settings = t.0.join("sequence.json");
+    sequence_settings(&settings);
+    let target = t.0.join("deferred");
+    let prepared = scancraft_workflow::recorded_sequence::prepare(
+        &inputs,
+        &settings,
+        &target,
+        &WorkControl::default(),
+    )
+    .unwrap();
+    assert!(!target.exists());
+    assert!(!prepared.cloud().points.is_empty());
+    let partial = prepared.staging_directory().to_path_buf();
+    assert!(partial.join("project.orproj").exists());
+    let cancelled = WorkControl::default();
+    cancelled.cancel();
+    assert!(
+        scancraft_workflow::recorded_sequence::publish_prepared(&prepared, &cancelled).is_err()
+    );
+    assert!(!target.exists());
+    assert!(partial.exists());
+    std::io::Write::write_all(
+        &mut fs::OpenOptions::new()
+            .append(true)
+            .open(&inputs.left)
+            .unwrap(),
+        b"changed",
+    )
+    .unwrap();
+    assert!(
+        scancraft_workflow::recorded_sequence::publish_prepared(&prepared, &WorkControl::default())
+            .is_err()
+    );
+    assert!(!target.exists());
+    assert!(partial.exists());
+}

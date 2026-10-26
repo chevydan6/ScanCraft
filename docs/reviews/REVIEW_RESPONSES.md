@@ -473,3 +473,80 @@ that review to6128be4 and separately passed the added context assertion test.
 Full535 remains developer evidence; no transfer of review to later bookkeeping.
 GitHub CI pending at recording, App draft-skip is not completed review. Included
 CLI quota still unavailable, no paid retry. Reviewer statuses/authority preserved.
+
+## DEV-SEQUENCE-GUI-001 — native recorded-sequence workflow
+
+Accepted developer mission work: add native background panel and startup operation
+for the shared recorded-stereo sequence pipeline. Unsaved-document replacement
+uses existing submit/save/discard guard. Workflow prepare/publish split lets the
+worker build Editor/Preview BEFORE atomic publication, then commit document/selection
+without fallible view construction. Original CLI run wraps these stages unchanged.
+Publication rechecks sources/cancellation; late pre-publication errors preserve
+staging, and post-publication sync errors explicitly identify committed output.
+
+Sources: app cloud_ui.rs, cloud_jobs.rs, main.rs; workflow recorded_sequence.rs,
+workflow tests/recording_reconstruction.rs; private-display helper. No new algorithm
+copy/dependency or scanner action. Existing architecture and algorithms retained.
+Regressions extend dirty guard, verify GUI worker document/selection persistence
+on cancelled/overwrite errors, exact saved/live geometry equality, startup arity,
+and cancellation/source mutation between preparation/publication. Detailed
+interface/publication contract and memory overlap: docs/RECORDED_STEREO_SEQUENCE.md.
+Final gate/runtime/review/commit evidence follows. Fused project multi-frame lineage
+still external; clocks/exposures/physical accuracy remain unqualified. No finding
+status changed. No paid review authorization; included quota is checked separately.
+
+DEV-SEQUENCE-GUI-001 final source gate:538Rusttests, frozenfmt/strictClippy/release
+PASS /tmp/scancraft-sequence-gui-complete-checks.log; helper Python syntax passes.
+Private-display synthetic startup background operation completed; all29outputfiles
+match CLI byte-for-byte, inputSHA256s unchanged, three frames integrated, no camera
+FDs. Screenshot window-3.png visually inspected, completed panel/result visible.
+Local /tmp/scancraft-sequence-gui-operation and datasetpointer
+/tmp/scancraft-recorded-sequence-gui-dataset.txt. Aggregate evidence in
+evidence/2026-10-26-sequence-gui-equivalence.json. Capture precedes a help-string-only
+addition; numerical/operation/UI behavior unchanged, fullgate rerun afterwards.
+No claim of manual dialog interaction or physical scanner qualification.
+
+Independent Assignment43 inspected stable uncommitted GUI snapshot and passed
+16 focused tests (app2, dirtyguard1, workflow12, nativeCLI1), no actionable defect
+in that scope. This is not a full538rerun or committed-head/service attestation.
+CLI included capacity was0 with nextslot~11:47UTC; no paid request or repeated
+unchanged review. Pending combined review should cover rawPTS+sequence+GUI versus
+b452b09 to avoid duplicate review of unchanged earlier source. Commitrefs follow.
+
+DEV-SEQUENCE-GUI-001 implementation `1bed149cdc5e998d77710a04d25b41d39e76bb4a`,
+PR https://github.com/chevydan6/ScanCraft/pull/8. Included capacity returned1 with
+inactive billing; one combined CodeRabbit CLI review against exact b452b09 completed
+26files, zero findings, major gate passed, exit0. Head/tree unchanged before/after;
+operator manifest/report and full538gate hashes plus file blob IDs in
+evidence/2026-10-26-combined-recorded-sequence-review.json. No paid consent/flag.
+This covers current combined implementation, not a server immutable-head attestation
+or an invented fresh review of previous variant PR heads. The old PR5 raw blocked
+result and independent009rejection remain preserved separately.
+Later evidence-only bookkeeping does not change reviewed code or receive a new
+review claim. GitHub App feedback remains separate; no owner merge consent implied.
+
+### Completed GitHub App review at3129761
+
+Supported single manual request completed at exact
+`312976145d08afbc96cc9466535e0ec54028152e`, base47293dd. Walkthrough6415231559
+explicitly marks source/covered head reviewed and says no actionable comments;
+reply6415310710 says Review finished. Post-completion API: zero inline comments,
+zero review threads and zero formal Reviews. This is not formal APPROVED or owner
+merge consent. Both test checks passed at covered head121555435820/121555459781.
+Sanitized completion metadata in evidence/2026-10-26-github-pr8-review.json; raw
+service-access links excluded. No paid consent/billing/configuration change.
+
+Docstring advisory8.33% versus80%,24touched functions across6files,6unsupported
+skipped: **disputed as blanket merge blocker**, not hidden. This change contains
+private/startup/controller helpers and descriptive regression functions alongside
+public staged-publication APIs. Module/type/API docs and the architecture/interface
+document explain ownership, ordering, cancellation, source checks, staging retention,
+committed-output sync errors and external provenance. Repeating those as docstrings
+on every private/test function to hit a percentage does not establish correctness.
+Concrete missing public/non-obvious contracts remain legitimate documentation work;
+this metric supplied no specific such defect. No threshold/check was weakened.
+Four premerge checks passed and one warning remains; no all-checks-pass claim.
+
+Current implementation remains1bed149;3129761 and later evidence-only bookkeeping
+do not change app code. Full538gate and GUI/CLI29file equivalence remain recorded
+with their actual scopes. Independent reviewer retains all finding/closure authority.
