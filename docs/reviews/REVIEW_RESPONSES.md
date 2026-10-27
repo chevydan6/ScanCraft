@@ -1205,3 +1205,62 @@ generated to inflate a score. Additional helper documentation can accompany
 specific interface or maintainability improvements. This is an App advisory, not
 a new independent SCAN finding. Evidence-only follow-up leaves reviewed Rust/tool
 source unchanged. SCAN-REV-005 remains open and 006 unqualified/under review.
+
+## Development milestone — fixed-intrinsic stereo calibration
+
+Advances the SCAN-REV-006 tooling gap without resolving/reclassifying qualification.
+New stereo_fit jointly estimates a shared rig and target poses while holding
+supplied lenses fixed. It uses bounded native inverse/homography seeds, shared
+Brown/pose derivatives and generic six/ten-parameter Schur blocks. A dense-system
+comparison verifies both consumers. Existing mono reference fixtures and all three
+CLI artifact sets are byte-identical. Workflow calibration_bundle shares existing
+atomic publication; public mono provenance path is preserved by re-export.
+New stereo_calibration workflow and calibrate-stereo-extrinsics CLI never open or
+configure hardware or install calibration. 607 Rust tests/fmt/strict Clippy/release
+pass; three OpenCV/NumPy stereo cases, held-out synthetic triangulation, release
+CLI preservation/rejection and a corrupted-transform reference control pass.
+No new dependencies/licenses/runtime, firmware, physical calibration or source
+accuracy claims. Exact source/review evidence is recorded separately; only the
+reviewer controls independent finding status.
+
+CR-STEREO-ERROR-SPACING accepted: add the missing space and inclusive upper bound
+in stereo_fit::initialize's count diagnostic (expected 4..=4096). No mathematical
+behavior changes. Actual CLI invalid-count request exits 1 with the corrected
+message and no published output. Source ff5b17b versus 26987bb completed CodeRabbit
+CLI review: 24 files, one minor finding, zero blocking findings, major gate passed,
+exit 0. Fresh included capacity 2 and inactive billing were checked; full context/
+diff secret scans passed and detached source stayed fixed. Corrected full gate
+passes 607 tests/fmt/strict Clippy/release; fixture bytes and all three stereo/three
+mono release artifact sets remain unchanged. Exact hashes and scope are in the
+stereo-calibration-reference/review JSON reports. No independent finding status
+changed. GitHub App review is separate; next manual free window after 01:44 UTC.
+
+The incremental stereo correction review completed at
+42d0b40b9833b441a32d0fde37e7fac8b54739a3 versus ff5b17b: four files, zero
+findings, major gate passed, exit 0. Fresh included capacity 1/inactive billing
+and complete context/diff scans were verified; checkout head/tree stayed fixed.
+Final evidence-only follow-up leaves this corrected Rust/tool source unchanged.
+No repeated unchanged code review or paid usage. When initial CLI evidence was
+recorded, App review had not yet been requested; its included window followed the
+PR19 review. The completed App result is recorded below. Skip status alone is
+not review completion.
+
+App20 completed exact ce5d66a19622948b949a749faa86d3449dbb9cab: run
+a5e01b1d-20b4-4ba5-b47d-a0e8f5a745bb, request 6431680969 at 01:45:59 UTC,
+finished reply 6431682290, summary 6431458213. Exact source/covered markers match
+with kind reviewed; no actionable/inline comments or review threads. No formal
+approval or owner merge consent is inferred. Included allowance was used (one per
+hour, zero remaining); no paid consent or repeated request.
+
+CR-APP-STEREO-DOCSTRINGS — advisory evaluated; blanket threshold disputed as a
+readiness gate, warning retained. The App reports 39.53% versus 80%, 43 touched
+functions across 13 files, 12 unsupported files skipped. New public entry points
+and shared projection/normal/publication helpers document their contracts; the
+method guide explains frames, equations, bounds, limitations and provenance. The
+aggregate also counts private/test helpers and existing touched code; it does not
+measure mathematical correctness, public API adequacy or physical qualification.
+No threshold/configuration is lowered and no boilerplate is generated to inflate
+the score. Specific maintainability improvements can receive targeted docs. This
+is an App advisory, not a new independent SCAN finding. Final follow-up changes
+review metadata only; corrected source and the 607-test evidence remain unchanged.
+SCAN-REV-005/006 remain under independent reviewer control.

@@ -312,3 +312,9 @@ Brown5/intrinsic/target-pose refinement through an offline diagnostic CLI. Next 
 joint stereo fitting, target/subpixel detection, coverage/uncertainty and explicit
 device/mode binding. Physical calibration stays deferred. Supplied observations
 and small residuals do not qualify Raptor reconstruction or remove hardware trials.
+
+Fixed-intrinsic stereo fitting and its diagnostic CLI now connect known synthetic
+lenses/target poses to relative pose estimation and held-out triangulation. Next
+advance real source/mode/optical binding, target/subpixel detection and coverage/
+uncertainty; simultaneous lens/rig refinement remains distinct future work.
+Physical calibration remains deferred; no synthetic fit removes physical trials.

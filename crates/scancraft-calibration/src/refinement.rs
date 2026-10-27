@@ -6,10 +6,11 @@
 //! calibration qualification and is never automatically installed for capture.
 use crate::{
     Brown5, CameraModel,
+    normal_blocks::{information_min_eigenvalue, scaled_gradient_inf, solve_step},
     planar::{InitialIntrinsics, InitializedView, PlanarInitialization, PlanarView, validate_view},
     stereo::RigidPose,
 };
-use nalgebra::{Matrix3, Rotation3, SMatrix, SVector, Vector2, Vector3};
+use nalgebra::{SMatrix, SVector, Vector2, Vector3};
 use serde::{Deserialize, Serialize};
 use std::cell::Cell;
 
@@ -94,32 +95,13 @@ impl State {
             return Err("camera step overflow".into());
         }
         for (pose, step) in state.poses.iter_mut().zip(poses) {
-            if !step.iter().all(|v| v.is_finite())
-                || step[0].hypot(step[1]).hypot(step[2]) > std::f64::consts::PI
-            {
-                return Err("invalid or nonlocal pose step".into());
-            }
-            let rotation =
-                Rotation3::new(Vector3::new(step[0], step[1], step[2])).matrix() * pose.matrix();
-            pose.rotation = std::array::from_fn(|i| std::array::from_fn(|j| rotation[(i, j)]));
-            for i in 0..3 {
-                pose.translation_mm[i] += step[i + 3];
-            }
-            pose.validate()?;
+            *pose = crate::projection_differential::step_pose(pose, *step)?;
         }
         Ok(state)
     }
 }
-struct ViewNormal {
-    pose: PoseMatrix,
-    cross: CrossMatrix,
-    gradient: PoseVector,
-}
-struct NormalSystem {
-    global: GlobalMatrix,
-    gradient: GlobalVector,
-    views: Vec<ViewNormal>,
-}
+type ViewNormal = crate::normal_blocks::ViewNormal<10>;
+type NormalSystem = crate::normal_blocks::NormalSystem<10>;
 struct Score {
     squared: f64,
     maximum: f64,
@@ -328,14 +310,11 @@ fn project_jacobians(
 ) -> Result<(Vector2<f64>, GlobalJacobian, PoseJacobian, f64), String> {
     let rotated = pose.matrix() * Vector3::new(target[0], target[1], 0.);
     let point = rotated + Vector3::from(pose.translation_mm);
-    if !point.iter().all(|v| v.is_finite()) || point[2] <= 0. {
-        return Err("invalid/behind-camera calibration observation".into());
-    }
-    let x = point[0] / point[2];
-    let y = point[1] / point[2];
-    let (d, j) = state.distortion().map(x, y)?;
     let k = state.intrinsics();
-    let pixel = Vector2::new(k.fx * d[0] + k.skew * d[1] + k.cx, k.fy * d[1] + k.cy);
+    let projection = crate::projection_differential::project(&k, state.distortion(), point)?;
+    let [x, y] = projection.normalized;
+    let d = projection.distorted;
+    let pixel = projection.pixel;
     let mut global = GlobalJacobian::zeros();
     global[(0, 0)] = k.fx * d[0];
     global[(1, 1)] = k.fy * d[1];
@@ -354,39 +333,8 @@ fn project_jacobians(
         global[(0, i + 5)] = k.fx * dx + k.skew * dy;
         global[(1, i + 5)] = k.fy * dy;
     }
-    let image_normalized = SMatrix::<f64, 2, 2>::new(
-        k.fx * j[0][0] + k.skew * j[1][0],
-        k.fx * j[0][1] + k.skew * j[1][1],
-        k.fy * j[1][0],
-        k.fy * j[1][1],
-    );
-    let normalized_point = SMatrix::<f64, 2, 3>::new(
-        1. / point[2],
-        0.,
-        -x / point[2],
-        0.,
-        1. / point[2],
-        -y / point[2],
-    );
-    let mut point_pose = SMatrix::<f64, 3, 6>::zeros();
-    let negative_cross = Matrix3::new(
-        0.,
-        rotated[2],
-        -rotated[1],
-        -rotated[2],
-        0.,
-        rotated[0],
-        rotated[1],
-        -rotated[0],
-        0.,
-    );
-    point_pose
-        .fixed_view_mut::<3, 3>(0, 0)
-        .copy_from(&negative_cross);
-    point_pose
-        .fixed_view_mut::<3, 3>(0, 3)
-        .copy_from(&Matrix3::identity());
-    let pose_jacobian = image_normalized * normalized_point * point_pose;
+    let pose_jacobian =
+        projection.point_jacobian * crate::projection_differential::point_pose_jacobian(rotated);
     if !pixel
         .iter()
         .chain(global.iter())
@@ -493,88 +441,11 @@ fn build_normal(
     Ok(system)
 }
 
-fn scaled_gradient_inf(system: &NormalSystem) -> f64 {
-    let mut value = (0..10)
-        .map(|i| system.gradient[i].abs() / system.global[(i, i)].max(1e-18).sqrt())
-        .fold(0., f64::max);
-    for view in &system.views {
-        for i in 0..6 {
-            value = value.max(view.gradient[i].abs() / view.pose[(i, i)].max(1e-18).sqrt());
-        }
-    }
-    value
-}
-
-fn damped<const N: usize>(mut h: SMatrix<f64, N, N>, damping: f64) -> SMatrix<f64, N, N> {
-    for i in 0..N {
-        h[(i, i)] += damping * h[(i, i)].max(1e-18);
-    }
-    h
-}
-fn solve_step(
-    system: &NormalSystem,
-    damping: f64,
-) -> Result<(GlobalVector, Vec<PoseVector>), String> {
-    let mut schur = damped(system.global, damping);
-    let mut rhs = -system.gradient;
-    let mut solved = Vec::with_capacity(system.views.len());
-    for view in &system.views {
-        let factor = damped(view.pose, damping)
-            .cholesky()
-            .ok_or("singular damped pose block")?;
-        let cross = factor.solve(&view.cross.transpose());
-        let gradient = factor.solve(&view.gradient);
-        schur -= view.cross * cross;
-        rhs += view.cross * gradient;
-        solved.push((cross, gradient));
-    }
-    let step = ((schur + schur.transpose()) * 0.5)
-        .cholesky()
-        .ok_or("singular damped camera system")?
-        .solve(&rhs);
-    let poses: Vec<_> = solved
-        .into_iter()
-        .map(|(cross, gradient)| -gradient - cross * step)
-        .collect();
-    if !step
-        .iter()
-        .chain(poses.iter().flat_map(|p| p.iter()))
-        .all(|v| v.is_finite())
-    {
-        return Err("calibration step overflow".into());
-    }
-    Ok((step, poses))
-}
-
-fn information_min_eigenvalue(system: &NormalSystem) -> Result<f64, String> {
-    let mut schur = system.global;
-    for view in &system.views {
-        let factor = view.pose.cholesky().ok_or("unobservable target pose")?;
-        schur -= view.cross * factor.solve(&view.cross.transpose());
-    }
-    schur = (schur + schur.transpose()) * 0.5;
-    let diagonal = schur.diagonal();
-    if diagonal.iter().any(|d| !d.is_finite() || *d <= 0.) {
-        return Err("unobservable camera parameters".into());
-    }
-    for i in 0..10 {
-        for j in 0..10 {
-            schur[(i, j)] /= diagonal[i].sqrt() * diagonal[j].sqrt();
-        }
-    }
-    let eigen = nalgebra::linalg::SymmetricEigen::try_new(schur, 1e-14, 1000)
-        .ok_or("information eigensystem did not converge")?;
-    let minimum = eigen.eigenvalues.min();
-    if !minimum.is_finite() || minimum < 1e-10 {
-        return Err("weak or degenerate Brown5 calibration information".into());
-    }
-    Ok(minimum)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::planar::{PlanarObservation, initialize_planar};
+    use nalgebra::Rotation3;
     use std::cell::Cell;
 
     fn fixture(skew: f64, noise: f64) -> (CameraModel, Vec<PlanarView>, Vec<RigidPose>) {

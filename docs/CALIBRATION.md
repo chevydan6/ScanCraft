@@ -7,8 +7,10 @@ pose and laser fields; extraction does not establish their active-mode binding,
 physical units, camera assignment or physical accuracy. The crate now provides
 an explicit [planar pinhole initializer](PLANAR_CALIBRATION_INITIALIZER.md) from
 supplied metric correspondences and explicit [Brown5 nonlinear refinement](BROWN_CALIBRATION_REFINEMENT.md)
-with an offline CLI workflow. Target-corner detection, joint stereo estimation,
+with an offline CLI workflow. Target-corner detection, simultaneous lens/rig estimation,
 physical lens coverage and a qualified Raptor optical model remain incomplete.
+An explicit [fixed-intrinsic stereo fitter](STEREO_EXTRINSIC_CALIBRATION.md) now
+jointly estimates the declared relative/target poses; no lens or device binding is inferred.
 Genuine calibrated Raptor geometry remains unverified, and physical calibration
 remains deferred by user request.
 

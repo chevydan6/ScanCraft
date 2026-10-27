@@ -20,6 +20,7 @@ are not yet qualified. This is not currently a professional CrealityScan replace
 - [Architecture](ARCHITECTURE.md), [current status](PROJECT_STATUS.md), [roadmap](ROADMAP.md)
 - [Compatibility and migration](docs/MIGRATION.md)
 - [Offline planar calibration fitting](docs/BROWN_CALIBRATION_REFINEMENT.md) (experimental; supplied observations only)
+- [Fixed-intrinsic stereo fitting](docs/STEREO_EXTRINSIC_CALIBRATION.md) (experimental; no hardware calibration)
 - [Contribution guide](CONTRIBUTING.md), [security reporting](SECURITY.md)
 - [Rebranding verification](docs/publication/VERIFICATION.md)
 - [Publication review](docs/publication/PUBLICATION_AUDIT.md)

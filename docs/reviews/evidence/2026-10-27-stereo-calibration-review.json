@@ -1,0 +1,140 @@
+{
+  "tool": "official CodeRabbit CLI 0.9.1",
+  "scope": "fixed-intrinsic stereo fitter, shared kernels/publication, CLI and synthetic evidence versus PR19",
+  "before": {
+    "head": "ff5b17b4ff81a4c87ce6d39456888d1358fba6e6",
+    "tree": "8da800fd95cb11d1006504e1340141f5a0014a50",
+    "base": "26987bbf0b49d2c2f5d3a3d4a658b7fb8f9bd9d6"
+  },
+  "after": {
+    "head": "ff5b17b4ff81a4c87ce6d39456888d1358fba6e6",
+    "tree": "8da800fd95cb11d1006504e1340141f5a0014a50",
+    "status": "",
+    "exit_code": 0
+  },
+  "binding": "operator-recorded immutable source, not service cryptographic source attestation",
+  "complete": {
+    "type": "complete",
+    "status": "review_completed",
+    "findings": 1,
+    "gate": {
+      "threshold": "major",
+      "status": "passed",
+      "blockingFindings": 0
+    },
+    "reviewedFiles": [
+      "ACCEPTANCE_RESULTS.md",
+      "ARCHITECTURE.md",
+      "PROJECT_STATUS.md",
+      "README.md",
+      "ROADMAP.md",
+      "crates/scancraft-calibration/examples/stereo_fit_reference.rs",
+      "crates/scancraft-calibration/src/lib.rs",
+      "crates/scancraft-calibration/src/normal_blocks.rs",
+      "crates/scancraft-calibration/src/planar.rs",
+      "crates/scancraft-calibration/src/projection_differential.rs",
+      "crates/scancraft-calibration/src/refinement.rs",
+      "crates/scancraft-calibration/src/stereo_fit.rs",
+      "crates/scancraft-cli/src/main.rs",
+      "crates/scancraft-workflow/src/calibration_bundle.rs",
+      "crates/scancraft-workflow/src/lib.rs",
+      "crates/scancraft-workflow/src/planar_calibration.rs",
+      "crates/scancraft-workflow/src/stereo_calibration.rs",
+      "docs/BROWN_CALIBRATION_REFINEMENT.md",
+      "docs/CALIBRATION.md",
+      "docs/PLANAR_CALIBRATION_INITIALIZER.md",
+      "docs/STEREO_EXTRINSIC_CALIBRATION.md",
+      "docs/reviews/REVIEW_RESPONSES.md",
+      "docs/reviews/evidence/2026-10-27-stereo-calibration-reference.json",
+      "tools/compare_stereo_fit_opencv.py"
+    ]
+  },
+  "included_capacity": 2,
+  "usage_billing": "inactive",
+  "secrets_scan": {
+    "full_context": "pass",
+    "complete_diff": "pass"
+  },
+  "raw_log_sha256": "1c83b1872d10907ddc7c7e4eff455cfbf5583a4373407a25f038beabddfc79f2",
+  "dispositions": [
+    {
+      "id": "CR-STEREO-ERROR-SPACING",
+      "severity": "minor",
+      "accepted": true,
+      "file": "crates/scancraft-calibration/src/stereo_fit.rs",
+      "explanation": "Add missing space and explicit inclusive 4..=4096 range to match the actual bounds. Error text only, numerical behavior unchanged. Final607-test gate, unchanged fixture/artifact hashes and actual CLI invalid-count rejection verified."
+    }
+  ],
+  "incremental_correction_review": {
+    "before": {
+      "head": "42d0b40b9833b441a32d0fde37e7fac8b54739a3",
+      "tree": "ead0f4ffe518cdf10f4fde2002af3511769e5c3c",
+      "base": "ff5b17b4ff81a4c87ce6d39456888d1358fba6e6"
+    },
+    "after": {
+      "head": "42d0b40b9833b441a32d0fde37e7fac8b54739a3",
+      "tree": "ead0f4ffe518cdf10f4fde2002af3511769e5c3c",
+      "status": "",
+      "exit_code": 0
+    },
+    "complete": {
+      "type": "complete",
+      "status": "review_completed",
+      "findings": 0,
+      "gate": {
+        "threshold": "major",
+        "status": "passed",
+        "blockingFindings": 0
+      },
+      "reviewedFiles": [
+        "crates/scancraft-calibration/src/stereo_fit.rs",
+        "docs/reviews/REVIEW_RESPONSES.md",
+        "docs/reviews/evidence/2026-10-27-stereo-calibration-reference.json",
+        "docs/reviews/evidence/2026-10-27-stereo-calibration-review.json"
+      ]
+    },
+    "raw_log_sha256": "b9e513edf9b0d2b10c08fa367c0443960303258f39d6570db77e8db98b2626bf",
+    "included_capacity": 1,
+    "usage_billing": "inactive",
+    "secrets_scan": {
+      "full_context": "pass",
+      "complete_diff": "pass"
+    }
+  },
+  "github_app": {
+    "state": "completed",
+    "reviewed_head": "ce5d66a19622948b949a749faa86d3449dbb9cab",
+    "base": "26987bbf0b49d2c2f5d3a3d4a658b7fb8f9bd9d6",
+    "run_id": "a5e01b1d-20b4-4ba5-b47d-a0e8f5a745bb",
+    "request_comment": 6431680969,
+    "request_created_at": "2026-10-27T01:45:59Z",
+    "reply_comment": 6431682290,
+    "reply_updated_at": "2026-10-27T01:50:48Z",
+    "finished_reply": true,
+    "summary_comment": 6431458213,
+    "summary_updated_at": "2026-10-27T01:50:44Z",
+    "coverage": {
+      "source_commit": "ce5d66a19622948b949a749faa86d3449dbb9cab",
+      "covered_commit": "ce5d66a19622948b949a749faa86d3449dbb9cab",
+      "kind": "reviewed"
+    },
+    "selected_files": 25,
+    "actionable_comments": 0,
+    "inline_comments": 0,
+    "review_threads": 0,
+    "formal_review_objects": 0,
+    "included_allowance_used": true,
+    "hourly_included_limit": 1,
+    "included_remaining_after_review": 0,
+    "raw_summary_sha256": "ae0e15f83850f9b21a716560d36cefb3293f51dd69cbaa4c974c769164d61e4b",
+    "docstring_advisory": {
+      "coverage_percent": 39.53,
+      "threshold_percent": 80.0,
+      "analyzed_functions": 43,
+      "files": 13,
+      "skipped_unsupported_files": 12,
+      "disposition": "warning retained; blanket function threshold disputed as readiness gate. Public entry points, shared mathematical helpers, conventions, limits and provenance are documented; private/test-helper metric is not numerical or physical qualification. No threshold/configuration change."
+    },
+    "limitations": "not owner approval, full application audit or physical qualification"
+  }
+}
