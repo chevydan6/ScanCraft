@@ -1415,3 +1415,25 @@ The preview-only synthetic results therefore do not establish whole-application
 bounded shutdown or resolve the independent finding. No hardware, firmware,
 physical calibration, paid service or merge action occurred. Automated review
 for this meaningful diff follows separately; existing independent statuses remain.
+
+Preview source commit283df43 completed CodeRabbit CLI review versus5336d8f:
+six files, one minor finding, zero major/critical findings, major gate passed,
+exit0. Review ran on an isolated fixed commit after full context/diff secret
+scans; included capacity and inactive billing were verified.
+
+CR-PREVIEW-IPC-FLUSH — accepted. The helper's stdout may buffer a partial frame,
+so a completed capture must not depend on the next frame to become visible to
+the parent. `capture_ipc::write_frame` now explicitly flushes after writing the
+frame; the existing helper transport-error path receives flush failures too.
+Added a buffered-writer regression that decodes the frame from underlying bytes
+before any second frame/completion, and a writer that fails only on flush to
+verify BrokenPipe is propagated. No unmeasured latency figures are claimed.
+Corrected full-gate and incremental review availability are recorded separately.
+
+Corrected flush source passes full formatting, strict all-target Clippy, 626 tests
+and release build (`tools/check.sh`). The included review allowance is currently
+zero, with next available capacity reported in about24 minutes; usage billing is
+inactive. No credits, charges or redundant rate-limited review request is used.
+A fresh corrected-source gate is pending included availability, not claimed as
+completed. This preview milestone is published as draft work; native live-scan
+isolation and whole-application shutdown qualification remain outstanding.

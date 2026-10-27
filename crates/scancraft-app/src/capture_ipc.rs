@@ -17,6 +17,7 @@ fn prefix(output: &mut impl Write, kind: u8, length: usize) -> io::Result<()> {
     output.write_all(&[kind])?;
     output.write_all(&(length as u32).to_le_bytes())
 }
+/// Send and flush a complete frame; a buffered tail must not await the next frame.
 pub(crate) fn write_frame(output: &mut impl Write, frame: &Frame) -> io::Result<()> {
     let length = 24usize
         .checked_add(frame.metadata.len())
@@ -32,7 +33,8 @@ pub(crate) fn write_frame(output: &mut impl Write, frame: &Frame) -> io::Result<
     output.write_all(&(frame.metadata.len() as u32).to_le_bytes())?;
     output.write_all(&(frame.data.len() as u32).to_le_bytes())?;
     output.write_all(&frame.metadata)?;
-    output.write_all(&frame.data)
+    output.write_all(&frame.data)?;
+    output.flush()
 }
 pub(crate) fn write_complete(
     output: &mut impl Write,
@@ -142,6 +144,47 @@ mod tests {
             );
         }
     }
+    #[test]
+    fn one_frame_is_visible_without_a_second_frame_or_completion() {
+        let frame = Frame {
+            sequence: 1,
+            host_timestamp_us: 2,
+            flags: 0,
+            metadata: vec![3],
+            data: vec![4; 16],
+        };
+        let mut buffered = io::BufWriter::with_capacity(4096, Vec::new());
+        write_frame(&mut buffered, &frame).unwrap();
+        let mut decoder = Decoder::default();
+        // Inspect only bytes already delivered to the underlying pipe/writer.
+        decoder.push(buffered.get_ref()).unwrap();
+        assert_eq!(decoder.next().unwrap(), Some(Message::Frame(frame)));
+    }
+
+    #[test]
+    fn frame_flush_failure_is_a_transport_failure() {
+        struct BrokenFlush;
+        impl Write for BrokenFlush {
+            fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
+                Ok(bytes.len())
+            }
+            fn flush(&mut self) -> io::Result<()> {
+                Err(io::Error::new(io::ErrorKind::BrokenPipe, "flush failed"))
+            }
+        }
+        let frame = Frame {
+            sequence: 1,
+            host_timestamp_us: 2,
+            flags: 0,
+            metadata: vec![],
+            data: vec![3],
+        };
+        assert_eq!(
+            write_frame(&mut BrokenFlush, &frame).unwrap_err().kind(),
+            io::ErrorKind::BrokenPipe
+        );
+    }
+
     #[test]
     fn corrupt_sizes_truncation_and_trailing_data_never_succeed() {
         for kind in [FRAME, COMPLETE, 0, 255] {

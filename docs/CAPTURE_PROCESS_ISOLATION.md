@@ -28,11 +28,13 @@ bound.
 
 `capture_ipc` transports raw frames with a 64 MiB body limit and a 24-byte
 fixed header plus metadata and image bytes. Completion uses bounded JSON (64 KiB).
+Each frame is explicitly flushed before returning to capture, so a buffered
+tail does not depend on the next capture. Flush errors are transport failures.
 The decoder accepts fragmented reads, rejects inconsistent lengths, unknown
 message kinds, truncation and bytes after completion. This is an internal protocol
 between copies of the same executable, not a new recording format.
 
-Only the child opens the scanner and holds session locks. Its control thread
+During preview capture, only the child opens the scanner and holds session locks. Its control thread
 interprets stdin EOF or any control byte as a graceful stop request. The parent
 reads stdout nonblocking in bounded batches, checks cancellation between batches
 and requests stop by closing stdin. It waits up to two seconds after observing
