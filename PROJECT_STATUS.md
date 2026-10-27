@@ -2167,3 +2167,14 @@ comparison pass. This does not detect target corners, estimate distortion, refin
 a complete calibration or install a scanner model. Physical calibration remains
 deferred and genuine Raptor optical binding/accuracy unqualified. See
 docs/PLANAR_CALIBRATION_INITIALIZER.md.
+
+## Native Brown5 calibration refinement — software-only
+
+Supplied planar correspondences now support joint intrinsic/distortion/pose
+refinement, with analytic derivatives, block Schur solves, numerical stationarity/
+rank checks and cancellation. The offline calibrate-planar CLI retains exact input
+and publishes a diagnostic fit without replacing output or installing calibration.
+Seven numerical and two workflow tests plus three independent synthetic reference
+cases pass. Physical calibration stays deferred; Raptor optical binding, dimensional
+accuracy and joint stereo calibration remain unqualified. See
+docs/BROWN_CALIBRATION_REFINEMENT.md.

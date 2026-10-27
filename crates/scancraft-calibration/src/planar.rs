@@ -193,7 +193,7 @@ pub fn initialize_planar(
     })
 }
 
-fn validate_view(view: &PlanarView, size: [u32; 2]) -> Result<(), String> {
+pub(crate) fn validate_view(view: &PlanarView, size: [u32; 2]) -> Result<(), String> {
     if !(4..=4096).contains(&view.observations.len()) {
         return Err("expected 4..=4096 observations".into());
     }

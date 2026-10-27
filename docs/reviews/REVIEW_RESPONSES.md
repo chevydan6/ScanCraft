@@ -1149,3 +1149,59 @@ review metadata only; no Rust, test, numerical method or measured value changes.
 No third unchanged code review or functional test repetition is warranted.
 GitHub App review and owner merge approval remain separate. SCAN-REV-006 is
 unqualified/under independent review and SCAN-REV-005 remains open.
+
+## Development milestone — native Brown5 refinement
+
+Advances part of SCAN-REV-006's tooling gap; does not resolve or reclassify the
+qualification finding. New refinement module fits intrinsics, Brown5 and poses
+with analytic Jacobians, bounded block Schur LM, residual/stationarity/information
+and numerical monotonicity checks. Diagnostic results never install calibration.
+Workflow planar_calibration and CLI calibrate-planar provide bounded input, exact
+request retention and atomic no-overwrite publication with existing primitives.
+No new runtime dependencies or device/firmware/physical calibration changes.
+Seven math and two workflow tests, independent three-case OpenCV/NumPy checks and
+release CLI preservation/rejection checks pass. Exact workspace/review evidence is
+recorded separately by source revision. Finding status belongs to the reviewer.
+
+The combined source gate passed 598 Rust tests, formatting, strict all-target
+Clippy and release build (exit 0). Source/log and synthetic runtime hashes are
+recorded in 2026-10-27-brown-calibration-reference.json. These are software gates,
+not hardware qualification.
+
+Brown5 milestone review: CodeRabbit CLI 0.9.1 completed immutable source
+7f1ad202fe4b4039d632e6727bcf82e2af19f7aa versus 761036d: 18 files, zero
+findings/blocking findings, major gate passed, exit 0. Full context/selected-diff
+secrets scans passed, fresh included capacity was 1 and billing inactive.
+Before/after head and tree were fixed; source attestation is operator-recorded.
+No suggestion was accepted blindly and there are no findings to dispute.
+Evidence: 2026-10-27-brown-calibration-review.json.
+
+An isolated mutation removing the cancellation latch made the targeted transient
+request regression fail with exit 101: a cancelled fit incorrectly returned Ok.
+The production 598-test gate passes with the latch. This is an intentional
+mutation control, not a newly discovered historical production defect. Separate
+checkout/target and source/log hashes are retained in the reference evidence.
+This follow-up changes evidence only; Rust and numerical parameters remain at
+the reviewed source. SCAN-REV-005/006 status remains under reviewer control.
+
+GitHub App completed exact 3b4dff705d661e3d56bb547b4c70d3384695a07a:
+run 2cd1dfda-ed4a-4b14-80bf-13e949fdc170, request 6430863767, finished reply
+6430868796 and summary 6430777570. Exact source/covered markers both match with
+kind reviewed; no actionable comments, inline comments or review threads. There
+is no formal APPROVED review object and no owner merge consent. The summary
+explicitly confirms included allowance used (one per hour, zero remaining). No
+repeated request or billing consent. Exact integration CI log confirms 598 tests
+and the new named calibration regressions at merge checkout 4d002be.
+
+CR-APP-BROWN-DOCSTRING-COVERAGE — advisory evaluated; blanket threshold disputed
+as a readiness gate, warning retained unchanged. The App reports 5.71% versus
+80%, 35 functions across eight files, 11 unsupported files skipped. Both new public
+fitting/workflow entry points describe their contracts/limitations, and the method,
+request schema, numerical policies and provenance have dedicated documentation.
+The function metric also counts private/test helpers and the touched CLI dispatcher;
+it does not measure numerical correctness, public API adequacy or physical
+qualification. No threshold/configuration is lowered and no boilerplate is
+generated to inflate a score. Additional helper documentation can accompany
+specific interface or maintainability improvements. This is an App advisory, not
+a new independent SCAN finding. Evidence-only follow-up leaves reviewed Rust/tool
+source unchanged. SCAN-REV-005 remains open and 006 unqualified/under review.

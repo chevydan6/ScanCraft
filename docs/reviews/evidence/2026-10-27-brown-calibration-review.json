@@ -1,0 +1,107 @@
+{
+  "tool": "official CodeRabbit CLI0.9.1",
+  "scope": "Brown5 native refinement, offline workflow and numerical evidence versus PR18",
+  "before": {
+    "head": "7f1ad202fe4b4039d632e6727bcf82e2af19f7aa",
+    "tree": "bc943f2b8114e0f97f072ab447b47ea2b0374c04",
+    "base": "761036d5a9697477c6f05de94728f4a84698c955"
+  },
+  "after": {
+    "head": "7f1ad202fe4b4039d632e6727bcf82e2af19f7aa",
+    "tree": "bc943f2b8114e0f97f072ab447b47ea2b0374c04",
+    "status": "",
+    "exit_code": 0
+  },
+  "binding": "operator-recorded immutable checkout, not service cryptographic source attestation",
+  "complete": {
+    "type": "complete",
+    "status": "review_completed",
+    "findings": 0,
+    "gate": {
+      "threshold": "major",
+      "status": "passed",
+      "blockingFindings": 0
+    },
+    "reviewedFiles": [
+      "ACCEPTANCE_RESULTS.md",
+      "ARCHITECTURE.md",
+      "PROJECT_STATUS.md",
+      "README.md",
+      "ROADMAP.md",
+      "crates/scancraft-calibration/examples/brown_reference.rs",
+      "crates/scancraft-calibration/src/lib.rs",
+      "crates/scancraft-calibration/src/planar.rs",
+      "crates/scancraft-calibration/src/refinement.rs",
+      "crates/scancraft-cli/src/main.rs",
+      "crates/scancraft-workflow/src/lib.rs",
+      "crates/scancraft-workflow/src/planar_calibration.rs",
+      "docs/BROWN_CALIBRATION_REFINEMENT.md",
+      "docs/CALIBRATION.md",
+      "docs/PLANAR_CALIBRATION_INITIALIZER.md",
+      "docs/reviews/REVIEW_RESPONSES.md",
+      "docs/reviews/evidence/2026-10-27-brown-calibration-reference.json",
+      "tools/compare_brown_calibration_opencv.py"
+    ]
+  },
+  "included_capacity": 1,
+  "usage_billing": "inactive",
+  "secrets_scan": {
+    "full_source_context": "pass",
+    "complete_selected_diff": "pass"
+  },
+  "raw_log_sha256": "2d780f14f582c9de4522fd9ee94dd3345473ee379dea6a6efddef7b54e7e0ea7",
+  "dispositions": [],
+  "limitations": [
+    "scoped changed-code review, not full application or physical accuracy qualification",
+    "GitHub App review and owner merge approval are separate"
+  ],
+  "github_app": {
+    "reviewed_head": "3b4dff705d661e3d56bb547b4c70d3384695a07a",
+    "base": "761036d5a9697477c6f05de94728f4a84698c955",
+    "run_id": "2cd1dfda-ed4a-4b14-80bf-13e949fdc170",
+    "request_comment": 6430863767,
+    "request_created_at": "2026-10-27T00:44:43Z",
+    "reply_comment": 6430868796,
+    "reply_updated_at": "2026-10-27T00:49:55Z",
+    "reply_finished": true,
+    "summary_comment": 6430777570,
+    "summary_updated_at": "2026-10-27T00:49:48Z",
+    "coverage": {
+      "source_commit": "3b4dff705d661e3d56bb547b4c70d3384695a07a",
+      "covered_commit": "3b4dff705d661e3d56bb547b4c70d3384695a07a",
+      "kind": "reviewed"
+    },
+    "selected_files": 19,
+    "actionable_comments": 0,
+    "inline_comments": 0,
+    "review_threads": 0,
+    "formal_review_objects": 0,
+    "included_allowance_used": true,
+    "hourly_included_limit": 1,
+    "included_remaining_after_review": 0,
+    "raw_summary_sha256": "f2fcf3f3f365ac439695d2f933373ec050801faa006ab748890197a2f838f2bd",
+    "docstring_advisory": {
+      "coverage_percent": 5.71,
+      "threshold_percent": 80.0,
+      "analyzed_functions": 35,
+      "files": 8,
+      "skipped_unsupported_files": 11,
+      "disposition": "blanket threshold disputed as readiness gate; keep warning visible. New public fitting and workflow entry points and mathematical method are documented; private/test-helper coverage is not equivalent to API or numerical qualification. No threshold/configuration change."
+    },
+    "limitations": "no actionable comments is not formal approval, physical qualification or owner merge consent"
+  },
+  "actual_integration_ci": {
+    "run": 40427856519,
+    "check": 121938013820,
+    "integration_commit": "4d002be50c73e2d686632aaecfbc38ac6a1cdc6e",
+    "source_head": "3b4dff705d661e3d56bb547b4c70d3384695a07a",
+    "passed_rust_tests": 598,
+    "named_calibration_regressions_present": [
+      "metric_scaling_preserves_refined_intrinsics_and_distortion",
+      "analytic_camera_and_pose_jacobians_match_central_differences",
+      "final_information_rejects_unobservable_repeated_pinhole_views",
+      "publishes_exact_request_and_unqualified_fit_without_overwriting"
+    ],
+    "log_sha256": "9861e66cd0c66e2ff00d6fd13beb4455f73c601887d04ed99107776bc570d7ab"
+  }
+}

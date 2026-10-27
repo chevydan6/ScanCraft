@@ -43,8 +43,10 @@ production dependencies or notice changes are needed.
 This is the linear initialization stage, not Zhang's full nonlinear/distortion
 calibration procedure. It has no checkerboard detector, bundle adjustment,
 robust correspondence/outlier selection, uncertainty estimate or stereo joint
-optimization. Those remain necessary development work. It is not claimed faster
-or more accurate than a mature calibration library.
+optimization. Optional [native Brown5 refinement](BROWN_CALIBRATION_REFINEMENT.md)
+now fits distortion, intrinsics and per-view poses separately; target detection,
+robust selection, uncertainty and joint stereo estimation remain missing. Neither
+stage is claimed faster or more accurate than a mature calibration library.
 
 ## Input and numerical policies
 

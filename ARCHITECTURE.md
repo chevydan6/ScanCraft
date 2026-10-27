@@ -483,3 +483,13 @@ nalgebra; no native runtime dependency is added. Its result type cannot directly
 be used as a capture calibration: distortion/domain, joint stereo estimation and
 physical binding remain separate work. No GUI/device initialization is changed.
 See docs/PLANAR_CALIBRATION_INITIALIZER.md for provenance and numerical policies.
+
+## Offline calibration refinement boundary
+
+`scancraft-calibration::refinement` fits supplied Brown5 camera parameters and
+target poses with analytic derivatives and per-view normal blocks. Fixed-size
+Schur elimination avoids an observations-by-all-parameters Jacobian. A cancellation
+callback keeps math independent of GUI/device or geometry WorkControl. Workflow
+planar_calibration owns bounded JSON and atomic no-overwrite diagnostic publication;
+the CLI supplies scoped termination. Results are not capture records; existing
+device/reconstruction behavior is unchanged. See docs/BROWN_CALIBRATION_REFINEMENT.md.
