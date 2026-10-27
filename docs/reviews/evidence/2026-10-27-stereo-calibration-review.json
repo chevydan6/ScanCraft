@@ -1,0 +1,68 @@
+{
+  "tool": "official CodeRabbit CLI 0.9.1",
+  "scope": "fixed-intrinsic stereo fitter, shared kernels/publication, CLI and synthetic evidence versus PR19",
+  "before": {
+    "head": "ff5b17b4ff81a4c87ce6d39456888d1358fba6e6",
+    "tree": "8da800fd95cb11d1006504e1340141f5a0014a50",
+    "base": "26987bbf0b49d2c2f5d3a3d4a658b7fb8f9bd9d6"
+  },
+  "after": {
+    "head": "ff5b17b4ff81a4c87ce6d39456888d1358fba6e6",
+    "tree": "8da800fd95cb11d1006504e1340141f5a0014a50",
+    "status": "",
+    "exit_code": 0
+  },
+  "binding": "operator-recorded immutable source, not service cryptographic source attestation",
+  "complete": {
+    "type": "complete",
+    "status": "review_completed",
+    "findings": 1,
+    "gate": {
+      "threshold": "major",
+      "status": "passed",
+      "blockingFindings": 0
+    },
+    "reviewedFiles": [
+      "ACCEPTANCE_RESULTS.md",
+      "ARCHITECTURE.md",
+      "PROJECT_STATUS.md",
+      "README.md",
+      "ROADMAP.md",
+      "crates/scancraft-calibration/examples/stereo_fit_reference.rs",
+      "crates/scancraft-calibration/src/lib.rs",
+      "crates/scancraft-calibration/src/normal_blocks.rs",
+      "crates/scancraft-calibration/src/planar.rs",
+      "crates/scancraft-calibration/src/projection_differential.rs",
+      "crates/scancraft-calibration/src/refinement.rs",
+      "crates/scancraft-calibration/src/stereo_fit.rs",
+      "crates/scancraft-cli/src/main.rs",
+      "crates/scancraft-workflow/src/calibration_bundle.rs",
+      "crates/scancraft-workflow/src/lib.rs",
+      "crates/scancraft-workflow/src/planar_calibration.rs",
+      "crates/scancraft-workflow/src/stereo_calibration.rs",
+      "docs/BROWN_CALIBRATION_REFINEMENT.md",
+      "docs/CALIBRATION.md",
+      "docs/PLANAR_CALIBRATION_INITIALIZER.md",
+      "docs/STEREO_EXTRINSIC_CALIBRATION.md",
+      "docs/reviews/REVIEW_RESPONSES.md",
+      "docs/reviews/evidence/2026-10-27-stereo-calibration-reference.json",
+      "tools/compare_stereo_fit_opencv.py"
+    ]
+  },
+  "included_capacity": 2,
+  "usage_billing": "inactive",
+  "secrets_scan": {
+    "full_context": "pass",
+    "complete_diff": "pass"
+  },
+  "raw_log_sha256": "1c83b1872d10907ddc7c7e4eff455cfbf5583a4373407a25f038beabddfc79f2",
+  "dispositions": [
+    {
+      "id": "CR-STEREO-ERROR-SPACING",
+      "severity": "minor",
+      "accepted": true,
+      "file": "crates/scancraft-calibration/src/stereo_fit.rs",
+      "explanation": "Add missing space and explicit inclusive 4..=4096 range to match the actual bounds. Error text only, numerical behavior unchanged. Final607-test gate, unchanged fixture/artifact hashes and actual CLI invalid-count rejection verified."
+    }
+  ]
+}

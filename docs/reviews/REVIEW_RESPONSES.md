@@ -1222,3 +1222,15 @@ CLI preservation/rejection and a corrupted-transform reference control pass.
 No new dependencies/licenses/runtime, firmware, physical calibration or source
 accuracy claims. Exact source/review evidence is recorded separately; only the
 reviewer controls independent finding status.
+
+CR-STEREO-ERROR-SPACING accepted: add the missing space and inclusive upper bound
+in stereo_fit::initialize's count diagnostic (expected 4..=4096). No mathematical
+behavior changes. Actual CLI invalid-count request exits 1 with the corrected
+message and no published output. Source ff5b17b versus 26987bb completed CodeRabbit
+CLI review: 24 files, one minor finding, zero blocking findings, major gate passed,
+exit 0. Fresh included capacity 2 and inactive billing were checked; full context/
+diff secret scans passed and detached source stayed fixed. Corrected full gate
+passes 607 tests/fmt/strict Clippy/release; fixture bytes and all three stereo/three
+mono release artifact sets remain unchanged. Exact hashes and scope are in the
+stereo-calibration-reference/review JSON reports. No independent finding status
+changed. GitHub App review is separate; next manual free window after 01:44 UTC.

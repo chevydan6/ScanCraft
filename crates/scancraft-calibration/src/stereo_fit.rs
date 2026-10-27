@@ -293,7 +293,7 @@ fn initialize(
         check(cancel)?;
         // Check count before any observation-sized allocation.
         if !(4..=4096).contains(&view.observations.len()) {
-            return Err("expected4..4096 stereo target observations".into());
+            return Err("expected 4..=4096 stereo target observations".into());
         }
         let l = PlanarView {
             observations: view

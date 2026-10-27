@@ -167,7 +167,7 @@
   "pass": true,
   "base_commit": "26987bbf0b49d2c2f5d3a3d4a658b7fb8f9bd9d6",
   "source_sha256": {
-    "crates/scancraft-calibration/src/stereo_fit.rs": "f0fac3a823b2137a5672d15374550a43afed1e4d7bca3151eb17c09b351f06d6",
+    "crates/scancraft-calibration/src/stereo_fit.rs": "8ed41ae1f252d1711f1da3555d64aec763b96892afed669b6df40f1fa3be9d7a",
     "crates/scancraft-calibration/src/normal_blocks.rs": "1b8d95987dd7911aedc6941ef62cde347ee71757098d4c29f122cac2b81b472e",
     "crates/scancraft-calibration/src/projection_differential.rs": "7ad5d2f4fa81865faeb6a5f4adbed2c6c5b79b9052043c3927a017f428f2089f",
     "crates/scancraft-calibration/src/refinement.rs": "f7f5fa87df3bf80f08d68d5b8c5fc6f3e84b4b384fef4fc7d23b0339a03df16f",
@@ -188,7 +188,7 @@
     "formatting": "pass",
     "strict_all_target_clippy": "pass",
     "release_build": "pass",
-    "log_sha256": "7a7141fe1c5630a0d399fd0b21f3d43d67a94937503989bdd8671e910160a3d8"
+    "log_sha256": "e637d2c4a85c7fea3fb6dc89e08bea6ebe14ef952bba2db39b59d4a8603780be"
   },
   "mono_regression": {
     "previous_fixture_sha256": "7a49587588631cbbd52f8fde055f9175561ab500e786775be00b5d737ded2d40",
@@ -379,7 +379,7 @@
   },
   "release_cli": {
     "scope": "actual release CLI on synthetic supplied observations only",
-    "binary_sha256": "bf9b309cd2daaf7ae5f6aa7943d2acd499aaca8456cb126db013d3f1e4ed712d",
+    "binary_sha256": "5a7ec6cb2305707120b59a2adcb806aaf35c87f8634e101874b02b617bd2b3c2",
     "cases": [
       {
         "name": "exact_zero_skew",
@@ -455,5 +455,13 @@
       "diagnostic": "Per-camera RMS inconsistent with independent projection",
       "expected_rejection": true
     }
+  },
+  "review_correction_validation": {
+    "change": "error text spacing and inclusive upper bound only",
+    "fixture_hash_unchanged": true,
+    "three_stereo_and_three_mono_artifact_sets_unchanged": true,
+    "invalid_count_exit_code": 1,
+    "inclusive_error_text_verified": true,
+    "invalid_count_output_absent": true
   }
 }
