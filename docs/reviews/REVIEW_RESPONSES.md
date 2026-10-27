@@ -1367,3 +1367,202 @@ while physical emission, wavelength and calibration binding remain unverified.
 Recorded the qualified comparison in `docs/RAPTOR_SCR_OBSERVATIONS.md`; no mode
 activation, vendor code import, new accuracy claim or SCAN-REV-006 closure.
 Existing 613-test/source review evidence remains for unchanged Rust code.
+
+SCAN-REV-005 — accepted, preparation in progress (uncommitted developer work).
+Separated preview session ownership into `scancraft-app/src/capture_session.rs`
+from `main.rs` GUI/channel handling. The session now explicitly calls device
+close after ordinary recording setup/write or acquisition failure and combines
+operation and restoration errors; publication still requires successful close.
+Two hardware-free regressions verify close invocation/order on errors and that
+cleanup failure cannot return successful publication state. Full offline gate
+passes formatting, strict all-target Clippy, 615 tests and release build.
+
+This does not implement process isolation or bound shutdown. Both preview and
+native live-scan UI still have device-owning worker joins; synchronous kernel
+calls remain. `docs/CAPTURE_PROCESS_ISOLATION.md` records the required helper
+ownership, bounded IPC, durable failure evidence, lock retention and validation
+contract. No claim that the independent finding is corrected or closed. No
+implementation commit, CodeRabbit review or PR is claimed for this unfinished
+work; preserve it on `dev/capture-session-isolation` for continued implementation.
+
+SCAN-REV-005 — preview helper milestone (partial correction, not closure).
+`capture_process.rs` now starts the same executable in a validated internal
+helper mode before GUI initialization. Only the helper invokes
+`capture_session::run` and owns scanner descriptors, locks, recording and cleanup.
+`capture_ipc.rs` bounds binary frames and JSON results and rejects malformed or
+incomplete streams. The parent monitor uses nonblocking pipe reads with bounded
+batches; cancellation closes stdin and applies a two-second software grace policy.
+Timeout reports restoration unconfirmed with helper PID and private 0600 log path.
+A waiter allocated before child launch reaps surviving children independently;
+no kill/reset or device-owning thread detachment is used. The GUI no longer
+labels a failed/pending cleanup worker as a stopped scanner.
+
+Evidence: full `tools/check.sh` passes formatting, strict all-target Clippy,
+624 tests and release build. Real device-free child processes test frame/result
+transport, nonzero and missing-result exit, cancellation during a stall, and a
+lock inherited by a stalled child. The monitor worker returns while that lock
+remains held; releasing the fixture's cleanup marker makes it acquirable again.
+Codec tests cover fragmented messages, corrupt lengths and truncated/trailing
+completion. A release invocation with unsupported helper interface255 exits1
+without stdout or GUI/device initialization. Private diagnostic permissions and
+retention across IPC loss are tested. No real scanner/driver-stall qualification
+is inferred. `docs/CAPTURE_PROCESS_ISOLATION.md` records the ownership contract.
+
+Native `live_ui` still runs acquisition in its existing thread and joins on Drop;
+other synchronous device-discovery calls are not newly isolated. Process spawn,
+log filesystem operations and scheduler latency have no hard real-time bound.
+The preview-only synthetic results therefore do not establish whole-application
+bounded shutdown or resolve the independent finding. No hardware, firmware,
+physical calibration, paid service or merge action occurred. Automated review
+for this meaningful diff follows separately; existing independent statuses remain.
+
+Preview source commit283df43 completed CodeRabbit CLI review versus5336d8f:
+six files, one minor finding, zero major/critical findings, major gate passed,
+exit0. Review ran on an isolated fixed commit after full context/diff secret
+scans; included capacity and inactive billing were verified.
+
+CR-PREVIEW-IPC-FLUSH — accepted. The helper's stdout may buffer a partial frame,
+so a completed capture must not depend on the next frame to become visible to
+the parent. `capture_ipc::write_frame` now explicitly flushes after writing the
+frame; the existing helper transport-error path receives flush failures too.
+Added a buffered-writer regression that decodes the frame from underlying bytes
+before any second frame/completion, and a writer that fails only on flush to
+verify BrokenPipe is propagated. No unmeasured latency figures are claimed.
+Corrected full-gate and incremental review availability are recorded separately.
+
+Corrected flush source passes full formatting, strict all-target Clippy, 626 tests
+and release build (`tools/check.sh`). The included review allowance is currently
+zero, with next available capacity reported in about24 minutes; usage billing is
+inactive. No credits, charges or redundant rate-limited review request is used.
+A fresh corrected-source gate is pending included availability, not claimed as
+completed. This preview milestone is published as draft work; native live-scan
+isolation and whole-application shutdown qualification remain outstanding.
+
+SCAN-REV-005 — native live-scan process boundary in progress; status unchanged.
+`live_process` now owns the parent-side supervision path used by native
+`LiveUi::start_native`. Its child owns the full `scancraft_acquisition::scan`,
+including session lock, settings lease, both sources, restoration, verification
+and publication. The existing child waiter, nonblocking pipe configuration and
+private diagnostics are shared with preview supervision. Startup diagnostics
+include helper PID and mode; timeouts describe acquired resources conditionally,
+without asserting a lock was acquired before initialization completed.
+
+Graceful Stop sends a latched command without cancelling WorkControl or starting
+an abort deadline. Explicit abort/control EOF cancels WorkControl and starts a
+separate two-second software grace policy. A prolonged ordinary-close wait offers
+an explicit abort action retaining partial data. Failure-intent reset now belongs
+to the root close handler itself, preventing a pending retry from bypassing its
+failure handling. Native worker Drop joins an IPC supervisor, not a thread that
+owns scanner cleanup. Synchronous discovery and filesystem/process/scheduler
+bounds remain unqualified; no whole-application hard deadline is claimed.
+
+`Control::display::DisplayUpdate` validates a display-only transfer: at most
+50000 finite cloud points and bounded thumbnails with matching pixel counts.
+Remote display controls cannot run a local scan; local controls reject imports;
+parent pause/stop commands are never overwritten. Skipped parent replacements are
+counted in addition to child skips. Progress serialization has a16MiB cap during
+writing/before parsing; final IPC is a bounded summary, while full per-pair data
+stays in the engine's report.json. The synthetic session is extracted to
+`live_fixture` to avoid a process/UI dependency cycle. No engine mathematics,
+scanner control values, recording format or calibration activation is changed.
+
+Evidence so far: full tools/check.sh passes formatting, strict all-target Clippy,
+637 tests and release build. Real child/control tests distinguish pause/resume,
+graceful stop beyond abort grace, EOF abort and stalled-child timeout without
+kill. New DTO/codec tests reject invalid thumbnails, nonfinite/excessive clouds,
+local import, unknown command fields, oversized JSON and mismatched frame sizes.
+The actual parent/helper/engine integration diagnostic publishes a synthetic scan,
+verifies both CRC-backed recordings through footers (two frames each), retains
+synthetic labels and false hardware qualification flags, and rejects overwriting
+an existing target. The release diagnostic also passes; final source proof and
+review evidence are recorded separately. No actual Raptor disconnect/stall or
+physical accuracy qualification is claimed.
+
+Reviewer assignment220 independently verified the earlier preview-only commits
+283df43/83daa8e with26 focused capture tests and retained SCAN-REV-005 Open. This
+is acknowledged; those results do not independently verify the new live changes.
+Only the independent reviewer may verify/close the finding. No paid usage,
+firmware, physical calibration, protection bypass or owner merge approval occurs.
+
+Native extension source5d07769 completed CLI review versus283df43 across eleven
+files: one major verification/coupling concern, one minor stdout-lock concern;
+major gate blocked, exit2. The blocked result is retained, not treated as a pass.
+
+CR-LIVE-DISPLAY-REJECTION — accepted. Both production offer paths in
+`live_stereo/runner.rs` use `Processor::preview_cloud`, which delegates to
+`Session::preview_cloud(50000)` and `VoxelFusion::preview_cloud`'s stride over
+its own voxel set. Thus current offers use a bounded fused subset rather than a
+per-pair pre-fusion cloud. Nonetheless, validation and serialized-size rejection
+are display concerns and must not cancel recording/publication. Preparation is
+now separate from pipe writes. Invalid/oversized previews are omitted with a
+small counter-only update, accumulated skip count and private diagnostic; final
+summaries expose helper_omitted_previews. Only actual pipe write/flush failure
+requests WorkControl cancellation. Engine geometry/output validation remains
+independent and unchanged. Regressions inject invalid thumbnails and oversized
+tracking JSON, verify no scan cancellation and retained counters, verify valid
+geometry/thumbnails survive transfer, and confirm real BrokenPipe requests abort.
+The actual synthetic process integration asserts zero omissions on its healthy
+engine path. No observed physical-scan failure is asserted.
+
+CR-LIVE-STDOUT-LOCK — verification/advice accepted; no offending diagnostic calls
+needed relocation. Static search of acquisition, live runner/control, device,
+depth, image, calibration and geometry source found no print!/println!/dbg!
+calls; existing cleanup diagnostics use eprintln! to stderr. The parent's
+synthetic diagnostic println occurs after child supervision, outside the engine
+call. The sender now holds stdout only for a fully prepared packet write/flush,
+not for the scan lifetime or encoding/sleep. Stdout remains reserved for binary
+IPC; future engine diagnostics must use stderr. This prevents the proposed
+scan-lifetime lock dependency without claiming arbitrary stdout text is valid IPC.
+
+Corrected full tools/check.sh passes formatting, strict all-target Clippy,
+640 tests and release build. Corrected-source numerical/physical accuracy is not
+claimed from these transport tests. Fresh incremental review and exact commit
+coverage follow separately; no independent finding severity/status is changed.
+
+SCAN-REV-018 — accepted. Exact correction
+beac45e04bbae5010bb4c60eca28c63545559d52 separates display preparation from
+transport writes, omits rejected previews while forwarding counters/diagnostics,
+counts omissions, and reserves scan abort for pipe write/flush errors. Source
+files are capture_ipc.rs/live_process.rs and the actual-process integration test;
+policy and regression details are recorded above under CR-LIVE-DISPLAY-REJECTION.
+Full offline gate passes640 tests, formatting, strict all-target Clippy and
+release. The corrected release synthetic diagnostic passes with zero omitted
+previews and retained false qualification flags. Independent assignment225's
+exact oversized-presentation case is covered by the new injected-budget
+regression; no observed hardware failure or physical qualification is asserted.
+Only the independent reviewer may verify and close018; its last-read status is
+Open.005 also remains Open, and actual driver/disconnect qualification is pending.
+
+Fresh incremental CLI review of exact beac45e versus5d07769 completed across five
+files: zero findings, major gate passed, exit0. This is the third CLI pass for
+this feature; no unchanged fourth review is requested. Initial blocked review
+history is preserved. Complete corrected context/diff secret scans passed after
+rebuilding them in private developer storage; the earlier interrupted /tmp-quota
+scan is not counted. Included capacity and inactive billing were checked before
+reviews, with no paid credits/charges. GitHub App review and integration CI are
+separate steps; owner merge consent is not inferred.
+
+
+CR-PR22-PREVIEW-GRACEFUL-STOP (GitHub comment4385482626) — accepted.
+The App review of1b1c8cf correctly identified that ordinary preview Stop/close
+started the abort deadline, permitting slow disk finalization to return an
+unconfirmed error before successful publication. A successful GitHub check was
+not a clean review: the review posted this actionable minor finding.
+Correction in capture_process.rs/main.rs separates the graceful-stop flag from
+explicit abort. Ordinary Stop closes helper stdin and continues draining until
+completion and actual exit; explicit abort, lost consumer or App Drop retains
+the supervision grace and honest cleanup-unconfirmed diagnostics. The slow-close
+UI offers abort for preview recording as well as native live scanning.
+A real device-free child waits for EOF, delays finalization beyond a shortened
+abort grace, then emits success; the supervisor must return that success. Existing
+stalled-child and lock-retention abort regressions remain. Validation/commit
+evidence follows when complete. No physical driver or slow-disk qualification
+is claimed. The three-pass CLI budget for this feature is exhausted; no fourth
+review or paid request is authorized by this correction. New review readiness
+must remain pending until appropriate included review is available within the
+recorded workflow. Independent reviewer findings remain untouched.
+
+Correction validation: tools/check.sh completed successfully: formatting, strict
+all-target Clippy,641 tests and release build. Private gate log:
+preview-graceful-stop-gate.log in developer artifacts. Correction remains local
+pending follow-up review; the previous clean review covers beac45e, not this edit.

@@ -3,12 +3,14 @@
 use super::Pair;
 use scancraft_core::StreamProfile;
 use scancraft_geometry::Cloud;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
+pub mod display;
 use std::sync::{
     Mutex,
     atomic::{AtomicBool, AtomicU8, AtomicUsize, Ordering},
 };
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[repr(u8)]
 pub enum Phase {
     Initializing,
@@ -19,11 +21,15 @@ pub enum Phase {
     Complete,
     Failed,
 }
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Thumbnail {
     pub width: usize,
     pub height: usize,
     pub pixels: Vec<u8>,
 }
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Snapshot {
     pub pair_id: usize,
     pub cameras: [Thumbnail; 2],
@@ -32,6 +38,8 @@ pub struct Snapshot {
     pub tracking: Value,
 }
 pub struct Control {
+    remote_display: bool,
+    remote_replacements: AtomicUsize,
     paused: AtomicBool,
     stop: AtomicBool,
     started: AtomicBool,
@@ -50,6 +58,8 @@ impl Default for Control {
 impl Control {
     pub fn new(preview_enabled: bool) -> Self {
         Self {
+            remote_display: false,
+            remote_replacements: AtomicUsize::new(0),
             paused: AtomicBool::new(false),
             stop: AtomicBool::new(false),
             started: AtomicBool::new(false),
@@ -114,6 +124,9 @@ impl Control {
             .take()
     }
     pub(super) fn begin(&self) -> Result<(), String> {
+        if self.remote_display {
+            return Err("remote display control cannot run a local scan".into());
+        }
         self.started
             .compare_exchange(false, true, Ordering::Relaxed, Ordering::Relaxed)
             .map_err(|_| "live control is single-use".to_string())?;

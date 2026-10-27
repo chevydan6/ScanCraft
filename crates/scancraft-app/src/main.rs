@@ -1,8 +1,13 @@
 mod archive_ui;
 mod capture_close;
+mod capture_ipc;
+mod capture_process;
+mod capture_session;
 mod capture_worker;
 mod cloud_jobs;
 mod cloud_ui;
+mod live_fixture;
+mod live_process;
 mod live_ui;
 mod measurement_view;
 mod mesh_ui;
@@ -11,12 +16,15 @@ mod recovery_ui;
 mod screen_tools;
 // Rust desktop workbench; acquisition/recording is independent of UI throughput.
 use eframe::egui;
-use scancraft_core::{Frame, StreamProfile};
-use scancraft_device::{Capture, SessionLock, discover};
+use scancraft_core::Frame;
+#[cfg(test)]
+use scancraft_core::StreamProfile;
+use scancraft_device::discover;
+#[cfg(test)]
 use scancraft_recording::Writer;
+#[cfg(test)]
+use std::fs::OpenOptions;
 use std::{
-    fs::OpenOptions,
-    io::BufWriter,
     path::PathBuf,
     sync::{
         Arc,
@@ -52,6 +60,7 @@ fn camera_texture(
 }
 struct Running {
     cancel: Arc<AtomicBool>,
+    abort: Arc<AtomicBool>,
     frames: Arc<AtomicU64>,
     preview_drops: Arc<AtomicU64>,
     rx: Receiver<Frame>,
@@ -170,14 +179,27 @@ impl App {
         }
         self.capture_close.is_waiting()
     }
+    fn abort_pending_capture(&self) {
+        if let Some(running) = &self.running {
+            running.abort.store(true, Ordering::Relaxed);
+            running.cancel.store(true, Ordering::Relaxed);
+        }
+        self.live.abort();
+    }
     fn window_close_step(
         &mut self,
         ctx: &egui::Context,
         requested: bool,
         live_failed: bool,
     ) -> bool {
-        if live_failed && requested {
-            ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+        if live_failed {
+            // Keep failure handling in the close boundary itself: a pending
+            // retry must not reopen a close request after helper failure.
+            self.capture_close.keep_open();
+            self.close_allowed = false;
+            if requested {
+                ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+            }
         }
         let close_requested = requested && !live_failed;
         let waiting_for_capture =
@@ -198,98 +220,33 @@ impl App {
         let record = self.record;
         let folder = self.folder.clone();
         let cancel = Arc::new(AtomicBool::new(false));
+        let abort = Arc::new(AtomicBool::new(false));
         let frames = Arc::new(AtomicU64::new(0));
         let drops = Arc::new(AtomicU64::new(0));
         let (tx, rx) = mpsc::sync_channel(2);
         let c = cancel.clone();
+        let a = abort.clone();
         let f = frames.clone();
         let d = drops.clone();
         let worker = match capture_worker::Worker::spawn(move || {
-            let run = || -> Result<String, String> {
-                let _locks = SessionLock::acquire().map_err(|e| e.to_string())?;
-                let profile = StreamProfile {
-                    interface,
-                    width: if interface == 4 { 1280 } else { 1920 },
-                    height: if interface == 4 { 800 } else { 1200 },
-                    fourcc: if interface == 4 { *b"MJPG" } else { *b"GREY" },
-                    fps: if interface == 4 { 10 } else { 50 },
-                };
-                let mut capture = if record {
-                    Capture::open_recording(profile.clone())
-                } else {
-                    Capture::open(profile.clone())
-                }
-                .map_err(|e| e.to_string())?;
-                let output = if record {
-                    let folder = PathBuf::from(folder);
-                    std::fs::create_dir_all(&folder).map_err(|e| e.to_string())?;
-                    let stamp = SystemTime::now()
-                        .duration_since(UNIX_EPOCH)
-                        .map_err(|e| e.to_string())?
-                        .as_nanos();
-                    Some(folder.join(format!("capture-{stamp}.raptor")))
-                } else {
-                    None
-                };
-                let partial = output.as_ref().map(|p| p.with_extension("raptor.partial"));
-                let mut recording = if let Some(path) = &partial {
-                    Some(
-                        Writer::with_context(
-                            BufWriter::new(
-                                OpenOptions::new()
-                                    .write(true)
-                                    .create_new(true)
-                                    .open(path)
-                                    .map_err(|e| e.to_string())?,
-                            ),
-                            profile,
-                            {
-                                let mut context = scancraft_recording::CaptureContext::default();
-                                if let Some(observed) = capture.recording_observations() {
-                                    context
-                                        .add_capture_observations(observed)
-                                        .map_err(|e| e.to_string())?;
-                                }
-                                context
-                            },
-                        )
-                        .map_err(|e| e.to_string())?,
-                    )
-                } else {
-                    None
-                };
-                while !c.load(Ordering::Relaxed) {
-                    let frame = capture.next_frame().map_err(|e| e.to_string())?;
-                    if let Some(w) = &mut recording {
-                        w.push(&frame).map_err(|e| e.to_string())?;
-                    }
+            capture_process::run(
+                interface,
+                record,
+                std::path::Path::new(&folder),
+                &c,
+                &a,
+                |frame| {
                     f.fetch_add(1, Ordering::Relaxed);
                     match tx.try_send(frame) {
-                        Ok(()) => (),
+                        Ok(()) => true,
                         Err(TrySendError::Full(_)) => {
                             d.fetch_add(1, Ordering::Relaxed);
+                            true
                         }
-                        Err(TrySendError::Disconnected(_)) => break,
+                        Err(TrySendError::Disconnected(_)) => false,
                     }
-                }
-                let rejected = capture.rejected;
-                let missing = capture.metadata_missing;
-                let gaps = capture.sequence_drops;
-                capture.close().map_err(|e| e.to_string())?;
-                if let Some(w) = recording {
-                    let file = w.finish().map_err(|e| e.to_string())?;
-                    file.get_ref().sync_all().map_err(|e| e.to_string())?;
-                    drop(file);
-                    std::fs::hard_link(partial.as_ref().unwrap(), output.as_ref().unwrap())
-                        .map_err(|e| e.to_string())?;
-                    std::fs::remove_file(partial.as_ref().unwrap()).map_err(|e| e.to_string())?;
-                }
-                Ok(format!(
-                    "Stopped cleanly. Rejected buffers={rejected}, missing metadata={missing}, sequence gaps={gaps}. Recording: {}",
-                    output.map_or_else(|| "off".into(), |p| p.display().to_string())
-                ))
-            };
-            run()
+                },
+            )
         }) {
             Ok(worker) => worker,
             Err(error) => {
@@ -300,6 +257,7 @@ impl App {
         };
         self.running = Some(Running {
             cancel,
+            abort,
             frames,
             preview_drops: drops,
             rx,
@@ -353,6 +311,7 @@ impl App {
             r.preview_drops.load(Ordering::Relaxed)
         );
         if let Some(result) = self.running.as_mut().and_then(|r| r.worker.poll()) {
+            let failed = result.is_err();
             self.log = match result {
                 Ok(s) => s,
                 Err(e) => {
@@ -364,7 +323,11 @@ impl App {
                 }
             };
             self.running = None;
-            self.status = "Capture stopped".into();
+            self.status = if failed {
+                "Capture worker ended; see cleanup diagnostics".into()
+            } else {
+                "Capture stopped".into()
+            };
         }
         ctx.request_repaint_after(Duration::from_millis(30));
     }
@@ -373,10 +336,6 @@ impl eframe::App for App {
     fn update(&mut self, ctx: &egui::Context, _: &mut eframe::Frame) {
         self.cloud.tick();
         let live_failed = self.live.tick(ctx);
-        if live_failed {
-            self.capture_close.keep_open();
-            self.close_allowed = false;
-        }
         self.mesh.tick();
         self.recovery.tick();
         self.archive.tick();
@@ -394,7 +353,10 @@ impl eframe::App for App {
                 .collapsible(false).resizable(false).show(ctx, |ui| {
                     ui.label("Waiting for capture cleanup. Recordings are not finalized until capture stops.");
                     if self.capture_close.slow(std::time::Instant::now()) {
-                        ui.label("Cleanup is taking longer than expected. The window stays open while the capture worker owns device cleanup.");
+                        ui.label("Scanner cleanup is taking longer than expected. Restoration is not yet confirmed.");
+                        if (self.live.is_busy() || self.running.is_some()) && ui.button("Abort capture (keep partial data)").clicked() {
+                            self.abort_pending_capture();
+                        }
                     }
                     if ui.button("Keep window open").clicked() { self.capture_close.keep_open(); self.confirm_close = false; }
                 });
@@ -533,6 +495,7 @@ impl eframe::App for App {
 impl Drop for App {
     fn drop(&mut self) {
         if let Some(r) = &mut self.running {
+            r.abort.store(true, Ordering::Relaxed);
             r.cancel.store(true, Ordering::Relaxed);
             let _ = r.worker.join();
         }
@@ -695,6 +658,13 @@ fn startup_args(args: Vec<std::ffi::OsString>) -> Result<Startup, String> {
     }
 }
 fn main() -> eframe::Result {
+    let args: Vec<_> = std::env::args_os().skip(1).collect();
+    if let Some(code) = live_process::helper_entry(&args) {
+        std::process::exit(code);
+    }
+    if let Some(code) = capture_process::helper_entry(&args) {
+        std::process::exit(code);
+    }
     let startup = match startup_args(std::env::args_os().skip(1).collect()) {
         Ok(Startup::Help) => {
             println!(
@@ -1225,6 +1195,7 @@ mod capture_recovery_tests {
         let (_sender, rx) = mpsc::channel();
         Running {
             cancel: Arc::new(AtomicBool::new(false)),
+            abort: Arc::new(AtomicBool::new(false)),
             frames: Arc::new(AtomicU64::new(0)),
             preview_drops: Arc::new(AtomicU64::new(0)),
             rx,
@@ -1340,7 +1311,7 @@ mod capture_recovery_tests {
             panic!("injected capture failure");
         }));
         finish(&mut app);
-        assert_eq!(app.status, "Capture stopped");
+        assert_eq!(app.status, "Capture worker ended; see cleanup diagnostics");
         assert!(app.log.contains("panicked"));
         assert!(app.log.contains("incomplete recording"));
         assert_eq!(std::fs::read(&path).unwrap(), before);
@@ -1362,7 +1333,7 @@ mod capture_recovery_tests {
         let mut app = App::default();
         app.running = Some(running(|| Err("injected capture error".into())));
         finish(&mut app);
-        assert_eq!(app.status, "Capture stopped");
+        assert_eq!(app.status, "Capture worker ended; see cleanup diagnostics");
         assert!(app.log.contains("injected capture error"));
     }
 }
@@ -1413,6 +1384,41 @@ mod live_lifecycle_tests {
         assert!(app.confirm_close);
         assert!(!app.closing_window);
     }
+    #[test]
+    fn pending_close_abort_is_explicit_and_never_bypasses_cleanup_or_document_checks() {
+        let mut app = App::default();
+        let ctx = egui::Context::default();
+        let (sender, receiver) = mpsc::channel();
+        let mut release = Release(Some(sender));
+        let (report, observe) = mpsc::channel();
+        let control = app.live.test_job(move |work, _| {
+            report.send(work.clone()).unwrap();
+            receiver.recv().unwrap();
+            Err("aborted with retained partial data".into())
+        });
+        let work = observe.recv_timeout(Duration::from_secs(5)).unwrap();
+        app.capture_close_step(&ctx, true, std::time::Instant::now());
+        assert!(control.stop_requested());
+        assert!(
+            work.check().is_ok(),
+            "ordinary close starts with graceful stop"
+        );
+        app.abort_pending_capture();
+        assert!(work.check().is_err());
+        assert!(app.capture_close.is_waiting());
+        assert!(!app.closing_window);
+        assert!(!app.close_allowed);
+        release.0.take().unwrap().send(()).unwrap();
+        let deadline = std::time::Instant::now() + Duration::from_secs(5);
+        while app.live.is_busy() {
+            app.live.tick(&ctx);
+            assert!(std::time::Instant::now() < deadline);
+            std::thread::yield_now();
+        }
+        app.window_close_step(&ctx, true, true);
+        assert!(!app.closing_window, "failure must remain visible");
+    }
+
     #[test]
     fn synthetic_startup_requires_explicit_output_and_does_not_select_camera_smoke() {
         let args = |items: &[&str]| items.iter().map(std::ffi::OsString::from).collect();
