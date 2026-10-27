@@ -473,3 +473,13 @@ median changed from 89.930 to 43.795 ms with bit-identical outputs/masks. The 58
 passes; single-CPU and thread-denied child fallbacks passed. This is not full
 scan throughput, accuracy or RSS qualification. See docs/PAIRED_REMAP_CONCURRENCY.md
 and docs/benchmarks/paired-remap-2026-10-27.json. Automated review remains pending.
+
+## Planar calibration initialization boundary
+
+`scancraft-calibration::planar` consumes supplied target-plane/pixel observations
+and returns diagnostic pinhole intrinsics, per-view metric poses and residuals.
+Normalized homography/absolute-conic SVD and SO(3) projection use existing
+nalgebra; no native runtime dependency is added. Its result type cannot directly
+be used as a capture calibration: distortion/domain, joint stereo estimation and
+physical binding remain separate work. No GUI/device initialization is changed.
+See docs/PLANAR_CALIBRATION_INITIALIZER.md for provenance and numerical policies.

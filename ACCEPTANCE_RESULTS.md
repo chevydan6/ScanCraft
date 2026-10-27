@@ -783,3 +783,15 @@ at each stated stage. Real Raptor calibration/mode binding, synchronization,
 dimensional accuracy, transport reliability, processing throughput and 10 complete
 hardware trials remain unqualified. These software results do not establish
 alpha, beta or stable readiness.
+
+## Planar initialization — synthetic evidence only
+
+Six focused native tests and three independent reference cases pass for initial
+pinhole intrinsics, target poses, residuals and degeneracy/input rejection.
+OpenCV comparison uses a refined zero-skew/zero-distortion fit, not the same
+objective as the native five-intrinsic linear initializer. These checks do not
+change any physical scanner qualification gate. Target detection, distortion
+estimation, nonlinear refinement, joint stereo calibration and genuine Raptor
+optical binding remain incomplete. Physical calibration remains deferred.
+Evidence: docs/PLANAR_CALIBRATION_INITIALIZER.md and
+docs/reviews/evidence/2026-10-27-planar-initializer-reference.json.

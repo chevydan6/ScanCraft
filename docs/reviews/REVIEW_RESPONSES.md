@@ -1114,3 +1114,19 @@ Independent reviewer Assignment156 has resolved SCAN-REV-016 after inspecting
 exact4cc519c and successful integration CI40417772893/check121904268081 (575 tests),
 plus push40417764389/check121904240273. Developer acknowledges that independent
 resolution without changing findings. SCAN-REV-005 remains Open and006 Under Review.
+
+## Development milestone — planar calibration initializer
+
+No new independent finding identifier is assigned. In response to the continuing
+SCAN-REV-006 qualification gap, add software-only native planar pinhole
+initialization as a prerequisite, not a claimed resolution. Source: calibration
+src/planar.rs and module export; synthetic example/reference tool and method
+documentation. Six Rust regressions and three independent OpenCV/NumPy cases
+pass, including known skew, poses, degeneracy and metric-scale/origin invariance.
+No hardware/physical calibration, active record installation or device workflow
+changes. Distortion, nonlinear refinement and actual Raptor calibration remain
+incomplete. Full workspace gate passed 589 Rust tests, formatting, strict all-target Clippy
+and release build (exit 0). The reference checker also rejected an intentionally
+perturbed focal length (exit 1), preventing a vacuous success claim. Source/log
+hashes are recorded in the reference JSON. CodeRabbit review remains pending;
+only the independent reviewer can change finding status.
