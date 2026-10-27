@@ -563,3 +563,5 @@ pub mod stream_state;
 pub mod capture_observations;
 
 pub mod stream_group;
+
+pub mod scr_observations;

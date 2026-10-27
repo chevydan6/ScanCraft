@@ -1264,3 +1264,106 @@ the score. Specific maintainability improvements can receive targeted docs. This
 is an App advisory, not a new independent SCAN finding. Final follow-up changes
 review metadata only; corrected source and the 607-test evidence remain unchanged.
 SCAN-REV-005/006 remain under independent reviewer control.
+
+## Developer milestone — passive SCR observations
+
+Developer-originated work, not a new independent finding. Source commit
+78f92ac adds `scancraft-device/src/scr_observations.rs` and CLI
+`recording-scr` in `scancraft-cli/src/recording_scr.rs`/`main.rs`.
+Accepted implementation priority: make the independently established Raptor SCR
+numeric tag contract observable before introducing any mode-dependent frame
+selection. Retain all per-record disagreements and unknown tags. Reject malformed
+headers with checked slices; preserve capture acceptance, recording format and
+existing device state. Provenance and qualifications are documented in
+`docs/RAPTOR_SCR_OBSERVATIONS.md`. No proprietary implementation is included.
+
+Validation: `tools/check.sh` passes formatting, strict all-target Clippy, 611
+workspace tests and release build. Four new focused tests cover all numeric tags,
+byte-three overrides, PTS present/absent, missing/unknown/conflicting SCR records,
+truncated headers, device error flags and truncated recording footer. The release
+CLI read four private genuine Raptor recordings through their verified footers:
+400 frames total, 400 SCR records, numeric type 1 throughout, zero missing,
+unknown or conflicting known tags. Private captures and raw results are excluded
+from commits and review uploads. This is hardware-recording replay evidence,
+not a fresh hardware run, mode-name validation or geometric accuracy result.
+
+SCAN-REV-005 and SCAN-REV-006 remain outstanding under independent reviewer
+control; this passive diagnostic does not resolve acquisition shutdown or physical
+qualification. No firmware, physical calibration, paid services, protection change
+or owner merge approval is involved. Automated review outcome follows separately.
+
+CR-SCR-UVCH-LENGTH — accepted. The initial CLI review of 78f92ac versus
+9f853105 completed across five files, with one minor finding and a passed major
+severity gate. Verified against Linux v6.17 `uvc_video_decode_meta`: standard UVCH
+copies `2 + PTS*4 + SCR*6` bytes while retaining the wire length byte. Corrected
+both the new SCR parser and existing `scancraft_core::uvc_pts`; otherwise the
+recording reader would reject valid extended headers before diagnostics ran.
+This deliberately expands acceptance to correctly formed standard UVCH records
+with extended declared wire lengths; malformed standard lengths still fail.
+Added consecutive extended-header tests to both parsers, including conflicting
+PTS detection, and changed the CRC-backed CLI fixture to extended lengths.
+This does not resolve independent acquisition shutdown/optics findings.
+Corrected full-gate and incremental-review results follow when completed.
+
+Correction commit 106a8a32b90caaeec1276025c2ae511c41882f74 passes the full
+offline gate: formatting, strict all-target Clippy, 613 tests and release build.
+The corrected release revalidated all 400 saved genuine Raptor frames; a
+truncated recording and missing CLI argument return nonzero without partial JSON.
+Initial gate failure exposed a malformed absent-PTS test fixture retaining PTS
+bytes; the corrected fixture removes those bytes and still verifies both legacy
+and current readers reject missing PTS before indexing. No check was weakened.
+
+Incremental CodeRabbit CLI review of 106a8a3 versus 78f92ac completed across six
+files, zero findings, major gate passed, exit 0. Both reviews used included
+capacity with usage billing inactive; full tracked source context and complete
+selected diff secret scans passed before each upload. Reviews ran on isolated
+fixed commits without private/reviewer-owned files. No redundant third review
+is requested for this outcome-only documentation. GitHub App review and exact
+PR integration CI remain separate verification steps; owner merge consent is
+not inferred from either. Independent finding statuses remain untouched.
+
+SCAN-REV-017 — accepted. This independently identified UVCH stride defect
+matches CR-SCR-UVCH-LENGTH above. Correction commit
+106a8a32b90caaeec1276025c2ae511c41882f74 changes the core PTS and device SCR
+parsers, associated recording fixture and extended-header regressions. Full gate
+passes 613 tests, formatting, strict Clippy and release; corrected-source
+CodeRabbit review reports zero findings. No remaining claim that extended wire
+length equals copied metadata length is intentional. Vendor-specific metadata
+formats remain outside the standard UVCH parser contract.
+
+Independent reviewer assignment208 has now inspected the exact correction and
+response-only descendant eda0347, run 57 focused tests and an external reproduction
+harness, and marked SCAN-REV-017 Resolved. This paragraph records that independent
+verification; development did not alter the reviewer's finding or its status.
+Physical reconstruction and whole-application shutdown bounds remain unqualified.
+
+PR21 GitHub App review completed for exact eda0347b21361144d6c917c76aeeaed336edca8c:
+run cb6b7864-ac17-47bf-be9b-a833883177d0, summary comment6433274923 and
+finished reply6433279946, following manual request6433278727. Summary states no
+actionable comments; exact source/covered markers both identify eda0347 with
+kind reviewed. API inspection found zero inline comments, zero review threads
+and no formal approving review. App check is successful. This is completed
+review evidence, not owner merge approval. The fetched PR integration object
+9b83bb4d9aec1a1212dbf27c2edcb0b98d25caec has tree
+9684f9852c2d50b09d7dd144ab103eb3c1b376b3, identical to eda0347. Integration
+CI run40446307260 is still running at this observation; no CI pass inferred.
+
+CR-APP-SCR-DOCSTRINGS — advisory evaluated; blanket readiness threshold disputed.
+The App reports 16.67% versus 80%, 12 functions across six files, two unsupported
+files skipped. The public observation/inspection entry points document framing,
+error behavior, unknown/conflicting tags and bounded streaming; the method guide
+documents provenance and hardware limits. Most new functions are synthetic test
+cases or fixture helpers. The aggregate is not a physical qualification or
+correctness measure. No threshold/configuration is weakened and no redundant
+source review is requested for this evidence-only follow-up. Specific missing
+API contracts remain eligible for targeted documentation work.
+
+Developer hardware-recording evidence follow-up (no new source change): release
+`recording-scr` additionally verifies four private line-control/off-check files,
+60 frames per camera per state. Trial120 frames all numeric type2; off120 frames
+all type1. Four derived single-frame recordings agree but are not independent
+samples. The trial manifest reports property151 enabled/read back and restored,
+while physical emission, wavelength and calibration binding remain unverified.
+Recorded the qualified comparison in `docs/RAPTOR_SCR_OBSERVATIONS.md`; no mode
+activation, vendor code import, new accuracy claim or SCAN-REV-006 closure.
+Existing 613-test/source review evidence remains for unchanged Rust code.
