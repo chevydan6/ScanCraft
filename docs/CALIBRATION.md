@@ -4,10 +4,12 @@ The `scancraft-calibration` crate provides independent Rust camera mathematics,
 versioned calibration records, and bounded decoders for observed factory-data
 schemas. [Factory-data diagnostics](FACTORY_CALIBRATION.md) extract named lens,
 pose and laser fields; extraction does not establish their active-mode binding,
-physical units, camera assignment or physical accuracy. The crate does **not**
-yet estimate calibration from a board or establish a qualified Raptor optical
-model. Genuine calibrated Raptor geometry remains unverified, and physical
-calibration remains deferred by user request.
+physical units, camera assignment or physical accuracy. The crate now provides
+an explicit [planar pinhole initializer](PLANAR_CALIBRATION_INITIALIZER.md) from
+supplied metric correspondences. It does not detect board corners, fit distortion,
+refine a complete calibration, or establish a qualified Raptor optical model.
+Genuine calibrated Raptor geometry remains unverified, and physical calibration
+remains deferred by user request.
 
 ## Coordinates and model
 

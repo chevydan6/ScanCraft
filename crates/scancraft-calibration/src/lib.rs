@@ -10,6 +10,7 @@ pub mod factory_named;
 pub mod factory_pose;
 pub mod laser_surface;
 pub mod orientation;
+pub mod planar;
 pub mod rectification;
 pub mod stereo;
 pub mod storage;

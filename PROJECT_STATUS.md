@@ -2157,3 +2157,13 @@ median changed from 89.930 to 43.795 ms with bit-identical outputs/masks. The 58
 passes; single-CPU and thread-denied child fallbacks passed. This is not full
 scan throughput, accuracy or RSS qualification. See docs/PAIRED_REMAP_CONCURRENCY.md
 and docs/benchmarks/paired-remap-2026-10-27.json. Automated review remains pending.
+
+## Planar camera initialization — experimental
+
+The native calibration crate now estimates initial five-parameter pinhole
+intrinsics and target poses from supplied metric plane/pixel correspondences.
+Six focused Rust regressions and a three-case independent synthetic OpenCV/NumPy
+comparison pass. This does not detect target corners, estimate distortion, refine
+a complete calibration or install a scanner model. Physical calibration remains
+deferred and genuine Raptor optical binding/accuracy unqualified. See
+docs/PLANAR_CALIBRATION_INITIALIZER.md.

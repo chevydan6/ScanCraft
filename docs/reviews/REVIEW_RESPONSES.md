@@ -1114,3 +1114,38 @@ Independent reviewer Assignment156 has resolved SCAN-REV-016 after inspecting
 exact4cc519c and successful integration CI40417772893/check121904268081 (575 tests),
 plus push40417764389/check121904240273. Developer acknowledges that independent
 resolution without changing findings. SCAN-REV-005 remains Open and006 Under Review.
+
+## Development milestone — planar calibration initializer
+
+No new independent finding identifier is assigned. In response to the continuing
+SCAN-REV-006 qualification gap, add software-only native planar pinhole
+initialization as a prerequisite, not a claimed resolution. Source: calibration
+src/planar.rs and module export; synthetic example/reference tool and method
+documentation. Six Rust regressions and three independent OpenCV/NumPy cases
+pass, including known skew, poses, degeneracy and metric-scale/origin invariance.
+No hardware/physical calibration, active record installation or device workflow
+changes. Distortion, nonlinear refinement and actual Raptor calibration remain
+incomplete. Full workspace gate passed 589 Rust tests, formatting, strict all-target Clippy
+and release build (exit 0). The reference checker also rejected an intentionally
+perturbed focal length (exit 1), preventing a vacuous success claim. Source/log
+hashes are recorded in the reference JSON. CodeRabbit CLI review is complete;
+its disposition follows. Only the independent reviewer can change finding status.
+
+CR-PLANAR-DOC-ROUNDING accepted: the exact OpenCV discrepancy
+0.00021100840581311786 pixels rounds to 0.000211, not 0.000212. Corrected
+docs/PLANAR_CALIBRATION_INITIALIZER.md only; numerical source and retained
+measurements are unchanged. CodeRabbit CLI0.9.1 reviewed immutable44a2630 versus
+31cfbe1:11 files, one minor finding, zero blocking findings, major gate passed,
+exit0. Full source-context/diff secret scans passed; fresh included capacity2 and
+inactive billing were confirmed. Evidence:2026-10-27-planar-initializer-review.json.
+The existing589-test/fmt/Clippy/release result applies to unchanged Rust source.
+No paid/repeated unchanged code review or physical calibration performed.
+
+CR-PLANAR-REVIEW-STATUS accepted: replace the initial pending-review sentence
+above with the completed CLI state. The incremental documentation review on
+3603af2 versus 44a2630 completed: three files, one minor status inconsistency,
+zero blocking findings, major gate passed, exit 0. This final follow-up changes
+review metadata only; no Rust, test, numerical method or measured value changes.
+No third unchanged code review or functional test repetition is warranted.
+GitHub App review and owner merge approval remain separate. SCAN-REV-006 is
+unqualified/under independent review and SCAN-REV-005 remains open.
