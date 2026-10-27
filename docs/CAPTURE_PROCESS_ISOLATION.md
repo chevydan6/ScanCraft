@@ -38,9 +38,14 @@ between copies of the same executable, not a new recording format.
 During preview capture, only the child opens the scanner and holds session locks. Its control thread
 interprets stdin EOF or any control byte as a graceful stop request. The parent
 reads stdout nonblocking in bounded batches, checks cancellation between batches
-and requests stop by closing stdin. It waits up to two seconds after observing
-cancellation, then returns an explicit cleanup-unconfirmed failure. This interval
-is a software grace policy, not a measured physical driver shutdown bound.
+and requests stop by closing stdin. Ordinary Stop and ordinary window close keep
+reading through recording finalization without starting a deadline. An explicit
+abort (offered by the slow-close UI), application Drop, or loss of the preview
+consumer starts a two-second grace, then returns an explicit cleanup-unconfirmed
+failure if the helper remains live. This interval is a software grace policy,
+not a measured physical driver shutdown bound. A surviving helper can still
+finish publication; an unconfirmed result must not be presented as proof that
+publication failed.
 
 A reaper thread is allocated before helper launch. On parent-monitor exit it
 receives the child handle and waits without joining the GUI or owning any device

@@ -78,6 +78,7 @@ pub(crate) fn run(
     record: bool,
     folder: &Path,
     cancel: &AtomicBool,
+    abort: &AtomicBool,
     deliver: impl FnMut(Frame) -> bool,
 ) -> Result<String, String> {
     if cancel.load(Ordering::Relaxed) {
@@ -100,7 +101,7 @@ pub(crate) fn run(
         )
     })?;
     let pid = helper.child().id();
-    supervise(&mut helper, cancel, deliver, GRACE).map_err(|e| {
+    supervise(&mut helper, cancel, abort, deliver, GRACE).map_err(|e| {
         format!(
             "{e}; helper PID {pid}; cleanup diagnostics: {}",
             log_path.display()
@@ -122,6 +123,7 @@ pub(crate) fn nonblocking(file: &impl AsRawFd) -> io::Result<()> {
 fn supervise(
     helper: &mut OwnedChild,
     cancel: &AtomicBool,
+    abort: &AtomicBool,
     mut deliver: impl FnMut(Frame) -> bool,
     grace: Duration,
 ) -> Result<String, String> {
@@ -138,9 +140,13 @@ fn supervise(
     let mut eof = false;
     let mut bytes = [0; 65536];
     loop {
-        if stopping.is_none() && (cancel.load(Ordering::Relaxed) || consumer_closed) {
-            stopping = Some(Instant::now());
+        if cancel.load(Ordering::Relaxed) || abort.load(Ordering::Relaxed) || consumer_closed {
             helper.child().stdin.take();
+        }
+        // Ordinary Stop permits arbitrarily slow recording finalization. Only
+        // explicit abort or a lost consumer starts the supervision grace.
+        if stopping.is_none() && (abort.load(Ordering::Relaxed) || consumer_closed) {
+            stopping = Some(Instant::now());
         }
         // Limit each batch so continuous input cannot starve cancellation.
         for _ in 0..64 {
@@ -278,6 +284,7 @@ mod tests {
                 true,
                 Path::new("/unused"),
                 &AtomicBool::new(true),
+                &AtomicBool::new(true),
                 |_| panic!("cancelled request delivered a frame")
             ),
             Ok("Cancelled before launching capture helper".into())
@@ -309,6 +316,7 @@ mod tests {
         let start = Instant::now();
         let error = supervise(
             &mut helper,
+            &AtomicBool::new(true),
             &AtomicBool::new(true),
             |_| true,
             Duration::from_millis(20),
@@ -370,7 +378,7 @@ mod tests {
         let cancel = Arc::new(AtomicBool::new(false));
         let c = cancel.clone();
         let mut worker = crate::capture_worker::Worker::spawn(move || {
-            supervise(&mut helper, &c, |_| true, Duration::from_millis(20))
+            supervise(&mut helper, &c, &c, |_| true, Duration::from_millis(20))
         })
         .unwrap();
         cancel.store(true, Ordering::Relaxed);
@@ -408,6 +416,35 @@ mod tests {
     }
 
     #[test]
+    fn graceful_stop_waits_for_finalization_beyond_abort_grace() {
+        let mut wire = Vec::new();
+        capture_ipc::write_complete(&mut wire, &Ok("recording finalized".into())).unwrap();
+        let escaped = wire
+            .iter()
+            .map(|b| format!("\\{b:03o}"))
+            .collect::<String>();
+        let mut command = Command::new("sh");
+        // Wait for stdin EOF, then simulate slow sync/publication without a device.
+        command
+            .arg("-c")
+            .arg(format!("cat >/dev/null; sleep 0.1; printf '{escaped}'"))
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::null());
+        let mut helper = OwnedChild::spawn(&mut command).unwrap();
+        let start = Instant::now();
+        let result = supervise(
+            &mut helper,
+            &AtomicBool::new(true),
+            &AtomicBool::new(false),
+            |_| true,
+            Duration::from_millis(10),
+        );
+        assert_eq!(result, Ok("recording finalized".into()));
+        assert!(start.elapsed() >= Duration::from_millis(100));
+    }
+
+    #[test]
     fn process_frame_and_completion_require_clean_exit() {
         let frame = Frame {
             sequence: 7,
@@ -436,6 +473,7 @@ mod tests {
             let mut frames = Vec::new();
             let result = supervise(
                 &mut helper,
+                &AtomicBool::new(false),
                 &AtomicBool::new(false),
                 |frame| {
                     frames.push(frame);
@@ -478,6 +516,7 @@ mod tests {
         let mut helper = OwnedChild::spawn(&mut command).unwrap();
         let error = supervise(
             &mut helper,
+            &AtomicBool::new(false),
             &AtomicBool::new(false),
             |_| true,
             Duration::from_secs(1),

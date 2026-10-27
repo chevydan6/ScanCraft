@@ -1541,3 +1541,28 @@ rebuilding them in private developer storage; the earlier interrupted /tmp-quota
 scan is not counted. Included capacity and inactive billing were checked before
 reviews, with no paid credits/charges. GitHub App review and integration CI are
 separate steps; owner merge consent is not inferred.
+
+
+CR-PR22-PREVIEW-GRACEFUL-STOP (GitHub comment4385482626) — accepted.
+The App review of1b1c8cf correctly identified that ordinary preview Stop/close
+started the abort deadline, permitting slow disk finalization to return an
+unconfirmed error before successful publication. A successful GitHub check was
+not a clean review: the review posted this actionable minor finding.
+Correction in capture_process.rs/main.rs separates the graceful-stop flag from
+explicit abort. Ordinary Stop closes helper stdin and continues draining until
+completion and actual exit; explicit abort, lost consumer or App Drop retains
+the supervision grace and honest cleanup-unconfirmed diagnostics. The slow-close
+UI offers abort for preview recording as well as native live scanning.
+A real device-free child waits for EOF, delays finalization beyond a shortened
+abort grace, then emits success; the supervisor must return that success. Existing
+stalled-child and lock-retention abort regressions remain. Validation/commit
+evidence follows when complete. No physical driver or slow-disk qualification
+is claimed. The three-pass CLI budget for this feature is exhausted; no fourth
+review or paid request is authorized by this correction. New review readiness
+must remain pending until appropriate included review is available within the
+recorded workflow. Independent reviewer findings remain untouched.
+
+Correction validation: tools/check.sh completed successfully: formatting, strict
+all-target Clippy,641 tests and release build. Private gate log:
+preview-graceful-stop-gate.log in developer artifacts. Correction remains local
+pending follow-up review; the previous clean review covers beac45e, not this edit.

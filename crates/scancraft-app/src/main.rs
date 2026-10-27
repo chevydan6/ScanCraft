@@ -60,6 +60,7 @@ fn camera_texture(
 }
 struct Running {
     cancel: Arc<AtomicBool>,
+    abort: Arc<AtomicBool>,
     frames: Arc<AtomicU64>,
     preview_drops: Arc<AtomicU64>,
     rx: Receiver<Frame>,
@@ -180,6 +181,7 @@ impl App {
     }
     fn abort_pending_capture(&self) {
         if let Some(running) = &self.running {
+            running.abort.store(true, Ordering::Relaxed);
             running.cancel.store(true, Ordering::Relaxed);
         }
         self.live.abort();
@@ -218,10 +220,12 @@ impl App {
         let record = self.record;
         let folder = self.folder.clone();
         let cancel = Arc::new(AtomicBool::new(false));
+        let abort = Arc::new(AtomicBool::new(false));
         let frames = Arc::new(AtomicU64::new(0));
         let drops = Arc::new(AtomicU64::new(0));
         let (tx, rx) = mpsc::sync_channel(2);
         let c = cancel.clone();
+        let a = abort.clone();
         let f = frames.clone();
         let d = drops.clone();
         let worker = match capture_worker::Worker::spawn(move || {
@@ -230,6 +234,7 @@ impl App {
                 record,
                 std::path::Path::new(&folder),
                 &c,
+                &a,
                 |frame| {
                     f.fetch_add(1, Ordering::Relaxed);
                     match tx.try_send(frame) {
@@ -252,6 +257,7 @@ impl App {
         };
         self.running = Some(Running {
             cancel,
+            abort,
             frames,
             preview_drops: drops,
             rx,
@@ -348,7 +354,7 @@ impl eframe::App for App {
                     ui.label("Waiting for capture cleanup. Recordings are not finalized until capture stops.");
                     if self.capture_close.slow(std::time::Instant::now()) {
                         ui.label("Scanner cleanup is taking longer than expected. Restoration is not yet confirmed.");
-                        if self.live.is_busy() && ui.button("Abort scan (keep partial data)").clicked() {
+                        if (self.live.is_busy() || self.running.is_some()) && ui.button("Abort capture (keep partial data)").clicked() {
                             self.abort_pending_capture();
                         }
                     }
@@ -489,6 +495,7 @@ impl eframe::App for App {
 impl Drop for App {
     fn drop(&mut self) {
         if let Some(r) = &mut self.running {
+            r.abort.store(true, Ordering::Relaxed);
             r.cancel.store(true, Ordering::Relaxed);
             let _ = r.worker.join();
         }
@@ -1188,6 +1195,7 @@ mod capture_recovery_tests {
         let (_sender, rx) = mpsc::channel();
         Running {
             cancel: Arc::new(AtomicBool::new(false)),
+            abort: Arc::new(AtomicBool::new(false)),
             frames: Arc::new(AtomicU64::new(0)),
             preview_drops: Arc::new(AtomicU64::new(0)),
             rx,
