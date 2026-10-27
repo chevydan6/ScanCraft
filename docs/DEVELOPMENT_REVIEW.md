@@ -26,6 +26,20 @@ components and run `cargo fetch --locked` while network access is available.
 `tools/check.sh` uses `--frozen` for clippy/tests/build: missing cached dependencies
 fail instead of being downloaded. Rustup/toolchain setup is a separate online step.
 
+## Build output isolation
+
+Use a separate Cargo target directory for each checkout path. Do not point a
+review worktree at the active developer checkout's `target`: same-name/version
+workspace packages can leave relative dependency-info and artifacts from the
+other source tree, including an older release library or executable despite a
+later `cargo build` reporting it fresh. This occurred during discovery/corner
+integration and was detected by running the actual release command, not merely
+checking Cargo's exit status. Preserve suspect artifacts for diagnosis, rebuild
+in a never-shared directory, and verify both the exact source revision and the
+actual executable's behavior before claiming release validation. Package-scoped
+cleaning did not remove every artifact from the other checkout in that incident.
+No scanner/firmware/setup change is part of build-cache recovery.
+
 ## Repeatable loop
 
 1. Start a focused `dev/...` branch from current main; preserve unrelated work.

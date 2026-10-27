@@ -1650,3 +1650,42 @@ the completed646-test gate, retaining review history rather than altering
 independent findings. Fresh validation of this fixture correction follows. The
 second CLI result is retained in private discovery-process/correction-coderabbit.ndjson;
 it covers c84655d, not this later minor edit. No paid credits were used.
+
+
+Publication and follow-up evidence:
+- Preview Stop correction224621b is published in PR22. Both new GitHub Rust
+  checks passed; the CodeRabbit App check skipped because the base is a
+  nondefault development branch. Skip is not verification. Evidence reply:
+  https://github.com/chevydan6/ScanCraft/pull/22#discussion_r4385599810 .
+  The existing thread remains for independent verification; no merge occurred.
+- Discovery final minor correctionce5600022421008cbcf0cc429ddbce9fdeb65036
+  passes the exact branch's full646-test gate and five focused discovery tests.
+  Published draft PR23: https://github.com/chevydan6/ScanCraft/pull/23 .
+  Both GitHub Rust checks passed; App skipped for the draft. The preceding
+  c84655d CLI review passed major severity with two accepted minor findings;
+  final minor edit remains pending fresh included review, not silently marked
+  reviewed. No paid credits or additional unchanged review was requested.
+
+Developer build-evidence correction (not an independent finding): sharing the
+Cargo target directory between checkout paths left an older release workflow
+library/executable in the normal output. A nominally fresh build did not prove
+that the new command existed. Actual command verification caught the mismatch;
+subsequent shared-directory gates passed652 debug tests but failed release and
+are explicitly not full passes. Targeted cleaning initially left artifacts from
+the other checkout. Suspect remaining ScanCraft release artifacts were preserved
+in private quarantine (83 entries; relocation manifest), not confused with new
+source outputs. All source, reviewer files, captures and external dependencies
+were preserved. A never-shared build directory then passed the full source gate
+at cac7f5b:652 tests, formatting, strict all-target Clippy and release build.
+The isolated release CLI successfully published a new measurement bundle,
+verified exact inputs/associations and all lengths/CRC, and refused overwrite.
+Rebuilt normal-path binaries passed those same actual CLI checks; the normal app
+also passed its explicit synthetic parent/helper/engine diagnostic with zero
+omitted previews and false physical qualification. No actual GUI/GPU launch or
+hardware qualification is inferred. Documentation now requires per-checkout
+build isolation. Private evidence: corner-refinement/isolated-clean-gate.log,
+isolated-runtime-proof.json, restored-current-release-proof.json,
+restored-app-synthetic-summary.json and stale-release-cache/relocation.json.
+The corner algorithm itself is unchanged from92374f8; its first CodeRabbit review
+remains pending included capacity. This documentation-only follow-up does not
+claim new source coverage from old reviews or alter independent finding status.
