@@ -1689,3 +1689,29 @@ restored-app-synthetic-summary.json and stale-release-cache/relocation.json.
 The corner algorithm itself is unchanged from92374f8; its first CodeRabbit review
 remains pending included capacity. This documentation-only follow-up does not
 claim new source coverage from old reviews or alter independent finding status.
+
+
+SCAN-REV-003 — accepted; partial workflow correction. New read-only
+`tools/review_readiness.py` reports actual current-head formal CodeRabbit review
+coverage separately from a successful/skipped badge. It requires known completed
+publication batches, a stable head snapshot, complete conversation evidence and
+no unresolved threads; draft/closed PRs and changes-requested reviews block.
+It performs only GitHub reads and always reports merge_authorized=false. This
+is a diagnostic, not an enforced authorization gate, and does not resolve
+SCAN-REV-002 credential separation or prove CI/code correctness. Unknown formats
+and evidence failures report not ready. No branch protection or existing review
+mechanism was changed. Only the independent reviewer may verify/close003.
+Ten offline synthetic tests pass, including stale/spoofed/pending/dismissed
+reviews, incomplete batches/pagination, changed heads, drafts and unresolved
+outdated conversations. Actual read-only runs correctly report PR22 not ready
+(no current-head completed App review; one open thread) and PR23 not ready
+(draft; no completed current-head App review), despite passing Rust checks.
+Source: tools/review_readiness.py, tools/test_review_readiness.py and
+DEVELOPMENT_REVIEW.md. Full repository gate/fresh CodeRabbit review are pending;
+no paid capacity, comment posting, thread resolution or merge occurs in this tool.
+
+Readiness utility validation: full repository gate completed successfully with
+652 Rust tests, formatting, strict all-target Clippy and release. Ten Python
+regressions pass, including contradictory publication totals failing closed.
+Current source remains unreviewed by CodeRabbit; review capacity is reserved
+first for final discovery corrections and then the queued corner measurements.

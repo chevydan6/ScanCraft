@@ -93,6 +93,27 @@ No scanner/firmware/setup change is part of build-cache recovery.
    Ask the owner to approve merging only after the change is reviewable. Do not
    merge, enable auto-merge or relax protection without explicit authorization.
 
+## Read-only review readiness diagnostic
+
+Run `python3 tools/review_readiness.py chevydan6/ScanCraft PR_NUMBER` before
+interpreting the App badge. This uses read-only `gh` calls and emits JSON/exit0
+only for known current-head formal CodeRabbit publication evidence with no open
+conversations on an open, ready PR. It verifies every batch of one publication
+attempt, detects a head change during collection, and refuses incomplete thread
+or comment pagination. Pending/dismissed/spoofed/unknown-format reviews and green
+or skipped check badges do not prove coverage. All unresolved conversations,
+including outdated ones, block this diagnostic; current-head changes-requested
+reviews are conservatively retained until an independent reviewer changes them.
+
+This is a point-in-time diagnostic, not an installed CI requirement or an
+authorization boundary. It does not test CI, correctness, quota, owner consent,
+or privileged credentials, and always reports `merge_authorized: false`.
+Re-check after every head change and immediately before any owner-approved merge.
+Changing CodeRabbit's publication format can make coverage unknown until the
+parser is updated with evidence. It never requests a review, resolves a thread,
+changes protection, posts a comment or performs a merge. Tests run offline via
+`python3 -m unittest discover -s tools -p test_review_readiness.py`.
+
 ## Repository controls
 
 Main protection requires the `test` CI check, an up-to-date branch, the PR requirement,
