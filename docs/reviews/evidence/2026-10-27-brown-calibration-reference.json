@@ -239,5 +239,17 @@
     "unknown_field_output_absent": true,
     "binary_sha256": "dc86221fa5180ea277065aff22aaaddb6a080efb63f6405b917a1a5e3e3d598e",
     "scope": "release CLI synthetic workflow only; no device operation"
+  },
+  "cancellation_mutation_control": {
+    "head": "7f1ad202fe4b4039d632e6727bcf82e2af19f7aa",
+    "change": "remove cancellation latch in isolated mutation only",
+    "original_source_sha256": "e88f757a020e8d45c172e248257f8a5ec83dd7c351a3460be097dc06ec8d5e26",
+    "mutation_source_sha256": "6e3f91a4bfa7285bc44c6ab0b1bbbac932d74d3a0810780d7745ae453214cecc",
+    "exit_code": 101,
+    "failure": "cancelled fit incorrectly returned Ok when latch removed",
+    "test": "refinement::tests::cancellation_and_nonconvergence_preserve_input",
+    "log_sha256": "7c9e281bce7cfc526a4bde17df77149b8aafc44fa3ceb95401cf3e4d68321c97",
+    "scope": "intentional isolated mutation control, not a historical production bug",
+    "production_green_gate": "598 tests at unchanged canonical source; separate mutation target directory"
   }
 }

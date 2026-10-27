@@ -1167,3 +1167,19 @@ The combined source gate passed 598 Rust tests, formatting, strict all-target
 Clippy and release build (exit 0). Source/log and synthetic runtime hashes are
 recorded in 2026-10-27-brown-calibration-reference.json. These are software gates,
 not hardware qualification.
+
+Brown5 milestone review: CodeRabbit CLI 0.9.1 completed immutable source
+7f1ad202fe4b4039d632e6727bcf82e2af19f7aa versus 761036d: 18 files, zero
+findings/blocking findings, major gate passed, exit 0. Full context/selected-diff
+secrets scans passed, fresh included capacity was 1 and billing inactive.
+Before/after head and tree were fixed; source attestation is operator-recorded.
+No suggestion was accepted blindly and there are no findings to dispute.
+Evidence: 2026-10-27-brown-calibration-review.json.
+
+An isolated mutation removing the cancellation latch made the targeted transient
+request regression fail with exit 101: a cancelled fit incorrectly returned Ok.
+The production 598-test gate passes with the latch. This is an intentional
+mutation control, not a newly discovered historical production defect. Separate
+checkout/target and source/log hashes are retained in the reference evidence.
+This follow-up changes evidence only; Rust and numerical parameters remain at
+the reviewed source. SCAN-REV-005/006 status remains under reviewer control.

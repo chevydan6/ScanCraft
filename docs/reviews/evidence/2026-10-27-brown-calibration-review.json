@@ -1,0 +1,58 @@
+{
+  "tool": "official CodeRabbit CLI0.9.1",
+  "scope": "Brown5 native refinement, offline workflow and numerical evidence versus PR18",
+  "before": {
+    "head": "7f1ad202fe4b4039d632e6727bcf82e2af19f7aa",
+    "tree": "bc943f2b8114e0f97f072ab447b47ea2b0374c04",
+    "base": "761036d5a9697477c6f05de94728f4a84698c955"
+  },
+  "after": {
+    "head": "7f1ad202fe4b4039d632e6727bcf82e2af19f7aa",
+    "tree": "bc943f2b8114e0f97f072ab447b47ea2b0374c04",
+    "status": "",
+    "exit_code": 0
+  },
+  "binding": "operator-recorded immutable checkout, not service cryptographic source attestation",
+  "complete": {
+    "type": "complete",
+    "status": "review_completed",
+    "findings": 0,
+    "gate": {
+      "threshold": "major",
+      "status": "passed",
+      "blockingFindings": 0
+    },
+    "reviewedFiles": [
+      "ACCEPTANCE_RESULTS.md",
+      "ARCHITECTURE.md",
+      "PROJECT_STATUS.md",
+      "README.md",
+      "ROADMAP.md",
+      "crates/scancraft-calibration/examples/brown_reference.rs",
+      "crates/scancraft-calibration/src/lib.rs",
+      "crates/scancraft-calibration/src/planar.rs",
+      "crates/scancraft-calibration/src/refinement.rs",
+      "crates/scancraft-cli/src/main.rs",
+      "crates/scancraft-workflow/src/lib.rs",
+      "crates/scancraft-workflow/src/planar_calibration.rs",
+      "docs/BROWN_CALIBRATION_REFINEMENT.md",
+      "docs/CALIBRATION.md",
+      "docs/PLANAR_CALIBRATION_INITIALIZER.md",
+      "docs/reviews/REVIEW_RESPONSES.md",
+      "docs/reviews/evidence/2026-10-27-brown-calibration-reference.json",
+      "tools/compare_brown_calibration_opencv.py"
+    ]
+  },
+  "included_capacity": 1,
+  "usage_billing": "inactive",
+  "secrets_scan": {
+    "full_source_context": "pass",
+    "complete_selected_diff": "pass"
+  },
+  "raw_log_sha256": "2d780f14f582c9de4522fd9ee94dd3345473ee379dea6a6efddef7b54e7e0ea7",
+  "dispositions": [],
+  "limitations": [
+    "scoped changed-code review, not full application or physical accuracy qualification",
+    "GitHub App review and owner merge approval are separate"
+  ]
+}
