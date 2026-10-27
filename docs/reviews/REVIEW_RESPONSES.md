@@ -1604,3 +1604,36 @@ retained in private developer artifacts/discovery-process/coderabbit.ndjson.
 Correction gate completed successfully:646 tests, formatting, strict all-target
 Clippy and release build. Fresh incremental review is still pending; this does
 not convert the initial blocked CLI result into a pass.
+
+
+SCAN-REV-020 — accepted. This is the independently recorded counterpart of
+CR-DISCOVERY-CHILD-LIFETIME. Exact correction
+c84655d467130591db875bb6523202e5c05e2180 and646-test full gate are recorded above.
+Independent assignment233 verified five isolated discovery tests and retained-
+child semantics and marks020 Resolved; development did not edit its findings.
+Fresh corrected-source CodeRabbit review remains pending included capacity.
+Independent assignment231 likewise verified224621b and marks019 Resolved.
+Neither resolution closes005 or establishes physical scanner qualification.
+
+Developer milestone (not an independent finding): offline seeded target-corner
+measurement preparation. New image::corners solves gradient-orthogonality normal
+equations with bounded Gaussian windows, explicit rank/contrast/displacement/
+border/convergence failures and cancellation. Shared workflow::target_corners
+and CLI refine-target-corners preserve exact PNG/request, association order,
+refined PlanarView, diagnostics and CRC manifest in no-overwrite output. No
+calibration is fitted/activated and no hardware/configuration is touched.
+Independent mathematical implementation references OpenCV cornerSubPix docs;
+no upstream code/assets copied and no new production dependencies.
+Source: image/src/corners.rs, image/examples/corner_reference.rs,
+workflow/src/target_corners.rs, their lib.rs declarations, cli/src/main.rs,
+tools/compare_target_corners_opencv.py; design/provenance/limitations documented
+in docs/TARGET_CORNER_REFINEMENT.md plus status/roadmap.
+Validation: full tools/check.sh passes652 tests, formatting, strict all-target
+Clippy and release; twelve synthetic cases match independent NumPy/OpenCV
+under fixed tolerances. Actual release CLI retained exact inputs/association,
+verified all artifact lengths/CRC, refused overwrite and left saved bytes intact.
+Private evidence lives under developer artifacts/corner-refinement (full-gate.log,
+fixture.json, reference-report.json, runtime-proof.json). Fresh CodeRabbit review
+is pending; no paid capacity or clean-review claim. Full-board detection/indexing,
+real corner accuracy, uncertainty, camera/mode binding and native hardware
+geometry remain incomplete. Physical calibration stays deferred.

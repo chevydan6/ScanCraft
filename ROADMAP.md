@@ -318,3 +318,10 @@ lenses/target poses to relative pose estimation and held-out triangulation. Next
 advance real source/mode/optical binding, target/subpixel detection and coverage/
 uncertainty; simultaneous lens/rig refinement remains distinct future work.
 Physical calibration remains deferred; no synthetic fit removes physical trials.
+
+Seeded subpixel target-corner refinement now has an offline image/association CLI
+and independent synthetic NumPy/OpenCV comparison. Next connect robust full-board
+detection/indexing, multi-view coverage and uncertainty to the existing numerical
+calibration workflows. Supplied associations still require verification; no real
+calibration, optics binding or M2 reconstruction qualification follows from this
+component. Physical calibration stays deferred.
