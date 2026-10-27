@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Read-only CodeRabbit coverage diagnostics; never authorizes or performs a merge.
 
-Formal review evidence must match the current head and known publication format.
+Review evidence must match the current head and a known formal or clean-summary format.
 A status/check badge alone cannot establish coverage. Unknown/incomplete evidence
 fails closed. This does not enforce owner identity separation or validate code.
 """
@@ -19,7 +19,44 @@ THREAD_QUERY = """query($owner:String!,$name:String!,$number:Int!){
  }}}}}"""
 
 
-def assess(before, after, reviews, threads):
+
+def clean_summaries(before, comments):
+    """Recognize observed bot no-actionable completion, never a badge or quoted owner reply."""
+    head = before['headRefOid']
+    url = before.get('url', '')
+    if '/pull/' not in url:
+        return []
+    commit_url = url.split('/pull/', 1)[0]+'/commit/'+head
+    summaries = []
+    for comment in comments:
+        if (comment.get('user') or {}).get('login') != BOT:
+            continue
+        body = comment.get('body') or ''
+        sections = re.findall(r'<!-- recent_review_start -->(.*?)<!-- recent_review_end -->', body, re.S)
+        markers = re.findall(r'<!-- final_review_risk_coverage:(.*?) -->', body)
+        if len(sections) != 1 or len(markers) != 1:
+            continue
+        try:
+            coverage = json.loads(markers[0])
+        except ValueError:
+            continue
+        if not isinstance(coverage, dict) or coverage.get('kind') != 'reviewed':
+            continue
+        if coverage.get('sourceCommitId') != head or coverage.get('coveredCommitId') != head:
+            continue
+        recent = sections[0]
+        if ('<!-- coderabbit-ai-generated:v1 -->' not in body or
+                'No actionable comments were generated in the recent review.' not in recent):
+            continue
+        commit = re.search(r'\*\*Commit\*\*:\s*\[[^\]]+\]\(<?'+re.escape(commit_url)+r'>?\)', recent)
+        run = re.search(r'\*\*Run ID\*\*:\s*`([0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})`', recent, re.I)
+        if commit and run:
+            summaries.append({'id': comment['id'], 'url': comment['html_url'],
+                              'run_id': run.group(1), 'covered_commit': head})
+    return summaries
+
+
+def assess(before, after, reviews, threads, comments=()):
     head = before['headRefOid']
     issues = []
     if head != after['headRefOid']:
@@ -54,7 +91,8 @@ def assess(before, after, reviews, threads):
                 for review in values:
                     formal.append({'id': review['id'], 'state': review['state'],
                                    'submitted_at': review['submitted_at']})
-    if not formal:
+    summaries = clean_summaries(before, comments)
+    if not formal and not summaries:
         issues.append('no_known_completed_coderabbit_review_of_current_head')
     if threads['headRefOid'] != head:
         issues.append('thread_snapshot_head_mismatch')
@@ -76,7 +114,8 @@ def assess(before, after, reviews, threads):
         # Conservative: do not infer dismissal/supersession from a later comment.
         issues.append('current_head_changes_requested')
     return {'schema_version': 1, 'head': head,
-            'known_current_head_reviews': formal, 'unresolved_threads': unresolved,
+            'known_current_head_reviews': formal, 'known_current_head_clean_summaries': summaries,
+            'unresolved_threads': unresolved,
             'coverage_and_conversations_ready': not issues,
             'blockers': sorted(set(issues)), 'merge_authorized': False,
             'scope': 'review coverage/conversations only; not CI, code correctness, owner approval or merge authority'}
@@ -92,18 +131,21 @@ def collect(repository, number):
     owner, name = repository.split('/')
     if not all(re.fullmatch(r'[A-Za-z0-9_.-]+', part) for part in (owner, name)):
         raise ValueError('Expected OWNER/REPOSITORY')
-    fields = 'headRefOid,state,isDraft'
+    fields = 'headRefOid,state,isDraft,url'
     before = gh_json('pr', 'view', str(number), '--repo', repository, '--json', fields)
     pages = gh_json('api', '--paginate', '--slurp',
                     f'repos/{owner}/{name}/pulls/{number}/reviews')
     reviews = [review for page in pages for review in page]
+    comment_pages = gh_json('api', '--paginate', '--slurp',
+                            f'repos/{owner}/{name}/issues/{number}/comments')
+    comments = [comment for page in comment_pages for comment in page]
     response = gh_json('api', 'graphql', '-f', 'query='+THREAD_QUERY,
                        '-f', 'owner='+owner, '-f', 'name='+name, '-F', 'number='+str(number))
     if response.get('errors'):
         raise ValueError('GraphQL review evidence unavailable')
     threads = response['data']['repository']['pullRequest']
     after = gh_json('pr', 'view', str(number), '--repo', repository, '--json', fields)
-    return assess(before, after, reviews, threads)
+    return assess(before, after, reviews, threads, comments)
 
 
 def main():

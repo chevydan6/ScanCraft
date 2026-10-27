@@ -97,9 +97,14 @@ No scanner/firmware/setup change is part of build-cache recovery.
 
 Run `python3 tools/review_readiness.py chevydan6/ScanCraft PR_NUMBER` before
 interpreting the App badge. This uses read-only `gh` calls and emits JSON/exit0
-only for known current-head formal CodeRabbit publication evidence with no open
+only for known current-head CodeRabbit completion evidence with no open
 conversations on an open, ready PR. It verifies every batch of one publication
-attempt, detects a head change during collection, and refuses incomplete thread
+attempt. It also recognizes the observed bot no-actionable issue-comment format,
+requiring one recent-review section with the exact repository/commit URL and run
+UUID plus one final coverage marker whose source and covered heads match and
+whose kind is reviewed. Owner replies, stale/triaged/ambiguous summaries and
+check badges do not satisfy that path. It detects a head change during collection
+and refuses incomplete thread
 or comment pagination. Pending/dismissed/spoofed/unknown-format reviews and green
 or skipped check badges do not prove coverage. All unresolved conversations,
 including outdated ones, block this diagnostic; current-head changes-requested

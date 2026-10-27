@@ -1725,3 +1725,39 @@ remain identical to the646-test validated ce56000 source. This is the third
 CLI pass for the discovery feature; no fourth review is requested for whitespace
 or the review outcome note. The remaining GitHub App review is separate and
 pending; CLI readiness does not provide owner merge consent.
+
+
+DEV-READINESS-CLEAN-SUMMARY (developer-identified format limitation) — accepted.
+The actual PR22 follow-up App review completed with no actionable comments for
+224621b, run e80421b6-3071-4107-b7a9-6c6f29fbf176, in bot issuecomment6433690801.
+It did not create a formal bot PR review. The initial checker conservatively
+rejected that unknown evidence shape; the owner's reply review was correctly
+not mistaken for a bot review. This is not a new independent finding or closure.
+Correction adds a separate known-summary evidence path, requiring the API bot
+identity, one recent-review section, exact repository/head URL, UUID and one
+final_review_risk_coverage object with matching source/covered head and reviewed
+kind. Skipped, triaged, stale, spoofed, ambiguous or malformed summaries fail
+closed; open threads, state/head races and changes-requested checks remain.
+The tool still never changes threads/protections/credentials or authorizes merge.
+Four new unique tests (14 total) pass. Actual read-only PR22 now recognizes the
+current-head summary; the bot independently resolved its old thread, giving
+coverage/conversations ready with merge_authorized=false. The initial shell
+assertion expected an open thread and returned nonzero when that real state
+changed; inspect the JSON, not that obsolete expectation, as readiness evidence.
+Source: tools/review_readiness.py, tools/test_review_readiness.py and workflow
+documentation. Full gate and incremental CodeRabbit review follow separately.
+No physical calibration, firmware, application algorithm or owner setup changes.
+
+Known-summary correction gate completed successfully in its dedicated checkout
+build directory:652 Rust tests, formatting, strict all-target Clippy and release;
+14 unique Python tests pass. These checks do not prove merge authorization.
+Incremental CodeRabbit review remains pending. The original combined ced7697
+review completed14 files/zero findings/major-pass, and exact ced7697 is published
+in PR24; this later checker correction is not falsely included in that result.
+
+Known-summary correction review of exact99de067 versus ced7697 completed across
+four changed files: zero findings, major gate passed, exit0. This is the second
+CLI pass for the combined corner/readiness milestone; no unchanged repeat is
+requested. Complete diff and tracked context pass secret scans; fresh included
+capacity and inactive billing were checked, with no paid flags. Source code
+remains the tested/reviewed99de067; this outcome note is documentation-only.
