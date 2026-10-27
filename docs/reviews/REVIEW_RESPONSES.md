@@ -1809,3 +1809,18 @@ scanner state, firmware or physical calibration changed. The audit recommendatio
 is documented for owner direction; it has not been implemented. The developer
 probe is stored privately under live-capacity-audit; reviewer verification and
 any independent finding/status remain solely under reviewer control.
+
+SCAN-REV-021 — accepted. Independent assignment 262 corroborates the live
+session capacity gap previously recorded as DEV-LIVE-SESSION-CAPACITY. The
+current limits are coordinated across acquisition, recording verification and
+persisted references; changing a single bound would not establish sustained
+scanning or bounded resource use. The audit recommends a coordinated design,
+but the audit instructions reserve implementation of recommendations for explicit
+owner authorization. No production correction has been made. The audit reports
+changed in commit d46decb36f4e262314e01a2d4a98d0c4bf3b57c2; this response
+records the subsequent independent finding. Developer testing: synthetic release-library boundary probe accepted
+1,000 and rejected 1,001 frames at both public entry points. The reviewer checked
+the probe's retained hashes and source but did not independently run it. No
+physical scan duration or throughput has been measured. The finding remains
+under independent reviewer control; long-session design and validation remain
+outstanding.
