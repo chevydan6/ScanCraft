@@ -6,6 +6,7 @@ mod capture_session;
 mod capture_worker;
 mod cloud_jobs;
 mod cloud_ui;
+mod discovery_process;
 mod live_fixture;
 mod live_process;
 mod live_ui;
@@ -19,7 +20,6 @@ use eframe::egui;
 use scancraft_core::Frame;
 #[cfg(test)]
 use scancraft_core::StreamProfile;
-use scancraft_device::discover;
 #[cfg(test)]
 use scancraft_recording::Writer;
 #[cfg(test)]
@@ -81,6 +81,7 @@ struct App {
     closing_window: bool,
     capture_close: capture_close::CaptureClose,
     running: Option<Running>,
+    discovery: Option<discovery_process::Discovery>,
     interface: u8,
     status: String,
     log: String,
@@ -110,6 +111,7 @@ impl Default for App {
             closing_window: false,
             capture_close: Default::default(),
             running: None,
+            discovery: None,
             interface: 4,
             status: "Ready. Find the scanner to check its USB interfaces.".into(),
             log: String::new(),
@@ -130,6 +132,7 @@ impl Default for App {
 impl App {
     fn capture_active_or_closing(&self) -> bool {
         self.running.is_some()
+            || self.discovery.is_some()
             || self.live.is_busy()
             || self.capture_close.is_waiting()
             || self.closing_window
@@ -415,6 +418,15 @@ impl eframe::App for App {
         {
             ctx.request_repaint_after(Duration::from_millis(100));
         }
+        if let Some(job) = &mut self.discovery {
+            if let Some(result) = job.poll() {
+                self.log = result.unwrap_or_else(|e| e);
+                self.status = "Discovery finished; see diagnostics".into();
+                self.discovery = None;
+            } else {
+                ctx.request_repaint_after(Duration::from_millis(30));
+            }
+        }
         self.receive(ctx);
         if let Some(start) = self.smoke {
             if let Some(r) = &self.running {
@@ -451,7 +463,7 @@ impl eframe::App for App {
                 if ui.selectable_label(self.mesh_active,"Meshes").clicked(){self.mesh_active=true;self.live_active=false;}
             });
             if self.live_active {
-                let can_start=self.running.is_none()&&!self.capture_close.is_waiting()&&!self.closing_window;
+                let can_start=self.discovery.is_none()&&self.running.is_none()&&!self.capture_close.is_waiting()&&!self.closing_window;
                 if let Some(path)=self.live.ui(ui,can_start,!self.cloud.is_busy()) && self.cloud.request_open(path) {self.editing=true;self.live_active=false;}
                 return;
             }
@@ -463,11 +475,19 @@ impl eframe::App for App {
             let previous_interface=self.interface;
             ui.horizontal(|ui|{
                 ui.add_enabled_ui(!active,|ui|{
-                    if ui.button("Find scanner").clicked(){self.log=match discover(){Ok(n)=>format!("{} native video/metadata nodes\n{}",n.len(),n.iter().map(|n|format!("{} · interface {} · {}",n.path.display(),n.interface,if n.metadata{"metadata"}else{"image"})).collect::<Vec<_>>().join("\n")),Err(e)=>e.to_string()};}
+                    if ui.button("Find scanner").clicked(){
+                        match discovery_process::Discovery::start() {
+                            Ok(job)=>{self.discovery=Some(job);self.status="Finding scanner…".into();},
+                            Err(e)=>self.log=format!("Could not start discovery: {e}"),
+                        }
+                    }
                     egui::ComboBox::from_id_salt("camera").selected_text(match self.interface{0=>"Left IR",2=>"Right IR",_=>"Color"}).show_ui(ui,|ui|{ui.selectable_value(&mut self.interface,4,"Color");ui.selectable_value(&mut self.interface,0,"Left IR");ui.selectable_value(&mut self.interface,2,"Right IR");});
                     if ui.button("Start preview").clicked(){self.start();}
                 });
-                if ui.add_enabled(active,egui::Button::new("Stop")).clicked()&& let Some(r)=&self.running{r.cancel.store(true,Ordering::Relaxed);}
+                if ui.add_enabled(active,egui::Button::new("Stop")).clicked(){
+                    if let Some(r)=&self.running{r.cancel.store(true,Ordering::Relaxed);}
+                    if let Some(job)=&self.discovery{job.cancel();}
+                }
                 if ui.add_enabled(self.snapshot.is_some(),egui::Button::new("Save snapshot")).clicked(){
                     let dir=PathBuf::from(&self.folder);let stamp=SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_nanos();let path=dir.join(format!("snapshot-{stamp}.png"));
                     self.log=match std::fs::create_dir_all(&dir).and_then(|_|self.snapshot.as_ref().unwrap().save(&path).map_err(std::io::Error::other)){Ok(())=>format!("Saved {}",path.display()),Err(e)=>format!("Save failed: {e}")};
@@ -660,6 +680,9 @@ fn startup_args(args: Vec<std::ffi::OsString>) -> Result<Startup, String> {
 fn main() -> eframe::Result {
     let args: Vec<_> = std::env::args_os().skip(1).collect();
     if let Some(code) = live_process::helper_entry(&args) {
+        std::process::exit(code);
+    }
+    if let Some(code) = discovery_process::helper_entry(&args) {
         std::process::exit(code);
     }
     if let Some(code) = capture_process::helper_entry(&args) {

@@ -1566,3 +1566,23 @@ Correction validation: tools/check.sh completed successfully: formatting, strict
 all-target Clippy,641 tests and release build. Private gate log:
 preview-graceful-stop-gate.log in developer artifacts. Correction remains local
 pending follow-up review; the previous clean review covers beac45e, not this edit.
+
+
+SCAN-REV-019 — accepted. Assignment230 independently identifies the same ordinary
+preview Stop/abort coupling as CR-PR22-PREVIEW-GRACEFUL-STOP above. Exact local
+correction224621b491a6a1811d184ac30f619e09d2713754 and641-test gate are recorded
+above; independent verification and closure belong exclusively to the reviewer.
+
+Development follow-up for SCAN-REV-005: discovery_process.rs moves the remaining
+GUI-thread discovery/QUERYCAP into a supervised read-only child; main.rs polls
+and gates conflicting starts. capture_process.rs exposes existing supervision
+within the crate without changing its policy. No hard whole-application shutdown
+bound is claimed: Discovery Drop joins the IPC monitor, and launch/filesystem/OS
+scheduling are unbounded. Actual driver stalls and calibrated hardware remain
+unqualified. Independent005 status is not changed by development.
+
+Discovery follow-up full offline gate passes644 tests, formatting, strict
+all-target Clippy and release build. Initial new test used the wrong Worker::join
+return type; corrected to observe the actual polled result before this final
+gate. Complete tracked source plus intended new module and selected diff pass
+gitleaks; protected/private untracked files are excluded. CLI review pending.
