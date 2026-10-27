@@ -1304,3 +1304,20 @@ Added consecutive extended-header tests to both parsers, including conflicting
 PTS detection, and changed the CRC-backed CLI fixture to extended lengths.
 This does not resolve independent acquisition shutdown/optics findings.
 Corrected full-gate and incremental-review results follow when completed.
+
+Correction commit 106a8a32b90caaeec1276025c2ae511c41882f74 passes the full
+offline gate: formatting, strict all-target Clippy, 613 tests and release build.
+The corrected release revalidated all 400 saved genuine Raptor frames; a
+truncated recording and missing CLI argument return nonzero without partial JSON.
+Initial gate failure exposed a malformed absent-PTS test fixture retaining PTS
+bytes; the corrected fixture removes those bytes and still verifies both legacy
+and current readers reject missing PTS before indexing. No check was weakened.
+
+Incremental CodeRabbit CLI review of 106a8a3 versus 78f92ac completed across six
+files, zero findings, major gate passed, exit 0. Both reviews used included
+capacity with usage billing inactive; full tracked source context and complete
+selected diff secret scans passed before each upload. Reviews ran on isolated
+fixed commits without private/reviewer-owned files. No redundant third review
+is requested for this outcome-only documentation. GitHub App review and exact
+PR integration CI remain separate verification steps; owner merge consent is
+not inferred from either. Independent finding statuses remain untouched.
