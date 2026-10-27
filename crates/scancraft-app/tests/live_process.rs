@@ -43,6 +43,7 @@ fn synthetic_process_publishes_verified_recordings_and_retains_synthetic_labels(
         assert_eq!(value["physical_accuracy_qualified"], false);
         assert_eq!(value["synchronization_verified"], false);
     }
+    assert_eq!(summary["helper_omitted_previews"], 0);
     assert_eq!(summary["fused_points"], report["fused_points"]);
     assert_eq!(summary["geometry_exported"], report["geometry_exported"]);
     for name in ["left.raptor", "right.raptor"] {

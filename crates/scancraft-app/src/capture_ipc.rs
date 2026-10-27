@@ -5,7 +5,7 @@ const FRAME: u8 = 1;
 const COMPLETE: u8 = 2;
 const LIVE_PROGRESS: u8 = 3;
 const LIVE_COMPLETE: u8 = 4;
-const MAX_PROGRESS: usize = 16 * 1024 * 1024;
+pub(crate) const MAX_PROGRESS: usize = 16 * 1024 * 1024;
 const MAX_FRAME: usize = 64 * 1024 * 1024;
 const MAX_RESULT: usize = 64 * 1024;
 fn invalid(message: &str) -> io::Error {
@@ -57,19 +57,28 @@ impl Write for LimitedBytes {
         Ok(())
     }
 }
+fn prepare_json(
+    kind: u8,
+    maximum: usize,
+    serialize: impl FnOnce(&mut LimitedBytes) -> serde_json::Result<()>,
+) -> io::Result<Vec<u8>> {
+    let mut bounded = LimitedBytes {
+        bytes: vec![kind, 0, 0, 0, 0],
+        maximum: maximum + 5,
+    };
+    serialize(&mut bounded)?;
+    let length = bounded.bytes.len() - 5;
+    bounded.bytes[1..5].copy_from_slice(&(length as u32).to_le_bytes());
+    Ok(bounded.bytes)
+}
 fn write_json(
     output: &mut impl Write,
     kind: u8,
     maximum: usize,
     serialize: impl FnOnce(&mut LimitedBytes) -> serde_json::Result<()>,
 ) -> io::Result<()> {
-    let mut bounded = LimitedBytes {
-        bytes: Vec::new(),
-        maximum,
-    };
-    serialize(&mut bounded)?;
-    prefix(output, kind, bounded.bytes.len())?;
-    output.write_all(&bounded.bytes)?;
+    let packet = prepare_json(kind, maximum, serialize)?;
+    output.write_all(&packet)?;
     output.flush()
 }
 pub(crate) fn write_complete(
@@ -80,12 +89,13 @@ pub(crate) fn write_complete(
         serde_json::to_writer(bytes, result)
     })
 }
-pub(crate) fn write_live_progress(
-    output: &mut impl Write,
+/// Validate/encode entirely before pipe I/O, allowing display-only rejections
+/// to be handled independently from a disconnected parent or broken pipe.
+pub(crate) fn prepare_live_progress(
     update: &scancraft_workflow::live_stereo::control::display::DisplayUpdate,
-) -> io::Result<()> {
+) -> io::Result<Vec<u8>> {
     update.validate().map_err(|e| invalid(&e))?;
-    write_json(output, LIVE_PROGRESS, MAX_PROGRESS, |bytes| {
+    prepare_json(LIVE_PROGRESS, MAX_PROGRESS, |bytes| {
         serde_json::to_writer(bytes, update)
     })
 }
@@ -253,7 +263,7 @@ mod tests {
             serde_json::json!({"kind":"synthetic_live_stereo_pipeline","geometry_exported":false}),
         );
         let mut wire = Vec::new();
-        write_live_progress(&mut wire, &update).unwrap();
+        wire.extend(prepare_live_progress(&update).unwrap());
         write_live_complete(&mut wire, &complete).unwrap();
         for size in 1..=wire.len() {
             let mut decoder = Decoder::default();

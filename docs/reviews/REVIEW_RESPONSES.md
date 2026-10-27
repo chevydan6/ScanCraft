@@ -1483,3 +1483,38 @@ Reviewer assignment220 independently verified the earlier preview-only commits
 is acknowledged; those results do not independently verify the new live changes.
 Only the independent reviewer may verify/close the finding. No paid usage,
 firmware, physical calibration, protection bypass or owner merge approval occurs.
+
+Native extension source5d07769 completed CLI review versus283df43 across eleven
+files: one major verification/coupling concern, one minor stdout-lock concern;
+major gate blocked, exit2. The blocked result is retained, not treated as a pass.
+
+CR-LIVE-DISPLAY-REJECTION — accepted. Both production offer paths in
+`live_stereo/runner.rs` use `Processor::preview_cloud`, which delegates to
+`Session::preview_cloud(50000)` and `VoxelFusion::preview_cloud`'s stride over
+its own voxel set. Thus current offers use a bounded fused subset rather than a
+per-pair pre-fusion cloud. Nonetheless, validation and serialized-size rejection
+are display concerns and must not cancel recording/publication. Preparation is
+now separate from pipe writes. Invalid/oversized previews are omitted with a
+small counter-only update, accumulated skip count and private diagnostic; final
+summaries expose helper_omitted_previews. Only actual pipe write/flush failure
+requests WorkControl cancellation. Engine geometry/output validation remains
+independent and unchanged. Regressions inject invalid thumbnails and oversized
+tracking JSON, verify no scan cancellation and retained counters, verify valid
+geometry/thumbnails survive transfer, and confirm real BrokenPipe requests abort.
+The actual synthetic process integration asserts zero omissions on its healthy
+engine path. No observed physical-scan failure is asserted.
+
+CR-LIVE-STDOUT-LOCK — verification/advice accepted; no offending diagnostic calls
+needed relocation. Static search of acquisition, live runner/control, device,
+depth, image, calibration and geometry source found no print!/println!/dbg!
+calls; existing cleanup diagnostics use eprintln! to stderr. The parent's
+synthetic diagnostic println occurs after child supervision, outside the engine
+call. The sender now holds stdout only for a fully prepared packet write/flush,
+not for the scan lifetime or encoding/sleep. Stdout remains reserved for binary
+IPC; future engine diagnostics must use stderr. This prevents the proposed
+scan-lifetime lock dependency without claiming arbitrary stdout text is valid IPC.
+
+Corrected full tools/check.sh passes formatting, strict all-target Clippy,
+640 tests and release build. Corrected-source numerical/physical accuracy is not
+claimed from these transport tests. Fresh incremental review and exact commit
+coverage follow separately; no independent finding severity/status is changed.

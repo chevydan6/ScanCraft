@@ -88,9 +88,12 @@ separately and added to the child's skipped-preview total.
 The child progress sender polls every 30 ms, matching the existing GUI repaint
 cadence instead of imposing a 10 Hz cap. No measured FPS/latency claim is made.
 The child progress thread consumes the one-slot engine mailbox without holding
-its mutex during serialization or pipe writes. Display transport failure requests
-abort. A blocked display writer does not own acquisition or reconstruction, and
-parent-monitor exit closes the pipe. The child joins its progress sender before
+its mutex during serialization or pipe writes. Display validation or encoding-limit failures omit the preview, preserve counter
+updates and increment the helper omission count. Only pipe write/flush failures
+request abort. Final summaries expose `helper_omitted_previews`; rejected display
+data does not change raw recording or engine publication validation. A blocked display writer does not own acquisition or reconstruction, and
+parent-monitor exit closes the pipe. The stdout lock is held only while one prepared packet is written and flushed;
+engine diagnostics must use stderr. The child joins its progress sender before
 writing completion so packets cannot interleave. Completion carries a bounded
 summary; the full per-pair report remains in the published folder's `report.json`
 and is not copied into IPC. All hardware qualification flags remain false.

@@ -199,6 +199,40 @@ fn summary(report: &Value) -> Result<Value, String> {
         "details":"report.json in the published scan folder"}),
     )
 }
+/// Presentation failures drop only the preview, preserving small counter
+/// updates. Only a pipe write/flush error requests scan abort/cleanup.
+fn send_display(
+    mut update: scancraft_workflow::live_stereo::control::display::DisplayUpdate,
+    omitted: &mut usize,
+    work: &WorkControl,
+    control: &Control,
+    send: impl FnOnce(&[u8]) -> io::Result<()>,
+) -> Result<(), String> {
+    update.skipped_previews = update.skipped_previews.saturating_add(*omitted);
+    let packet = match capture_ipc::prepare_live_progress(&update) {
+        Ok(packet) => packet,
+        Err(error) => {
+            if update.preview.take().is_some() {
+                *omitted = omitted.saturating_add(1);
+                update.skipped_previews = update.skipped_previews.saturating_add(1);
+            }
+            eprintln!("Display preview omitted (scan continues): {error}");
+            match capture_ipc::prepare_live_progress(&update) {
+                Ok(packet) => packet,
+                Err(error) => {
+                    eprintln!("Display counter update omitted (scan continues): {error}");
+                    return Ok(());
+                }
+            }
+        }
+    };
+    if let Err(error) = send(&packet) {
+        work.cancel();
+        control.request_stop();
+        return Err(error.to_string());
+    }
+    Ok(())
+}
 fn child_session(paths: &[PathBuf], synthetic: bool) -> Result<Value, String> {
     eprintln!(
         "{}",
@@ -223,19 +257,19 @@ fn child_session(paths: &[PathBuf], synthetic: bool) -> Result<Value, String> {
     let c = control.clone();
     let progress = std::thread::Builder::new()
         .name("scancraft-scan-helper-display".into())
-        .spawn(move || {
-            let mut output = io::stdout().lock();
+        .spawn(move || -> Result<usize, String> {
+            let mut omitted = 0;
             loop {
                 let finished = d.load(Ordering::Acquire);
-                if let Err(error) =
-                    capture_ipc::write_live_progress(&mut output, &c.take_display_update())
-                {
-                    w.cancel();
-                    c.request_stop();
-                    return Err(error.to_string());
-                }
+                send_display(c.take_display_update(), &mut omitted, &w, &c, |packet| {
+                    // Reserve stdout for IPC. Hold its lock only for one fully
+                    // prepared packet, never while the engine runs or sleeps.
+                    let mut output = io::stdout().lock();
+                    output.write_all(packet)?;
+                    output.flush()
+                })?;
                 if finished {
-                    return Ok(());
+                    return Ok(omitted);
                 }
                 // Match GUI polling cadence; do not impose a fixed 10 Hz preview cap.
                 std::thread::sleep(Duration::from_millis(30));
@@ -256,8 +290,12 @@ fn child_session(paths: &[PathBuf], synthetic: bool) -> Result<Value, String> {
         json!({"scan_result":outcome.as_ref().map(|_| "completed").map_err(|e|e.as_str()),"transport_error":transport.as_ref().err()})
     );
     match (outcome, transport) {
-        (Ok(report), Ok(())) => summary(&report),
-        (Err(error), Ok(())) => Err(error),
+        (Ok(report), Ok(omitted)) => {
+            let mut report = summary(&report)?;
+            report["helper_omitted_previews"] = json!(omitted);
+            Ok(report)
+        }
+        (Err(error), Ok(_)) => Err(error),
         (Ok(_), Err(error)) => Err(format!(
             "Scan completed but display transport failed: {error}; inspect target report.json"
         )),
@@ -401,6 +439,135 @@ mod tests {
         assert!(helper.child().try_wait().unwrap().is_none());
         assert!(start.elapsed() < Duration::from_millis(800));
     }
+    #[test]
+    fn invalid_or_oversized_preview_is_omitted_without_cancelling_scan_or_counters() {
+        use scancraft_geometry::Cloud;
+        use scancraft_workflow::live_stereo::control::{Snapshot, Thumbnail};
+        let work = WorkControl::default();
+        let control = Control::new(true);
+        let mut omitted = 0;
+        for oversized in [false, true] {
+            let mut update = control.take_display_update();
+            update.recorded_frames = [7, 8];
+            update.preview = Some(Snapshot {
+                pair_id: 0,
+                cameras: [
+                    Thumbnail {
+                        width: 1,
+                        height: 1,
+                        pixels: vec![1],
+                    },
+                    Thumbnail {
+                        width: if oversized { 1 } else { 0 },
+                        height: 1,
+                        pixels: vec![2],
+                    },
+                ],
+                cloud: Cloud { points: vec![] },
+                fused_points: 0,
+                tracking: if oversized {
+                    Value::String("x".repeat(capture_ipc::MAX_PROGRESS))
+                } else {
+                    Value::Null
+                },
+            });
+            let mut wire = Vec::new();
+            send_display(update, &mut omitted, &work, &control, |packet| {
+                wire.extend_from_slice(packet);
+                Ok(())
+            })
+            .unwrap();
+            assert!(work.check().is_ok());
+            assert!(!control.stop_requested());
+            let mut decoder = Decoder::default();
+            decoder.push(&wire).unwrap();
+            match decoder.next().unwrap().unwrap() {
+                Message::LiveProgress(update) => {
+                    assert!(update.preview.is_none());
+                    assert_eq!(update.recorded_frames, [7, 8]);
+                    assert_eq!(update.skipped_previews, omitted);
+                }
+                _ => panic!("wrong display packet"),
+            }
+        }
+        assert_eq!(omitted, 2);
+    }
+    #[test]
+    fn valid_preview_reaches_the_parent_with_geometry_and_thumbnails_intact() {
+        use scancraft_geometry::{Cloud, Point};
+        use scancraft_workflow::live_stereo::control::{Snapshot, Thumbnail};
+        let work = WorkControl::default();
+        let control = Control::new(true);
+        let mut update = control.take_display_update();
+        update.preview = Some(Snapshot {
+            pair_id: 9,
+            cameras: [
+                Thumbnail {
+                    width: 1,
+                    height: 1,
+                    pixels: vec![11],
+                },
+                Thumbnail {
+                    width: 1,
+                    height: 1,
+                    pixels: vec![22],
+                },
+            ],
+            cloud: Cloud {
+                points: vec![Point {
+                    position: [1., 2., 3.],
+                    color: None,
+                    normal: None,
+                }],
+            },
+            fused_points: 1,
+            tracking: json!({"state":"fixture"}),
+        });
+        let mut wire = Vec::new();
+        let mut omitted = 0;
+        send_display(update, &mut omitted, &work, &control, |packet| {
+            wire.extend_from_slice(packet);
+            Ok(())
+        })
+        .unwrap();
+        assert_eq!(omitted, 0);
+        let mut decoder = Decoder::default();
+        decoder.push(&wire).unwrap();
+        match decoder.next().unwrap().unwrap() {
+            Message::LiveProgress(update) => {
+                let preview = update.preview.unwrap();
+                assert_eq!(preview.pair_id, 9);
+                assert_eq!(preview.cloud.points[0].position, [1., 2., 3.]);
+                assert_eq!(preview.cameras[0].pixels, [11]);
+                assert_eq!(preview.cameras[1].pixels, [22]);
+            }
+            _ => panic!("wrong display packet"),
+        }
+        assert!(work.check().is_ok());
+    }
+
+    #[test]
+    fn actual_display_pipe_failure_requests_abort_and_cleanup() {
+        let work = WorkControl::default();
+        let control = Control::new(true);
+        let error = send_display(
+            control.take_display_update(),
+            &mut 0,
+            &work,
+            &control,
+            |_| {
+                Err(io::Error::new(
+                    io::ErrorKind::BrokenPipe,
+                    "parent pipe gone",
+                ))
+            },
+        )
+        .unwrap_err();
+        assert!(error.contains("parent pipe gone"));
+        assert!(work.check().is_err());
+        assert!(control.stop_requested());
+    }
+
     #[test]
     fn summary_stays_small_and_never_attests_hardware() {
         let report = json!({"kind":"synthetic_live_stereo_pipeline", "fused_points":3,
