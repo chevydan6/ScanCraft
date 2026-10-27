@@ -78,5 +78,5 @@ files/manifests, use the pinned toolchain and a dedicated target directory, run
 `tools/check.sh` plus named oracle commands, and compare actual artifacts. This
 report references existing validation and does not claim an independent repeat of
 all historical tests/private hardware trials or a new legal clearance of all Git
-history. No firmware, calibration, source algorithms, existing reviewer documents,
+history. No firmware, calibration, source algorithms, reviewer-owned records,
 GitHub protections or main-branch state is changed by this audit.
