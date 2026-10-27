@@ -1357,3 +1357,13 @@ cases or fixture helpers. The aggregate is not a physical qualification or
 correctness measure. No threshold/configuration is weakened and no redundant
 source review is requested for this evidence-only follow-up. Specific missing
 API contracts remain eligible for targeted documentation work.
+
+Developer hardware-recording evidence follow-up (no new source change): release
+`recording-scr` additionally verifies four private line-control/off-check files,
+60 frames per camera per state. Trial120 frames all numeric type2; off120 frames
+all type1. Four derived single-frame recordings agree but are not independent
+samples. The trial manifest reports property151 enabled/read back and restored,
+while physical emission, wavelength and calibration binding remain unverified.
+Recorded the qualified comparison in `docs/RAPTOR_SCR_OBSERVATIONS.md`; no mode
+activation, vendor code import, new accuracy claim or SCAN-REV-006 closure.
+Existing 613-test/source review evidence remains for unchanged Rust code.

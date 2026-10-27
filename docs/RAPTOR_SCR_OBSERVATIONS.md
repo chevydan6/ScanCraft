@@ -54,3 +54,21 @@ existing PTS validator therefore advance by `2 + PTS*4 + SCR*6`, requiring the
 declared length to be at least that size. This supports extended wire headers
 without consuming bytes belonging to the next Linux record. Vendor-specific
 metadata formats that retain extension bytes are outside this UVCH contract.
+
+## Saved line-control trial comparison
+
+Read-only replay with the release `recording-scr` command additionally verified
+four genuine native recordings through their CRCs and footers: two line-control
+trial recordings (60 frames per camera) and two subsequent off-check recordings
+(60 frames per camera). All 120 trial frames report numeric vendor type 2; all
+120 off-check frames report type 1. None has missing SCR, unknown tags or
+conflicting known types. Four previously extracted single-frame recordings
+agree, but are derivatives and do not count as independent observations.
+
+The trial manifest records property 151 (`OB_PROP_LASER_LINE_BOOL`) changing
+from 0 to 1, enabled readback after capture and successful restoration. It
+explicitly leaves physical emission, wavelength and calibration binding
+unverified. These observations establish an association for the recorded trial,
+not universal mode names, a qualified blue-laser scan or current device state.
+The native command and saved recordings are sufficient to repeat decoding
+locally; private captures and manifests remain excluded from redistribution.
