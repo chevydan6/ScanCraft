@@ -172,7 +172,7 @@ mod tests {
     fn failed_probe_keeps_pending_guard_until_actual_child_exit() {
         let mut command = Command::new("sh");
         command
-            .args(["-c", "exec sleep 0.1"])
+            .args(["-c", "cat >/dev/null; exec sleep 0.1"])
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::null());
