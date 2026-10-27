@@ -516,7 +516,7 @@ b452b09 to avoid duplicate review of unchanged earlier source. Commitrefs follow
 DEV-SEQUENCE-GUI-001 implementation `1bed149cdc5e998d77710a04d25b41d39e76bb4a`,
 PR https://github.com/chevydan6/ScanCraft/pull/8. Included capacity returned1 with
 inactive billing; one combined CodeRabbit CLI review against exact b452b09 completed
-26files, zero findings, major gate passed, exit0. Head/tree unchanged before/after;
+26files, zero findings, major gate passed, exit 0. Head/tree unchanged before/after;
 operator manifest/report and full538gate hashes plus file blob IDs in
 evidence/2026-10-26-combined-recorded-sequence-review.json. No paid consent/flag.
 This covers current combined implementation, not a server immutable-head attestation
@@ -598,7 +598,7 @@ capacity/billing will be checked before one incremental review; no paid consent.
 DEV-SEQUENCE-REF-001 implementation `c67a46fba687fb941cacd7b1d01912c52ea92597`,
 PR https://github.com/chevydan6/ScanCraft/pull/9. Included CodeRabbit CLI review
 against exact13790e3 completed15files, one minor finding, zero blocking findings,
-major gate passed, exit0. Head/tree unchanged before/after; operator manifest,
+major gate passed, exit 0. Head/tree unchanged before/after; operator manifest,
 file blob IDs and log/report hashes in evidence/2026-10-27-sequence-reference-review.json.
 This is not server immutable-head attestation or a new review of later bookkeeping.
 
@@ -1534,7 +1534,7 @@ Only the independent reviewer may verify and close018; its last-read status is
 Open.005 also remains Open, and actual driver/disconnect qualification is pending.
 
 Fresh incremental CLI review of exact beac45e versus5d07769 completed across five
-files: zero findings, major gate passed, exit0. This is the third CLI pass for
+files: zero findings, major gate passed, exit 0. This is the third CLI pass for
 this feature; no unchanged fourth review is requested. Initial blocked review
 history is preserved. Complete corrected context/diff secret scans passed after
 rebuilding them in private developer storage; the earlier interrupted /tmp-quota
@@ -1639,8 +1639,8 @@ real corner accuracy, uncertainty, camera/mode binding and native hardware
 geometry remain incomplete. Physical calibration stays deferred.
 
 
-Discovery correction CLI review of c84655d versus6cd439e completed: three files,
-zero major findings, major gate passed, exit0. Two minor findings accepted:
+Discovery correction CLI review of c84655d versus 6cd439e completed: three files,
+zero major findings, major gate passed, exit 0. Two minor findings accepted:
 CR-DISCOVERY-TEST-TIMER: the child could start its100ms sleep before the test
 timer. Its script now waits for stdin EOF, which retain_until_exit requests
 after timer initialization, eliminating that scheduling race. This changes only
@@ -1715,3 +1715,13 @@ Readiness utility validation: full repository gate completed successfully with
 regressions pass, including contradictory publication totals failing closed.
 Current source remains unreviewed by CodeRabbit; review capacity is reserved
 first for final discovery corrections and then the queued corner measurements.
+
+
+Final discovery CLI review: exact ce56000 versus c84655d completed across two
+files with zero major findings, one minor documentation-spacing finding, major
+gate passed and exit 0. CR-DISCOVERY-PROVENANCE-SPACING accepted: revision and
+exit-status tokens are separated for readability. Production Rust and fixtures
+remain identical to the646-test validated ce56000 source. This is the third
+CLI pass for the discovery feature; no fourth review is requested for whitespace
+or the review outcome note. The remaining GitHub App review is separate and
+pending; CLI readiness does not provide owner merge consent.
