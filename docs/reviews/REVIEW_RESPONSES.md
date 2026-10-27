@@ -1824,3 +1824,18 @@ the probe's retained hashes and source but did not independently run it. No
 physical scan duration or throughput has been measured. The finding remains
 under independent reviewer control; long-session design and validation remain
 outstanding.
+
+CR-DISCOVERY-APP-REVIEW — GitHub App review completed for exact PR #23 head
+ a5deec7249d944c4f9f9fa70d0c019c5821fa37f against 224621b491a6a1811d184ac30f619e09d2713754.
+Run 5ced998c-8bd3-4223-9345-a78c2c37fb75 reports no actionable comments across
+five selected files; API returned no formal reviews or inline comments. The
+read-only readiness diagnostic identifies the matching current-head clean summary
+and zero unresolved threads; it explicitly does not authorize a merge. Both
+Rust CI checks for that PR passed; 646 tests and the actual CI integration tree
+were previously verified. The App's separate docstring-coverage warning is
+acknowledged: the helper lifecycle and its limits are described in
+CAPTURE_PROCESS_ISOLATION.md, and requiring generated docstrings on private
+functions solely to reach an automated percentage would not establish correctness.
+No source changes or further review request were made for this warning. Whole-app
+cleanup and physical hardware qualification remain unproven (SCAN-REV-005/006).
+This included review used the available allowance; no paid review was requested.
