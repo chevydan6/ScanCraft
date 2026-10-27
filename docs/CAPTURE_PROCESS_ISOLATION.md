@@ -1,7 +1,7 @@
 # Capture process isolation: development contract
 
 Status: preview/recording and native live-scan helpers implemented; physical
-driver-stall qualification and synchronous discovery isolation remain outstanding.
+driver-stall qualification remains outstanding; discovery now uses a read-only helper.
 Independent SCAN-REV-005 remains open. This document does not establish a bounded
 whole-application shutdown or hardware qualification.
 
@@ -150,7 +150,7 @@ held; after child cleanup the lock becomes acquirable. Test teardown releases
 the marker even on assertion unwind. No scanner, USB node, firmware or calibration
 is touched by these fixtures. Native live-scan Drop now joins an IPC supervisor rather than a device-owning
 thread. This does not establish a hard whole-application shutdown bound:
-synchronous discovery, process launch, filesystem operations and scheduler latency
+process launch, filesystem operations and scheduler latency
 remain outside that claim, and real driver-stall/disconnect tests are outstanding.
 Independent SCAN-REV-005 status remains under reviewer control.
 
@@ -184,3 +184,25 @@ flowchart LR
 and process tests; process supervision does not depend on rendering code. These
 internal helpers expect the executable's matching protocol; restart the GUI when
 replacing development binaries. No persisted recording/project format is changed.
+
+## Read-only discovery boundary
+
+`discovery_process::Discovery` starts a worker that supervises the same executable
+with `--discovery-helper`. Only the child calls device discovery, including
+opening candidate video nodes and QUERYCAP; it does not acquire a capture session
+or change scanner settings. Discovery uses the existing bounded completion
+protocol and private diagnostics, rejecting frame messages. The GUI polls
+completion without joining a live probe and prevents duplicate discovery and
+capture starts while pending. Stop requests graceful cancellation but leaves the
+pending guard active until actual child exit. Protocol/read failures also retain
+the guard until exit; they cannot silently enable repeated probes while a child
+is alive. An in-flight synchronous QUERYCAP may therefore leave discovery pending
+indefinitely, with the UI continuing to poll. No helper is killed.
+
+Discovery Drop separately requests abort and joins the IPC worker, so ordinary
+application destruction can wait for the software grace plus unbounded process
+launch/filesystem/scheduler latency. This is not a hard whole-app close deadline.
+No actual stuck-driver or device discovery reliability qualification is claimed.
+Unit tests check argument rejection, pre-launch cancellation, and nonblocking
+poll/cancel while a simulated probe is deliberately stalled. Existing supervisor
+process tests cover timeout and retained child ownership.

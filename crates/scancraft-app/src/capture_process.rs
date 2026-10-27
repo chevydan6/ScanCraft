@@ -120,7 +120,7 @@ pub(crate) fn nonblocking(file: &impl AsRawFd) -> io::Result<()> {
     }
     Ok(())
 }
-fn supervise(
+pub(crate) fn supervise(
     helper: &mut OwnedChild,
     cancel: &AtomicBool,
     abort: &AtomicBool,

@@ -516,7 +516,7 @@ b452b09 to avoid duplicate review of unchanged earlier source. Commitrefs follow
 DEV-SEQUENCE-GUI-001 implementation `1bed149cdc5e998d77710a04d25b41d39e76bb4a`,
 PR https://github.com/chevydan6/ScanCraft/pull/8. Included capacity returned1 with
 inactive billing; one combined CodeRabbit CLI review against exact b452b09 completed
-26files, zero findings, major gate passed, exit0. Head/tree unchanged before/after;
+26files, zero findings, major gate passed, exit 0. Head/tree unchanged before/after;
 operator manifest/report and full538gate hashes plus file blob IDs in
 evidence/2026-10-26-combined-recorded-sequence-review.json. No paid consent/flag.
 This covers current combined implementation, not a server immutable-head attestation
@@ -598,7 +598,7 @@ capacity/billing will be checked before one incremental review; no paid consent.
 DEV-SEQUENCE-REF-001 implementation `c67a46fba687fb941cacd7b1d01912c52ea92597`,
 PR https://github.com/chevydan6/ScanCraft/pull/9. Included CodeRabbit CLI review
 against exact13790e3 completed15files, one minor finding, zero blocking findings,
-major gate passed, exit0. Head/tree unchanged before/after; operator manifest,
+major gate passed, exit 0. Head/tree unchanged before/after; operator manifest,
 file blob IDs and log/report hashes in evidence/2026-10-27-sequence-reference-review.json.
 This is not server immutable-head attestation or a new review of later bookkeeping.
 
@@ -1534,7 +1534,7 @@ Only the independent reviewer may verify and close018; its last-read status is
 Open.005 also remains Open, and actual driver/disconnect qualification is pending.
 
 Fresh incremental CLI review of exact beac45e versus5d07769 completed across five
-files: zero findings, major gate passed, exit0. This is the third CLI pass for
+files: zero findings, major gate passed, exit 0. This is the third CLI pass for
 this feature; no unchanged fourth review is requested. Initial blocked review
 history is preserved. Complete corrected context/diff secret scans passed after
 rebuilding them in private developer storage; the earlier interrupted /tmp-quota
@@ -1566,3 +1566,64 @@ Correction validation: tools/check.sh completed successfully: formatting, strict
 all-target Clippy,641 tests and release build. Private gate log:
 preview-graceful-stop-gate.log in developer artifacts. Correction remains local
 pending follow-up review; the previous clean review covers beac45e, not this edit.
+
+
+SCAN-REV-019 — accepted. Assignment230 independently identifies the same ordinary
+preview Stop/abort coupling as CR-PR22-PREVIEW-GRACEFUL-STOP above. Exact local
+correction224621b491a6a1811d184ac30f619e09d2713754 and641-test gate are recorded
+above; independent verification and closure belong exclusively to the reviewer.
+
+Development follow-up for SCAN-REV-005: discovery_process.rs moves the remaining
+GUI-thread discovery/QUERYCAP into a supervised read-only child; main.rs polls
+and gates conflicting starts. capture_process.rs exposes existing supervision
+within the crate without changing its policy. No hard whole-application shutdown
+bound is claimed: Discovery Drop joins the IPC monitor, and launch/filesystem/OS
+scheduling are unbounded. Actual driver stalls and calibrated hardware remain
+unqualified. Independent005 status is not changed by development.
+
+Discovery follow-up full offline gate passes644 tests, formatting, strict
+all-target Clippy and release build. Initial new test used the wrong Worker::join
+return type; corrected to observe the actual polled result before this final
+gate. Complete tracked source plus intended new module and selected diff pass
+gitleaks; protected/private untracked files are excluded. CLI review pending.
+
+
+CR-DISCOVERY-CHILD-LIFETIME — accepted. First CLI review of6cd439e versus224621b
+completed with one major finding and blocked gate (exit2). Cancellation timeout
+could clear the UI discovery guard while a probe child was still alive, allowing
+repeated stuck children. Correction separates ordinary Stop from teardown abort.
+Normal Stop keeps supervising; after any protocol/supervision error, the worker
+retains the pending guard until actual child exit. Only Discovery Drop may stop
+waiting during application destruction. No forced kill or device reset occurs.
+New real child regressions check retained waiting until exit and teardown that
+does not falsely claim exit. Discovery can remain pending indefinitely on a stuck
+QUERYCAP; responsiveness does not establish a hard shutdown or hardware bound.
+The correction gate completed successfully; fresh review remains pending. The initial blocked review is
+retained in private developer artifacts/discovery-process/coderabbit.ndjson.
+
+Correction gate completed successfully:646 tests, formatting, strict all-target
+Clippy and release build. Fresh incremental review is still pending; this does
+not convert the initial blocked CLI result into a pass.
+
+
+Discovery correction CLI review of c84655d versus 6cd439e completed: three files,
+zero major findings, major gate passed, exit 0. Two minor findings accepted:
+CR-DISCOVERY-TEST-TIMER: the child could start its100ms sleep before the test
+timer. Its script now waits for stdin EOF, which retain_until_exit requests
+after timer initialization, eliminating that scheduling race. This changes only
+the fixture, not production discovery ownership.
+CR-DISCOVERY-STALE-STATUS: corrected the previous pending-gate sentence to reflect
+the completed646-test gate, retaining review history rather than altering
+independent findings. Fresh validation of this fixture correction follows. The
+second CLI result is retained in private discovery-process/correction-coderabbit.ndjson;
+it covers c84655d, not this later minor edit. No paid credits were used.
+
+
+Final discovery CLI review: exact ce56000 versus c84655d completed across two
+files with zero major findings, one minor documentation-spacing finding, major
+gate passed and exit 0. CR-DISCOVERY-PROVENANCE-SPACING accepted: revision and
+exit-status tokens are separated for readability. Production Rust and fixtures
+remain identical to the646-test validated ce56000 source. This is the third
+CLI pass for the discovery feature; no fourth review is requested for whitespace
+or the review outcome note. The remaining GitHub App review is separate and
+pending; CLI readiness does not provide owner merge consent.
