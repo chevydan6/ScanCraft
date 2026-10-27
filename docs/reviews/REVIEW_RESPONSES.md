@@ -1518,3 +1518,26 @@ Corrected full tools/check.sh passes formatting, strict all-target Clippy,
 640 tests and release build. Corrected-source numerical/physical accuracy is not
 claimed from these transport tests. Fresh incremental review and exact commit
 coverage follow separately; no independent finding severity/status is changed.
+
+SCAN-REV-018 — accepted. Exact correction
+beac45e04bbae5010bb4c60eca28c63545559d52 separates display preparation from
+transport writes, omits rejected previews while forwarding counters/diagnostics,
+counts omissions, and reserves scan abort for pipe write/flush errors. Source
+files are capture_ipc.rs/live_process.rs and the actual-process integration test;
+policy and regression details are recorded above under CR-LIVE-DISPLAY-REJECTION.
+Full offline gate passes640 tests, formatting, strict all-target Clippy and
+release. The corrected release synthetic diagnostic passes with zero omitted
+previews and retained false qualification flags. Independent assignment225's
+exact oversized-presentation case is covered by the new injected-budget
+regression; no observed hardware failure or physical qualification is asserted.
+Only the independent reviewer may verify and close018; its last-read status is
+Open.005 also remains Open, and actual driver/disconnect qualification is pending.
+
+Fresh incremental CLI review of exact beac45e versus5d07769 completed across five
+files: zero findings, major gate passed, exit0. This is the third CLI pass for
+this feature; no unchanged fourth review is requested. Initial blocked review
+history is preserved. Complete corrected context/diff secret scans passed after
+rebuilding them in private developer storage; the earlier interrupted /tmp-quota
+scan is not counted. Included capacity and inactive billing were checked before
+reviews, with no paid credits/charges. GitHub App review and integration CI are
+separate steps; owner merge consent is not inferred.
