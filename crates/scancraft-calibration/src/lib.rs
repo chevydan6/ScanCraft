@@ -12,6 +12,7 @@ pub mod laser_surface;
 pub mod orientation;
 pub mod planar;
 pub mod rectification;
+pub mod refinement;
 pub mod stereo;
 pub mod storage;
 

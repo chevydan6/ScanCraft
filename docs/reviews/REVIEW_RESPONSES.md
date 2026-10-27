@@ -1149,3 +1149,21 @@ review metadata only; no Rust, test, numerical method or measured value changes.
 No third unchanged code review or functional test repetition is warranted.
 GitHub App review and owner merge approval remain separate. SCAN-REV-006 is
 unqualified/under independent review and SCAN-REV-005 remains open.
+
+## Development milestone — native Brown5 refinement
+
+Advances part of SCAN-REV-006's tooling gap; does not resolve or reclassify the
+qualification finding. New refinement module fits intrinsics, Brown5 and poses
+with analytic Jacobians, bounded block Schur LM, residual/stationarity/information
+and numerical monotonicity checks. Diagnostic results never install calibration.
+Workflow planar_calibration and CLI calibrate-planar provide bounded input, exact
+request retention and atomic no-overwrite publication with existing primitives.
+No new runtime dependencies or device/firmware/physical calibration changes.
+Seven math and two workflow tests, independent three-case OpenCV/NumPy checks and
+release CLI preservation/rejection checks pass. Exact workspace/review evidence is
+recorded separately by source revision. Finding status belongs to the reviewer.
+
+The combined source gate passed 598 Rust tests, formatting, strict all-target
+Clippy and release build (exit 0). Source/log and synthetic runtime hashes are
+recorded in 2026-10-27-brown-calibration-reference.json. These are software gates,
+not hardware qualification.

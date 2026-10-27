@@ -306,3 +306,9 @@ SciPy comparison. Next add stronger correspondence/global alignment strategies,
 calibrated real-sequence evaluation, trajectory optimization and live integration.
 Do not interpret local robust convergence as verified physical or global alignment.
 Continue transport isolation and deferred genuine calibration/geometry requirements.
+
+Supplied-observation calibration now includes pinhole initialization and joint
+Brown5/intrinsic/target-pose refinement through an offline diagnostic CLI. Next add
+joint stereo fitting, target/subpixel detection, coverage/uncertainty and explicit
+device/mode binding. Physical calibration stays deferred. Supplied observations
+and small residuals do not qualify Raptor reconstruction or remove hardware trials.

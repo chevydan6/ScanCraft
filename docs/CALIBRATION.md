@@ -6,8 +6,9 @@ schemas. [Factory-data diagnostics](FACTORY_CALIBRATION.md) extract named lens,
 pose and laser fields; extraction does not establish their active-mode binding,
 physical units, camera assignment or physical accuracy. The crate now provides
 an explicit [planar pinhole initializer](PLANAR_CALIBRATION_INITIALIZER.md) from
-supplied metric correspondences. It does not detect board corners, fit distortion,
-refine a complete calibration, or establish a qualified Raptor optical model.
+supplied metric correspondences and explicit [Brown5 nonlinear refinement](BROWN_CALIBRATION_REFINEMENT.md)
+with an offline CLI workflow. Target-corner detection, joint stereo estimation,
+physical lens coverage and a qualified Raptor optical model remain incomplete.
 Genuine calibrated Raptor geometry remains unverified, and physical calibration
 remains deferred by user request.
 

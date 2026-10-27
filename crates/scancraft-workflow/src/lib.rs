@@ -5,6 +5,7 @@ pub mod mesh_history;
 pub mod mesh_trim;
 pub mod meshing;
 pub mod output;
+pub mod planar_calibration;
 pub mod scan_project;
 pub mod scan_project_load;
 pub mod section_document;

@@ -795,3 +795,13 @@ estimation, nonlinear refinement, joint stereo calibration and genuine Raptor
 optical binding remain incomplete. Physical calibration remains deferred.
 Evidence: docs/PLANAR_CALIBRATION_INITIALIZER.md and
 docs/reviews/evidence/2026-10-27-planar-initializer-reference.json.
+
+## Brown5 refinement — synthetic software evidence only
+
+Joint intrinsics/distortion/target-pose fitting has seven numerical and two workflow
+regressions. Three 12-view synthetic cases pass truth/NumPy and zero-skew OpenCV
+checks. Release CLI fits retain exact inputs, preserve existing outputs and reject
+malformed requests; an altered distortion coefficient fails the reference checker.
+This does not qualify Raptor optics or change hardware acceptance gates. See
+docs/BROWN_CALIBRATION_REFINEMENT.md and
+docs/reviews/evidence/2026-10-27-brown-calibration-reference.json.
