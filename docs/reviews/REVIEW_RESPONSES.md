@@ -1606,6 +1606,39 @@ Clippy and release build. Fresh incremental review is still pending; this does
 not convert the initial blocked CLI result into a pass.
 
 
+SCAN-REV-020 — accepted. This is the independently recorded counterpart of
+CR-DISCOVERY-CHILD-LIFETIME. Exact correction
+c84655d467130591db875bb6523202e5c05e2180 and646-test full gate are recorded above.
+Independent assignment233 verified five isolated discovery tests and retained-
+child semantics and marks020 Resolved; development did not edit its findings.
+Fresh corrected-source CodeRabbit review remains pending included capacity.
+Independent assignment231 likewise verified224621b and marks019 Resolved.
+Neither resolution closes005 or establishes physical scanner qualification.
+
+Developer milestone (not an independent finding): offline seeded target-corner
+measurement preparation. New image::corners solves gradient-orthogonality normal
+equations with bounded Gaussian windows, explicit rank/contrast/displacement/
+border/convergence failures and cancellation. Shared workflow::target_corners
+and CLI refine-target-corners preserve exact PNG/request, association order,
+refined PlanarView, diagnostics and CRC manifest in no-overwrite output. No
+calibration is fitted/activated and no hardware/configuration is touched.
+Independent mathematical implementation references OpenCV cornerSubPix docs;
+no upstream code/assets copied and no new production dependencies.
+Source: image/src/corners.rs, image/examples/corner_reference.rs,
+workflow/src/target_corners.rs, their lib.rs declarations, cli/src/main.rs,
+tools/compare_target_corners_opencv.py; design/provenance/limitations documented
+in docs/TARGET_CORNER_REFINEMENT.md plus status/roadmap.
+Validation: full tools/check.sh passes652 tests, formatting, strict all-target
+Clippy and release; twelve synthetic cases match independent NumPy/OpenCV
+under fixed tolerances. Actual release CLI retained exact inputs/association,
+verified all artifact lengths/CRC, refused overwrite and left saved bytes intact.
+Private evidence lives under developer artifacts/corner-refinement (full-gate.log,
+fixture.json, reference-report.json, runtime-proof.json). Fresh CodeRabbit review
+is pending; no paid capacity or clean-review claim. Full-board detection/indexing,
+real corner accuracy, uncertainty, camera/mode binding and native hardware
+geometry remain incomplete. Physical calibration stays deferred.
+
+
 Discovery correction CLI review of c84655d versus 6cd439e completed: three files,
 zero major findings, major gate passed, exit 0. Two minor findings accepted:
 CR-DISCOVERY-TEST-TIMER: the child could start its100ms sleep before the test
@@ -1619,6 +1652,71 @@ second CLI result is retained in private discovery-process/correction-coderabbit
 it covers c84655d, not this later minor edit. No paid credits were used.
 
 
+Publication and follow-up evidence:
+- Preview Stop correction224621b is published in PR22. Both new GitHub Rust
+  checks passed; the CodeRabbit App check skipped because the base is a
+  nondefault development branch. Skip is not verification. Evidence reply:
+  https://github.com/chevydan6/ScanCraft/pull/22#discussion_r4385599810 .
+  The existing thread remains for independent verification; no merge occurred.
+- Discovery final minor correctionce5600022421008cbcf0cc429ddbce9fdeb65036
+  passes the exact branch's full646-test gate and five focused discovery tests.
+  Published draft PR23: https://github.com/chevydan6/ScanCraft/pull/23 .
+  Both GitHub Rust checks passed; App skipped for the draft. The preceding
+  c84655d CLI review passed major severity with two accepted minor findings;
+  final minor edit remains pending fresh included review, not silently marked
+  reviewed. No paid credits or additional unchanged review was requested.
+
+Developer build-evidence correction (not an independent finding): sharing the
+Cargo target directory between checkout paths left an older release workflow
+library/executable in the normal output. A nominally fresh build did not prove
+that the new command existed. Actual command verification caught the mismatch;
+subsequent shared-directory gates passed652 debug tests but failed release and
+are explicitly not full passes. Targeted cleaning initially left artifacts from
+the other checkout. Suspect remaining ScanCraft release artifacts were preserved
+in private quarantine (83 entries; relocation manifest), not confused with new
+source outputs. All source, reviewer files, captures and external dependencies
+were preserved. A never-shared build directory then passed the full source gate
+at cac7f5b:652 tests, formatting, strict all-target Clippy and release build.
+The isolated release CLI successfully published a new measurement bundle,
+verified exact inputs/associations and all lengths/CRC, and refused overwrite.
+Rebuilt normal-path binaries passed those same actual CLI checks; the normal app
+also passed its explicit synthetic parent/helper/engine diagnostic with zero
+omitted previews and false physical qualification. No actual GUI/GPU launch or
+hardware qualification is inferred. Documentation now requires per-checkout
+build isolation. Private evidence: corner-refinement/isolated-clean-gate.log,
+isolated-runtime-proof.json, restored-current-release-proof.json,
+restored-app-synthetic-summary.json and stale-release-cache/relocation.json.
+The corner algorithm itself is unchanged from92374f8; its first CodeRabbit review
+remains pending included capacity. This documentation-only follow-up does not
+claim new source coverage from old reviews or alter independent finding status.
+
+
+SCAN-REV-003 — accepted; partial workflow correction. New read-only
+`tools/review_readiness.py` reports actual current-head formal CodeRabbit review
+coverage separately from a successful/skipped badge. It requires known completed
+publication batches, a stable head snapshot, complete conversation evidence and
+no unresolved threads; draft/closed PRs and changes-requested reviews block.
+It performs only GitHub reads and always reports merge_authorized=false. This
+is a diagnostic, not an enforced authorization gate, and does not resolve
+SCAN-REV-002 credential separation or prove CI/code correctness. Unknown formats
+and evidence failures report not ready. No branch protection or existing review
+mechanism was changed. Only the independent reviewer may verify/close003.
+Ten offline synthetic tests pass, including stale/spoofed/pending/dismissed
+reviews, incomplete batches/pagination, changed heads, drafts and unresolved
+outdated conversations. Actual read-only runs correctly report PR22 not ready
+(no current-head completed App review; one open thread) and PR23 not ready
+(draft; no completed current-head App review), despite passing Rust checks.
+Source: tools/review_readiness.py, tools/test_review_readiness.py and
+DEVELOPMENT_REVIEW.md. Full repository gate/fresh CodeRabbit review are pending;
+no paid capacity, comment posting, thread resolution or merge occurs in this tool.
+
+Readiness utility validation: full repository gate completed successfully with
+652 Rust tests, formatting, strict all-target Clippy and release. Ten Python
+regressions pass, including contradictory publication totals failing closed.
+Current source remains unreviewed by CodeRabbit; review capacity is reserved
+first for final discovery corrections and then the queued corner measurements.
+
+
 Final discovery CLI review: exact ce56000 versus c84655d completed across two
 files with zero major findings, one minor documentation-spacing finding, major
 gate passed and exit 0. CR-DISCOVERY-PROVENANCE-SPACING accepted: revision and
@@ -1627,3 +1725,39 @@ remain identical to the646-test validated ce56000 source. This is the third
 CLI pass for the discovery feature; no fourth review is requested for whitespace
 or the review outcome note. The remaining GitHub App review is separate and
 pending; CLI readiness does not provide owner merge consent.
+
+
+DEV-READINESS-CLEAN-SUMMARY (developer-identified format limitation) — accepted.
+The actual PR22 follow-up App review completed with no actionable comments for
+224621b, run e80421b6-3071-4107-b7a9-6c6f29fbf176, in bot issuecomment6433690801.
+It did not create a formal bot PR review. The initial checker conservatively
+rejected that unknown evidence shape; the owner's reply review was correctly
+not mistaken for a bot review. This is not a new independent finding or closure.
+Correction adds a separate known-summary evidence path, requiring the API bot
+identity, one recent-review section, exact repository/head URL, UUID and one
+final_review_risk_coverage object with matching source/covered head and reviewed
+kind. Skipped, triaged, stale, spoofed, ambiguous or malformed summaries fail
+closed; open threads, state/head races and changes-requested checks remain.
+The tool still never changes threads/protections/credentials or authorizes merge.
+Four new unique tests (14 total) pass. Actual read-only PR22 now recognizes the
+current-head summary; the bot independently resolved its old thread, giving
+coverage/conversations ready with merge_authorized=false. The initial shell
+assertion expected an open thread and returned nonzero when that real state
+changed; inspect the JSON, not that obsolete expectation, as readiness evidence.
+Source: tools/review_readiness.py, tools/test_review_readiness.py and workflow
+documentation. Full gate and incremental CodeRabbit review follow separately.
+No physical calibration, firmware, application algorithm or owner setup changes.
+
+Known-summary correction gate completed successfully in its dedicated checkout
+build directory:652 Rust tests, formatting, strict all-target Clippy and release;
+14 unique Python tests pass. These checks do not prove merge authorization.
+Incremental CodeRabbit review remains pending. The original combined ced7697
+review completed14 files/zero findings/major-pass, and exact ced7697 is published
+in PR24; this later checker correction is not falsely included in that result.
+
+Known-summary correction review of exact99de067 versus ced7697 completed across
+four changed files: zero findings, major gate passed, exit0. This is the second
+CLI pass for the combined corner/readiness milestone; no unchanged repeat is
+requested. Complete diff and tracked context pass secret scans; fresh included
+capacity and inactive billing were checked, with no paid flags. Source code
+remains the tested/reviewed99de067; this outcome note is documentation-only.

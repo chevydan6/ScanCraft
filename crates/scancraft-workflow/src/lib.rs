@@ -14,6 +14,7 @@ pub mod sequence;
 pub mod statistical;
 pub mod stereo_calibration;
 pub mod stereo_surface;
+pub mod target_corners;
 use crate::output::{publish, staging};
 use image::{ColorType, ImageDecoder, codecs::png::PngDecoder};
 use scancraft_calibration::{CameraModel, stereo::TriangulationLimits, storage};

@@ -4,6 +4,7 @@ use scancraft_calibration::{Brown5, CameraModel, stereo::RigidPose};
 use scancraft_core::{Frame, StreamProfile, validate_frame};
 use scancraft_geometry::work::{Stage, WorkControl};
 
+pub mod corners;
 pub mod diagnostics;
 pub mod laser;
 pub mod stereo;

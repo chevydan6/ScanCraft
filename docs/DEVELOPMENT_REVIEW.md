@@ -26,6 +26,20 @@ components and run `cargo fetch --locked` while network access is available.
 `tools/check.sh` uses `--frozen` for clippy/tests/build: missing cached dependencies
 fail instead of being downloaded. Rustup/toolchain setup is a separate online step.
 
+## Build output isolation
+
+Use a separate Cargo target directory for each checkout path. Do not point a
+review worktree at the active developer checkout's `target`: same-name/version
+workspace packages can leave relative dependency-info and artifacts from the
+other source tree, including an older release library or executable despite a
+later `cargo build` reporting it fresh. This occurred during discovery/corner
+integration and was detected by running the actual release command, not merely
+checking Cargo's exit status. Preserve suspect artifacts for diagnosis, rebuild
+in a never-shared directory, and verify both the exact source revision and the
+actual executable's behavior before claiming release validation. Package-scoped
+cleaning did not remove every artifact from the other checkout in that incident.
+No scanner/firmware/setup change is part of build-cache recovery.
+
 ## Repeatable loop
 
 1. Start a focused `dev/...` branch from current main; preserve unrelated work.
@@ -78,6 +92,32 @@ fail instead of being downloaded. Rustup/toolchain setup is a separate online st
 8. Require passing checks and no unresolved actionable high-severity findings.
    Ask the owner to approve merging only after the change is reviewable. Do not
    merge, enable auto-merge or relax protection without explicit authorization.
+
+## Read-only review readiness diagnostic
+
+Run `python3 tools/review_readiness.py chevydan6/ScanCraft PR_NUMBER` before
+interpreting the App badge. This uses read-only `gh` calls and emits JSON/exit0
+only for known current-head CodeRabbit completion evidence with no open
+conversations on an open, ready PR. It verifies every batch of one publication
+attempt. It also recognizes the observed bot no-actionable issue-comment format,
+requiring one recent-review section with the exact repository/commit URL and run
+UUID plus one final coverage marker whose source and covered heads match and
+whose kind is reviewed. Owner replies, stale/triaged/ambiguous summaries and
+check badges do not satisfy that path. It detects a head change during collection
+and refuses incomplete thread
+or comment pagination. Pending/dismissed/spoofed/unknown-format reviews and green
+or skipped check badges do not prove coverage. All unresolved conversations,
+including outdated ones, block this diagnostic; current-head changes-requested
+reviews are conservatively retained until an independent reviewer changes them.
+
+This is a point-in-time diagnostic, not an installed CI requirement or an
+authorization boundary. It does not test CI, correctness, quota, owner consent,
+or privileged credentials, and always reports `merge_authorized: false`.
+Re-check after every head change and immediately before any owner-approved merge.
+Changing CodeRabbit's publication format can make coverage unknown until the
+parser is updated with evidence. It never requests a review, resolves a thread,
+changes protection, posts a comment or performs a merge. Tests run offline via
+`python3 -m unittest discover -s tools -p test_review_readiness.py`.
 
 ## Repository controls
 

@@ -2189,3 +2189,14 @@ all three previous mono fixtures/artifact sets byte-for-byte. The 607-test full
 gate and synthetic OpenCV/NumPy/held-out triangulation checks pass. No physical
 calibration, actual Raptor optical binding, synchronization or accuracy is qualified.
 See docs/STEREO_EXTRINSIC_CALIBRATION.md.
+
+## Offline seeded target-corner measurement preparation
+
+An experimental Rust gradient-orthogonality corner refiner and shared CLI workflow
+now prepare pixel observations from explicit grayscale images/seeds, retaining
+exact inputs and target associations in a no-overwrite diagnostic bundle.
+Twelve synthetic cases agree with NumPy/OpenCV under stated numerical tolerances;
+no scanner accuracy or physical calibration is established. Full-board detection,
+coverage, uncertainty, source/mode binding and genuine calibrated reconstruction
+remain open. See docs/TARGET_CORNER_REFINEMENT.md. Physical calibration remains
+deferred; no capture calibration is installed or activated.
