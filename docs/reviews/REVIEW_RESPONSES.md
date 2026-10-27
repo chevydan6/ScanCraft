@@ -1321,3 +1321,39 @@ fixed commits without private/reviewer-owned files. No redundant third review
 is requested for this outcome-only documentation. GitHub App review and exact
 PR integration CI remain separate verification steps; owner merge consent is
 not inferred from either. Independent finding statuses remain untouched.
+
+SCAN-REV-017 — accepted. This independently identified UVCH stride defect
+matches CR-SCR-UVCH-LENGTH above. Correction commit
+106a8a32b90caaeec1276025c2ae511c41882f74 changes the core PTS and device SCR
+parsers, associated recording fixture and extended-header regressions. Full gate
+passes 613 tests, formatting, strict Clippy and release; corrected-source
+CodeRabbit review reports zero findings. No remaining claim that extended wire
+length equals copied metadata length is intentional. Vendor-specific metadata
+formats remain outside the standard UVCH parser contract.
+
+Independent reviewer assignment208 has now inspected the exact correction and
+response-only descendant eda0347, run 57 focused tests and an external reproduction
+harness, and marked SCAN-REV-017 Resolved. This paragraph records that independent
+verification; development did not alter the reviewer's finding or its status.
+Physical reconstruction and whole-application shutdown bounds remain unqualified.
+
+PR21 GitHub App review completed for exact eda0347b21361144d6c917c76aeeaed336edca8c:
+run cb6b7864-ac17-47bf-be9b-a833883177d0, summary comment6433274923 and
+finished reply6433279946, following manual request6433278727. Summary states no
+actionable comments; exact source/covered markers both identify eda0347 with
+kind reviewed. API inspection found zero inline comments, zero review threads
+and no formal approving review. App check is successful. This is completed
+review evidence, not owner merge approval. The fetched PR integration object
+9b83bb4d9aec1a1212dbf27c2edcb0b98d25caec has tree
+9684f9852c2d50b09d7dd144ab103eb3c1b376b3, identical to eda0347. Integration
+CI run40446307260 is still running at this observation; no CI pass inferred.
+
+CR-APP-SCR-DOCSTRINGS — advisory evaluated; blanket readiness threshold disputed.
+The App reports 16.67% versus 80%, 12 functions across six files, two unsupported
+files skipped. The public observation/inspection entry points document framing,
+error behavior, unknown/conflicting tags and bounded streaming; the method guide
+documents provenance and hardware limits. Most new functions are synthetic test
+cases or fixture helpers. The aggregate is not a physical qualification or
+correctness measure. No threshold/configuration is weakened and no redundant
+source review is requested for this evidence-only follow-up. Specific missing
+API contracts remain eligible for targeted documentation work.
