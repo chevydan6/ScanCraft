@@ -43,3 +43,14 @@ without publishing partial JSON. Memory remains bounded per frame.
 The API is not wired into live mode gating. It must
 not be used to select calibration or silently discard frames without separate
 qualification. Hardware mode activation and physical accuracy remain outstanding.
+
+## Linux copied header lengths
+
+The [Linux v6.17 UVCH format documentation](https://www.kernel.org/doc/html/v6.17/userspace-api/media/v4l/metafmt-uvc.html)
+and [`uvc_video_decode_meta`](https://github.com/torvalds/linux/blob/v6.17/drivers/media/usb/uvc/uvc_video.c)
+establish that standard UVCH records retain the original length byte but copy
+only the standard fields selected by the flags. Both SCR diagnostics and the
+existing PTS validator therefore advance by `2 + PTS*4 + SCR*6`, requiring the
+declared length to be at least that size. This supports extended wire headers
+without consuming bytes belonging to the next Linux record. Vendor-specific
+metadata formats that retain extension bytes are outside this UVCH contract.

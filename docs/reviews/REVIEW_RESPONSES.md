@@ -1264,3 +1264,43 @@ the score. Specific maintainability improvements can receive targeted docs. This
 is an App advisory, not a new independent SCAN finding. Final follow-up changes
 review metadata only; corrected source and the 607-test evidence remain unchanged.
 SCAN-REV-005/006 remain under independent reviewer control.
+
+## Developer milestone — passive SCR observations
+
+Developer-originated work, not a new independent finding. Source commit
+78f92ac adds `scancraft-device/src/scr_observations.rs` and CLI
+`recording-scr` in `scancraft-cli/src/recording_scr.rs`/`main.rs`.
+Accepted implementation priority: make the independently established Raptor SCR
+numeric tag contract observable before introducing any mode-dependent frame
+selection. Retain all per-record disagreements and unknown tags. Reject malformed
+headers with checked slices; preserve capture acceptance, recording format and
+existing device state. Provenance and qualifications are documented in
+`docs/RAPTOR_SCR_OBSERVATIONS.md`. No proprietary implementation is included.
+
+Validation: `tools/check.sh` passes formatting, strict all-target Clippy, 611
+workspace tests and release build. Four new focused tests cover all numeric tags,
+byte-three overrides, PTS present/absent, missing/unknown/conflicting SCR records,
+truncated headers, device error flags and truncated recording footer. The release
+CLI read four private genuine Raptor recordings through their verified footers:
+400 frames total, 400 SCR records, numeric type 1 throughout, zero missing,
+unknown or conflicting known tags. Private captures and raw results are excluded
+from commits and review uploads. This is hardware-recording replay evidence,
+not a fresh hardware run, mode-name validation or geometric accuracy result.
+
+SCAN-REV-005 and SCAN-REV-006 remain outstanding under independent reviewer
+control; this passive diagnostic does not resolve acquisition shutdown or physical
+qualification. No firmware, physical calibration, paid services, protection change
+or owner merge approval is involved. Automated review outcome follows separately.
+
+CR-SCR-UVCH-LENGTH — accepted. The initial CLI review of 78f92ac versus
+9f853105 completed across five files, with one minor finding and a passed major
+severity gate. Verified against Linux v6.17 `uvc_video_decode_meta`: standard UVCH
+copies `2 + PTS*4 + SCR*6` bytes while retaining the wire length byte. Corrected
+both the new SCR parser and existing `scancraft_core::uvc_pts`; otherwise the
+recording reader would reject valid extended headers before diagnostics ran.
+This deliberately expands acceptance to correctly formed standard UVCH records
+with extended declared wire lengths; malformed standard lengths still fail.
+Added consecutive extended-header tests to both parsers, including conflicting
+PTS detection, and changed the CRC-backed CLI fixture to extended lengths.
+This does not resolve independent acquisition shutdown/optics findings.
+Corrected full-gate and incremental-review results follow when completed.

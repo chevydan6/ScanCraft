@@ -181,7 +181,12 @@ mod tests {
                 let mut body = original_body.to_vec();
                 let expected = match kind {
                     0 => {
+                        // UVCH copies no timestamp bytes when PTS/SCR flags
+                        // are absent; remove the formerly present PTS too.
+                        body[24 + 10] = 2;
                         body[24 + 11] = 0;
+                        body[16..20].copy_from_slice(&12_u32.to_le_bytes());
+                        body.drain(36..40);
                         "missing sensor PTS"
                     }
                     1 => {

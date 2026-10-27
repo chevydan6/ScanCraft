@@ -27,11 +27,13 @@ pub fn uvc_pts(metadata: &[u8]) -> Result<Option<u32>, &'static str> {
         if metadata.len() - pos < 12 {
             return Err("truncated UVC metadata record");
         }
-        let length = metadata[pos + 10] as usize;
-        if length < 2 || pos + 10 + length > metadata.len() {
+        let declared_length = usize::from(metadata[pos + 10]);
+        let flags = metadata[pos + 11];
+        // UVCH retains the wire length but copies only standard PTS/SCR fields.
+        let length = 2 + 4 * usize::from(flags & 4 != 0) + 6 * usize::from(flags & 8 != 0);
+        if declared_length < length || length > metadata.len() - pos - 10 {
             return Err("invalid UVC header length");
         }
-        let flags = metadata[pos + 11];
         if flags & 0x40 != 0 {
             return Err("device reported a UVC frame error");
         }
@@ -94,6 +96,19 @@ mod tests {
             assert!(uvc_pts(&vec![255; n]).is_err() || n == 0);
         }
     }
+    #[test]
+    fn extended_header_length_uses_copied_standard_fields() {
+        let mut record = vec![0; 22];
+        record[10] = 255;
+        record[11] = 12;
+        record[12..16].copy_from_slice(&123u32.to_le_bytes());
+        let mut metadata = record.clone();
+        metadata.extend(record);
+        assert_eq!(uvc_pts(&metadata), Ok(Some(123)));
+        metadata[34..38].copy_from_slice(&124u32.to_le_bytes());
+        assert_eq!(uvc_pts(&metadata), Err("inconsistent per-frame PTS"));
+    }
+
     #[test]
     fn genuine_record_layout_pts() {
         let mut m = vec![0; 22];

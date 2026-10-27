@@ -31,12 +31,14 @@ pub fn observe(metadata: &[u8]) -> Result<Vec<ScrObservation>, &'static str> {
         if remaining.len() < 12 {
             return Err("truncated UVC metadata record");
         }
-        let length = usize::from(remaining[10]);
-        if length < 2 || length > remaining.len() - 10 {
+        let declared_length = usize::from(remaining[10]);
+        let flags = remaining[11];
+        // UVCH copies only standard fields, retaining the original length byte.
+        let length = 2 + 4 * usize::from(flags & 4 != 0) + 6 * usize::from(flags & 8 != 0);
+        if declared_length < length || length > remaining.len() - 10 {
             return Err("invalid UVC header length");
         }
         let header = &remaining[10..10 + length];
-        let flags = header[1];
         if flags & 0x40 != 0 {
             return Err("device reported a UVC frame error");
         }
@@ -135,6 +137,16 @@ mod tests {
         );
         assert!(observe(&record(false, None)).unwrap().is_empty());
         assert!(observe(&[]).unwrap().is_empty());
+    }
+
+    #[test]
+    fn extended_declared_length_does_not_consume_next_record() {
+        let mut bytes = record(true, Some([0xa2, 0, 0, 0, 0, 0]));
+        bytes[10] = 255;
+        bytes.extend(record(false, Some([0xb1, 0, 0, 0, 0, 0])));
+        let observations = observe(&bytes).unwrap();
+        assert_eq!(observations.len(), 2);
+        assert_eq!(observations[1].vendor_light_type, Some(2));
     }
 
     #[test]

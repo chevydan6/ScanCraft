@@ -59,7 +59,7 @@ mod tests {
         let mut metadata = Vec::new();
         for tag in [0xa2, 0xb1, 0] {
             metadata.extend([0; 10]);
-            metadata.extend([12, 12]);
+            metadata.extend([255, 12]);
             metadata.extend(123u32.to_le_bytes());
             metadata.extend([tag, 0, 0, 0, 0, 0]);
         }
