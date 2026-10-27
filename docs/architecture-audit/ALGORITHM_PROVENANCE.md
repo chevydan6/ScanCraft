@@ -332,13 +332,14 @@ publication/docs versions and actual dependency revisions are different things.
 ## Source-level entry points and unit-test index
 
 Generated from tracked Rust source at the audited revision. Every source module
-with public functions or local test functions is included, so helpers outside the
+with public function definitions or local test functions is included; explicit
+binary-entry and re-export rows are also provided, so helpers outside the
 major-family summaries remain discoverable. Integration tests and reference tools
 are additional evidence; a function/test name alone is not a passed experiment.
 Private helper functions are resolved by inspecting the linked file; macro-
 generated entry points are not expanded by this lexical index.
 
-| Source file | Public function names | Local `#[test]` functions |
+| Source file | Public functions / explicit binary entries and re-exports | Local `#[test]` functions |
 |---|---|---|
 | [crates/scancraft-acquisition/src/lib.rs](../../crates/scancraft-acquisition/src/lib.rs) | `scan` | see integration tests |
 | [crates/scancraft-app/src/archive_ui.rs](../../crates/scancraft-app/src/archive_ui.rs) | `is_busy`, `cancel`, `start_paths`, `start_scan_paths`, `tick`, `ui` | `native_worker_archives_every_frame_and_refuses_existing_output`, `native_worker_exports_saved_project_with_full_recordings` |
@@ -382,6 +383,8 @@ generated entry points are not expanded by this lexical index.
 | [crates/scancraft-cli/src/laser_diagnostics.rs](../../crates/scancraft-cli/src/laser_diagnostics.rs) | `run` | `diagnostic_retains_lineage_and_rejects_late_corruption`, `local_diagnostic_labels_contrast_and_preserves_original_frame_crc` |
 | [crates/scancraft-cli/src/live_scan.rs](../../crates/scancraft-cli/src/live_scan.rs) | `run` | see integration tests |
 | [crates/scancraft-cli/src/reconstruct_stereo.rs](../../crates/scancraft-cli/src/reconstruct_stereo.rs) | `run` | see integration tests |
+| [crates/scancraft-cli/src/main.rs](../../crates/scancraft-cli/src/main.rs) | private binary entry `main`; private dispatch `run` and `stereo_fps` | none defined in this file; nested CLI modules have their own rows |
+| [crates/scancraft-cli/src/output.rs](../../crates/scancraft-cli/src/output.rs) | crate-visible re-exports `publish`, `staging` from `scancraft_workflow::output`; no local function definitions | none defined in this file; shared implementation tests belong to the workflow module |
 | [crates/scancraft-cli/src/recording_scr.rs](../../crates/scancraft-cli/src/recording_scr.rs) | `inspect` | `recording_crc_and_conflict_diagnostics` |
 | [crates/scancraft-cli/src/stereo_probe.rs](../../crates/scancraft-cli/src/stereo_probe.rs) | `run`, `record`, `record_gain`, `record_flood`, `record_line` | `linear_association_matches_brute_force_with_wrap_and_overlap`, `accepted_rate_uses_host_span_and_not_device_sequence_gaps`, `unsupported_capture_rates_and_unbounded_counts_fail_validation`, `empty_or_nonoverlapping_associations_are_controlled` |
 | [crates/scancraft-cli/src/termination.rs](../../crates/scancraft-cli/src/termination.rs) | `check`, `install` | `isolated_signal_child`, `both_signals_cancel_nested_scope_is_rejected_and_previous_handlers_are_restored` |

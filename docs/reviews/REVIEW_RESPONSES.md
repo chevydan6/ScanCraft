@@ -1761,3 +1761,23 @@ CLI pass for the combined corner/readiness milestone; no unchanged repeat is
 requested. Complete diff and tracked context pass secret scans; fresh included
 capacity and inactive billing were checked, with no paid flags. Source code
 remains the tested/reviewed99de067; this outcome note is documentation-only.
+
+
+CR-AUDIT-ENTRYPOINT-INDEX — accepted as a clarity/completeness improvement.
+The first audit-documentation CLI review covered all eight new reports at
+ eadd10b versus ced7697: zero major findings, one minor entry-index finding,
+major gate passed, exit 0. Source inspection qualifies its premise: CLI main.rs
+has private binary/dispatch functions and no local #[test]; output.rs only
+re-exports shared publication functions. The original lexical index intentionally
+selected public definitions/local tests, so no public implementation or local
+test was actually dropped by that filter. Nevertheless both modules are now
+explicit rows, accurately labeled private entry/re-export with no invented tests.
+Source files changed: ALGORITHM_PROVENANCE.md and ARCHITECTURE.md under the audit
+folder, plus this developer-owned response. Also clarified the data-flow diagram
+so unorganized fused clouds do not appear to feed the organized-grid mesher,
+and replaced three generic module descriptions with inspected responsibilities.
+No application implementation or independent reviewer file changes. Report links,
+frozen source identity, notice inventory, whitespace and secret scans are checked;
+no historical hardware/numerical benchmark is claimed rerun. Incremental doc
+review follows separately. Audit source remains ced7697 even while normal
+development/checker fixes proceed outside the frozen snapshot.

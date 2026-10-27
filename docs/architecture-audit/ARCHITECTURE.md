@@ -2,8 +2,9 @@
 
 Audited source: `ced7697fa0a4e2a262ae255efffa53ca577f117f` (ScanCraft, formerly OpenRaptor), frozen on 2026-10-27.
 This is a developer-authored source audit, not independent reviewer sign-off.
-Only these new reports are written; application code, existing documents and
-independent reviewer files are unchanged. **Confirmed** means inspected source or
+Audit changes are reports and developer-owned review-response documentation;
+application code and reviewer-owned files are unchanged. Existing design records
+are inspected rather than rewritten. **Confirmed** means inspected source or
 an identified record; **Inference** means engineering interpretation;
 **Recommendation** means proposed work, not an authorized implementation.
 Historical evidence is identified separately from tests rerun during this audit.
@@ -51,12 +52,15 @@ flowchart TD
     W --> REPLAY[CRC-checked replay / selected frame and sequence workflows]
     REPLAY --> DEPTH
     PUB --> EDIT[Cloud / mesh documents, undo and measurements]
-    EDIT --> SURF[Organized-grid meshing / mesh edits]
-    SURF --> EXP[PLY / OBJ / STL and versioned projects]
+    DEPTH -->|declared grid adjacency only| GRID[Organized-sample meshing]
+    GRID --> MEDIT[Mesh edits]
+    MEDIT --> EXP[PLY / OBJ / STL and versioned projects]
     EDIT --> EXP
 ```
 
-The geometry-producing path exists in source; the diagram is not proof of a
+There is no implemented general-surface edge from an unorganized fused cloud
+to the organized-grid mesher; that branch requires explicitly retained sample
+adjacency. The geometry-producing paths exist in source; the diagram is not proof of a
 qualified physical end-to-end scan. `depth::pipeline::StereoReport` deliberately
 keeps synchronization/physical qualification false. `ACCEPTANCE_RESULTS.md` and
 `README.md` distinguish real structural acquisition from calibrated geometry.
@@ -178,12 +182,12 @@ entry-point/test details are cross-indexed in ALGORITHM_PROVENANCE.md.
 - [crates/scancraft-app/src/capture_session.rs](../../crates/scancraft-app/src/capture_session.rs) — Owns one preview/recording session independently of GUI channels.
 - [crates/scancraft-app/src/capture_worker.rs](../../crates/scancraft-app/src/capture_worker.rs) — Capture-thread completion only; no scanner, UI or file ownership policy.
 - [crates/scancraft-app/src/cloud_jobs.rs](../../crates/scancraft-app/src/cloud_jobs.rs) — One owned document per bounded background job. Failed/cancelled proposals never commit.
-- [crates/scancraft-app/src/cloud_ui.rs](../../crates/scancraft-app/src/cloud_ui.rs) — Implementation/support module; inspect entry points and callers.
+- [crates/scancraft-app/src/cloud_ui.rs](../../crates/scancraft-app/src/cloud_ui.rs) — Point-cloud document UI, selection/measurement and source/recording panels, and background-job dispatch.
 - [crates/scancraft-app/src/discovery_process.rs](../../crates/scancraft-app/src/discovery_process.rs) — Read-only device probing stays in a child, including potentially blocking QUERYCAP.
 - [crates/scancraft-app/src/live_fixture.rs](../../crates/scancraft-app/src/live_fixture.rs) — Explicit synthetic engine sessions shared by GUI and process diagnostics.
 - [crates/scancraft-app/src/live_process.rs](../../crates/scancraft-app/src/live_process.rs) — Whole native scan helper: device/settings ownership remains outside the GUI.
 - [crates/scancraft-app/src/live_ui.rs](../../crates/scancraft-app/src/live_ui.rs) — Live acquisition owns a separate display; existing editable documents are untouched.
-- [crates/scancraft-app/src/main.rs](../../crates/scancraft-app/src/main.rs) — Implementation/support module; inspect entry points and callers.
+- [crates/scancraft-app/src/main.rs](../../crates/scancraft-app/src/main.rs) — eframe application state, helper dispatch, preview/result polling and guarded window lifecycle.
 - [crates/scancraft-app/src/measurement_view.rs](../../crates/scancraft-app/src/measurement_view.rs) — Historical analytic fits; these lines are not acquired surface geometry.
 - [crates/scancraft-app/src/mesh_ui.rs](../../crates/scancraft-app/src/mesh_ui.rs) — Saved-version mesh editing with cancellable preparation and atomic publication.
 - [crates/scancraft-app/src/playback_ui.rs](../../crates/scancraft-app/src/playback_ui.rs) — Offline playback jobs never acquire the scanner or write the source.
@@ -217,7 +221,7 @@ entry-point/test details are cross-indexed in ALGORITHM_PROVENANCE.md.
 - [crates/scancraft-cli/src/image_export.rs](../../crates/scancraft-cli/src/image_export.rs) — Publish only after the caller has validated the complete recording.
 - [crates/scancraft-cli/src/laser_diagnostics.rs](../../crates/scancraft-cli/src/laser_diagnostics.rs) — Raw observations only, after validation of the entire source recording.
 - [crates/scancraft-cli/src/live_scan.rs](../../crates/scancraft-cli/src/live_scan.rs) — Process-local signal ownership for native acquisition shared with the GUI.
-- [crates/scancraft-cli/src/main.rs](../../crates/scancraft-cli/src/main.rs) — Implementation/support module; inspect entry points and callers.
+- [crates/scancraft-cli/src/main.rs](../../crates/scancraft-cli/src/main.rs) — Binary command dispatch for native acquisition, replay and shared offline processing/diagnostic workflows.
 - [crates/scancraft-cli/src/output.rs](../../crates/scancraft-cli/src/output.rs) — Shared no-overwrite publication primitives.
 - [crates/scancraft-cli/src/reconstruct_stereo.rs](../../crates/scancraft-cli/src/reconstruct_stereo.rs) — Native CLI adapter for the shared reconstruction workflow.
 - [crates/scancraft-cli/src/recording_scr.rs](../../crates/scancraft-cli/src/recording_scr.rs) — Streaming, aggregate-only SCR diagnostics; capture context is not emitted.
