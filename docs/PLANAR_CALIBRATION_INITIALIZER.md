@@ -88,7 +88,7 @@ See the [OpenCV reference](https://docs.opencv.org/4.13.0/d9/d0c/group__calib3d.
 Pinned OpenCV 5.0.0 and NumPy 2.5.4 are isolated test-only dependencies.
 
 Observed maximum intrinsic discrepancies: exact Rust versus truth below
-6e-12 pixels, exact Rust versus refined OpenCV about 0.000212 pixels; noisy Rust
+6e-12 pixels, exact Rust versus refined OpenCV about 0.000211 pixels; noisy Rust
 versus truth about 0.109 pixels and versus OpenCV about 0.085 pixels. These are
 synthetic numerical results only. The JSON report records exact limits and
 fixture/source hashes. No actual target capture, Raptor optical binding,

@@ -1130,3 +1130,13 @@ and release build (exit 0). The reference checker also rejected an intentionally
 perturbed focal length (exit 1), preventing a vacuous success claim. Source/log
 hashes are recorded in the reference JSON. CodeRabbit review remains pending;
 only the independent reviewer can change finding status.
+
+CR-PLANAR-DOC-ROUNDING accepted: the exact OpenCV discrepancy
+0.00021100840581311786 pixels rounds to 0.000211, not 0.000212. Corrected
+docs/PLANAR_CALIBRATION_INITIALIZER.md only; numerical source and retained
+measurements are unchanged. CodeRabbit CLI0.9.1 reviewed immutable44a2630 versus
+31cfbe1:11 files, one minor finding, zero blocking findings, major gate passed,
+exit0. Full source-context/diff secret scans passed; fresh included capacity2 and
+inactive billing were confirmed. Evidence:2026-10-27-planar-initializer-review.json.
+The existing589-test/fmt/Clippy/release result applies to unchanged Rust source.
+No paid/repeated unchanged code review or physical calibration performed.

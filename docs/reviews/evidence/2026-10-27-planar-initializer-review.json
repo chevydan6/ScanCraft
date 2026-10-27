@@ -1,0 +1,55 @@
+{
+  "tool": "official CodeRabbit CLI 0.9.1",
+  "scope": "native planar initializer and synthetic reference validation versus PR17",
+  "before": {
+    "head": "44a26302d27b2981a0434f3f9c37fe3a055887cd",
+    "tree": "99345944e3e87eb5473737d4c6806571c77a0a5a",
+    "base": "31cfbe1b8cbbac317afc9f85575242d0621f6a8f"
+  },
+  "after": {
+    "head": "44a26302d27b2981a0434f3f9c37fe3a055887cd",
+    "tree": "99345944e3e87eb5473737d4c6806571c77a0a5a",
+    "status": "",
+    "exit_code": 0
+  },
+  "binding": "operator recorded immutable Git checkout; not service cryptographic source attestation",
+  "complete": {
+    "type": "complete",
+    "status": "review_completed",
+    "findings": 1,
+    "gate": {
+      "threshold": "major",
+      "status": "passed",
+      "blockingFindings": 0
+    },
+    "reviewedFiles": [
+      "ACCEPTANCE_RESULTS.md",
+      "ARCHITECTURE.md",
+      "PROJECT_STATUS.md",
+      "crates/scancraft-calibration/examples/planar_reference.rs",
+      "crates/scancraft-calibration/src/lib.rs",
+      "crates/scancraft-calibration/src/planar.rs",
+      "docs/CALIBRATION.md",
+      "docs/PLANAR_CALIBRATION_INITIALIZER.md",
+      "docs/reviews/REVIEW_RESPONSES.md",
+      "docs/reviews/evidence/2026-10-27-planar-initializer-reference.json",
+      "tools/compare_planar_opencv.py"
+    ]
+  },
+  "raw_log_sha256": "61e368238717602ff136f0039a33e3f040d15946de58e4cdf878d3d40bc4f27e",
+  "secrets_scan": {
+    "full_context": "pass",
+    "complete_diff": "pass"
+  },
+  "included_review_capacity": 2,
+  "usage_billing": "inactive",
+  "dispositions": [
+    {
+      "id": "CR-PLANAR-DOC-ROUNDING",
+      "severity": "minor",
+      "file": "docs/PLANAR_CALIBRATION_INITIALIZER.md",
+      "accepted": true,
+      "explanation": "Change 0.000212 to 0.000211 px to round retained exact discrepancy0.00021100840581311786 correctly. No numerical source or evidence values change."
+    }
+  ]
+}
