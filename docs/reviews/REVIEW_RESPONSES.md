@@ -1437,3 +1437,49 @@ inactive. No credits, charges or redundant rate-limited review request is used.
 A fresh corrected-source gate is pending included availability, not claimed as
 completed. This preview milestone is published as draft work; native live-scan
 isolation and whole-application shutdown qualification remain outstanding.
+
+SCAN-REV-005 — native live-scan process boundary in progress; status unchanged.
+`live_process` now owns the parent-side supervision path used by native
+`LiveUi::start_native`. Its child owns the full `scancraft_acquisition::scan`,
+including session lock, settings lease, both sources, restoration, verification
+and publication. The existing child waiter, nonblocking pipe configuration and
+private diagnostics are shared with preview supervision. Startup diagnostics
+include helper PID and mode; timeouts describe acquired resources conditionally,
+without asserting a lock was acquired before initialization completed.
+
+Graceful Stop sends a latched command without cancelling WorkControl or starting
+an abort deadline. Explicit abort/control EOF cancels WorkControl and starts a
+separate two-second software grace policy. A prolonged ordinary-close wait offers
+an explicit abort action retaining partial data. Failure-intent reset now belongs
+to the root close handler itself, preventing a pending retry from bypassing its
+failure handling. Native worker Drop joins an IPC supervisor, not a thread that
+owns scanner cleanup. Synchronous discovery and filesystem/process/scheduler
+bounds remain unqualified; no whole-application hard deadline is claimed.
+
+`Control::display::DisplayUpdate` validates a display-only transfer: at most
+50000 finite cloud points and bounded thumbnails with matching pixel counts.
+Remote display controls cannot run a local scan; local controls reject imports;
+parent pause/stop commands are never overwritten. Skipped parent replacements are
+counted in addition to child skips. Progress serialization has a16MiB cap during
+writing/before parsing; final IPC is a bounded summary, while full per-pair data
+stays in the engine's report.json. The synthetic session is extracted to
+`live_fixture` to avoid a process/UI dependency cycle. No engine mathematics,
+scanner control values, recording format or calibration activation is changed.
+
+Evidence so far: full tools/check.sh passes formatting, strict all-target Clippy,
+637 tests and release build. Real child/control tests distinguish pause/resume,
+graceful stop beyond abort grace, EOF abort and stalled-child timeout without
+kill. New DTO/codec tests reject invalid thumbnails, nonfinite/excessive clouds,
+local import, unknown command fields, oversized JSON and mismatched frame sizes.
+The actual parent/helper/engine integration diagnostic publishes a synthetic scan,
+verifies both CRC-backed recordings through footers (two frames each), retains
+synthetic labels and false hardware qualification flags, and rejects overwriting
+an existing target. The release diagnostic also passes; final source proof and
+review evidence are recorded separately. No actual Raptor disconnect/stall or
+physical accuracy qualification is claimed.
+
+Reviewer assignment220 independently verified the earlier preview-only commits
+283df43/83daa8e with26 focused capture tests and retained SCAN-REV-005 Open. This
+is acknowledged; those results do not independently verify the new live changes.
+Only the independent reviewer may verify/close the finding. No paid usage,
+firmware, physical calibration, protection bypass or owner merge approval occurs.

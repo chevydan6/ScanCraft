@@ -1,6 +1,7 @@
 # Capture process isolation: development contract
 
-Status: preview/recording helper implemented; native live-scan helper not implemented.
+Status: preview/recording and native live-scan helpers implemented; physical
+driver-stall qualification and synchronous discovery isolation remain outstanding.
 Independent SCAN-REV-005 remains open. This document does not establish a bounded
 whole-application shutdown or hardware qualification.
 
@@ -57,12 +58,46 @@ persistence is not qualified. Successful completion requires the final message,
 valid stream termination and successful process exit. Capture errors keep the
 window open and show cleanup diagnostics rather than claiming the scanner stopped.
 
-The native live-scan UI separately runs `scancraft_acquisition::scan` and joins
-its worker on Drop. Moving only preview capture cannot establish bounded shutdown
-for that live-scan path. Existing ordinary-close handling retains worker ownership
-and keeps the UI responsive while awaiting cleanup, but its wait is unbounded.
+## Implemented native live-scan boundary
 
-## Required process boundary
+`live_process` starts a helper that owns the entire
+`scancraft_acquisition::scan` call, including `SettingsLease`, both capture sources,
+restoration, recording verification and final publication. The GUI worker owns
+only process supervision and display transport. The existing native live-scan
+button uses this path; synthetic GUI fixtures remain explicitly synthetic.
+
+The control pipe sends pause/resume and a latched graceful Stop as bounded bytes.
+Writes are nonblocking and retain the latest unsent state under backpressure.
+Graceful Stop does not cancel `WorkControl` and has no two-second completion
+limit: draining, fusion and publication must be allowed to finish. Explicit abort
+or parent-control EOF cancels `WorkControl`, requests stop and starts the parent's
+two-second abort grace policy. A timeout does not kill the helper or confirm
+restoration. Ordinary root close first requests graceful Stop; after a prolonged
+wait the user can explicitly abort while retaining partial data. Failure clears
+pending close intent at the close boundary and preserves document checks.
+
+Display progress has a 16 MiB serialized cap enforced during writing and before
+reading. `Control::new_remote_display` accepts validated updates containing only
+phase, counters and an optional display snapshot. It cannot run a local scan;
+ordinary local controls reject imported display updates. Pause/stop atomics are
+not serialized or overwritten by incoming display state. Cloud previews are
+limited to 50000 finite points; thumbnail dimensions are nonzero, at most
+320x240, and must match pixel counts. Parent mailbox replacements are counted
+separately and added to the child's skipped-preview total.
+
+The child progress thread consumes the one-slot engine mailbox without holding
+its mutex during serialization or pipe writes. Display transport failure requests
+abort. A blocked display writer does not own acquisition or reconstruction, and
+parent-monitor exit closes the pipe. The child joins its progress sender before
+writing completion so packets cannot interleave. Completion carries a bounded
+summary; the full per-pair report remains in the published folder's `report.json`
+and is not copied into IPC. All hardware qualification flags remain false.
+
+Helper diagnostic files include a startup PID/status marker and final outcome
+when the helper returns. A missing final outcome remains unconfirmed.
+
+## Ownership contract and remaining qualification
+
 
 The helper must exclusively own device descriptors, session locks and restoration
 duties. The GUI must own no device handles and must not synchronously wait for a
@@ -79,7 +114,7 @@ sending a kill signal does not establish that the process or kernel operation ha
 terminated. Cleanup failures and incomplete recording locations need durable,
 private diagnostics when the GUI exits before the helper.
 
-Both preview recording and native live scanning need the boundary. Preserve
+Both preview recording and native live scanning now use the boundary. Preserve
 current raw recording formats, partial-recording recovery, publication ordering,
 control restoration and independent finding status. No forced scanner reset,
 firmware change or weakening of validation is part of this work.
@@ -103,5 +138,39 @@ An actual child inherits an exclusive lock and waits for a release marker: the
 supervisor worker finishes with an unconfirmed error while the lock remains
 held; after child cleanup the lock becomes acquirable. Test teardown releases
 the marker even on assertion unwind. No scanner, USB node, firmware or calibration
-is touched by these fixtures. Native live-scan Drop remains synchronous and
-SCAN-REV-005 must not be closed from these preview-only results.
+is touched by these fixtures. Native live-scan Drop now joins an IPC supervisor rather than a device-owning
+thread. This does not establish a hard whole-application shutdown bound:
+synchronous discovery, process launch, filesystem operations and scheduler latency
+remain outside that claim, and real driver-stall/disconnect tests are outstanding.
+Independent SCAN-REV-005 status remains under reviewer control.
+
+The `scancraft --synthetic-live-process NEW_OUTPUT_DIRECTORY` diagnostic runs the
+actual parent supervisor, helper process, synthetic engine and publication path
+without GUI or scanner access. An integration test checks the report/summary
+retain synthetic labels and false hardware qualification flags, reads both
+recordings through CRC-checked footers (two frames per camera), and verifies a
+retry cannot overwrite the saved report. Additional process tests distinguish
+pause/resume, graceful Stop beyond the abort grace, explicit abort during a
+stalled child, bounded summaries and invalid control bytes. No physical accuracy,
+USB shutdown latency or current scanner connectivity is inferred from them.
+
+```mermaid
+flowchart LR
+    GUI[GUI and remote display control] -->|pause / stop / abort| Supervisor[IPC supervisor]
+    Supervisor -->|nonblocking control pipe| Helper[Native scan helper]
+    Helper --> Ownership[Session lock and settings lease]
+    Ownership --> Cameras[Two native capture sources]
+    Cameras --> Raw[Raw recording writers]
+    Cameras --> Engine[Reconstruction / tracking / fusion]
+    Engine --> Bundle[Verified scan bundle publication]
+    Engine --> Mailbox[One-slot display mailbox]
+    Mailbox --> Sender[Bounded progress sender]
+    Sender -->|bounded JSON pipe| Supervisor
+    Supervisor -->|validated display update| GUI
+    Supervisor --> Reaper[Child waiter; no device handles]
+```
+
+`live_fixture` supplies the explicit synthetic engine session to GUI diagnostics
+and process tests; process supervision does not depend on rendering code. These
+internal helpers expect the executable's matching protocol; restart the GUI when
+replacing development binaries. No persisted recording/project format is changed.

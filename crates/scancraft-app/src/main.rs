@@ -6,6 +6,8 @@ mod capture_session;
 mod capture_worker;
 mod cloud_jobs;
 mod cloud_ui;
+mod live_fixture;
+mod live_process;
 mod live_ui;
 mod measurement_view;
 mod mesh_ui;
@@ -176,14 +178,26 @@ impl App {
         }
         self.capture_close.is_waiting()
     }
+    fn abort_pending_capture(&self) {
+        if let Some(running) = &self.running {
+            running.cancel.store(true, Ordering::Relaxed);
+        }
+        self.live.abort();
+    }
     fn window_close_step(
         &mut self,
         ctx: &egui::Context,
         requested: bool,
         live_failed: bool,
     ) -> bool {
-        if live_failed && requested {
-            ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+        if live_failed {
+            // Keep failure handling in the close boundary itself: a pending
+            // retry must not reopen a close request after helper failure.
+            self.capture_close.keep_open();
+            self.close_allowed = false;
+            if requested {
+                ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+            }
         }
         let close_requested = requested && !live_failed;
         let waiting_for_capture =
@@ -316,10 +330,6 @@ impl eframe::App for App {
     fn update(&mut self, ctx: &egui::Context, _: &mut eframe::Frame) {
         self.cloud.tick();
         let live_failed = self.live.tick(ctx);
-        if live_failed {
-            self.capture_close.keep_open();
-            self.close_allowed = false;
-        }
         self.mesh.tick();
         self.recovery.tick();
         self.archive.tick();
@@ -337,7 +347,10 @@ impl eframe::App for App {
                 .collapsible(false).resizable(false).show(ctx, |ui| {
                     ui.label("Waiting for capture cleanup. Recordings are not finalized until capture stops.");
                     if self.capture_close.slow(std::time::Instant::now()) {
-                        ui.label("Cleanup is taking longer than expected. The window stays open while the capture worker owns device cleanup.");
+                        ui.label("Scanner cleanup is taking longer than expected. Restoration is not yet confirmed.");
+                        if self.live.is_busy() && ui.button("Abort scan (keep partial data)").clicked() {
+                            self.abort_pending_capture();
+                        }
                     }
                     if ui.button("Keep window open").clicked() { self.capture_close.keep_open(); self.confirm_close = false; }
                 });
@@ -639,6 +652,9 @@ fn startup_args(args: Vec<std::ffi::OsString>) -> Result<Startup, String> {
 }
 fn main() -> eframe::Result {
     let args: Vec<_> = std::env::args_os().skip(1).collect();
+    if let Some(code) = live_process::helper_entry(&args) {
+        std::process::exit(code);
+    }
     if let Some(code) = capture_process::helper_entry(&args) {
         std::process::exit(code);
     }
@@ -1360,6 +1376,41 @@ mod live_lifecycle_tests {
         assert!(app.confirm_close);
         assert!(!app.closing_window);
     }
+    #[test]
+    fn pending_close_abort_is_explicit_and_never_bypasses_cleanup_or_document_checks() {
+        let mut app = App::default();
+        let ctx = egui::Context::default();
+        let (sender, receiver) = mpsc::channel();
+        let mut release = Release(Some(sender));
+        let (report, observe) = mpsc::channel();
+        let control = app.live.test_job(move |work, _| {
+            report.send(work.clone()).unwrap();
+            receiver.recv().unwrap();
+            Err("aborted with retained partial data".into())
+        });
+        let work = observe.recv_timeout(Duration::from_secs(5)).unwrap();
+        app.capture_close_step(&ctx, true, std::time::Instant::now());
+        assert!(control.stop_requested());
+        assert!(
+            work.check().is_ok(),
+            "ordinary close starts with graceful stop"
+        );
+        app.abort_pending_capture();
+        assert!(work.check().is_err());
+        assert!(app.capture_close.is_waiting());
+        assert!(!app.closing_window);
+        assert!(!app.close_allowed);
+        release.0.take().unwrap().send(()).unwrap();
+        let deadline = std::time::Instant::now() + Duration::from_secs(5);
+        while app.live.is_busy() {
+            app.live.tick(&ctx);
+            assert!(std::time::Instant::now() < deadline);
+            std::thread::yield_now();
+        }
+        app.window_close_step(&ctx, true, true);
+        assert!(!app.closing_window, "failure must remain visible");
+    }
+
     #[test]
     fn synthetic_startup_requires_explicit_output_and_does_not_select_camera_smoke() {
         let args = |items: &[&str]| items.iter().map(std::ffi::OsString::from).collect();

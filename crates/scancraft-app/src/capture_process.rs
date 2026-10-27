@@ -19,12 +19,12 @@ const GRACE: Duration = Duration::from_secs(2);
 
 // Allocate the waiter before launching a helper. On early return it can reap a
 // surviving child without any GUI join or scanner restoration duties of its own.
-struct OwnedChild {
+pub(crate) struct OwnedChild {
     child: Option<Child>,
     reap: mpsc::Sender<Child>,
 }
 impl OwnedChild {
-    fn spawn(command: &mut Command) -> io::Result<Self> {
+    pub(crate) fn spawn(command: &mut Command) -> io::Result<Self> {
         let (reap, receiver) = mpsc::channel::<Child>();
         std::thread::Builder::new()
             .name("scancraft-helper-reaper".into())
@@ -38,7 +38,7 @@ impl OwnedChild {
             reap,
         })
     }
-    fn child(&mut self) -> &mut Child {
+    pub(crate) fn child(&mut self) -> &mut Child {
         self.child.as_mut().unwrap()
     }
 }
@@ -51,7 +51,7 @@ impl Drop for OwnedChild {
         }
     }
 }
-fn private_log() -> io::Result<(PathBuf, File)> {
+pub(crate) fn private_log() -> io::Result<(PathBuf, File)> {
     static NEXT: AtomicU64 = AtomicU64::new(0);
     let stamp = SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -107,9 +107,9 @@ pub(crate) fn run(
         )
     })
 }
-fn nonblocking(file: &impl AsRawFd) -> io::Result<()> {
+pub(crate) fn nonblocking(file: &impl AsRawFd) -> io::Result<()> {
     // SAFETY: F_GETFL/F_SETFL operate on a borrowed, live pipe descriptor. Only
-    // this monitor reads it; no descriptor flags or ownership are transferred.
+    // this monitor uses it; no descriptor ownership is transferred.
     let flags = unsafe { libc::fcntl(file.as_raw_fd(), libc::F_GETFL) };
     if flags < 0 {
         return Err(io::Error::last_os_error());
@@ -162,6 +162,9 @@ fn supervise(
                         }
                     }
                     Message::Complete(result) => completion = Some(result),
+                    Message::LiveProgress(_) | Message::LiveComplete(_) => {
+                        return Err("Live-scan packet in preview helper stream".into());
+                    }
                 }
             }
         }
@@ -177,7 +180,7 @@ fn supervise(
             return completion.ok_or("Capture helper omitted its result")?;
         }
         if stopping.is_some_and(|start| start.elapsed() >= grace) {
-            return Err("Capture helper is still running; device cleanup/restoration is NOT confirmed. It retains its session locks until cleanup finishes".into());
+            return Err("Capture helper is still running; device cleanup/restoration is NOT confirmed. Any acquired device handles and locks remain owned by that helper until cleanup finishes".into());
         }
         std::thread::sleep(Duration::from_millis(10));
     }
@@ -205,6 +208,10 @@ pub(crate) fn helper_entry(args: &[OsString]) -> Option<i32> {
             Some("preview") => false,
             _ => return Err("invalid capture mode".into()),
         };
+        eprintln!(
+            "{}",
+            serde_json::json!({"helper_pid":std::process::id(),"status":"starting","kind":"camera_preview_or_recording"})
+        );
         let cancel = Arc::new(AtomicBool::new(false));
         let c = cancel.clone();
         std::thread::Builder::new()

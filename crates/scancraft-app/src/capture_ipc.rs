@@ -3,6 +3,9 @@ use scancraft_core::Frame;
 use std::io::{self, Write};
 const FRAME: u8 = 1;
 const COMPLETE: u8 = 2;
+const LIVE_PROGRESS: u8 = 3;
+const LIVE_COMPLETE: u8 = 4;
+const MAX_PROGRESS: usize = 16 * 1024 * 1024;
 const MAX_FRAME: usize = 64 * 1024 * 1024;
 const MAX_RESULT: usize = 64 * 1024;
 fn invalid(message: &str) -> io::Error {
@@ -12,6 +15,8 @@ fn invalid(message: &str) -> io::Error {
 pub(crate) enum Message {
     Frame(Frame),
     Complete(Result<String, String>),
+    LiveProgress(scancraft_workflow::live_stereo::control::display::DisplayUpdate),
+    LiveComplete(Result<serde_json::Value, String>),
 }
 fn prefix(output: &mut impl Write, kind: u8, length: usize) -> io::Result<()> {
     output.write_all(&[kind])?;
@@ -36,16 +41,61 @@ pub(crate) fn write_frame(output: &mut impl Write, frame: &Frame) -> io::Result<
     output.write_all(&frame.data)?;
     output.flush()
 }
+struct LimitedBytes {
+    bytes: Vec<u8>,
+    maximum: usize,
+}
+impl Write for LimitedBytes {
+    fn write(&mut self, data: &[u8]) -> io::Result<usize> {
+        if self.bytes.len().saturating_add(data.len()) > self.maximum {
+            return Err(invalid("IPC JSON exceeds its size limit"));
+        }
+        self.bytes.extend_from_slice(data);
+        Ok(data.len())
+    }
+    fn flush(&mut self) -> io::Result<()> {
+        Ok(())
+    }
+}
+fn write_json(
+    output: &mut impl Write,
+    kind: u8,
+    maximum: usize,
+    serialize: impl FnOnce(&mut LimitedBytes) -> serde_json::Result<()>,
+) -> io::Result<()> {
+    let mut bounded = LimitedBytes {
+        bytes: Vec::new(),
+        maximum,
+    };
+    serialize(&mut bounded)?;
+    prefix(output, kind, bounded.bytes.len())?;
+    output.write_all(&bounded.bytes)?;
+    output.flush()
+}
 pub(crate) fn write_complete(
     output: &mut impl Write,
     result: &Result<String, String>,
 ) -> io::Result<()> {
-    let data = serde_json::to_vec(result)?;
-    if data.len() > MAX_RESULT {
-        return Err(invalid("IPC completion exceeds limit"));
-    }
-    prefix(output, COMPLETE, data.len())?;
-    output.write_all(&data)
+    write_json(output, COMPLETE, MAX_RESULT, |bytes| {
+        serde_json::to_writer(bytes, result)
+    })
+}
+pub(crate) fn write_live_progress(
+    output: &mut impl Write,
+    update: &scancraft_workflow::live_stereo::control::display::DisplayUpdate,
+) -> io::Result<()> {
+    update.validate().map_err(|e| invalid(&e))?;
+    write_json(output, LIVE_PROGRESS, MAX_PROGRESS, |bytes| {
+        serde_json::to_writer(bytes, update)
+    })
+}
+pub(crate) fn write_live_complete(
+    output: &mut impl Write,
+    result: &Result<serde_json::Value, String>,
+) -> io::Result<()> {
+    write_json(output, LIVE_COMPLETE, MAX_RESULT, |bytes| {
+        serde_json::to_writer(bytes, result)
+    })
 }
 #[derive(Default)]
 pub(crate) struct Decoder {
@@ -75,7 +125,8 @@ impl Decoder {
         let length = u32::from_le_bytes(self.bytes[1..5].try_into().unwrap()) as usize;
         match kind {
             FRAME if (24..=MAX_FRAME).contains(&length) => (),
-            COMPLETE if (1..=MAX_RESULT).contains(&length) => (),
+            COMPLETE | LIVE_COMPLETE if (1..=MAX_RESULT).contains(&length) => (),
+            LIVE_PROGRESS if (1..=MAX_PROGRESS).contains(&length) => (),
             _ => return Err(invalid("invalid IPC kind or declared length")),
         }
         if self.bytes.len() < 5 + length {
@@ -95,9 +146,18 @@ impl Decoder {
                 metadata: body[24..24 + metadata].to_vec(),
                 data: body[24 + metadata..].to_vec(),
             })
+        } else if kind == LIVE_PROGRESS {
+            let update: scancraft_workflow::live_stereo::control::display::DisplayUpdate =
+                serde_json::from_slice(body)?;
+            update.validate().map_err(|e| invalid(&e))?;
+            Message::LiveProgress(update)
         } else {
             self.completed = true;
-            Message::Complete(serde_json::from_slice(body)?)
+            if kind == COMPLETE {
+                Message::Complete(serde_json::from_slice(body)?)
+            } else {
+                Message::LiveComplete(serde_json::from_slice(body)?)
+            }
         };
         self.bytes.drain(..5 + length);
         Ok(Some(message))
@@ -183,6 +243,61 @@ mod tests {
             write_frame(&mut BrokenFlush, &frame).unwrap_err().kind(),
             io::ErrorKind::BrokenPipe
         );
+    }
+
+    #[test]
+    fn fragmented_live_updates_and_typed_completion_roundtrip() {
+        let update =
+            scancraft_workflow::live_stereo::control::Control::new(true).take_display_update();
+        let complete = Ok(
+            serde_json::json!({"kind":"synthetic_live_stereo_pipeline","geometry_exported":false}),
+        );
+        let mut wire = Vec::new();
+        write_live_progress(&mut wire, &update).unwrap();
+        write_live_complete(&mut wire, &complete).unwrap();
+        for size in 1..=wire.len() {
+            let mut decoder = Decoder::default();
+            let mut messages = Vec::new();
+            for chunk in wire.chunks(size) {
+                decoder.push(chunk).unwrap();
+                while let Some(message) = decoder.next().unwrap() {
+                    messages.push(message);
+                }
+            }
+            decoder.finish().unwrap();
+            assert_eq!(messages.len(), 2);
+            match &messages[0] {
+                Message::LiveProgress(value) => assert_eq!(value, &update),
+                _ => panic!("wrong progress type"),
+            }
+            match &messages[1] {
+                Message::LiveComplete(value) => assert_eq!(value, &complete),
+                _ => panic!("wrong completion type"),
+            }
+        }
+    }
+    #[test]
+    fn live_json_limits_fail_before_any_partial_packet_is_published() {
+        let mut wire = Vec::new();
+        assert!(write_live_complete(&mut wire, &Err("x".repeat(MAX_RESULT + 1))).is_err());
+        assert!(wire.is_empty());
+        for (kind, length) in [
+            (LIVE_PROGRESS, MAX_PROGRESS + 1),
+            (LIVE_COMPLETE, MAX_RESULT + 1),
+        ] {
+            let mut header = vec![kind];
+            header.extend((length as u32).to_le_bytes());
+            let mut decoder = Decoder::default();
+            decoder.push(&header).unwrap();
+            assert!(decoder.next().is_err());
+        }
+        let mut frame = vec![FRAME];
+        frame.extend(24u32.to_le_bytes());
+        frame.extend([0; 24]);
+        frame[5 + 16..5 + 20].copy_from_slice(&u32::MAX.to_le_bytes());
+        let mut decoder = Decoder::default();
+        decoder.push(&frame).unwrap();
+        assert!(decoder.next().is_err());
     }
 
     #[test]
