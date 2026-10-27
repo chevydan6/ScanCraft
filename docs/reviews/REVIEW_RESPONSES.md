@@ -1598,9 +1598,22 @@ waiting during application destruction. No forced kill or device reset occurs.
 New real child regressions check retained waiting until exit and teardown that
 does not falsely claim exit. Discovery can remain pending indefinitely on a stuck
 QUERYCAP; responsiveness does not establish a hard shutdown or hardware bound.
-Full correction gate and fresh review remain pending; initial blocked review is
+The correction gate completed successfully; fresh review remains pending. The initial blocked review is
 retained in private developer artifacts/discovery-process/coderabbit.ndjson.
 
 Correction gate completed successfully:646 tests, formatting, strict all-target
 Clippy and release build. Fresh incremental review is still pending; this does
 not convert the initial blocked CLI result into a pass.
+
+
+Discovery correction CLI review of c84655d versus6cd439e completed: three files,
+zero major findings, major gate passed, exit0. Two minor findings accepted:
+CR-DISCOVERY-TEST-TIMER: the child could start its100ms sleep before the test
+timer. Its script now waits for stdin EOF, which retain_until_exit requests
+after timer initialization, eliminating that scheduling race. This changes only
+the fixture, not production discovery ownership.
+CR-DISCOVERY-STALE-STATUS: corrected the previous pending-gate sentence to reflect
+the completed646-test gate, retaining review history rather than altering
+independent findings. Fresh validation of this fixture correction follows. The
+second CLI result is retained in private discovery-process/correction-coderabbit.ndjson;
+it covers c84655d, not this later minor edit. No paid credits were used.
