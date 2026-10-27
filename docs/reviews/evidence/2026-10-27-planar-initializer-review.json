@@ -51,5 +51,47 @@
       "accepted": true,
       "explanation": "Change 0.000212 to 0.000211 px to round retained exact discrepancy0.00021100840581311786 correctly. No numerical source or evidence values change."
     }
-  ]
+  ],
+  "incremental_correction_review": {
+    "before": {
+      "head": "3603af2738c03638560671cadeb3218840c9ff71",
+      "tree": "a4963475344f61d062c24127abe16b9b3a68979d",
+      "base": "44a26302d27b2981a0434f3f9c37fe3a055887cd"
+    },
+    "after": {
+      "head": "3603af2738c03638560671cadeb3218840c9ff71",
+      "tree": "a4963475344f61d062c24127abe16b9b3a68979d",
+      "status": "",
+      "exit_code": 0
+    },
+    "complete": {
+      "type": "complete",
+      "status": "review_completed",
+      "findings": 1,
+      "gate": {
+        "threshold": "major",
+        "status": "passed",
+        "blockingFindings": 0
+      },
+      "reviewedFiles": [
+        "docs/PLANAR_CALIBRATION_INITIALIZER.md",
+        "docs/reviews/REVIEW_RESPONSES.md",
+        "docs/reviews/evidence/2026-10-27-planar-initializer-review.json"
+      ]
+    },
+    "raw_log_sha256": "d6230d3da189b024153ba5b3f20101897d74f4b7d9ebac4997151653fe5170e0",
+    "secrets_scan": {
+      "full_context": "pass",
+      "complete_diff": "pass"
+    },
+    "included_review_capacity": 1,
+    "usage_billing": "inactive",
+    "disposition": {
+      "id": "CR-PLANAR-REVIEW-STATUS",
+      "severity": "minor",
+      "accepted": true,
+      "file": "docs/reviews/REVIEW_RESPONSES.md",
+      "explanation": "Initial pending sentence replaced with completed CLI status; final follow-up is review metadata only."
+    }
+  }
 }
