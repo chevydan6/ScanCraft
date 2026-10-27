@@ -64,5 +64,46 @@
       "file": "crates/scancraft-calibration/src/stereo_fit.rs",
       "explanation": "Add missing space and explicit inclusive 4..=4096 range to match the actual bounds. Error text only, numerical behavior unchanged. Final607-test gate, unchanged fixture/artifact hashes and actual CLI invalid-count rejection verified."
     }
-  ]
+  ],
+  "incremental_correction_review": {
+    "before": {
+      "head": "42d0b40b9833b441a32d0fde37e7fac8b54739a3",
+      "tree": "ead0f4ffe518cdf10f4fde2002af3511769e5c3c",
+      "base": "ff5b17b4ff81a4c87ce6d39456888d1358fba6e6"
+    },
+    "after": {
+      "head": "42d0b40b9833b441a32d0fde37e7fac8b54739a3",
+      "tree": "ead0f4ffe518cdf10f4fde2002af3511769e5c3c",
+      "status": "",
+      "exit_code": 0
+    },
+    "complete": {
+      "type": "complete",
+      "status": "review_completed",
+      "findings": 0,
+      "gate": {
+        "threshold": "major",
+        "status": "passed",
+        "blockingFindings": 0
+      },
+      "reviewedFiles": [
+        "crates/scancraft-calibration/src/stereo_fit.rs",
+        "docs/reviews/REVIEW_RESPONSES.md",
+        "docs/reviews/evidence/2026-10-27-stereo-calibration-reference.json",
+        "docs/reviews/evidence/2026-10-27-stereo-calibration-review.json"
+      ]
+    },
+    "raw_log_sha256": "b9e513edf9b0d2b10c08fa367c0443960303258f39d6570db77e8db98b2626bf",
+    "included_capacity": 1,
+    "usage_billing": "inactive",
+    "secrets_scan": {
+      "full_context": "pass",
+      "complete_diff": "pass"
+    }
+  },
+  "github_app": {
+    "state": "not requested yet",
+    "reason": "earliest known included manual window approximately2026-10-27T01:44:43Z after PR19 request",
+    "limitations": "draft/nondefault-base skip is not App review completion; no paid or duplicate request authorized"
+  }
 }
