@@ -1586,3 +1586,21 @@ all-target Clippy and release build. Initial new test used the wrong Worker::joi
 return type; corrected to observe the actual polled result before this final
 gate. Complete tracked source plus intended new module and selected diff pass
 gitleaks; protected/private untracked files are excluded. CLI review pending.
+
+
+CR-DISCOVERY-CHILD-LIFETIME — accepted. First CLI review of6cd439e versus224621b
+completed with one major finding and blocked gate (exit2). Cancellation timeout
+could clear the UI discovery guard while a probe child was still alive, allowing
+repeated stuck children. Correction separates ordinary Stop from teardown abort.
+Normal Stop keeps supervising; after any protocol/supervision error, the worker
+retains the pending guard until actual child exit. Only Discovery Drop may stop
+waiting during application destruction. No forced kill or device reset occurs.
+New real child regressions check retained waiting until exit and teardown that
+does not falsely claim exit. Discovery can remain pending indefinitely on a stuck
+QUERYCAP; responsiveness does not establish a hard shutdown or hardware bound.
+Full correction gate and fresh review remain pending; initial blocked review is
+retained in private developer artifacts/discovery-process/coderabbit.ndjson.
+
+Correction gate completed successfully:646 tests, formatting, strict all-target
+Clippy and release build. Fresh incremental review is still pending; this does
+not convert the initial blocked CLI result into a pass.

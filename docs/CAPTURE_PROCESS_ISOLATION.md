@@ -193,11 +193,13 @@ opening candidate video nodes and QUERYCAP; it does not acquire a capture sessio
 or change scanner settings. Discovery uses the existing bounded completion
 protocol and private diagnostics, rejecting frame messages. The GUI polls
 completion without joining a live probe and prevents duplicate discovery and
-capture starts while pending. Stop requests cancellation; monitor cancellation
-uses the two-second supervision grace and does not kill the helper. An in-flight
-synchronous QUERYCAP may continue in that child after the monitor gives up.
+capture starts while pending. Stop requests graceful cancellation but leaves the
+pending guard active until actual child exit. Protocol/read failures also retain
+the guard until exit; they cannot silently enable repeated probes while a child
+is alive. An in-flight synchronous QUERYCAP may therefore leave discovery pending
+indefinitely, with the UI continuing to poll. No helper is killed.
 
-Discovery Drop requests cancellation and joins the IPC worker, so ordinary
+Discovery Drop separately requests abort and joins the IPC worker, so ordinary
 application destruction can wait for the software grace plus unbounded process
 launch/filesystem/scheduler latency. This is not a hard whole-app close deadline.
 No actual stuck-driver or device discovery reliability qualification is claimed.

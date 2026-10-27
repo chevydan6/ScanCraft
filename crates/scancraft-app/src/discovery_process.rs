@@ -16,14 +16,21 @@ use std::{
 
 pub(crate) struct Discovery {
     cancel: Arc<AtomicBool>,
+    abort: Arc<AtomicBool>,
     worker: Worker,
 }
 impl Discovery {
     pub(crate) fn start() -> Result<Self, String> {
         let cancel = Arc::new(AtomicBool::new(false));
         let control = cancel.clone();
-        let worker = Worker::spawn(move || run(&control)).map_err(|e| e.to_string())?;
-        Ok(Self { cancel, worker })
+        let abort = Arc::new(AtomicBool::new(false));
+        let teardown = abort.clone();
+        let worker = Worker::spawn(move || run(&control, &teardown)).map_err(|e| e.to_string())?;
+        Ok(Self {
+            cancel,
+            abort,
+            worker,
+        })
     }
     pub(crate) fn cancel(&self) {
         self.cancel.store(true, Ordering::Relaxed);
@@ -34,13 +41,14 @@ impl Discovery {
 }
 impl Drop for Discovery {
     fn drop(&mut self) {
+        self.abort.store(true, Ordering::Relaxed);
         self.cancel();
         // This joins IPC supervision only. A stalled probe retains its descriptors
         // in the helper; no kill/reset or successful-cleanup claim is made.
         let _ = self.worker.join();
     }
 }
-fn run(cancel: &AtomicBool) -> Result<String, String> {
+fn run(cancel: &AtomicBool, abort: &AtomicBool) -> Result<String, String> {
     if cancel.load(Ordering::Relaxed) {
         return Ok("Discovery cancelled before launch".into());
     }
@@ -57,13 +65,14 @@ fn run(cancel: &AtomicBool) -> Result<String, String> {
     let result = capture_process::supervise(
         &mut helper,
         cancel,
-        cancel,
+        abort,
         |_| {
             unexpected_frame = true;
             false
         },
         Duration::from_secs(2),
     );
+    retain_until_exit(&mut helper, abort);
     if unexpected_frame {
         return Err("Unexpected frame in discovery protocol".into());
     }
@@ -73,6 +82,17 @@ fn run(cancel: &AtomicBool) -> Result<String, String> {
             path.display()
         )
     })
+}
+// Failed IPC must not release the GUI's pending guard while a probe is alive.
+// Only application teardown may abandon waiting; ordinary Stop cannot do so.
+fn retain_until_exit(helper: &mut OwnedChild, abort: &AtomicBool) {
+    helper.child().stdin.take();
+    while !abort.load(Ordering::Relaxed) {
+        if matches!(helper.child().try_wait(), Ok(Some(_))) {
+            return;
+        }
+        std::thread::sleep(Duration::from_millis(10));
+    }
 }
 pub(crate) fn helper_entry(args: &[OsString]) -> Option<i32> {
     if args.first().is_none_or(|a| a != "--discovery-helper") {
@@ -120,6 +140,7 @@ mod tests {
         .unwrap();
         let mut job = Discovery {
             cancel: cancel.clone(),
+            abort: Arc::new(AtomicBool::new(false)),
             worker,
         };
         // Release before unwinding/drop on assertion failure as well.
@@ -148,6 +169,32 @@ mod tests {
         assert_eq!(result, Ok("probe finished".into()));
     }
     #[test]
+    fn failed_probe_keeps_pending_guard_until_actual_child_exit() {
+        let mut command = Command::new("sh");
+        command
+            .args(["-c", "exec sleep 0.1"])
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::null());
+        let mut helper = OwnedChild::spawn(&mut command).unwrap();
+        let start = std::time::Instant::now();
+        retain_until_exit(&mut helper, &AtomicBool::new(false));
+        assert!(helper.child().try_wait().unwrap().is_some());
+        assert!(start.elapsed() >= Duration::from_millis(100));
+    }
+    #[test]
+    fn teardown_may_stop_waiting_without_claiming_child_exit() {
+        let mut command = Command::new("sh");
+        command
+            .args(["-c", "exec sleep 1"])
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::null());
+        let mut helper = OwnedChild::spawn(&mut command).unwrap();
+        retain_until_exit(&mut helper, &AtomicBool::new(true));
+        assert!(helper.child().try_wait().unwrap().is_none());
+    }
+    #[test]
     fn invalid_request_never_probes_devices() {
         assert_eq!(
             helper_entry(&["--discovery-helper".into(), "extra".into()]),
@@ -158,7 +205,7 @@ mod tests {
     #[test]
     fn cancelled_discovery_does_not_spawn() {
         assert_eq!(
-            run(&AtomicBool::new(true)),
+            run(&AtomicBool::new(true), &AtomicBool::new(false)),
             Ok("Discovery cancelled before launch".into())
         );
     }
