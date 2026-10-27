@@ -9,11 +9,14 @@ pub mod factory_laser;
 pub mod factory_named;
 pub mod factory_pose;
 pub mod laser_surface;
+mod normal_blocks;
 pub mod orientation;
 pub mod planar;
+mod projection_differential;
 pub mod rectification;
 pub mod refinement;
 pub mod stereo;
+pub mod stereo_fit;
 pub mod storage;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]

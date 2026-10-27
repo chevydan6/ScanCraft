@@ -1205,3 +1205,20 @@ generated to inflate a score. Additional helper documentation can accompany
 specific interface or maintainability improvements. This is an App advisory, not
 a new independent SCAN finding. Evidence-only follow-up leaves reviewed Rust/tool
 source unchanged. SCAN-REV-005 remains open and 006 unqualified/under review.
+
+## Development milestone — fixed-intrinsic stereo calibration
+
+Advances the SCAN-REV-006 tooling gap without resolving/reclassifying qualification.
+New stereo_fit jointly estimates a shared rig and target poses while holding
+supplied lenses fixed. It uses bounded native inverse/homography seeds, shared
+Brown/pose derivatives and generic six/ten-parameter Schur blocks. A dense-system
+comparison verifies both consumers. Existing mono reference fixtures and all three
+CLI artifact sets are byte-identical. Workflow calibration_bundle shares existing
+atomic publication; public mono provenance path is preserved by re-export.
+New stereo_calibration workflow and calibrate-stereo-extrinsics CLI never open or
+configure hardware or install calibration. 607 Rust tests/fmt/strict Clippy/release
+pass; three OpenCV/NumPy stereo cases, held-out synthetic triangulation, release
+CLI preservation/rejection and a corrupted-transform reference control pass.
+No new dependencies/licenses/runtime, firmware, physical calibration or source
+accuracy claims. Exact source/review evidence is recorded separately; only the
+reviewer controls independent finding status.

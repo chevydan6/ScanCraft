@@ -493,3 +493,13 @@ callback keeps math independent of GUI/device or geometry WorkControl. Workflow
 planar_calibration owns bounded JSON and atomic no-overwrite diagnostic publication;
 the CLI supplies scoped termination. Results are not capture records; existing
 device/reconstruction behavior is unchanged. See docs/BROWN_CALIBRATION_REFINEMENT.md.
+
+## Fixed-lens stereo calibration boundary
+
+`scancraft-calibration::stereo_fit` estimates shared rig/target poses with fixed
+lenses. Mono/stereo share private projection_differential and normal_blocks kernels
+(6/10 global parameters); the normal blocks are checked against a dense reference.
+Workflow calibration_bundle shares atomic diagnostic publication while preserving
+the mono public type path. stereo_calibration and the CLI adapter own typed bounded
+input and cancellation. No device/GUI/reconstruction invocation or active calibration
+installation changes. See docs/STEREO_EXTRINSIC_CALIBRATION.md.

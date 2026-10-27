@@ -805,3 +805,14 @@ malformed requests; an altered distortion coefficient fails the reference checke
 This does not qualify Raptor optics or change hardware acceptance gates. See
 docs/BROWN_CALIBRATION_REFINEMENT.md and
 docs/reviews/evidence/2026-10-27-brown-calibration-reference.json.
+
+## Fixed-intrinsic stereo fitting — synthetic PASS only
+
+The full 607-test/fmt/strict-Clippy/release gate passes. Three independent synthetic
+fixed-lens stereo cases and held-out native triangulation checks pass; noisy
+hold-out error about 0.0298 mm is not scanner accuracy. Fixed lenses are declarations,
+not physically qualified Raptor parameters. Three prior mono reference fixtures
+and release CLI artifact sets remain byte-identical after shared-code extraction.
+Actual hardware/calibration/synchronization/reliability acceptance gates are unchanged.
+Evidence: docs/STEREO_EXTRINSIC_CALIBRATION.md and
+docs/reviews/evidence/2026-10-27-stereo-calibration-reference.json.

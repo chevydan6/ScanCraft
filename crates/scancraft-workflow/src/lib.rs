@@ -1,4 +1,5 @@
 //! Shared bounded, cancellable reconstruction/scanning and atomic bundle publication.
+mod calibration_bundle;
 pub mod frame_document;
 pub mod mesh_document;
 pub mod mesh_history;
@@ -11,6 +12,7 @@ pub mod scan_project_load;
 pub mod section_document;
 pub mod sequence;
 pub mod statistical;
+pub mod stereo_calibration;
 pub mod stereo_surface;
 use crate::output::{publish, staging};
 use image::{ColorType, ImageDecoder, codecs::png::PngDecoder};

@@ -253,7 +253,7 @@ fn normalize(points: &[[f64; 2]]) -> Result<(Matrix3<f64>, Vec<[f64; 2]>), Strin
     Ok((transform, normalized))
 }
 
-fn homography(target: &[[f64; 2]], pixels: &[[f64; 2]]) -> Result<Matrix3<f64>, String> {
+pub(crate) fn homography(target: &[[f64; 2]], pixels: &[[f64; 2]]) -> Result<Matrix3<f64>, String> {
     let (t, x) = normalize(target)?;
     let (u, y) = normalize(pixels)?;
     // Pad the four-point 8x9 system: thin SVD otherwise omits its null vector.
@@ -309,7 +309,7 @@ fn intrinsic_constraint(h: &Matrix3<f64>, i: usize, j: usize) -> nalgebra::SVect
     ])
 }
 
-fn recover_pose(h: Matrix3<f64>, visible_target: [f64; 2]) -> Result<RigidPose, String> {
+pub(crate) fn recover_pose(h: Matrix3<f64>, visible_target: [f64; 2]) -> Result<RigidPose, String> {
     let length = (h.column(0).norm() + h.column(1).norm()) / 2.;
     if !length.is_finite() || length <= f64::MIN_POSITIVE {
         return Err("singular target pose".into());

@@ -1,7 +1,7 @@
 //! Explicit, offline-only observation fitting. Never installs capture calibration.
 use crate::{
-    Error, artifact, bounded, digest,
-    output::{publish, staging},
+    Error, bounded,
+    calibration_bundle::{check, ensure_new, publish_fit},
 };
 use scancraft_calibration::{
     planar::{PlanarView, initialize_planar},
@@ -10,19 +10,12 @@ use scancraft_calibration::{
 use scancraft_geometry::work::WorkControl;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use std::{
-    fs::{self, File},
-    io::Write,
-    path::Path,
-};
+#[cfg(test)]
+use std::fs::{self, File};
+use std::path::Path;
 
 pub const MAX_REQUEST_BYTES: usize = 16 * 1024 * 1024;
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum ObservationProvenance {
-    SyntheticFixture,
-    UserSuppliedUnverified,
-}
+pub use crate::calibration_bundle::ObservationProvenance;
 /// Provenance is a supplied declaration, never device/accuracy attestation.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -35,13 +28,6 @@ pub struct Request {
     pub initial_max_reprojection_error_px: f64,
     pub refinement: RefinementOptions,
 }
-fn check(work: &WorkControl, cancel: &dyn Fn() -> bool) -> Result<(), Error> {
-    work.check()?;
-    if cancel() {
-        return Err("offline calibration cancelled".into());
-    }
-    Ok(())
-}
 /// Retain exact request bytes and a diagnostic fit in an atomic no-overwrite bundle.
 /// Filesystem I/O and linear-initializer SVD are not preempted inside their calls;
 /// refinement checks cancellation per view/256 observations and damping trial.
@@ -52,11 +38,7 @@ pub fn run(
     cancel: &dyn Fn() -> bool,
 ) -> Result<Value, Error> {
     check(work, cancel)?;
-    match fs::symlink_metadata(target) {
-        Ok(_) => return Err("calibration output already exists; choose a new directory".into()),
-        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
-        Err(e) => return Err(e.into()),
-    }
+    ensure_new(target)?;
     let bytes = bounded(input, MAX_REQUEST_BYTES, work)?;
     let request: Request = serde_json::from_slice(&bytes)?;
     if request.schema_version != 1 {
@@ -76,29 +58,14 @@ pub fn run(
     let report = json!({"schema_version":1,"scope":"offline numerical fit of supplied observations; not qualified or installed capture calibration",
         "provenance":request.provenance,"device_binding_verified":false,"physical_accuracy_qualified":false,
         "initialization":initial,"refinement":fit});
-    let partial = staging(target)?;
-    let result=(||->Result<Value,Error>{
-        let request_digest=artifact(&partial,"observations.json",work,|out|{out.write_all(&bytes)?;Ok(())})?;
-        check(work,cancel)?;
-        let fit_digest=artifact(&partial,"fit.json",work,|out|{serde_json::to_writer_pretty(out,&report)?;Ok(())})?;
-        let manifest=json!({"schema_version":1,"scope":"offline planar Brown5 fit only","input":digest("observations.json",&bytes),"artifacts":[request_digest,fit_digest],"device_binding_verified":false,"physical_accuracy_qualified":false});
-        artifact(&partial,"manifest.json",work,|out|{serde_json::to_writer_pretty(out,&manifest)?;Ok(())})?;
-        File::open(&partial)?.sync_all()?;
-        check(work,cancel)?;
-        publish(&partial,target)?;
-        Ok(manifest)
-    })().map_err(|e|format!("{e}; incomplete calibration bundle retained at {}",partial.display()))?;
-    let parent = target
-        .parent()
-        .filter(|p| !p.as_os_str().is_empty())
-        .unwrap_or(Path::new("."));
-    File::open(parent).and_then(|f| f.sync_all()).map_err(|e| {
-        format!(
-            "calibration bundle published at {}, parent sync failed: {e}",
-            target.display()
-        )
-    })?;
-    Ok(result)
+    publish_fit(
+        &bytes,
+        &report,
+        target,
+        work,
+        cancel,
+        "offline planar Brown5 fit only",
+    )
 }
 
 #[cfg(test)]

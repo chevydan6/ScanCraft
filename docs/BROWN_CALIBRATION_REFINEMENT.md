@@ -145,7 +145,7 @@ thresholds, hashes and release CLI evidence are retained in
 `reviews/evidence/2026-10-27-brown-calibration-reference.json`.
 
 No real target was captured/calibrated. Model suitability, target detection and
-subpixel localization, robust selection, coverage/uncertainty, joint stereo
+subpixel localization, robust selection, coverage/uncertainty, simultaneous lens/rig
 estimation, Raptor optical/mode binding, synchronization, physical accuracy and
 repeated hardware qualification remain incomplete. SCAN-REV-006 remains under
 independent review; synthetic numerical results do not close it.
@@ -154,3 +154,8 @@ The combined source gate passed 598 Rust tests, formatting, strict all-target
 Clippy and release build (exit 0). Source/log and synthetic runtime hashes are
 recorded in 2026-10-27-brown-calibration-reference.json. These are software gates,
 not hardware qualification.
+
+A separate [fixed-intrinsic stereo stage](STEREO_EXTRINSIC_CALIBRATION.md) now fits
+a rig and common target poses from declared lenses/observations. It does not
+refit lenses or qualify their domain/binding. Shared mono numerical and release
+artifact regressions pass after the kernel/publication extraction.

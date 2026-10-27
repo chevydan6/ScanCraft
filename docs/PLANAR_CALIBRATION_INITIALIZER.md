@@ -45,7 +45,7 @@ calibration procedure. It has no checkerboard detector, bundle adjustment,
 robust correspondence/outlier selection, uncertainty estimate or stereo joint
 optimization. Optional [native Brown5 refinement](BROWN_CALIBRATION_REFINEMENT.md)
 now fits distortion, intrinsics and per-view poses separately; target detection,
-robust selection, uncertainty and joint stereo estimation remain missing. Neither
+robust selection, uncertainty and simultaneous lens/rig estimation remain missing. Neither
 stage is claimed faster or more accurate than a mature calibration library.
 
 ## Input and numerical policies

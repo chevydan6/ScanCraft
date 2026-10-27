@@ -2178,3 +2178,14 @@ Seven numerical and two workflow tests plus three independent synthetic referenc
 cases pass. Physical calibration stays deferred; Raptor optical binding, dimensional
 accuracy and joint stereo calibration remain unqualified. See
 docs/BROWN_CALIBRATION_REFINEMENT.md.
+
+## Fixed-intrinsic stereo fitting — software-only
+
+The native fitter now jointly estimates a right-from-left rig pose and all target
+poses from declared lens models and common target correspondences. The offline
+calibrate-stereo-extrinsics CLI retains exact inputs in an unqualified diagnostic
+bundle; lenses remain fixed. Shared projection/Schur/publication components preserve
+all three previous mono fixtures/artifact sets byte-for-byte. The 607-test full
+gate and synthetic OpenCV/NumPy/held-out triangulation checks pass. No physical
+calibration, actual Raptor optical binding, synchronization or accuracy is qualified.
+See docs/STEREO_EXTRINSIC_CALIBRATION.md.
