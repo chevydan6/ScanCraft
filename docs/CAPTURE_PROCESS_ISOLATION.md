@@ -85,6 +85,8 @@ limited to 50000 finite points; thumbnail dimensions are nonzero, at most
 320x240, and must match pixel counts. Parent mailbox replacements are counted
 separately and added to the child's skipped-preview total.
 
+The child progress sender polls every 30 ms, matching the existing GUI repaint
+cadence instead of imposing a 10 Hz cap. No measured FPS/latency claim is made.
 The child progress thread consumes the one-slot engine mailbox without holding
 its mutex during serialization or pipe writes. Display transport failure requests
 abort. A blocked display writer does not own acquisition or reconstruction, and
