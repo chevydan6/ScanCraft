@@ -1240,6 +1240,27 @@ The incremental stereo correction review completed at
 findings, major gate passed, exit 0. Fresh included capacity 1/inactive billing
 and complete context/diff scans were verified; checkout head/tree stayed fixed.
 Final evidence-only follow-up leaves this corrected Rust/tool source unchanged.
-No repeated unchanged code review or paid usage. GitHub App review has not been
-requested for PR20: earliest known included manual window is about 01:44 UTC,
-following the completed PR19 review. Skip status is not review completion.
+No repeated unchanged code review or paid usage. When initial CLI evidence was
+recorded, App review had not yet been requested; its included window followed the
+PR19 review. The completed App result is recorded below. Skip status alone is
+not review completion.
+
+App20 completed exact ce5d66a19622948b949a749faa86d3449dbb9cab: run
+a5e01b1d-20b4-4ba5-b47d-a0e8f5a745bb, request 6431680969 at 01:45:59 UTC,
+finished reply 6431682290, summary 6431458213. Exact source/covered markers match
+with kind reviewed; no actionable/inline comments or review threads. No formal
+approval or owner merge consent is inferred. Included allowance was used (one per
+hour, zero remaining); no paid consent or repeated request.
+
+CR-APP-STEREO-DOCSTRINGS — advisory evaluated; blanket threshold disputed as a
+readiness gate, warning retained. The App reports 39.53% versus 80%, 43 touched
+functions across 13 files, 12 unsupported files skipped. New public entry points
+and shared projection/normal/publication helpers document their contracts; the
+method guide explains frames, equations, bounds, limitations and provenance. The
+aggregate also counts private/test helpers and existing touched code; it does not
+measure mathematical correctness, public API adequacy or physical qualification.
+No threshold/configuration is lowered and no boilerplate is generated to inflate
+the score. Specific maintainability improvements can receive targeted docs. This
+is an App advisory, not a new independent SCAN finding. Final follow-up changes
+review metadata only; corrected source and the 607-test evidence remain unchanged.
+SCAN-REV-005/006 remain under independent reviewer control.
