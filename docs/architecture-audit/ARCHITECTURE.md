@@ -98,6 +98,24 @@ GUI joins from directly owning a stuck ioctl but does not bound spawn, filesyste
 scheduling, allocator or all application Drop behavior. Independent SCAN-REV-005
 remains Open; physical stall/disconnect qualification is absent.
 
+## Live-session capacity constraint
+
+**Confirmed:** `live_stereo::Processor::open` and `Association::new` accept at most
+1,000 frames per camera. `runner::record_controlled` stops each source after its
+configured maximum, `verify_recording` rejects more than 1,000, and
+`geometry::live_references::LiveSession::validate` caps both recorded-frame counts
+and pairs at 1,000 plus a 1 MiB serialized-reference limit. `ScanSession` has its
+own separate 100,000-frame history cap. A per-pair JSON file, in-memory pair/report
+vectors, complete recording replay and artifact fingerprinting all participate
+in publication. Raising one number alone cannot make a long session publishable.
+
+A later device-free probe against unchanged audited Rust source verified that
+both `Association::new` and `Processor::open` accept a synthetic configuration
+at 1,000 and reject 1,001. No scanner or physical calibration was accessed. The
+probe and its source/binary hashes are retained in private developer artifacts;
+this is a software capacity check, not a timed physical scan. See
+PERFORMANCE_AND_VALIDATION.md for duration/disk arithmetic and its assumptions.
+
 ## Geometry, editing and rendering
 
 Image maps precompute inverse sampling with validity masks. Stereo maps can apply

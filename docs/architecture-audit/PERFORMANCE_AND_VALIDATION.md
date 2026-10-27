@@ -39,6 +39,38 @@ source/binary identification are part of reproducibility, not a numerical speedu
 | GPU | App glow graphics backend; no production reconstruction compute dispatcher found | OpenGL presentation is not GPU triangulation/ICP/fusion; no CPU-vs-GPU reconstruction result |
 | Throughput/latency | Component timings below and raw acquisition duration trials | No measured90% valid-frame processing,20FPS live preview,p95<=150ms,30-minute calibrated scan or full pipeline benchmark |
 
+## Live-duration feasibility: confirmed source limit
+
+`live_stereo.rs` caps `maximum_frames_per_camera` and the association limit at
+1,000; `runner::record_controlled` consumes that maximum per source and
+`verify_recording` rejects a larger completed recording. `live_references.rs`
+also limits source counts/pairs to 1,000 and serialized live references to 1 MiB;
+`geometry/session.rs` separately caps frame history at 100,000. The runner retains
+pair summaries and emits/fingerprints one report file per processed pair. These
+are separate constraints, so increasing only the configuration limit would not
+establish a valid long-session publication or bounded resource usage.
+
+After the source snapshot, a no-device synthetic probe linked against the verified
+release library tested both `Association::new` and `Processor::open`: a 1,000-frame
+configuration succeeded and 1,001 was rejected. The Rust files are unchanged
+from audited commit ced7697; probe source, inputs, executable and result are retained
+privately. This is direct boundary evidence, not a hardware-duration measurement.
+
+At exactly 50 accepted frames/s, 1,000 frames per camera represent **20 seconds**
+of frame time. A 30-minute continuous run at that rate requires 90,000 frames
+per camera. Even at the minimum selectable 5 FPS, a hypothetical 30-minute run
+processing 90% of incoming frames involves at least 8,100 frames per camera,
+above the configured raw-source cap. These are arithmetic scenarios, not measured
+wall-clock performance; pauses, rate variance and drops are not modeled.
+
+For context only, two uncompressed 1920×1200 8-bit streams at exactly 50 FPS for
+30 minutes contain 414.72 GB (386.24 GiB) of pixel payload before metadata, reports,
+filesystem overhead or duplicate copies. This is a calculation, not measured disk
+usage, and does not assume real exposures are synchronized. Sustained storage,
+publication/recovery time and memory must be tested for an actual chosen format
+and hardware. This hard source cap independently prevents satisfying the stated
+continuous-duration and throughput gates together under the stated assumptions.
+
 ## Recorded timings, with limits
 
 BENCHMARKS.md and linked checked-in benchmark JSON record:

@@ -46,6 +46,19 @@ consumer/pipe failure and restart only after actual cleanup, with private durabl
 logs. Sources: device Capture/stream_group, acquisition::scan, CAPTURE_PROCESS_ISOLATION,
 app supervisors, acceptance and review responses.
 
+## P1: design a verifiable long-session lifecycle
+
+The current 1,000-frame per-camera source, association, replay and live-reference
+limits prevent the mission's 30-minute/throughput gates under normal configured
+frame rates. Evaluate recording/storage capacity, per-pair file and in-memory
+history scaling, full-file verification, interruption/recovery, PTS rollover,
+project-reference limits and publication/legacy compatibility together. A lone
+larger constant would leave other limits and resource guarantees unresolved.
+The exact selection, implementation and any data-format changes require explicit
+authorization; the audit makes no such change. Source evidence and arithmetic:
+ARCHITECTURE and PERFORMANCE_AND_VALIDATION, live_stereo.rs, runner.rs,
+live_references.rs and session.rs. No physical scan or disk benchmark was run.
+
 ## P2: surface reconstruction and tracking quality before editing expansion
 
 Current voxel centroids and organized-grid triangles are not a general fused-scan

@@ -1788,3 +1788,24 @@ the second audit-doc review; no unchanged third review is requested. All eight
 reports still identify frozen source ced7697, and 364 local source links resolve
 to tracked files at that revision. No application Rust, calibration, firmware or
 reviewer-owned record was changed. The final outcome note is documentation-only.
+
+
+DEV-LIVE-SESSION-CAPACITY — developer-identified mission gap, not an independent
+review finding. At audited Rust source ced7697, Processor::open and
+Association::new reject more than 1,000 frames per camera. The source runner
+records at most that many frames, verify_recording rejects larger files, and
+LiveSession::validate independently caps counts/pairs at 1,000 and references
+at 1 MiB; ScanSession has a separate 100,000-history cap. A no-device synthetic
+probe against the verified release libraries confirms 1,000 accepted and 1,001
+rejected at both public boundaries. At nominal 50 FPS this is 20 seconds of frame
+time, not a measured hardware duration; 30 minutes at 50 FPS means 90,000 frames
+per camera. Conditional raw-storage arithmetic and assumptions are documented in
+architecture-audit/PERFORMANCE_AND_VALIDATION.md. Recording/write/finalization,
+PTS handling, per-pair files, memory and reference compatibility all require
+analysis; changing one limit is insufficient. Source files modified: audit
+ARCHITECTURE, PERFORMANCE_AND_VALIDATION, RECOMMENDATIONS and EXECUTIVE_SUMMARY,
+plus this developer-owned response. No production code, independent findings,
+scanner state, firmware or physical calibration changed. The audit recommendation
+is documented for owner direction; it has not been implemented. The developer
+probe is stored privately under live-capacity-audit; reviewer verification and
+any independent finding/status remain solely under reviewer control.

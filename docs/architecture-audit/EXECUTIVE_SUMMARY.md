@@ -50,8 +50,9 @@ export/reopen qualification. See ARCHITECTURE and PERFORMANCE_AND_VALIDATION.
    file/linkage, not assumed MIT-compatible unchanged (comparison/license sources).
 7. **Biggest weaknesses?** Unqualified physical mode/camera/optics/scale/timing;
    failed historical rejection proxy and setup-specific portability; local tracking
-   without global recovery; centroid fusion/organized meshing rather than general
-   scan-surface reconstruction; absent full performance/memory/end-to-end evidence;
+   without global recovery; a 1,000-frame-per-camera live-session cap that
+   conflicts with the 30-minute throughput gate; centroid fusion/organized
+   meshing rather than general scan-surface reconstruction; absent full performance/memory/end-to-end evidence;
    stale architecture summaries and gaps in historical design/provenance records
    (performance/maturity matrix, README, acceptance, source modules).
 8. **What most improves delivery likelihood?** Finish one trustworthy real native
