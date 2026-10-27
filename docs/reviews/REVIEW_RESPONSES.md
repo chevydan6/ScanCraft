@@ -1367,3 +1367,51 @@ while physical emission, wavelength and calibration binding remain unverified.
 Recorded the qualified comparison in `docs/RAPTOR_SCR_OBSERVATIONS.md`; no mode
 activation, vendor code import, new accuracy claim or SCAN-REV-006 closure.
 Existing 613-test/source review evidence remains for unchanged Rust code.
+
+SCAN-REV-005 — accepted, preparation in progress (uncommitted developer work).
+Separated preview session ownership into `scancraft-app/src/capture_session.rs`
+from `main.rs` GUI/channel handling. The session now explicitly calls device
+close after ordinary recording setup/write or acquisition failure and combines
+operation and restoration errors; publication still requires successful close.
+Two hardware-free regressions verify close invocation/order on errors and that
+cleanup failure cannot return successful publication state. Full offline gate
+passes formatting, strict all-target Clippy, 615 tests and release build.
+
+This does not implement process isolation or bound shutdown. Both preview and
+native live-scan UI still have device-owning worker joins; synchronous kernel
+calls remain. `docs/CAPTURE_PROCESS_ISOLATION.md` records the required helper
+ownership, bounded IPC, durable failure evidence, lock retention and validation
+contract. No claim that the independent finding is corrected or closed. No
+implementation commit, CodeRabbit review or PR is claimed for this unfinished
+work; preserve it on `dev/capture-session-isolation` for continued implementation.
+
+SCAN-REV-005 — preview helper milestone (partial correction, not closure).
+`capture_process.rs` now starts the same executable in a validated internal
+helper mode before GUI initialization. Only the helper invokes
+`capture_session::run` and owns scanner descriptors, locks, recording and cleanup.
+`capture_ipc.rs` bounds binary frames and JSON results and rejects malformed or
+incomplete streams. The parent monitor uses nonblocking pipe reads with bounded
+batches; cancellation closes stdin and applies a two-second software grace policy.
+Timeout reports restoration unconfirmed with helper PID and private 0600 log path.
+A waiter allocated before child launch reaps surviving children independently;
+no kill/reset or device-owning thread detachment is used. The GUI no longer
+labels a failed/pending cleanup worker as a stopped scanner.
+
+Evidence: full `tools/check.sh` passes formatting, strict all-target Clippy,
+624 tests and release build. Real device-free child processes test frame/result
+transport, nonzero and missing-result exit, cancellation during a stall, and a
+lock inherited by a stalled child. The monitor worker returns while that lock
+remains held; releasing the fixture's cleanup marker makes it acquirable again.
+Codec tests cover fragmented messages, corrupt lengths and truncated/trailing
+completion. A release invocation with unsupported helper interface255 exits1
+without stdout or GUI/device initialization. Private diagnostic permissions and
+retention across IPC loss are tested. No real scanner/driver-stall qualification
+is inferred. `docs/CAPTURE_PROCESS_ISOLATION.md` records the ownership contract.
+
+Native `live_ui` still runs acquisition in its existing thread and joins on Drop;
+other synchronous device-discovery calls are not newly isolated. Process spawn,
+log filesystem operations and scheduler latency have no hard real-time bound.
+The preview-only synthetic results therefore do not establish whole-application
+bounded shutdown or resolve the independent finding. No hardware, firmware,
+physical calibration, paid service or merge action occurred. Automated review
+for this meaningful diff follows separately; existing independent statuses remain.

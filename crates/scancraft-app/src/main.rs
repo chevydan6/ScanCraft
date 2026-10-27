@@ -1,5 +1,8 @@
 mod archive_ui;
 mod capture_close;
+mod capture_ipc;
+mod capture_process;
+mod capture_session;
 mod capture_worker;
 mod cloud_jobs;
 mod cloud_ui;
@@ -11,12 +14,15 @@ mod recovery_ui;
 mod screen_tools;
 // Rust desktop workbench; acquisition/recording is independent of UI throughput.
 use eframe::egui;
-use scancraft_core::{Frame, StreamProfile};
-use scancraft_device::{Capture, SessionLock, discover};
+use scancraft_core::Frame;
+#[cfg(test)]
+use scancraft_core::StreamProfile;
+use scancraft_device::discover;
+#[cfg(test)]
 use scancraft_recording::Writer;
+#[cfg(test)]
+use std::fs::OpenOptions;
 use std::{
-    fs::OpenOptions,
-    io::BufWriter,
     path::PathBuf,
     sync::{
         Arc,
@@ -205,91 +211,23 @@ impl App {
         let f = frames.clone();
         let d = drops.clone();
         let worker = match capture_worker::Worker::spawn(move || {
-            let run = || -> Result<String, String> {
-                let _locks = SessionLock::acquire().map_err(|e| e.to_string())?;
-                let profile = StreamProfile {
-                    interface,
-                    width: if interface == 4 { 1280 } else { 1920 },
-                    height: if interface == 4 { 800 } else { 1200 },
-                    fourcc: if interface == 4 { *b"MJPG" } else { *b"GREY" },
-                    fps: if interface == 4 { 10 } else { 50 },
-                };
-                let mut capture = if record {
-                    Capture::open_recording(profile.clone())
-                } else {
-                    Capture::open(profile.clone())
-                }
-                .map_err(|e| e.to_string())?;
-                let output = if record {
-                    let folder = PathBuf::from(folder);
-                    std::fs::create_dir_all(&folder).map_err(|e| e.to_string())?;
-                    let stamp = SystemTime::now()
-                        .duration_since(UNIX_EPOCH)
-                        .map_err(|e| e.to_string())?
-                        .as_nanos();
-                    Some(folder.join(format!("capture-{stamp}.raptor")))
-                } else {
-                    None
-                };
-                let partial = output.as_ref().map(|p| p.with_extension("raptor.partial"));
-                let mut recording = if let Some(path) = &partial {
-                    Some(
-                        Writer::with_context(
-                            BufWriter::new(
-                                OpenOptions::new()
-                                    .write(true)
-                                    .create_new(true)
-                                    .open(path)
-                                    .map_err(|e| e.to_string())?,
-                            ),
-                            profile,
-                            {
-                                let mut context = scancraft_recording::CaptureContext::default();
-                                if let Some(observed) = capture.recording_observations() {
-                                    context
-                                        .add_capture_observations(observed)
-                                        .map_err(|e| e.to_string())?;
-                                }
-                                context
-                            },
-                        )
-                        .map_err(|e| e.to_string())?,
-                    )
-                } else {
-                    None
-                };
-                while !c.load(Ordering::Relaxed) {
-                    let frame = capture.next_frame().map_err(|e| e.to_string())?;
-                    if let Some(w) = &mut recording {
-                        w.push(&frame).map_err(|e| e.to_string())?;
-                    }
+            capture_process::run(
+                interface,
+                record,
+                std::path::Path::new(&folder),
+                &c,
+                |frame| {
                     f.fetch_add(1, Ordering::Relaxed);
                     match tx.try_send(frame) {
-                        Ok(()) => (),
+                        Ok(()) => true,
                         Err(TrySendError::Full(_)) => {
                             d.fetch_add(1, Ordering::Relaxed);
+                            true
                         }
-                        Err(TrySendError::Disconnected(_)) => break,
+                        Err(TrySendError::Disconnected(_)) => false,
                     }
-                }
-                let rejected = capture.rejected;
-                let missing = capture.metadata_missing;
-                let gaps = capture.sequence_drops;
-                capture.close().map_err(|e| e.to_string())?;
-                if let Some(w) = recording {
-                    let file = w.finish().map_err(|e| e.to_string())?;
-                    file.get_ref().sync_all().map_err(|e| e.to_string())?;
-                    drop(file);
-                    std::fs::hard_link(partial.as_ref().unwrap(), output.as_ref().unwrap())
-                        .map_err(|e| e.to_string())?;
-                    std::fs::remove_file(partial.as_ref().unwrap()).map_err(|e| e.to_string())?;
-                }
-                Ok(format!(
-                    "Stopped cleanly. Rejected buffers={rejected}, missing metadata={missing}, sequence gaps={gaps}. Recording: {}",
-                    output.map_or_else(|| "off".into(), |p| p.display().to_string())
-                ))
-            };
-            run()
+                },
+            )
         }) {
             Ok(worker) => worker,
             Err(error) => {
@@ -353,6 +291,7 @@ impl App {
             r.preview_drops.load(Ordering::Relaxed)
         );
         if let Some(result) = self.running.as_mut().and_then(|r| r.worker.poll()) {
+            let failed = result.is_err();
             self.log = match result {
                 Ok(s) => s,
                 Err(e) => {
@@ -364,7 +303,11 @@ impl App {
                 }
             };
             self.running = None;
-            self.status = "Capture stopped".into();
+            self.status = if failed {
+                "Capture worker ended; see cleanup diagnostics".into()
+            } else {
+                "Capture stopped".into()
+            };
         }
         ctx.request_repaint_after(Duration::from_millis(30));
     }
@@ -695,6 +638,10 @@ fn startup_args(args: Vec<std::ffi::OsString>) -> Result<Startup, String> {
     }
 }
 fn main() -> eframe::Result {
+    let args: Vec<_> = std::env::args_os().skip(1).collect();
+    if let Some(code) = capture_process::helper_entry(&args) {
+        std::process::exit(code);
+    }
     let startup = match startup_args(std::env::args_os().skip(1).collect()) {
         Ok(Startup::Help) => {
             println!(
@@ -1340,7 +1287,7 @@ mod capture_recovery_tests {
             panic!("injected capture failure");
         }));
         finish(&mut app);
-        assert_eq!(app.status, "Capture stopped");
+        assert_eq!(app.status, "Capture worker ended; see cleanup diagnostics");
         assert!(app.log.contains("panicked"));
         assert!(app.log.contains("incomplete recording"));
         assert_eq!(std::fs::read(&path).unwrap(), before);
@@ -1362,7 +1309,7 @@ mod capture_recovery_tests {
         let mut app = App::default();
         app.running = Some(running(|| Err("injected capture error".into())));
         finish(&mut app);
-        assert_eq!(app.status, "Capture stopped");
+        assert_eq!(app.status, "Capture worker ended; see cleanup diagnostics");
         assert!(app.log.contains("injected capture error"));
     }
 }
