@@ -1183,3 +1183,25 @@ mutation control, not a newly discovered historical production defect. Separate
 checkout/target and source/log hashes are retained in the reference evidence.
 This follow-up changes evidence only; Rust and numerical parameters remain at
 the reviewed source. SCAN-REV-005/006 status remains under reviewer control.
+
+GitHub App completed exact 3b4dff705d661e3d56bb547b4c70d3384695a07a:
+run 2cd1dfda-ed4a-4b14-80bf-13e949fdc170, request 6430863767, finished reply
+6430868796 and summary 6430777570. Exact source/covered markers both match with
+kind reviewed; no actionable comments, inline comments or review threads. There
+is no formal APPROVED review object and no owner merge consent. The summary
+explicitly confirms included allowance used (one per hour, zero remaining). No
+repeated request or billing consent. Exact integration CI log confirms 598 tests
+and the new named calibration regressions at merge checkout 4d002be.
+
+CR-APP-BROWN-DOCSTRING-COVERAGE — advisory evaluated; blanket threshold disputed
+as a readiness gate, warning retained unchanged. The App reports 5.71% versus
+80%, 35 functions across eight files, 11 unsupported files skipped. Both new public
+fitting/workflow entry points describe their contracts/limitations, and the method,
+request schema, numerical policies and provenance have dedicated documentation.
+The function metric also counts private/test helpers and the touched CLI dispatcher;
+it does not measure numerical correctness, public API adequacy or physical
+qualification. No threshold/configuration is lowered and no boilerplate is
+generated to inflate a score. Additional helper documentation can accompany
+specific interface or maintainability improvements. This is an App advisory, not
+a new independent SCAN finding. Evidence-only follow-up leaves reviewed Rust/tool
+source unchanged. SCAN-REV-005 remains open and 006 unqualified/under review.
