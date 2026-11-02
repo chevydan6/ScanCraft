@@ -2107,6 +2107,26 @@ Final full gate passed 684 tests, formatting, strict Clippy and release build;
 Raptor traces retained 79/80, 81/83 and 74/75 candidates with unchanged stereo
 guards; raw-plane RMS remains about 0.23 and is not a physical accuracy result.
 No camera/device controls changed. Commit/review outcomes follow separately.
-PR #28 App review requested once after its included hourly interval, comment
-6578089151; service acknowledged the trigger. Await completed review before
-claiming coverage. No paid usage requested, no independent status changed.
+Separate review backlog item, not coverage of DEV-EPIPOLAR-TRACE: PR #28 App
+review requested once after its included hourly interval, comment 6578089151.
+That older PR contains component-shape work. Its completed review is documented
+below; it does not review this epipolar change. No paid usage was requested.
+
+
+CR-EPIPOLAR-REVIEW-SCOPE — disputed the suggested PR-number correction after
+verification. Comment 6578089151 is attached to GitHub issue/PR 28 and contains
+@coderabbitai review, as recorded. It intentionally requests an older pending
+shape review, not review of this new epipolar change. Clarified the backlog
+paragraph to prevent readers from confusing coverage. Initial CLI review of
+c484556a60e373b5493ede3b3786a304377ee817 against b8c7720 completed with this one
+minor finding, no major blockers and exit 0. Corrected documentation requires
+incremental review; application source remains identical to the 684-test gate.
+
+CR-SHAPE-MAIN-WORDING — accepted ambiguity in PR #28 inline 4442858468,
+formal review 5737158429 on 9181d0f, run 509fca5f-b384-44f5-b996-11c55c6f6f7d.
+The earlier statement referred to the Git main branch, not main.rs. Standalone
+commit 1f284b9 explicitly names the Git branch and acknowledges the CLI main.rs
+change. No implementation change is needed. Verified the actual changed-file
+scope and whitespace; no redundant runtime test added for prose. Propagation
+back to the older PR and stacked descendants follows incremental review. No
+independent finding or GitHub thread was resolved by the developer.
