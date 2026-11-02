@@ -14,7 +14,12 @@ use std::{
 };
 
 type Error = Box<dyn std::error::Error>;
-pub fn run(path: &Path, index: u64, config: Config) -> Result<Value, Error> {
+pub fn run(
+    path: &Path,
+    index: u64,
+    config: Config,
+    shape_rms_limit: Option<f64>,
+) -> Result<Value, Error> {
     let file = OpenOptions::new()
         .read(true)
         .custom_flags(libc::O_NONBLOCK | libc::O_CLOEXEC)
@@ -22,9 +27,17 @@ pub fn run(path: &Path, index: u64, config: Config) -> Result<Value, Error> {
     if !file.metadata()?.is_file() {
         return Err("recording must be a regular file".into());
     }
-    analyze(BufReader::new(file), index, config)
+    analyze(BufReader::new(file), index, config, shape_rms_limit)
 }
-fn analyze(input: impl Read, index: u64, config: Config) -> Result<Value, Error> {
+fn analyze(
+    input: impl Read,
+    index: u64,
+    config: Config,
+    shape_rms_limit: Option<f64>,
+) -> Result<Value, Error> {
+    if shape_rms_limit.is_some_and(|v| !v.is_finite() || v <= 0. || v > 1e5) {
+        return Err("shape RMS limit must be finite and in (0, 100000] pixels".into());
+    }
     let reader = Reader::new(input)?;
     let version = reader.version;
     let selected = read_selected(reader, index)?;
@@ -33,17 +46,35 @@ fn analyze(input: impl Read, index: u64, config: Config) -> Result<Value, Error>
         config,
         &WorkControl::default(),
     )?;
+    if shape_rms_limit.is_some() && detections.observations.len() > 512 {
+        return Err("shape diagnostics limited to 512 components per image".into());
+    }
+    let image = GrayImage::from_frame(&selected.profile, &selected.frame)?;
     let observations: Vec<_> = detections
         .observations
         .iter()
         .map(|o| {
-            json!({
+            let mut row = json!({
                 "pixel":o.pixel,"area":o.area,"bounds_inclusive":o.bounds,
                 "peak":o.peak,"saturated_pixels":o.saturated_pixels
-            })
+            });
+            if let Some(limit) = shape_rms_limit {
+                row["shape"] = match scancraft_image::shape::measure(
+                    image,
+                    config.threshold,
+                    o,
+                    &WorkControl::default(),
+                ) {
+                    Ok(fit) => json!({"rms_gate_passed":fit.rms_sampson<=limit,"fit":fit,
+                        "physical_center_verified":false}),
+                    Err(error) => json!({"rms_gate_passed":false,"error":error,
+                        "physical_center_verified":false}),
+                };
+            }
+            row
         })
         .collect();
-    Ok(json!({
+    let mut report = json!({
         "schema_version":1,"source_recording_version":version,
         "source_integrity":"all frames and footer validated","source_header_crc_protected":version>=2,
         "selected_frame_index":index,"source_total_frames":selected.total_frames,
@@ -60,7 +91,14 @@ fn analyze(input: impl Read, index: u64, config: Config) -> Result<Value, Error>
         "coordinate_system":"raw image pixel centers; x right, y down",
         "marker_identity_verified":false,"calibration_activated":false,
         "synchronization_verified":false,"physical_accuracy_qualified":false
-    }))
+    });
+    if let Some(limit) = shape_rms_limit {
+        report["shape_parameters"] = json!({"maximum_rms_sampson_px":limit,
+            "boundary":"foreground pixel centers adjacent to cardinal background, including holes",
+            "fit":"normalized general-conic SVD; reject nonellipses",
+            "raw_observations_retained":true,"subpixel_boundary":false});
+    }
+    Ok(report)
 }
 
 #[cfg(test)]
@@ -106,7 +144,7 @@ mod tests {
     #[test]
     fn reports_raw_observations_and_selected_frame_provenance() {
         let bytes = fixture();
-        let report = analyze(bytes.as_slice(), 1, config()).unwrap();
+        let report = analyze(bytes.as_slice(), 1, config(), None).unwrap();
         assert_eq!(
             report["source_integrity"],
             "all frames and footer validated"
@@ -126,9 +164,26 @@ mod tests {
     fn early_selection_never_hides_corruption_after_selected_frame() {
         let mut bytes = fixture();
         let n = bytes.len();
-        assert!(analyze(&bytes[..n - 1], 0, config()).is_err());
-        assert!(analyze(bytes.as_slice(), 2, config()).is_err());
+        assert!(analyze(&bytes[..n - 1], 0, config(), None).is_err());
+        assert!(analyze(bytes.as_slice(), 2, config(), None).is_err());
         bytes[n - 13] ^= 1;
-        assert!(analyze(bytes.as_slice(), 0, config()).is_err());
+        assert!(analyze(bytes.as_slice(), 0, config(), None).is_err());
+        assert!(analyze(bytes.as_slice(), 0, config(), Some(0.5)).is_err());
+    }
+    #[test]
+    fn failed_shape_keeps_raw_observation_and_requires_an_explicit_valid_limit() {
+        let bytes = fixture();
+        let report = analyze(bytes.as_slice(), 0, config(), Some(0.5)).unwrap();
+        assert_eq!(report["accepted_observations"], 1);
+        assert_eq!(report["observations"][0]["pixel"], json!([2.5, 2.5]));
+        assert_eq!(report["observations"][0]["shape"]["rms_gate_passed"], false);
+        assert!(report["observations"][0]["shape"]["error"].is_string());
+        assert_eq!(
+            report["observations"][0]["shape"]["physical_center_verified"],
+            false
+        );
+        for limit in [0., -1., f64::NAN, f64::INFINITY] {
+            assert!(analyze(bytes.as_slice(), 0, config(), Some(limit)).is_err());
+        }
     }
 }

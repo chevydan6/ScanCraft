@@ -1887,4 +1887,41 @@ previously indexed small marks per camera across three scenes; these are
 image-correspondence comparisons, not physical accuracy qualification or a
 held-out parameter test. Documentation: TARGET_ASSOCIATION.md. Full gate passed
 666 tests, formatting, strict all-target Clippy and release compilation.
-CodeRabbit outcomes will be recorded after execution; no merge is authorized.
+Implementation commit b7124d917784afcf4f70eb06bac0ff96e6c565fd is published
+in PR #27, stacked on reviewed PR #26. The complete diff and tracked source
+context passed secret scanning. One included CodeRabbit CLI review against
+352d6629cca91f5f999cbe41f53497764faad864 completed with zero findings across
+five files, major gate passed and exit 0. Both GitHub CI runs (41437848205 and
+41437792579) passed on the published head. The App initially
+skipped the non-default base; its last reported included allowance was exhausted,
+so no additional manual request or paid usage has been made yet. The CLI pass
+does not substitute for completed GitHub feedback. No merge is authorized.
+This subsequent outcome-only text is not covered by the b7124d9 review.
+
+Additional private validation connects native association outputs to the existing
+Rust triangulator with the unchanged fixed-factory hypothesis and numerical
+limits. It accepts 37, 33 and 30 pairs across the three saved scenes, but this
+remains unqualified raw-unit geometry. The expanded partly obscured scene has
+a much larger target-fit residual than its earlier unobscured subset despite
+low reprojection error. Inspection shows the affected left-camera mark is
+partly occluded while its partner is circular. Binary area centroids therefore
+need image-quality checks before use as precision circle centers; successful
+association/reprojection alone does not establish measurement accuracy. No
+outlier was silently removed, no rejection bound relaxed and no calibration
+installed. Raw observations/results stay local; the physical qualification
+finding remains controlled by the independent reviewer.
+
+DEV-COMPONENT-SHAPE-QUALITY — developer milestone, not an independent finding.
+Add original normalized general-conic/ellipse validation, revalidated component
+boundary measurements and the recording-backed inspect-components CLI. Preserve
+all raw observations, explicit fit errors and false physical-center/accuracy
+flags. Sources: calibration/ellipse, image/shape, CLI component_diagnostics/main,
+module exports, optional NumPy reference tools and COMPONENT_SHAPE_QUALITY.md.
+No copied upstream implementation or added dependency. Synthetic/real numerical
+reference checks pass 32 images and 227 fits; the explored residual threshold
+flags the known obscured mark and other irregular regions. It is not a qualified
+default scanner filter or physical-center correction. The first full Rust gate
+failed when /tmp returned Disk quota exceeded; retained its log and reran with
+a dedicated home-filesystem TMPDIR. The final gate passed 675 tests, formatting,
+strict Clippy and release compilation. Automated review follows separately.
+No independent reviewer file, hardware controls, calibration or main was changed.

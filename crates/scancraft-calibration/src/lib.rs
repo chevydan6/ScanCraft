@@ -2,6 +2,7 @@
 //! Camera axes: +X right, +Y down, +Z forward; extrinsic translations are millimeters.
 use serde::{Deserialize, Serialize};
 
+pub mod ellipse;
 pub mod epipolar;
 pub mod factory;
 pub mod factory_brown;
