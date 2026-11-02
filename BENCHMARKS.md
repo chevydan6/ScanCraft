@@ -14,8 +14,10 @@ left IR 100 frames / 2.161 s; right IR 100 frames / 2.157 s. Startup is
 included. These short experiments are not sustained throughput benchmarks.
 Raw sensor setting is 1920x1200 GREY at 50 fps. See evidence JSON for counters.
 
-Pending: release builds; ten-minute acquisition; thirty-minute live pipeline;
-sixty-minute memory stability; timing distribution and p95 latency; comparison
+Release compilation and ten-minute structural acquisition duration are now
+verified in the stated experiments; the buffer-rejection reliability gate still
+fails. Pending: thirty-minute live pipeline; sixty-minute memory stability;
+timing distribution and p95 latency; comparison
 against matched Creality Scan modes; calibrated geometry ground truth. No
 manufacturer accuracy or processing-throughput claims are made.
 

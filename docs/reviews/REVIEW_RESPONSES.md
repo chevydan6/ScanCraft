@@ -1966,8 +1966,25 @@ It reported 98/102 ongoing and 1/87 startup rejected buffers, with 18,007
 matching sensor PTS. Both ongoing and all-buffer rejection proxies exceed the
 0.1% mission threshold. This confirms sustained acquisition, not full reliability
 or scanning qualification. Sanitized statistics/source/binary binding are in
-benchmarks/capture-soak-2026-11-02.json and NATIVE_CAPTURE_REPEATABILITY.md;
+[capture statistics](../benchmarks/capture-soak-2026-11-02.json) and
+[capture repeatability](../NATIVE_CAPTURE_REPEATABILITY.md);
 raw data remains local. No transport implementation, rejection guard, firmware,
 calibration or reviewer status was changed. Source code is unchanged; documentation
 checks passed: 675 tests, formatting, strict Clippy and release compilation;
 Sanitized statistics/binding checks passed. Automated review follows separately.
+
+CR-CAPTURE-DOCS — accepted two minor CLI findings on b364468. Evidence references
+in this response now link relative to docs/reviews; BENCHMARKS no longer lists
+release compilation or ten-minute structural acquisition as pending. The failed
+buffer-rejection gate and unqualified full pipeline remain explicit. Initial
+review completed with two minor findings, no major blockers and exit 0; the
+corrected documentation requires an incremental review. No source tests need
+changing; relative-link, sanitized JSON arithmetic and whitespace checks cover
+these corrections. The 675-test full gate covers the unchanged application code.
+
+CR-TARGET-INPUT-LIMIT — accepted PR #27 comment 4442298976 from completed App
+run 7f685d52-4093-4760-9c84-f5f43f81eb86 on b7124d9. The example accepts
+1 MiB but reads one extra byte to detect overflow. TARGET_ASSOCIATION now states
+both bounds accurately; implementation is unchanged. The standalone correction
+will also be applied to PR #27 after incremental review. This is a documentation
+correction, not a relaxation of input bounds or independent finding closure.
