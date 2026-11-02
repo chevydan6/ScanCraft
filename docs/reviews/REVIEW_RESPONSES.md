@@ -2057,3 +2057,55 @@ No plane residual was used for selection. These remain same-pose exploratory
 results with substantial lost coverage, shared factory geometry and unqualified
 units/exposure timing. No physical-accuracy claim or independent finding closure.
 Commit and CodeRabbit outcomes follow after review; raw scans stay local.
+
+
+DEV-STRIPE-CONTINUITY review outcome — commit
+b8c772078a7e9478301d39d2f4ee5988f40547e5 published in PR #30, stacked on PR #29.
+One included CodeRabbit CLI review against 0d6eb4119e79e2220b3bd88227d41db4c5edb975
+completed with zero findings, major gate passed and exit 0. Complete diff and
+tracked source context passed secret scanning before upload. The App skipped
+its non-default base, so no App coverage is claimed. One Rust CI run passed and
+the second was still running at the last check. No merge or paid usage requested.
+This outcome-only addition is not covered by the preceding review.
+
+DEV-EPIPOLAR-INTERPOLATION-PROBE — private follow-up, not production code or an
+independent finding. Comparing the same continuity-supported pairs with native
+stereo triangulation gives reference-plane RMS about 0.260–0.264 raw units versus
+about 0.667 for factory-sheet intersections. Intersecting the stereo epipolar
+constraint with adjacent image-trace segments, without extrapolation and within
+three pixels of the original partner, retains 79/80, 81/83 and 74/75 pairs across
+middle/first/last frames. RMS becomes 0.231/0.233/0.226 raw units. All failures and
+residuals are retained. Low reprojection error is imposed by construction and is
+not independent accuracy evidence. Original matches still depend on provisional
+sheet hypotheses; camera geometry and the target reference are shared, while
+physical units and target-surface assumptions remain unqualified. No production
+method, rejection limit, calibration or device setting changed. A public method
+would need analytic/degeneracy/ambiguity tests and interpolation provenance before
+integration; these private probes are not a released reconstruction capability.
+
+PR #30 subsequent CI recheck: run 41449538212 completed successfully at
+13:05:53 UTC; both Rust checks now pass on b8c7720. App coverage remains pending.
+
+
+DEV-EPIPOLAR-TRACE — development continuation, not an independent finding.
+Added calibration/epipolar_trace.rs and the bounded intersect_epipolar_trace
+example. Reuses existing camera preparation and essential-matrix calculation;
+segments interpolate in undistorted normalized coordinates, supporting distortion
+and skew. Every intersection and near-coincident segment remains explicit; only
+a repeated shared vertex is deduplicated. Invalid/gapped input, cancellation and
+camera-domain errors fail without partial output. No projector identity, depth
+export, physical-unit inference or calibration activation is introduced.
+
+Source changes: calibration module/export/example, optional NumPy known-point
+reference tool, EPIPOLAR_TRACE_INTERSECTIONS.md and architecture/response docs.
+Original implementation, no upstream code copied or new dependency. Four new
+unit tests cover known geometry, nontrivial camera pose, distortion/skew,
+ambiguities, numerical tolerance, input bounds, cancellation and invariance.
+Final full gate passed 684 tests, formatting, strict Clippy and release build;
+32 synthetic references passed with max pixel error 5.25e-10. Private existing
+Raptor traces retained 79/80, 81/83 and 74/75 candidates with unchanged stereo
+guards; raw-plane RMS remains about 0.23 and is not a physical accuracy result.
+No camera/device controls changed. Commit/review outcomes follow separately.
+PR #28 App review requested once after its included hourly interval, comment
+6578089151; service acknowledged the trigger. Await completed review before
+claiming coverage. No paid usage requested, no independent status changed.

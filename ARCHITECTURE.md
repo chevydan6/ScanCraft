@@ -1,5 +1,11 @@
 # Architecture
 
+`scancraft-calibration::epipolar_trace` consumes explicit stereo geometry and
+image-trace vertices, returning all epipolar intersections and ambiguous segments.
+It interpolates in undistorted normalized coordinates and labels endpoint versus
+interior results. It does not select projector identities or install calibration;
+see [epipolar trace contracts](docs/EPIPOLAR_TRACE_INTERSECTIONS.md).
+
 Within-image stripe continuity now has a separate bounded module,
 `scancraft-image::laser_continuity`, consuming immutable row observations and
 returning index traces with explicit support/ambiguity diagnostics. The CLI

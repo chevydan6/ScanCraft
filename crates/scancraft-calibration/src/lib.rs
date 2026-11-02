@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 pub mod ellipse;
 pub mod epipolar;
+pub mod epipolar_trace;
 pub mod factory;
 pub mod factory_brown;
 pub mod factory_laser;
