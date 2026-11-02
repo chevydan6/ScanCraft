@@ -4,7 +4,7 @@ Stage: experimental. Specification: docs/MISSION.txt.
 
 ## Latest local reconstruction checkpoint — 2026-11-02
 
-The local development tree passes 725 Rust tests, formatting, strict Clippy and
+The local development tree passes 732 Rust tests, formatting, strict Clippy and
 release build. Recording-backed seeded trace diagnostics preserve source frames
 and interpolation lineage. A new native sheet-supported full-trace matcher removes
 the need for supplied partner seeds at the numerical component boundary; it has
@@ -56,6 +56,13 @@ the formerly over-budget rotating pose: 2532 candidates, with a proved bound of
 remain exact, including the two zero-candidate cases. Native-app processing is
 verified. Worst-pose matching and full JSON serialization remain too expensive
 to claim live throughput; calibration, coverage and tracking/fusion remain open.
+
+[In-memory laser-pair computation](docs/IN_MEMORY_LASER_PAIRS.md) separates the
+shared numerical engine from recording/JSON publication. Compact query outcomes
+and camera counters remain available without full diagnostic JSON. All eleven
+recorded bundles and three seeded bundles remain byte-identical. Specific paired
+tests measured 104.1 ms without query JSON versus 160.5 ms with it on the expensive
+rotating pose; this is not live qualification.
 
 These latest changes are local and await automated review/publication: CodeRabbit
 quota/billing lookup is unavailable although its local doctor passes. Genuine

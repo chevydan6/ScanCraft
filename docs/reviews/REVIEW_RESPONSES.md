@@ -2448,3 +2448,56 @@ fallback root storage is bounded but worstcaseRSS/deadline unqualified. Match wo
 units exclude root/image/serialization costs; no wholeoperation budget claim.
 CodeRabbit usage stillalllookup_failed; no review/upload/paidusage/publication or
 merge/protection change. Reviewer files and independent finding statuses untouched.
+
+
+DEV-IN-MEMORY-LASER-PAIRS — developer continuation, not an independent finding.
+Accepted the measured need to separate raw-pair computation from diagnostic JSON
+and file publication before live integration. Added depth/laser_pair.rs Processor,
+borrowed FrameInput, immutable Settings, optional Sink events, typed candidates,
+per-query outcomes and compact camera counters. Existing detector/continuity code
+moved into depth and is reused by seeded and automatic workflows. Numerical
+matching/admission methods and limits remain unchanged. Depth adds only a direct
+existing internal core dependency; no third-party package or license change.
+
+Recorded automatic.rs is now a provenance/CRC/source/byte-cap adapter with a
+Diagnostics sink. Owned ArtifactWriter factors the original checked write/flush/
+fsync/rehash operations; the old closure helper delegates to it. Admission still
+precedes staging. Partial/publication error paths, no-overwrite, CRC/header/footer
+and parent sync remain. Core report flags stay unqualified and it never creates a
+metric Cloud/Editor. Default () omits full detail explicitly, retains every compact
+outcome/error and camera rejection/continuity counters. Sink errors stop that call
+without setting WorkControl cancellation or controlling acquisition; optional
+preview omissions must remain separate from required-journal failures (018).
+
+Six new core tests plus one owned-artifact regression pass; final732-test/fmt/
+strict-Clippy/release gate PASS. Covers raw validation/timing, finite known geometry,
+full/sparse sink equality, empty/reused/invalid pair state, ambiguity/per-query and
+batch bounds, cancellation/error/no complete report, and writer CRC/no-overwrite/
+cancellation. Camera-feedback assertions were added before the final gate.
+Eleven real/synthetic saved pairs reproduce all full match bytes, observations and
+candidate values; camera counters agree with baseline observations. Every artifact
+and manifest in all11 automatic bundles and all3 seeded bundles is byte-identical;
+input hashes and output CRCs/lengths pass. Final native-app pose/box renders show
+2532/1764 candidates and unchanged matches/points, with no scanner descriptors.
+
+Final same-binary paired probe11iterations(firstwarmup), alternating queryJSON/
+Noop order: worstpose104.10ms without queryJSON vs160.51ms with it, median paired
+ratio1.54; box65.43vs98.52ms,ratio1.51. Real cancellation checks active in both;
+model/input I/O, history/CRC binding, header/final formatting and disk/fsync excluded.
+Baseline full bytes remain allocated during timers. Shared warm host; not a general
+speedup, liveFPS, worstcase memory or physical qualification. Early prototype probe
+and renders preserved separately; final/ artifacts bind final camera-counter source.
+
+Owner asked about accelerometer: official Raptor manual confirms IMU. Read-only
+sysfs confirms HID6/25-byte descriptor/248-byte input declaration, but axis, chip,
+units, rate, actual HID-to-IMU mapping and decoding remain unverified. Corrected
+protocol notes to distinguish manufacturer confirmation from HID interpretation;
+no HID/control writes or inertial fusion added. Scanner-motion IMU cannot measure
+an independently rotating object when scanner remains stationary.
+
+Private evidence/commit bindings are in recovery checkpoint. No raw data/model
+upload, hardware capture/control/firmware/calibration action, reviewer-file change,
+merge or protection bypass. Freshest CodeRabbit usage still alllookup_failed;
+review/publication pending, not passed. Goals005/006/021 remain open/unqualified;
+compute speed, calibration, coverage, tracking/fusion and sustained live scanning
+remain incomplete.

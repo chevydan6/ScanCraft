@@ -2265,6 +2265,7 @@ name = "scancraft-depth"
 version = "0.1.0"
 dependencies = [
  "scancraft-calibration",
+ "scancraft-core",
  "scancraft-geometry",
  "scancraft-image",
  "serde",

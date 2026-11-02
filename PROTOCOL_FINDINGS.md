@@ -1,9 +1,18 @@
 # Protocol findings
 
 Verified Raptor identity: USB 2bc5:06a8, firmware observed 1.5.7. Three UVC
-control interfaces 0/2/4 and an IMU HID interface 6. Video node minor numbers
+control interfaces 0/2/4 and a HID interface 6. Video node minor numbers
 change after reboot; identify by USB parent, interface and QUERYCAP, never
 adjacent numbers. Image and metadata sequences pair exactly on this kernel.
+
+Creality's [official Raptor manual](https://cdn.creality.com/ow/official/9f08b8fd-e5da-485b-97ee-5b1a31db6416.pdf)
+lists an IMU. A read-only sysfs check confirms HID interface 6 is enumerated;
+its 25-byte report descriptor declares a 248-byte input block (62 × 32-bit values).
+It does not identify individual accelerometer/gyroscope axes or their units.
+The earlier IMU label for this HID endpoint was an interpretation: actual stream
+content, sensor chip, scale, axes, rate and camera-time relationship remain
+unverified. ScanCraft does not yet acquire or fuse inertial data. No HID/control
+writes or physical calibration were performed for this descriptor check.
 
 This firmware repeats SCR values across frames, while PTS advances. The
 installed development kernel preserves the first PTS-bearing metadata header

@@ -1,9 +1,7 @@
-//! Record-backed automatic sheet-supported matching; diagnostic coordinates only.
-use super::{
-    Continuity, Detection, ExpectedFrame, Inputs, detect, observation_report, validate_frames,
-};
+//! Recording/CRC/source guards and diagnostic publication around the pure pair engine.
+use super::{Continuity, Detection, ExpectedFrame, Inputs, observation_report, validate_frames};
 use crate::{
-    Error, artifact, bounded,
+    ArtifactWriter, Digest, Error, artifact, bounded,
     calibration_bundle::ensure_new,
     output::{publish, staging},
     recording_playback::Playback,
@@ -11,18 +9,18 @@ use crate::{
 };
 use scancraft_calibration::{
     laser_surface::QuadraticSheet,
-    laser_trace::{self, PreparedMatcher},
-    orientation::reflect_pixel_x,
+    laser_trace,
     stereo::{StereoCalibration, TriangulationLimits},
 };
+use scancraft_depth::laser_pair::{self, FrameInput, PairInfo, Query, Settings, Sink};
 use scancraft_geometry::work::{Stage, WorkControl};
-use scancraft_recording::Writer;
+use scancraft_recording::{Writer, selection::SelectedFrame};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use std::{
     fs::File,
     io::{self, Write},
-    path::Path,
+    path::{Path, PathBuf},
 };
 
 #[derive(Deserialize)]
@@ -44,11 +42,11 @@ struct Request {
     maximum_report_bytes: usize,
 }
 
-struct LimitedWriter<'a, W> {
-    inner: &'a mut W,
+struct LimitedWriter<W> {
+    inner: W,
     remaining: usize,
 }
-impl<W: Write> Write for LimitedWriter<'_, W> {
+impl<W: Write> Write for LimitedWriter<W> {
     fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
         if bytes.len() > self.remaining {
             return Err(io::Error::other("matching report exceeds byte budget"));
@@ -61,11 +59,146 @@ impl<W: Write> Write for LimitedWriter<'_, W> {
         self.inner.flush()
     }
 }
+struct Diagnostics<'a> {
+    inputs: &'a Inputs,
+    target: &'a Path,
+    geometry_bytes: &'a [u8],
+    request_bytes: &'a [u8],
+    settings: &'a Settings,
+    sources: &'a [Playback; 2],
+    frames: &'a [SelectedFrame; 2],
+    work: &'a WorkControl,
+    maximum_report_bytes: usize,
+    partial: Option<PathBuf>,
+    artifacts: Vec<Digest>,
+    matches: Option<LimitedWriter<ArtifactWriter<'a>>>,
+}
+impl Diagnostics<'_> {
+    fn begin_inner(&mut self, info: PairInfo<'_>) -> Result<(), Error> {
+        self.sources[0].check_source()?;
+        self.sources[1].check_source()?;
+        self.work.check()?;
+        let sources = [
+            lineage(
+                &self.inputs.first_recording,
+                self.sources[0].version(),
+                &self.frames[0],
+            )?,
+            lineage(
+                &self.inputs.second_recording,
+                self.sources[1].version(),
+                &self.frames[1],
+            )?,
+        ];
+        let report = json!({"schema_version":1,"kind":"recorded_sheet_supported_matching","sources":sources,
+            "first":observation_report(&info.sides[0]),"second":observation_report(&info.sides[1]),
+            "first_query_observation_indices":info.first_query_observation_indices,"second_matcher_trace_ids":info.second_matcher_trace_ids,
+            "second_matcher_trace_pixels":info.second_matcher_trace_pixels,"reflect_x":self.settings.reflect_x,
+            "observation_coordinates":"raw image pixel centers, x right and y down",
+            "matching_coordinates":"supplied camera pixels after explicit reflections",
+            "interpolation_space":"undistorted normalized coordinates",
+            "signal_units":if self.settings.detection.opening_radius.is_some(){"raw minus row morphological opening, 8-bit contrast"}else{"original raw 8-bit intensity"},
+            "saturation_units":"original raw 8-bit intensity","raw_sensor_pts_equal":true,"clock_domains_verified":false,"synchronization_verified":false,
+            "geometry_binding_verified":false,"geometry_translation_units_verified":false,"physical_accuracy_qualified":false,"projector_line_identity_verified":false,"calibration_activated":false});
+        self.work.check()?;
+        let partial = staging(self.target)?;
+        self.partial = Some(partial.clone());
+        for (name, bytes) in [
+            ("geometry.json", self.geometry_bytes),
+            ("request.json", self.request_bytes),
+        ] {
+            self.artifacts
+                .push(artifact(&partial, name, self.work, |out| {
+                    out.write_all(bytes)?;
+                    Ok(())
+                })?);
+        }
+        for (name, frame) in ["first-frame.raptor", "second-frame.raptor"]
+            .into_iter()
+            .zip(self.frames)
+        {
+            self.artifacts
+                .push(artifact(&partial, name, self.work, |out| {
+                    let mut writer = Writer::with_context(
+                        out,
+                        frame.profile.clone(),
+                        frame.context.clone().unwrap_or_default(),
+                    )?;
+                    writer.push(&frame.frame)?;
+                    writer.finish()?;
+                    Ok(())
+                })?);
+        }
+        self.artifacts
+            .push(artifact(&partial, "observations.json", self.work, |out| {
+                serde_json::to_writer_pretty(out, &report)?;
+                Ok(())
+            })?);
+        self.matches = Some(LimitedWriter {
+            inner: ArtifactWriter::open(&partial, "matches.ndjson", self.work)?,
+            remaining: self.maximum_report_bytes,
+        });
+        Ok(())
+    }
+    fn finish(&mut self, report: laser_pair::Report) -> Result<Value, Error> {
+        let partial = self
+            .partial
+            .as_ref()
+            .ok_or("missing diagnostic staging directory")?;
+        self.artifacts.push(
+            self.matches
+                .take()
+                .ok_or("missing diagnostic match writer")?
+                .inner
+                .finish()?,
+        );
+        let points_report = json!({"schema_version":1,"coordinate_frame":"supplied first-camera frame","units_verified":false,"physical_accuracy_qualified":false,"projector_line_identity_verified":false,"cross_observation_uniqueness_verified":false,"points":report.candidates});
+        self.artifacts.push(artifact(
+            partial,
+            "candidate-points.json",
+            self.work,
+            |out| {
+                serde_json::to_writer_pretty(out, &points_report)?;
+                Ok(())
+            },
+        )?);
+        let mut manifest = json!({"schema_version":1,"kind":"recorded_sheet_supported_matching","queries":report.queries,"candidate_points":report.candidates.len(),"query_failures":report.query_failures,"queries_without_unique_match":report.queries_without_unique_match,"conservative_total_work_bound":report.admission.conservative_total_work_bound,"artifacts":self.artifacts,"physical_accuracy_qualified":false,"units_verified":false,"geometry_binding_verified":false,"projector_line_identity_verified":false,"calibration_activated":false});
+        if report.admission.uses_projected_roots {
+            manifest["coarse_total_work_bound"] = json!(report.admission.coarse_total_work_bound);
+            manifest["work_bound_method"] = json!("per_pixel_projected_roots");
+            manifest["projected_root_preparation_failures"] =
+                json!(report.admission.projected_root_preparation_failures);
+        }
+        artifact(partial, "manifest.json", self.work, |out| {
+            serde_json::to_writer_pretty(out, &manifest)?;
+            Ok(())
+        })?;
+        self.work.update(Stage::Finishing, 0, 0)?;
+        File::open(partial)?.sync_all()?;
+        self.sources[0].check_source()?;
+        self.sources[1].check_source()?;
+        self.work.check()?;
+        publish(partial, self.target)?;
+        Ok(manifest)
+    }
+}
+impl Sink for Diagnostics<'_> {
+    fn begin(&mut self, info: PairInfo<'_>) -> Result<(), String> {
+        self.begin_inner(info).map_err(|e| e.to_string())
+    }
+    fn query(&mut self, query: &Query) -> Result<(), String> {
+        let out = self
+            .matches
+            .as_mut()
+            .ok_or("missing diagnostic match writer")?;
+        serde_json::to_writer(&mut *out,&json!({"first_observation":query.first_observation,"first_calibration_pixel":query.first_calibration_pixel,"result":query.result})).map_err(|e|e.to_string())?;
+        out.write_all(b"\n").map_err(|e| e.to_string())
+    }
+}
 
-/// Process all continuity-supported first-camera observations against all supported
-/// second traces. Retain detections, rejected queries and interpolation lineage.
-/// Result coordinates use unqualified supplied geometry units; no PLY/project or
-/// physical calibration is created. Filesystem calls have no hard time bound.
+/// Preserve whole-recording/source/CRC guards and streaming diagnostic publication.
+/// Pure frame computation is shared with future in-memory acquisition consumers;
+/// source history, filesystem checks and byte caps remain this adapter's duties.
 pub fn run(inputs: &Inputs, target: &Path, work: &WorkControl) -> Result<Value, Error> {
     work.check()?;
     ensure_new(target)?;
@@ -92,12 +225,26 @@ pub fn run(inputs: &Inputs, target: &Path, work: &WorkControl) -> Result<Value, 
     {
         return Err("invalid automatic recorded trace request bounds".into());
     }
-    let matcher = PreparedMatcher::new(&geometry, request.triangulation)?;
-    let mut first_source = Playback::open(&inputs.first_recording, work)?;
-    let mut second_source = Playback::open(&inputs.second_recording, work)?;
+    let settings = Settings {
+        interfaces: request.expected_frames.each_ref().map(|f| f.interface),
+        reflect_x: request.reflect_x,
+        maximum_host_delta_us: request.maximum_host_delta_us,
+        detection: request.detection,
+        continuity: request.continuity,
+        sheets: request.sheets,
+        triangulation: request.triangulation,
+        matching: request.matching,
+        maximum_queries: request.maximum_queries,
+        maximum_total_work: request.maximum_total_work,
+    };
+    let processor = laser_pair::Processor::new(&geometry, &settings)?;
+    let mut sources = [
+        Playback::open(&inputs.first_recording, work)?,
+        Playback::open(&inputs.second_recording, work)?,
+    ];
     let frames = [
-        first_source.select_raw(inputs.first_index, work)?,
-        second_source.select_raw(inputs.second_index, work)?,
+        sources[0].select_raw(inputs.first_index, work)?,
+        sources[1].select_raw(inputs.second_index, work)?,
     ];
     validate_frames(
         &frames,
@@ -105,197 +252,44 @@ pub fn run(inputs: &Inputs, target: &Path, work: &WorkControl) -> Result<Value, 
         &request.expected_frames,
         request.maximum_host_delta_us,
     )?;
-    let sides = [
-        detect(&frames[0], &request.detection, &request.continuity, work)?,
-        detect(&frames[1], &request.detection, &request.continuity, work)?,
-    ];
-    let map_pixel = |side: usize, pixel: [f64; 2]| -> Result<[f64; 2], String> {
-        if request.reflect_x[side] {
-            reflect_pixel_x(
-                [frames[side].profile.width, frames[side].profile.height],
-                pixel,
-            )
-        } else {
-            Ok(pixel)
-        }
+    let mut diagnostics = Diagnostics {
+        inputs,
+        target,
+        geometry_bytes: &geometry_bytes,
+        request_bytes: &request_bytes,
+        settings: &settings,
+        sources: &sources,
+        frames: &frames,
+        work,
+        maximum_report_bytes: request.maximum_report_bytes,
+        partial: None,
+        artifacts: Vec::new(),
+        matches: None,
     };
-    let first_indices = sides[0]
-        .traces
-        .traces
-        .iter()
-        .filter(|t| t.continuity_supported)
-        .flat_map(|t| t.observation_indices.iter().copied())
-        .collect::<Vec<_>>();
-    if first_indices.len() > request.maximum_queries {
-        return Err(
-            "automatic trace query limit exceeded; no observations were silently sampled".into(),
-        );
-    }
-    let trace_ids = sides[1]
-        .traces
-        .traces
-        .iter()
-        .enumerate()
-        .filter_map(|(i, t)| t.continuity_supported.then_some(i))
-        .collect::<Vec<_>>();
-    if trace_ids.len() > 128 {
-        return Err("automatic second-trace limit exceeded".into());
-    }
-    let mut traces = Vec::new();
-    let mut vertices = 0usize;
-    let mut segments = 0usize;
-    for &id in &trace_ids {
-        work.check()?;
-        let indices = &sides[1].traces.traces[id].observation_indices;
-        if !(2..=4096).contains(&indices.len()) {
-            return Err("unsupported second-trace vertex count".into());
-        }
-        vertices += indices.len();
-        segments += indices.len() - 1;
-        traces.push(
-            indices
-                .iter()
-                .map(|&i| map_pixel(1, sides[1].detections.observations[i].pixel))
-                .collect::<Result<Vec<_>, _>>()?,
-        );
-    }
-    if vertices > 65536 {
-        return Err("automatic trace vertex limit exceeded".into());
-    }
-    let prepared_queries = if traces.is_empty() {
-        None
-    } else {
-        Some(
-            matcher.prepare_traces(&traces, &request.sheets, request.matching, &mut || {
-                work.check().is_err()
-            }),
-        )
-    };
-    let per_query_bound = vertices + segments * 2 * request.sheets.len();
-    let coarse_work_bound = per_query_bound
-        .checked_mul(first_indices.len())
-        .ok_or("automatic work bound overflow")?;
-    // Preserve the cheap admission path and its existing output for ordinary
-    // inputs. When it rejects, count actual projected roots before any matching.
-    let mut total_work_bound = coarse_work_bound;
-    let mut prepared_pixels = None;
-    let mut projection_failures = 0usize;
-    if coarse_work_bound > request.maximum_total_work {
-        let Some(Ok(prepared)) = &prepared_queries else {
-            return Err("automatic total work budget exceeded before matching".into());
-        };
-        total_work_bound = 0;
-        let mut pixels = Vec::with_capacity(first_indices.len());
-        for (query, &index) in first_indices.iter().enumerate() {
-            work.update(Stage::Validating, query, first_indices.len())?;
-            let pixel = map_pixel(0, sides[0].detections.observations[index].pixel)?;
-            let prepared = prepared.prepare_pixel(pixel, &mut || work.check().is_err());
-            work.check()?;
-            match &prepared {
-                Ok(pixel) => {
-                    total_work_bound = total_work_bound
-                        .checked_add(pixel.work_bound())
-                        .ok_or("automatic work bound overflow")?;
-                }
-                // These errors precede any counted matching work and are retained.
-                Err(_) => projection_failures += 1,
-            }
-            if total_work_bound > request.maximum_total_work {
-                return Err("automatic total work budget exceeded before matching".into());
-            }
-            pixels.push(prepared);
-        }
-        prepared_pixels = Some(pixels.into_iter());
-    }
-    first_source.check_source()?;
-    second_source.check_source()?;
-    work.check()?;
-    let sources = [
-        lineage(&inputs.first_recording, first_source.version(), &frames[0])?,
-        lineage(
-            &inputs.second_recording,
-            second_source.version(),
-            &frames[1],
-        )?,
-    ];
-    let report = json!({"schema_version":1,"kind":"recorded_sheet_supported_matching","sources":sources,
-        "first":observation_report(&sides[0]),"second":observation_report(&sides[1]),
-        "first_query_observation_indices":first_indices,"second_matcher_trace_ids":trace_ids,
-        "second_matcher_trace_pixels":traces,"reflect_x":request.reflect_x,
-        "observation_coordinates":"raw image pixel centers, x right and y down",
-        "matching_coordinates":"supplied camera pixels after explicit reflections",
-        "interpolation_space":"undistorted normalized coordinates",
-        "signal_units":if request.detection.opening_radius.is_some(){"raw minus row morphological opening, 8-bit contrast"}else{"original raw 8-bit intensity"},
-        "saturation_units":"original raw 8-bit intensity","raw_sensor_pts_equal":true,
-        "clock_domains_verified":false,"synchronization_verified":false,
-        "geometry_binding_verified":false,"geometry_translation_units_verified":false,
-        "physical_accuracy_qualified":false,"projector_line_identity_verified":false,"calibration_activated":false});
-    work.check()?;
-    let partial = staging(target)?;
-    let manifest=(||->Result<Value,Error>{
-        let mut artifacts=Vec::new();
-        for (name,bytes) in [("geometry.json",&geometry_bytes),("request.json",&request_bytes)] {
-            artifacts.push(artifact(&partial,name,work,|out|{out.write_all(bytes)?;Ok(())})?);
-        }
-        for (name,frame) in ["first-frame.raptor","second-frame.raptor"].into_iter().zip(&frames) {
-            artifacts.push(artifact(&partial,name,work,|out|{let mut writer=Writer::with_context(out,frame.profile.clone(),frame.context.clone().unwrap_or_default())?;writer.push(&frame.frame)?;writer.finish()?;Ok(())})?);
-        }
-        artifacts.push(artifact(&partial,"observations.json",work,|out|{serde_json::to_writer_pretty(out,&report)?;Ok(())})?);
-        let mut points=Vec::new();let mut failures=0usize;let mut no_unique=0usize;
-        artifacts.push(artifact(&partial,"matches.ndjson",work,|out|{
-            let mut out=LimitedWriter {inner:out,remaining:request.maximum_report_bytes};
-            for (query,&index) in first_indices.iter().enumerate() {
-                work.update(Stage::Matching,query,first_indices.len())?;let pixel=map_pixel(0,sides[0].detections.observations[index].pixel)?;
-                let result=match &mut prepared_pixels {
-                    Some(pixels)=>match pixels.next().ok_or("inconsistent prepared query count")? {
-                        Ok(pixel)=>pixel.execute(&mut ||work.check().is_err()),
-                        Err(error)=>Err(error),
-                    },
-                    None=>match &prepared_queries {
-                        None=>Err("no supported second-camera traces".into()),
-                        Some(Err(error))=>Err(error.clone()),
-                        Some(Ok(prepared))=>prepared.match_pixel(pixel,&mut ||work.check().is_err()),
-                    },
-                };
-                work.check()?;
-                match &result {
-                    Ok(matches)=>if let Some(selected)=matches.unique {
-                        let crossing=&matches.traces[selected.trace_index].crossings[selected.crossing_index];
-                        let point=crossing.triangulation.as_ref().map_err(|e|format!("inconsistent selected triangulation: {e}"))?;
-                        let support=&crossing.support[selected.support_index];
-                        let projection=&matches.projections[support.projection_index];
-                        points.push(json!({"first_observation":index,"first_trace":sides[0].membership[index].0,
-                            "selection":selected,"second_trace":trace_ids[selected.trace_index],
-                            "second_calibration_pixel":crossing.intersection.right_pixel,
-                            "second_raw_image_pixel":map_pixel(1,crossing.intersection.right_pixel)?,
-                            "sheet_index":projection.sheet_index,"sheet_root_index":projection.root_index,
-                            "position_in_supplied_geometry_units":point.position_mm}));
-                    }else{no_unique+=1;},
-                    Err(_)=>{failures+=1;}
-                }
-                serde_json::to_writer(&mut out,&json!({"first_observation":index,"first_calibration_pixel":pixel,"result":result}))?;
-                out.write_all(b"\n")?;
-            }
-            work.update(Stage::Matching,first_indices.len(),first_indices.len())?;
-            Ok(())
-        })?);
-        let points_report=json!({"schema_version":1,"coordinate_frame":"supplied first-camera frame",
-            "units_verified":false,"physical_accuracy_qualified":false,"projector_line_identity_verified":false,
-            "cross_observation_uniqueness_verified":false,"points":points});
-        artifacts.push(artifact(&partial,"candidate-points.json",work,|out|{serde_json::to_writer_pretty(out,&points_report)?;Ok(())})?);
-        let mut manifest=json!({"schema_version":1,"kind":"recorded_sheet_supported_matching",
-            "queries":first_indices.len(),"candidate_points":points.len(),"query_failures":failures,
-            "queries_without_unique_match":no_unique,"conservative_total_work_bound":total_work_bound,
-            "artifacts":artifacts,"physical_accuracy_qualified":false,"units_verified":false,
-            "geometry_binding_verified":false,"projector_line_identity_verified":false,"calibration_activated":false});
-        if prepared_pixels.is_some() {
-            manifest["coarse_total_work_bound"]=json!(coarse_work_bound);
-            manifest["work_bound_method"]=json!("per_pixel_projected_roots");
-            manifest["projected_root_preparation_failures"]=json!(projection_failures);
-        }
-        artifact(&partial,"manifest.json",work,|out|{serde_json::to_writer_pretty(out,&manifest)?;Ok(())})?;
-        work.update(Stage::Finishing,0,0)?;File::open(&partial)?.sync_all()?;first_source.check_source()?;second_source.check_source()?;work.check()?;publish(&partial,target)?;Ok(manifest)
-    })().map_err(|e|format!("{e}; incomplete automatic trace bundle retained at {}",partial.display()))?;
+    let manifest = (|| -> Result<Value, Error> {
+        let report = processor.process(
+            [
+                FrameInput {
+                    profile: &frames[0].profile,
+                    frame: &frames[0].frame,
+                },
+                FrameInput {
+                    profile: &frames[1].profile,
+                    frame: &frames[1].frame,
+                },
+            ],
+            work,
+            &mut diagnostics,
+        )?;
+        diagnostics.finish(report)
+    })()
+    .map_err(|e| match &diagnostics.partial {
+        Some(partial) => format!(
+            "{e}; incomplete automatic trace bundle retained at {}",
+            partial.display()
+        ),
+        None => e.to_string(),
+    })?;
     let parent = target
         .parent()
         .filter(|p| !p.as_os_str().is_empty())

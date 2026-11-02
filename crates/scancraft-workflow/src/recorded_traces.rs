@@ -16,11 +16,7 @@ use scancraft_calibration::{
     stereo::StereoCalibration,
 };
 use scancraft_geometry::work::WorkControl;
-use scancraft_image::{
-    GrayImage,
-    laser::{self, LineConfig, LineDetections},
-    laser_continuity::{self, Traces},
-};
+use scancraft_image::GrayImage;
 use scancraft_recording::{Writer, selection::SelectedFrame};
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -40,25 +36,7 @@ pub struct Inputs {
     pub second_index: usize,
     pub request: PathBuf,
 }
-#[derive(Deserialize)]
-#[serde(deny_unknown_fields)]
-struct Detection {
-    background: u8,
-    minimum_peak: u8,
-    maximum_width: u32,
-    saturation: u8,
-    maximum_observations: usize,
-    opening_radius: Option<u32>,
-}
-#[derive(Deserialize)]
-#[serde(deny_unknown_fields)]
-struct Continuity {
-    maximum_row_gap: u32,
-    maximum_horizontal_step: f64,
-    maximum_slope: f64,
-    minimum_span_rows: u32,
-    minimum_observations: usize,
-}
+use scancraft_depth::laser_pair::{Continuity, Detection, Observations};
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct ExpectedFrame {
@@ -86,56 +64,18 @@ struct Request {
     seed_radius_px: f64,
     seeds: Vec<Seed>,
 }
-struct Observations {
-    detections: LineDetections,
-    traces: Traces,
-    membership: Vec<(usize, usize)>,
-}
 fn detect(
     frame: &SelectedFrame,
     detection: &Detection,
     continuity: &Continuity,
     work: &WorkControl,
 ) -> Result<Observations, Error> {
-    let image = GrayImage::from_frame(&frame.profile, &frame.frame)?;
-    let c = detection;
-    let config = LineConfig {
-        background: c.background,
-        minimum_peak: c.minimum_peak,
-        maximum_width: c.maximum_width,
-        saturation: c.saturation,
-        maximum_observations: c.maximum_observations,
-    };
-    let detections = match c.opening_radius {
-        Some(radius) => laser::detect_rows_with_opening(image, config, radius, work)?,
-        None => laser::detect_rows(image, config, work)?,
-    };
-    let c = continuity;
-    let traces = laser_continuity::trace_rows(
-        image.size(),
-        &detections.observations,
-        laser_continuity::Config {
-            maximum_row_gap: c.maximum_row_gap,
-            maximum_horizontal_step: c.maximum_horizontal_step,
-            maximum_slope: c.maximum_slope,
-            minimum_span_rows: c.minimum_span_rows,
-            minimum_observations: c.minimum_observations,
-            maximum_comparisons: 20_000_000,
-        },
+    Ok(scancraft_depth::laser_pair::detect(
+        GrayImage::from_frame(&frame.profile, &frame.frame)?,
+        detection,
+        continuity,
         work,
-    )?;
-    let mut membership = vec![(0, 0); detections.observations.len()];
-    for (trace_id, trace) in traces.traces.iter().enumerate() {
-        work.check()?;
-        for (offset, &index) in trace.observation_indices.iter().enumerate() {
-            membership[index] = (trace_id, offset);
-        }
-    }
-    Ok(Observations {
-        detections,
-        traces,
-        membership,
-    })
+    )?)
 }
 fn observation_report(side: &Observations) -> Value {
     json!({"observations":side.detections.observations.iter().map(|o|json!({

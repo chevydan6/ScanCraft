@@ -1,5 +1,11 @@
 # Architecture
 
+`scancraft_depth::laser_pair::Processor` processes borrowed raw frame pairs without
+files or JSON and returns bounded candidates, per-query outcomes and camera
+counters. Optional `Sink` events carry full diagnostics. Recording workflows supply
+provenance/CRC/source and publication policy through an owned streaming artifact
+writer. See [in-memory interfaces and evidence](docs/IN_MEMORY_LASER_PAIRS.md).
+
 `candidate_bundle::load` verifies recorded-candidate artifact integrity and retained
 frames, then returns bounded unverified coordinates. The app's `CandidateUi` uses
 the shared worker and renderer with a read-only `Preview`; metric `Cloud`/`Editor`

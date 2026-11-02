@@ -10,6 +10,11 @@ invokes the [sheet-supported matcher](SHEET_SUPPORTED_TRACES.md). No partner see
 or externally prepared image observations are required. Geometry and sheets remain
 explicit hypotheses. No calibration, PLY, editable project or live session is created.
 
+Numerical processing delegates to the shared [in-memory depth processor](IN_MEMORY_LASER_PAIRS.md).
+Recording validation, source/CRC guards, diagnostic byte limits and publication
+remain in this adapter; all existing recorded outputs remain byte-identical in
+the saved-data checks.
+
 The workflow now [prepares corrected trace vertices once per pair](PREPARED_LASER_TRACES.md),
 preserving the output schema and complete query results while avoiding repeated
 inverse distortion. The verification/timing checkpoint below predates this optimization;
