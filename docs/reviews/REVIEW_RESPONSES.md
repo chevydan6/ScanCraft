@@ -2668,3 +2668,6 @@ included-quota/billing lookup still lookup_failed; no paid review/pass/push clai
 Live GUI controls, performance/coverage, calibrated geometry, tracking/fusion and
 long-session qualification remain incomplete. Old IR1000frame/session021 unchanged;
 006 remains physically unqualified,007 coupling unchanged. See NATIVE_LASER_CAPTURE.md.
+
+DEV-NATIVE-LASER-CAPTURE implementation commit: `c86762c1af279bfb5a1c1201e64e035480c72659`.
+This documentation binding changes no application source or validation result.
