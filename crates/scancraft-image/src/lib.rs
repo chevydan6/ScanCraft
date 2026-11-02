@@ -8,6 +8,7 @@ pub mod components;
 pub mod corners;
 pub mod diagnostics;
 pub mod laser;
+pub mod shape;
 pub mod stereo;
 
 pub const MAX_PIXELS: usize = 4_194_304;
