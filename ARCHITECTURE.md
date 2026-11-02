@@ -3,7 +3,9 @@
 `candidate_bundle::load` verifies recorded-candidate artifact integrity and retained
 frames, then returns bounded unverified coordinates. The app's `CandidateUi` uses
 the shared worker and renderer with a read-only `Preview`; metric `Cloud`/`Editor`
-state remains separate. See [candidate viewport contracts](docs/CANDIDATE_VIEWER.md).
+state remains separate. Retained-frame feedback reuses the image crate's exact
+raw statistics and display-only contrast LUT; bounded original-orientation
+thumbnails never enter reconstruction. See [candidate viewport contracts](docs/CANDIDATE_VIEWER.md).
 
 Laser background removal uses reusable block-prefix/suffix row extrema before
 the existing stripe detector. Exact border/clipping semantics are preserved; see

@@ -4,6 +4,7 @@ use crate::{
     cloud_ui::{self, View},
 };
 use eframe::egui;
+use scancraft_workflow::candidate_bundle::FrameView;
 use std::path::PathBuf;
 
 pub struct CandidateUi {
@@ -13,6 +14,9 @@ pub struct CandidateUi {
     preview: Preview,
     view: View,
     message: String,
+    frames: Option<[FrameView; 2]>,
+    cameras: [Option<egui::TextureHandle>; 2],
+    stretch_display: bool,
 }
 
 impl Default for CandidateUi {
@@ -29,6 +33,9 @@ impl Default for CandidateUi {
                 pan: egui::Vec2::ZERO,
             },
             message: "Open a recorded laser-matching result folder.".into(),
+            frames: None,
+            cameras: Default::default(),
+            stretch_display: false,
         }
     }
 }
@@ -59,6 +66,8 @@ impl CandidateUi {
         self.job = None;
         match output.result {
             Ok(report) => {
+                self.frames = report.candidate_frames;
+                self.cameras = Default::default();
                 if let Some(preview) = report.preview {
                     self.preview = preview;
                 }
@@ -115,6 +124,7 @@ impl CandidateUi {
             }
             ui.label(format!("{} candidate points", self.preview.total));
         });
+        self.frame_panel(ui);
         let size = egui::vec2(
             ui.available_width().max(1.),
             ui.available_height().max(100.),
@@ -148,11 +158,54 @@ impl CandidateUi {
             None,
         );
     }
+    fn frame_panel(&mut self, ui: &mut egui::Ui) {
+        let Some(frames) = &self.frames else {
+            return;
+        };
+        egui::CollapsingHeader::new("Retained camera frames")
+            .default_open(true)
+            .show(ui, |ui| {
+                if ui.checkbox(&mut self.stretch_display, "Stretch display contrast only (p01–p99)").changed() {
+                    self.cameras = Default::default();
+                }
+                ui.small("Original image orientation · sampled preview · statistics use every raw pixel. Image brightness alone does not establish laser visibility, focus or scan accuracy.");
+                ui.columns(2, |columns| {
+                    for (index, (frame, ui)) in frames.iter().zip(columns).enumerate() {
+                        let texture = self.cameras[index].get_or_insert_with(|| {
+                            let pixels = if self.stretch_display {
+                                let lut = frame.statistics.contrast_lut();
+                                frame.pixels.iter().map(|&n| lut[usize::from(n)]).collect()
+                            } else { frame.pixels.clone() };
+                            ui.ctx().load_texture(format!("candidate-frame-{index}"),egui::ColorImage::from_gray(frame.size,&pixels),egui::TextureOptions::NEAREST)
+                        });
+                        ui.label(format!("Camera {} · interface {} · {} × {}",index+1,frame.interface,frame.source_size[0],frame.source_size[1]));
+                        let s = &frame.statistics;
+                        ui.small(format!("Raw min {} · median {} · p99 {} · max {}",s.minimum,s.median,s.p99,s.maximum));
+                        ui.small(format!("Raw 0: {} ({:.3}%) · raw 255: {} ({:.3}%)",s.black_clipped,100.*s.black_clipped as f64/s.pixels as f64,s.white_clipped,100.*s.white_clipped as f64/s.pixels as f64))
+                            .on_hover_text("Exact endpoint counts, not the detector's configurable saturation threshold or a count of rejected laser runs.");
+                        let scale = (ui.available_width()/frame.size[0] as f32).min(140./frame.size[1] as f32).min(1.);
+                        ui.image((texture.id(),egui::vec2(frame.size[0] as f32*scale,frame.size[1] as f32*scale)));
+                    }
+                });
+            });
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    fn frame(interface: u8) -> FrameView {
+        let pixels = vec![0, 30, 60, 255];
+        FrameView {
+            interface,
+            source_size: [2, 2],
+            size: [2, 2],
+            statistics: scancraft_image::diagnostics::statistics(
+                scancraft_image::GrayImage::new(2, 2, &pixels).unwrap(),
+            ),
+            pixels,
+        }
+    }
     #[test]
     fn failed_open_preserves_the_prior_view_and_its_source_label() {
         let mut ui = CandidateUi {
@@ -162,6 +215,7 @@ mod tests {
                 bounds: Some(([1., 2., 3.], [1., 2., 3.])),
                 ..Preview::default()
             },
+            frames: Some([frame(0), frame(2)]),
             ..CandidateUi::default()
         };
         ui.open(std::env::temp_dir().join(format!(
@@ -177,6 +231,8 @@ mod tests {
         assert!(ui.message.contains("Could not open candidates"));
         assert_eq!(ui.preview.total, 1);
         assert_eq!(ui.loaded_path, "prior bundle");
+        assert_eq!(ui.frames.as_ref().unwrap()[1].interface, 2);
+        assert_eq!(ui.frames.as_ref().unwrap()[0].pixels, [0, 30, 60, 255]);
     }
     #[test]
     fn diagnostic_panel_renders_without_an_editor_or_metric_actions() {
@@ -201,5 +257,45 @@ mod tests {
         }
         assert!(view.preview.points.is_empty());
         assert!(!view.is_busy());
+    }
+    #[test]
+    fn camera_panel_labels_raw_statistics_and_keeps_display_stretch_out_of_frame_data() {
+        let mut view = CandidateUi {
+            frames: Some([frame(0), frame(2)]),
+            ..CandidateUi::default()
+        };
+        let context = egui::Context::default();
+        for stretch in [false, true] {
+            view.stretch_display = stretch;
+            view.cameras = Default::default();
+            let output = context.run(
+                egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(
+                        egui::Pos2::ZERO,
+                        egui::vec2(1280., 900.),
+                    )),
+                    ..Default::default()
+                },
+                |ctx| {
+                    egui::CentralPanel::default().show(ctx, |ui| view.ui(ui));
+                },
+            );
+            let text = output
+                .shapes
+                .iter()
+                .filter_map(|s| match &s.shape {
+                    egui::epaint::Shape::Text(t) => Some(t.galley.job.text.as_str()),
+                    _ => None,
+                })
+                .collect::<Vec<_>>()
+                .join("\n");
+            assert!(text.contains("interface 0"));
+            assert!(text.contains("interface 2"));
+            assert!(text.contains("Raw min 0 · median 30 · p99 255 · max 255"));
+            assert!(text.contains("raw 255: 1 (25.000%)"));
+            assert!(text.contains("Stretch display contrast only"));
+            assert!(view.cameras.iter().all(Option::is_some));
+            assert_eq!(view.frames.as_ref().unwrap()[0].pixels, [0, 30, 60, 255]);
+        }
     }
 }

@@ -172,6 +172,7 @@ pub enum Operation {
     },
 }
 pub struct Report {
+    pub candidate_frames: Option<[scancraft_workflow::candidate_bundle::FrameView; 2]>,
     pub coordinate_frame: Option<(String, scancraft_geometry::coordinate_frame::Frame)>,
     pub message: String,
     pub preview: Option<Preview>,
@@ -310,6 +311,7 @@ pub fn build_preview(
 }
 fn report(message: impl Into<String>, preview: Option<Preview>) -> Report {
     Report {
+        candidate_frames: None,
         coordinate_frame: None,
         message: message.into(),
         preview,
@@ -388,6 +390,7 @@ fn execute(
             Some(preview),
         );
         result.reset_view = true;
+        result.candidate_frames = Some(loaded.frames);
         return Ok(result);
     }
     if let Operation::ExportProjectBundle { sources, target } = &operation {

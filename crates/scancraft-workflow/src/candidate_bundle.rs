@@ -1,6 +1,8 @@
 //! Read-only candidate coordinates with artifact integrity and retained-frame checks.
 //! This does not recompute matching or qualify numerical/physical correctness.
+mod frame_view;
 use crate::{Error, recording_playback::Playback, scan_project_load::Guard};
+pub use frame_view::FrameView;
 use scancraft_calibration::stereo::StereoCalibration;
 use scancraft_geometry::work::WorkControl;
 use serde::{
@@ -86,6 +88,7 @@ pub struct Loaded {
     pub positions: Vec<[f64; 3]>,
     pub first_observations: Vec<usize>,
     pub report: Value,
+    pub frames: [FrameView; 2],
 }
 
 fn count(value: &Value, key: &str, max: u64) -> Result<usize, Error> {
@@ -273,6 +276,10 @@ fn load_inner(
         return Err("retained candidate frames fail pairing checks".into());
     }
     let first_count = observations.first.observations.0.len();
+    let frame_views = [
+        frame_view::prepare(&frames[0], work)?,
+        frame_view::prepare(&frames[1], work)?,
+    ];
     let values = points.points.0;
     if values.len() != candidates {
         return Err("candidate point count mismatch".into());
@@ -302,6 +309,7 @@ fn load_inner(
     Ok(Loaded {
         positions,
         first_observations: indices,
+        frames: frame_views,
         report: json!({"queries":queries,"candidate_points":candidates,
         "query_failures":failures,"queries_without_unique_match":unmatched,"artifact_integrity_verified":true,
         "retained_frame_bindings_verified":true,"historical_original_recordings_verified":false,
@@ -442,6 +450,14 @@ mod tests {
         assert_eq!(loaded.report["retained_frame_bindings_verified"], true);
         assert_eq!(loaded.report["numerical_recomputation_verified"], false);
         assert_eq!(loaded.report["units_verified"], false);
+        assert_eq!(loaded.frames.each_ref().map(|f| f.interface), [0, 2]);
+        for frame in &loaded.frames {
+            assert_eq!(frame.source_size, [4, 3]);
+            assert_eq!(frame.statistics.pixels, 12);
+            assert_eq!(frame.statistics.median, 30);
+            assert_eq!(frame.statistics.white_clipped, 0);
+            assert_eq!(frame.pixels, vec![30; 12]);
+        }
         assert_eq!(
             fs::read(root.join("candidate-points.json")).unwrap(),
             before

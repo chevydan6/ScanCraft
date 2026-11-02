@@ -15,6 +15,25 @@ queries. Units and physical accuracy are labeled unverified. The normal editable
 project, selection and history remain in the Point clouds tab. These coordinates
 do not enter `Cloud`/`Editor`, metric measurements or geometry exports.
 
+Expand **Retained camera frames** to see both source views. Each camera is labeled
+by its bundle order and USB interface; these labels do not establish a physical
+left/right orientation. Previews keep the original image orientation, without
+the request's optional matching reflections. Nearest samples are capped at
+320 × 240 pixels. Small stripes can disappear between sampled pixels; inspect the
+full recording when judging local details.
+
+Raw minimum, median, p99, maximum and exact counts at 0 and 255 are computed from
+every original pixel using `scancraft_image::diagnostics::statistics`. Percentiles
+use the existing nearest-rank method. Endpoint counts are neither the detector's
+configurable saturation threshold nor its rejected-run counters. Whole-image
+brightness does not establish foreground visibility, focus or accurate geometry.
+
+**Stretch display contrast only (p01–p99)** uses the existing monotonic contrast
+LUT on thumbnail copies; a flat percentile range retains identity. It clips the
+display tails and may make noise more visible. Raw frames, summaries, matching
+thresholds and candidate coordinates remain unchanged. No gain/exposure/projector
+control is sent. Failed loads retain the previous camera images and point view.
+
 ## Components and validation
 
 - `workflow/candidate_bundle.rs::load` validates a fixed bundle layout and returns
@@ -27,6 +46,12 @@ do not enter `Cloud`/`Editor`, metric measurements or geometry exports.
 - `candidate_ui::CandidateUi` owns only the diagnostic preview and view controls.
   `cloud_ui::draw` supplies the existing depth-sorted renderer. Root startup,
   tab selection, cancellation and close handling include this loading job.
+- `candidate_bundle/frame_view.rs::prepare` validates packed GREY samples, reuses
+  full-frame statistics and builds bounded display copies in the loader worker.
+  The existing `cloud_jobs::Report` transports the two summaries and thumbnails;
+  GUI textures are created lazily and recreated when display contrast changes.
+  Cancellation is checked before/after statistics and per thumbnail row; the
+  existing bounded statistics loop has no internal cancellation or hard deadline.
 
 The loader requires the matching schema/kind, consistent query counters and the
 seven known artifact roles. Unknown/path-traversal/duplicate roles fail. Every
@@ -77,7 +102,7 @@ Nine new regressions cover artifact corruption, role/path/symlink rejection,
 qualification/count/reference checks, retained-frame binding/footer validation,
 input mutation/cancellation, typed item bounds, failure preservation, diagnostic
 labels and root-close handling. Startup parser coverage includes the new option.
-The complete 714-test, formatting, strict Clippy and release gate passed.
+The initial complete 714-test, formatting, strict Clippy and release gate passed.
 
 Private-display renders were inspected for both the 126-point synthetic fixture
 and the saved 1764-point box-scene bundle. Both show the unverified-unit label and
@@ -85,6 +110,21 @@ candidate counts, and neither process held scanner device descriptors. Source an
 binary hashes accompany the screenshots locally. The initial render attempt lacked
 the configured Xvfb location; the existing explicit-path option resolved it.
 No private screenshots or scan/calibration data are distributed.
+
+Retained-frame feedback adds two regressions, extends loader/frame-preservation
+coverage and passes the complete 716-test/fmt/strict-Clippy/release gate. A private
+release-linked probe exported original samples and thumbnails from four bundles:
+synthetic (126 candidates), saved box (1764), front board (zero) and edge board
+(1275). An independent Python histogram/nearest-rank calculation agrees with every
+statistic and every sampled thumbnail byte, with raw CRCs checked against requests.
+The front board has 10275/15083 samples at 255 versus the box's 41/35. These are
+image facts, not proof of the cause of failed matching or physical accuracy.
+
+Separate authenticated Xvfb renders show both camera panels and candidate views
+for synthetic, box and front-board bundles; each application process has no scanner
+device descriptors. A private-display checkbox interaction also checks the box's
+display stretching. All screenshots and raw evidence remain local. No matching
+algorithm, persistent bundle format, dependency or scanner setting changed.
 
 This connects existing recorded numerical candidates to native visualization.
 It does not yet start reconstruction from the tab, continuously scan, qualify

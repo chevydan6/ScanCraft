@@ -2337,3 +2337,31 @@ lookup_failed for included allowance/billing, so no paid usage or review started
 Review/publication remain pending, not passed. Local source/commit/evidence hashes
 are in the recovery checkpoint. No reviewer-file, firmware/calibration, hardware
 capture, main-branch merge or protection change occurred in this viewer task.
+
+DEV-CANDIDATE-FRAME-FEEDBACK — developer continuation, not an independent finding.
+Accepted the need to expose input evidence alongside sparse/empty candidate views.
+Added candidate_bundle/frame_view.rs and loader-returned frame views, cloud_jobs
+report transport and CandidateUi camera panels. Reuses existing exact raw histogram
+statistics and monotonic display LUT rather than implementing another algorithm.
+Full original samples determine statistics; bounded nearest thumbnails keep raw
+orientation. USB interface labels do not infer physical camera orientation.
+Display-only contrast never modifies frames, thresholds, geometry or candidates.
+Failed loads preserve both camera and point views. No scanner control is sent.
+
+Two added regressions and extended loader/preservation checks pass; full716-test,
+formatting, strict Clippy and release gate PASS on the final source. Private release
+probe plus independent Python histogram/sample checks agree exactly for synthetic,
+box, zero-candidate front-board and edge-board bundles. Raw CRCs match requests and
+candidate counts remain126/1764/0/1275. Native private-display renders show camera
+panels and point views, with zero scanner descriptors. A separate private-display
+checkbox check exercises contrast; screenshots stay private. No matching or format
+change; no new dependency, hardware capture, calibration or firmware action.
+
+Limitations: subsampled previews can miss narrow stripes; endpoint counts are not
+detector rejected-run counters or causal diagnosis. Full-image statistics do not
+qualify object visibility, focus, synchronization, units or physical accuracy.
+Statistics have bounded input but no internal cancellation/hard-time guarantee;
+SCAN-REV-005/006 and long-session021 remain unchanged and open/unqualified.
+Fresh CodeRabbit usage still reports unavailable/lookup_failed for included quota
+and billing; no review/paid usage/publication claimed. Local commit/source/evidence
+bindings follow in the recovery checkpoint. Independent findings remain untouched.

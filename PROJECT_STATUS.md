@@ -4,7 +4,7 @@ Stage: experimental. Specification: docs/MISSION.txt.
 
 ## Latest local reconstruction checkpoint — 2026-11-02
 
-The local development tree passes 714 Rust tests, formatting, strict Clippy and
+The local development tree passes 716 Rust tests, formatting, strict Clippy and
 release build. Recording-backed seeded trace diagnostics preserve source frames
 and interpolation lineage. A new native sheet-supported full-trace matcher removes
 the need for supplied partner seeds at the numerical component boundary; it has
@@ -38,8 +38,10 @@ end-to-end reconstruction; material-aware quality feedback is a current priority
 
 The native [Laser candidates viewport](docs/CANDIDATE_VIEWER.md) now opens checked
 recorded diagnostic bundles with orbit/pan/zoom and explicit unverified-unit labels.
-Synthetic and real box-scene renders pass local checks. This is read-only candidate
-visualization; calibrated model generation and live scanning remain unfinished.
+Both retained camera frames now appear with exact raw intensity summaries and
+endpoint counts. Optional contrast stretching affects display copies only.
+Synthetic, box and zero-candidate board renders pass local checks. This is read-only
+candidate visualization; calibrated model generation and live scanning remain unfinished.
 
 These latest changes are local and await automated review/publication: CodeRabbit
 quota/billing lookup is unavailable although its local doctor passes. Genuine
