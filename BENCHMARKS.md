@@ -1,5 +1,11 @@
 # Benchmarks
 
+Native laser GUI diagnostics (2026-11-03) save all 32 raw frames/camera in one
+private renderer-limited trial but process only 19 pairs (59.375%, below 90%).
+Two default private software-renderer starts accept zero frames; rendering-load
+causality is unproven. No preview FPS/p95 or physical qualification is claimed.
+See [GUI observations and limits](docs/LIVE_LASER_GUI.md).
+
 Current acquisition-only repeatability evidence (2026-11-02): a source/binary-bound
 ten-minute stereo probe accepted 18,010 frames per camera at about 29.83 Hz,
 but ongoing rejected-buffer proxies were 0.54–0.56%. Resource accounting and

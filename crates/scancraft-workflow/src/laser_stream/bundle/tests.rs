@@ -87,7 +87,11 @@ fn bundle_verifies_raw_lineage_checksums_and_no_metric_exports_before_publicatio
                 restored = true;
                 Ok(())
             },
-            |_, r| {
+            |input| {
+                assert_eq!(input.progress.journaled_frames, [1; 2]);
+                assert_eq!(input.progress.processing_queue_drops, [0; 2]);
+                assert_eq!(input.profiles.each_ref().map(|p| p.interface), [0, 2]);
+                let r = input.outcome;
                 assert_eq!(r.as_ref().unwrap().candidates.len(), 4);
                 previewed += 1;
                 PreviewStatus::Accepted
@@ -113,6 +117,8 @@ fn bundle_verifies_raw_lineage_checksums_and_no_metric_exports_before_publicatio
         line["result"]["Ok"]["candidates"].as_array().unwrap().len(),
         4
     );
+    assert_eq!(line["acquisition"]["journaled_frames"], json!([1, 1]));
+    assert_eq!(line["acquisition"]["processing_queue_drops"], json!([0, 0]));
     for i in 0..2 {
         assert_eq!(line["frames"][i]["frame_index"], 0);
         assert_eq!(
@@ -155,7 +161,7 @@ fn optional_preview_omission_and_panic_do_not_fail_raw_recording_or_cancel_work(
                 &Arc::new(AtomicBool::new(false)),
                 source(&f, Arc::new(AtomicUsize::new(0))),
                 || Ok(()),
-                |_, _| {
+                |_| {
                     if panic {
                         panic!("injected display panic");
                     }
@@ -184,7 +190,7 @@ fn restoration_failure_retains_raw_journals_and_terminal_evidence_without_public
                 assert_eq!(closed.load(Ordering::Relaxed), 2);
                 Err("injected restoration failure".into())
             },
-            |_, _| PreviewStatus::NotRequested,
+            |_| PreviewStatus::NotRequested,
         )
         .unwrap_err();
     assert!(e.contains("restoration failure"));
@@ -234,7 +240,7 @@ fn invalid_policy_changed_inputs_and_existing_target_never_open_sources() {
                     restored = true;
                     Ok(())
                 },
-                |_, _| panic!("must not preview"),
+                |_| panic!("must not preview"),
             )
             .unwrap_err();
         assert!(restored);
@@ -263,7 +269,7 @@ fn publication_race_and_input_mutation_after_capture_retain_diagnostics() {
                     }
                     Ok(())
                 },
-                |_, _| PreviewStatus::NotRequested,
+                |_| PreviewStatus::NotRequested,
             )
             .unwrap_err();
         assert!(e.contains("incomplete capture retained"));
@@ -332,7 +338,7 @@ fn required_pair_log_budget_failure_keeps_finalized_raw_prefix_and_cleanup_evide
                 })
             },
             || Ok(()),
-            |_, _| PreviewStatus::NotRequested,
+            |_| PreviewStatus::NotRequested,
         )
         .unwrap_err();
     assert!(e.contains("byte budget"));
@@ -381,7 +387,7 @@ fn raw_mutation_after_cleanup_is_detected_before_publication() {
                 fs::write(p, bytes).unwrap();
                 Ok(())
             },
-            |_, _| PreviewStatus::NotRequested,
+            |_| PreviewStatus::NotRequested,
         )
         .unwrap_err();
     assert!(!target.exists());

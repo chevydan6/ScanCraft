@@ -2671,3 +2671,60 @@ long-session qualification remain incomplete. Old IR1000frame/session021 unchang
 
 DEV-NATIVE-LASER-CAPTURE implementation commit: `c86762c1af279bfb5a1c1201e64e035480c72659`.
 This documentation binding changes no application source or validation result.
+
+DEV-LIVE-LASER-GUI — developer integration, not an independent finding.
+Accepted the need to connect native laser acquisition to the existing diagnostic
+viewer. Added app laser_display/laser_process (helper/replay/tests) and
+candidate_ui/capture; extended IPC/root close/start exclusion and source progress
+boundaries. Reuses existing OwnedChild, Worker, bounded stream/bundle, raw frame
+statistics, candidate renderer and source/settings leases. No geometry arithmetic,
+new upstream algorithm or metric Cloud/Editor mutation. App/image add direct
+existing serde edges only; no new external package/license change.
+
+Applies the resolved018/019/020 principles: display preparation rejection omits and
+counts, BrokenPipe requests cleanup, ordinary Stop finalizes beyond abort grace,
+and failed IPC/Abort retains the guard until helper exit. Only teardown may leave
+cleanup unconfirmed. Final mailbox is drained after completion. These are developer
+regressions, not independent re-verification or changes to finding status.005
+whole-application hard bounds remain unproved;006 physical accuracy unqualified;
+021 old IR capacity and007 generic control coupling remain unchanged.
+
+Full fmt/strict-alltarget-Clippy/771tests/release gate PASS. Regressions include
+bounded decode/outcome/counters, fragmented wire, delayed real children, actual
+eGUI form dispatch, root-close/failed-start view preservation, and a real replay
+helper with synthetic recordings, exact raw/preview equality and no overwrite.
+Initial tests had a shadowed helper name, an invalid Rust float spelling, a Drop
+struct-update error, a valid-statistics negative fixture and an enabled-widget
+transition assumption; corrected test setup. Initial strict Clippy caught large
+IPC enum and nested/dense conditionals; corrected with boxing/readable conditionals,
+without suppressions. All failed logs retained privately.
+
+Actual saved-data GUI replay shows both images/2003candidates, with unpaced input
+explicitly dropping processing only. Headless native helper saves32raw/camera,
+processes19pairs, preserves source context and restores exact settings. Two default
+private software-renderer native GUI starts acceptzero frames and fail on partial/
+error buffers/timeouts; retained failure diagnostics and cleanup evidence remain.
+A subsequent private LP_NUM_THREADS=2 GUI trial saves32raw/camera,19pairs,1873–2104
+candidates/pair,13/12processingdrops. Root close during another capture saves7/7raw,
+6pairs and restores/publishes before app exits; observedclose-to-exit0.338s is not
+hardbound. Both successful GUI trials' entire stream/illumination readbacks match,
+including restoredoriginal151. GUI deviceFDs remainzero; initial childFD sampler
+missed monitor-thread children, so no positive helperFD sample claimed from it.
+Renderer-load/startup causality remains a hypothesis; no productiongraphics/OS
+settings changed.19/32processed is below90%, no20FPS/p95/soak qualification.
+
+Separate retained-frame same-engine check reproduces49completecompactreports and
+95833candidatevalues across5bundles, all frameCRC/sequence/time/flags/PTS refs pass;
+all5manifestartifact lengths/CRCs pass. All19headlessnativeIPC snapshots exactly
+match savedpositions/cameracounters/acquisition/frame refs. Actualscreen images
+inspected. No independent physical truth/calibratedmodel/coverage/tracking/fusion
+or complete end-to-end scan claimed. Streambundle directoldviewer reopen remains
+unsupported; explicit devicefree replay produces diagnosticpreviews into newfolder.
+
+See docs/LIVE_LASER_GUI.md and updated architecture/status/roadmap/acceptance/
+benchmarks; exact source/binary/evidence and implementation commit binding follow
+in the recovery checkpoint. Private geometry/raw/scenes/probes/screenshots remain
+outsideGit/reviewuploads. OfficialCodeRabbit0.9.2 latestusage stillincludedquota/
+billinglookup_failed; no paidreview/pass/push/PR/merge/protectionbypass. Firmware,
+physicalcalibration and reviewer-owned files/status unchanged. Scoped151line trial
+was temporarily enabled and verified restored, as authorized for capture testing.

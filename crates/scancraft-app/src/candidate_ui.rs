@@ -1,4 +1,5 @@
 //! Read-only diagnostic viewport. Uses the shared worker and renderer, not Editor.
+mod capture;
 mod processing;
 use crate::{
     cloud_jobs::{Document, Job, Operation, Preview},
@@ -25,6 +26,7 @@ pub struct CandidateUi {
     stretch_display: bool,
     processing: processing::Processing,
     action: Action,
+    capture: capture::Capture,
 }
 
 impl Default for CandidateUi {
@@ -46,14 +48,135 @@ impl Default for CandidateUi {
             stretch_display: false,
             processing: Default::default(),
             action: Action::Open,
+            capture: Default::default(),
         }
     }
 }
 impl CandidateUi {
+    #[cfg(test)]
+    pub(crate) fn test_capture(
+        &mut self,
+        run: impl FnOnce(
+            std::sync::Arc<crate::laser_process::Control>,
+        ) -> Result<crate::laser_process::Completion, String>
+        + Send
+        + 'static,
+    ) -> std::sync::Arc<crate::laser_process::Control> {
+        self.capture.test_job(run)
+    }
     pub fn is_busy(&self) -> bool {
-        self.job.is_some()
+        self.job.is_some() || self.capture.is_busy()
+    }
+    pub fn capture_busy(&self) -> bool {
+        self.capture.is_busy()
+    }
+    pub fn stop_capture(&self) {
+        self.capture.request_stop();
+    }
+    pub fn abort_capture(&self) {
+        self.capture.abort();
+    }
+    pub fn start_capture(&mut self, paths: Vec<PathBuf>, origin: crate::laser_display::Origin) {
+        if self.is_busy() {
+            return;
+        }
+        match self.capture.start(paths, origin) {
+            Ok(()) => {
+                self.message =
+                    "Starting laser capture; prior view retained until a new pair arrives.".into()
+            }
+            Err(e) => self.message = format!("Could not start laser capture: {e}"),
+        }
+    }
+    fn tick_capture(&mut self) -> bool {
+        let Some(update) = self.capture.tick() else {
+            return false;
+        };
+        if let Some(snapshot) = update.snapshot {
+            let mut preview = Preview {
+                total: snapshot.positions.len(),
+                ..Preview::default()
+            };
+            for (index, position) in snapshot.positions.into_iter().enumerate() {
+                if let Some((min, max)) = &mut preview.bounds {
+                    for axis in 0..3 {
+                        min[axis] = min[axis].min(position[axis]);
+                        max[axis] = max[axis].max(position[axis]);
+                    }
+                } else {
+                    preview.bounds = Some((position, position));
+                }
+                preview.points.push(crate::cloud_jobs::DisplayPoint {
+                    normal: None,
+                    position,
+                    color: [101, 190, 226],
+                    selected: false,
+                    index,
+                });
+            }
+            self.preview = preview;
+            self.frames = Some(snapshot.frames);
+            self.cameras = Default::default();
+            if update.first {
+                self.view = View {
+                    yaw: 0.6,
+                    pitch: -0.3,
+                    zoom: 1.,
+                    pan: egui::Vec2::ZERO,
+                };
+            }
+            let origin = if snapshot.origin == crate::laser_display::Origin::Native {
+                "Native capture"
+            } else {
+                "Recording replay"
+            };
+            self.loaded_path = format!(
+                "{origin}: {} · source frames {} / {}",
+                update.target.display(),
+                snapshot.indices[0],
+                snapshot.indices[1]
+            );
+            self.message = if let Some(error) = snapshot.processing_error {
+                format!("Pair processing failed: {error}. Raw journaling continues.")
+            } else {
+                format!(
+                    "{} candidates · {} queries · {} numerical failures · {} without unique match",
+                    self.preview.total,
+                    snapshot.queries,
+                    snapshot.query_failures,
+                    snapshot.without_unique
+                )
+            };
+            self.message.push_str(&format!(" · raw accepted {:?} · processing queue drops {:?} · helper/GUI preview omissions {}/{}. Capture awaits finalization.",snapshot.acquisition.journaled_frames,snapshot.acquisition.processing_queue_drops,snapshot.helper_omissions,update.parent_omissions));
+        }
+        if let Some(result) = update.completion {
+            match result {
+                Ok(c) => {
+                    self.message = format!(
+                        "Saved capture at {}. Raw frames {:?}; {} pairs processed, {} pair failures, processing drops {:?}, unmatched {:?}. Preview omissions helper/GUI {}/{}. Source cleanup and recording verification passed. View is a single diagnostic pair; tracking and fusion remain unavailable.",
+                        update.target.display(),
+                        c.recorded,
+                        c.processed,
+                        c.failed,
+                        c.drops,
+                        c.pending,
+                        c.helper_omissions,
+                        update.parent_omissions
+                    )
+                }
+                Err(e) => {
+                    self.message = format!(
+                        "Laser capture failed: {e}. Inspect {} and any retained staging folder; prior/latest view retained.",
+                        update.target.display()
+                    );
+                    return true;
+                }
+            }
+        }
+        false
     }
     pub fn cancel(&self) {
+        self.capture.abort();
         if let Some(job) = &self.job {
             job.control.cancel();
         }
@@ -88,9 +211,10 @@ impl CandidateUi {
             Operation::ProcessLaserCandidates { inputs, target },
         ));
     }
-    pub fn tick(&mut self) {
+    pub fn tick(&mut self) -> bool {
+        let capture_failed = self.tick_capture();
         let Some(output) = self.job.as_mut().and_then(Job::poll) else {
-            return;
+            return capture_failed;
         };
         self.job = None;
         match output.result {
@@ -119,8 +243,9 @@ impl CandidateUi {
                 )
             }
         }
+        capture_failed
     }
-    pub fn ui(&mut self, ui: &mut egui::Ui) {
+    pub fn ui(&mut self, ui: &mut egui::Ui, can_capture: bool) {
         ui.heading("Laser candidates");
         ui.label("Diagnostic coordinates · model units and physical accuracy unverified");
         ui.horizontal(|ui| {
@@ -136,7 +261,7 @@ impl CandidateUi {
                 self.open(self.path.clone().into());
             }
             if ui
-                .add_enabled(self.is_busy(), egui::Button::new("Cancel operation"))
+                .add_enabled(self.job.is_some(), egui::Button::new("Cancel operation"))
                 .clicked()
             {
                 self.cancel();
@@ -154,6 +279,9 @@ impl CandidateUi {
                 .request_repaint_after(std::time::Duration::from_millis(30));
         }
         let can_process = !self.is_busy();
+        if let Some(paths) = self.capture.show(ui, can_capture && can_process) {
+            self.start_capture(paths, crate::laser_display::Origin::Native);
+        }
         if let Some((inputs, target)) = self.processing.show(ui, can_process) {
             self.process(inputs, target);
         }
@@ -283,7 +411,7 @@ mod tests {
         let mut view = CandidateUi::default();
         let context = egui::Context::default();
         let output = context.run(egui::RawInput::default(), |ctx| {
-            egui::CentralPanel::default().show(ctx, |ui| view.ui(ui));
+            egui::CentralPanel::default().show(ctx, |ui| view.ui(ui, true));
         });
         let text = output
             .shapes
@@ -301,6 +429,31 @@ mod tests {
         }
         assert!(view.preview.points.is_empty());
         assert!(!view.is_busy());
+    }
+    #[test]
+    fn failed_laser_start_retains_prior_view_and_reports_failure_to_root_close() {
+        let mut view = CandidateUi {
+            loaded_path: "prior bundle".into(),
+            frames: Some([frame(0), frame(2)]),
+            preview: Preview {
+                total: 7,
+                ..Preview::default()
+            },
+            ..CandidateUi::default()
+        };
+        view.test_capture(|_| Err("preflight failed before scanner open".into()));
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
+        let mut failed = false;
+        while view.is_busy() {
+            failed |= view.tick();
+            assert!(std::time::Instant::now() < deadline);
+            std::thread::yield_now();
+        }
+        assert!(failed);
+        assert_eq!(view.loaded_path, "prior bundle");
+        assert_eq!(view.preview.total, 7);
+        assert_eq!(view.frames.as_ref().unwrap()[0].pixels, [0, 30, 60, 255]);
+        assert!(view.message.contains("preflight failed"));
     }
     #[test]
     fn failed_processing_keeps_prior_frames_points_and_source_label() {
@@ -358,7 +511,7 @@ mod tests {
                 ];
             }
             context.run(input, |ctx| {
-                egui::CentralPanel::default().show(ctx, |panel| ui.ui(panel));
+                egui::CentralPanel::default().show(ctx, |panel| ui.ui(panel, true));
             })
         };
         let text_position = |output: &egui::FullOutput, label: &str| {
@@ -411,7 +564,7 @@ mod tests {
                     ..Default::default()
                 },
                 |ctx| {
-                    egui::CentralPanel::default().show(ctx, |ui| view.ui(ui));
+                    egui::CentralPanel::default().show(ctx, |ui| view.ui(ui, true));
                 },
             );
             let text = output

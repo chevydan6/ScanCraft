@@ -14,7 +14,7 @@ use std::{
     io::BufWriter,
     sync::{
         Arc,
-        atomic::{AtomicBool, Ordering},
+        atomic::{AtomicBool, AtomicU64, Ordering},
         mpsc::{self, SyncSender, TrySendError},
     },
     thread,
@@ -95,10 +95,34 @@ fn caught<T>(call: impl FnOnce() -> Result<T>) -> Result<T> {
     std::panic::catch_unwind(std::panic::AssertUnwindSafe(call))
         .unwrap_or_else(|_| Err("laser adapter/consumer panicked".into()))
 }
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ProgressSnapshot {
+    pub journaled_frames: [u64; 2],
+    pub processing_queue_drops: [u64; 2],
+}
+#[derive(Default)]
+struct Progress {
+    recorded: [AtomicU64; 2],
+    drops: [AtomicU64; 2],
+}
+impl Progress {
+    fn snapshot(&self) -> ProgressSnapshot {
+        // Read drops first: acquiring a published drop also observes its earlier
+        // raw append. Counts are monotonic observations, not one atomic instant
+        // or a claim of disk durability.
+        let processing_queue_drops = self.drops.each_ref().map(|n| n.load(Ordering::Acquire));
+        ProgressSnapshot {
+            journaled_frames: self.recorded.each_ref().map(|n| n.load(Ordering::Acquire)),
+            processing_queue_drops,
+        }
+    }
+}
 struct Signals {
     stop: AtomicBool,
     requested: Arc<AtomicBool>,
     work: Arc<WorkControl>,
+    progress: Progress,
 }
 impl Signals {
     fn stopping(&self) -> bool {
@@ -160,14 +184,19 @@ fn produce<S: Source, J: Journal>(
             super::validate_sample(&profile, &frame)?;
             journal.push(&frame)?;
             report.journaled_frames += 1;
+            signals.progress.recorded[camera.index()].fetch_add(1, Ordering::Release);
             match sender.try_send(Event {
                 camera,
                 sample: Sample { index, frame },
             }) {
                 Ok(()) => report.queued_frames += 1,
-                Err(TrySendError::Full(_)) => report.processing_queue_drops += 1,
+                Err(TrySendError::Full(_)) => {
+                    report.processing_queue_drops += 1;
+                    signals.progress.drops[camera.index()].fetch_add(1, Ordering::Release);
+                }
                 Err(TrySendError::Disconnected(_)) => {
                     report.processing_queue_drops += 1;
+                    signals.progress.drops[camera.index()].fetch_add(1, Ordering::Release);
                     break;
                 }
             }
@@ -219,8 +248,31 @@ impl Pipeline<'_> {
     ) -> std::result::Result<Summary, Failure>
     where
         O: Fn(Camera, StreamProfile, StopToken) -> Result<S> + Send + Sync + 'static,
-        F: Fn(Camera, StreamProfile, CaptureContext) -> Result<J> + Send + Sync + 'static,
+        F: Fn(Camera, StreamProfile, scancraft_recording::CaptureContext) -> Result<J>
+            + Send
+            + Sync
+            + 'static,
         D: FnMut(&Pair, Result<Report>) -> Result<()>,
+    {
+        self.run_progress(maximum, work, stop, open, journal, |pair, result, _| {
+            deliver(pair, result)
+        })
+    }
+    /// Observed atomic source counters at each pair boundary; not a simultaneous
+    /// transaction or durable-file attestation. No history is retained.
+    pub fn run_progress<S: Source + 'static, J: Journal, O, F, D>(
+        &self,
+        maximum: u64,
+        work: &Arc<WorkControl>,
+        stop: &Arc<AtomicBool>,
+        open: O,
+        journal: F,
+        mut deliver: D,
+    ) -> std::result::Result<Summary, Failure>
+    where
+        O: Fn(Camera, StreamProfile, StopToken) -> Result<S> + Send + Sync + 'static,
+        F: Fn(Camera, StreamProfile, CaptureContext) -> Result<J> + Send + Sync + 'static,
+        D: FnMut(&Pair, Result<Report>, ProgressSnapshot) -> Result<()>,
     {
         let early = |reason| Failure {
             reason,
@@ -234,6 +286,7 @@ impl Pipeline<'_> {
             stop: AtomicBool::new(false),
             requested: stop.clone(),
             work: work.clone(),
+            progress: Progress::default(),
         });
         let mut workers = Workers {
             signals: signals.clone(),
@@ -307,7 +360,7 @@ impl Pipeline<'_> {
                             if result.is_err() {
                                 failed += 1;
                             }
-                            deliver(&pair, result)?;
+                            deliver(&pair, result, signals.progress.snapshot())?;
                         }
                     }
                     Err(mpsc::RecvTimeoutError::Timeout) => {}

@@ -1,21 +1,16 @@
 # Roadmap
 
-Native CLI laser capture now retains raw frames, computes diagnostic candidates,
-restores scoped settings and publishes verified bundles. Next connect Start/Stop
-and camera/candidate previews through the supervised native GUI helper, then
-measure complete-pair dispatch/compute scheduling against the observed processing
-omissions. Preserve required raw journals separately from optional previews.
-Calibrated dimensions, coverage, tracking/fusion and long sessions remain required;
-physical calibration is deferred. See docs/NATIVE_LASER_CAPTURE.md.
+Native laser Start/Stop and camera/candidate previews now use the supervised GUI
+helper. Next investigate renderer-load/startup transport failures and measure
+complete-pair dispatch/compute scheduling: the GUI finite trial processes only
+19/32 possible pairs, below the 90% target. Preserve raw journals independently
+of optional previews and retain failed-run evidence. See docs/LIVE_LASER_GUI.md.
 
-Current laser priority: connect the bounded raw-journal-first workflow
-(`16b9092dbcd5fcd09162569a941691cbfa75fee3`) to the native acquisition helper and
-GUI with explicit source/settings ownership, queue omissions and recovery.
-Measure real scheduling, pair yield and preview latency before changing queue
-policy or claiming live throughput. Tracking/fusion and long-session project
-retention remain separate work; the old IR 1000-frame limit is unchanged.
-Calibrated reconstruction and optical coverage remain higher release priorities
-than additional editing features. Physical calibration is still deferred.
+Calibrated dimensions, optical coverage, actual tracking/fusion and long-session
+project retention remain required, with physical calibration deferred. The old
+IR 1000-frame/session limit is unchanged. Prioritize real reconstruction and
+reliability over additional editing features. Direct stream-bundle reopen and a
+complete usable model remain outstanding; diagnostic replay is not fusion.
 
 1. Complete native acquisition: decoding, timestamps, controls, cold-start,
    reconnection, multiple cameras, explicit dropped-frame/error accounting.

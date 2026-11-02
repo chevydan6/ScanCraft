@@ -1,5 +1,10 @@
 # Architecture
 
+The laser candidate GUI now supervises a device-owning helper via bounded typed
+IPC, latest-only preview mailboxes and explicit Stop/Abort/cleanup state. It renders
+raw thumbnails and single-pair diagnostic coordinates separately from metric
+Cloud/Editor. See [live laser GUI contracts](docs/LIVE_LASER_GUI.md).
+
 Native laser capture now connects `scancraft-acquisition::laser::scan` and
 `scan-live-laser` to the bounded stream engine through verified capture bundles.
 Source/settings ownership and optional scoped line control remain in acquisition;
@@ -8,7 +13,7 @@ See [native laser capture contracts](docs/NATIVE_LASER_CAPTURE.md).
 
 `scancraft_workflow::laser_stream::Pipeline` adds raw-journal-first bounded
 source-to-laser processing with explicit queue omissions and structured cleanup
-results. The native CLI adapter is connected; live GUI controls and fusion remain
+results. The native CLI adapter is connected; live GUI diagnostics are connected and fusion remains
 future integration. See
 [stream contracts and evidence](docs/BOUNDED_LASER_STREAM.md).
 

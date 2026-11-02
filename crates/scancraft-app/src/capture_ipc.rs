@@ -5,6 +5,9 @@ const FRAME: u8 = 1;
 const COMPLETE: u8 = 2;
 const LIVE_PROGRESS: u8 = 3;
 const LIVE_COMPLETE: u8 = 4;
+const LASER_PROGRESS: u8 = 5;
+const LASER_COMPLETE: u8 = 6;
+const MAX_LASER_PROGRESS: usize = 2 * 1024 * 1024;
 pub(crate) const MAX_PROGRESS: usize = 16 * 1024 * 1024;
 const MAX_FRAME: usize = 64 * 1024 * 1024;
 const MAX_RESULT: usize = 64 * 1024;
@@ -14,6 +17,8 @@ fn invalid(message: &str) -> io::Error {
 #[derive(Debug, PartialEq)]
 pub(crate) enum Message {
     Frame(Frame),
+    LaserProgress(Box<crate::laser_display::Snapshot>),
+    LaserComplete(Result<crate::laser_process::Completion, String>),
     Complete(Result<String, String>),
     LiveProgress(scancraft_workflow::live_stereo::control::display::DisplayUpdate),
     LiveComplete(Result<serde_json::Value, String>),
@@ -107,6 +112,22 @@ pub(crate) fn write_live_complete(
         serde_json::to_writer(bytes, result)
     })
 }
+pub(crate) fn prepare_laser_progress(
+    snapshot: &crate::laser_display::Snapshot,
+) -> io::Result<Vec<u8>> {
+    snapshot.validate().map_err(|e| invalid(&e))?;
+    prepare_json(LASER_PROGRESS, MAX_LASER_PROGRESS, |bytes| {
+        serde_json::to_writer(bytes, snapshot)
+    })
+}
+pub(crate) fn write_laser_complete(
+    out: &mut impl Write,
+    result: &Result<crate::laser_process::Completion, String>,
+) -> io::Result<()> {
+    write_json(out, LASER_COMPLETE, MAX_RESULT, |bytes| {
+        serde_json::to_writer(bytes, result)
+    })
+}
 #[derive(Default)]
 pub(crate) struct Decoder {
     bytes: Vec<u8>,
@@ -135,8 +156,9 @@ impl Decoder {
         let length = u32::from_le_bytes(self.bytes[1..5].try_into().unwrap()) as usize;
         match kind {
             FRAME if (24..=MAX_FRAME).contains(&length) => (),
-            COMPLETE | LIVE_COMPLETE if (1..=MAX_RESULT).contains(&length) => (),
+            COMPLETE | LIVE_COMPLETE | LASER_COMPLETE if (1..=MAX_RESULT).contains(&length) => (),
             LIVE_PROGRESS if (1..=MAX_PROGRESS).contains(&length) => (),
+            LASER_PROGRESS if (1..=MAX_LASER_PROGRESS).contains(&length) => (),
             _ => return Err(invalid("invalid IPC kind or declared length")),
         }
         if self.bytes.len() < 5 + length {
@@ -156,6 +178,10 @@ impl Decoder {
                 metadata: body[24..24 + metadata].to_vec(),
                 data: body[24 + metadata..].to_vec(),
             })
+        } else if kind == LASER_PROGRESS {
+            let preview: crate::laser_display::Snapshot = serde_json::from_slice(body)?;
+            preview.validate().map_err(|e| invalid(&e))?;
+            Message::LaserProgress(Box::new(preview))
         } else if kind == LIVE_PROGRESS {
             let update: scancraft_workflow::live_stereo::control::display::DisplayUpdate =
                 serde_json::from_slice(body)?;
@@ -163,7 +189,14 @@ impl Decoder {
             Message::LiveProgress(update)
         } else {
             self.completed = true;
-            if kind == COMPLETE {
+            if kind == LASER_COMPLETE {
+                let result: Result<crate::laser_process::Completion, String> =
+                    serde_json::from_slice(body)?;
+                if let Ok(c) = &result {
+                    c.validate().map_err(|e| invalid(&e))?;
+                }
+                Message::LaserComplete(result)
+            } else if kind == COMPLETE {
                 Message::Complete(serde_json::from_slice(body)?)
             } else {
                 Message::LiveComplete(serde_json::from_slice(body)?)
@@ -183,6 +216,53 @@ impl Decoder {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn laser_packets_fragmented_and_validated_before_display_or_completion() {
+        let snapshot =
+            crate::laser_display::tests::snapshot(crate::laser_display::Origin::Native, 0);
+        let mut wire = prepare_laser_progress(&snapshot).unwrap();
+        write_laser_complete(&mut wire, &Err("restoration failed".into())).unwrap();
+        for size in [1, 3, 17, 1024, 65536] {
+            let mut d = Decoder::default();
+            let mut messages = Vec::new();
+            for chunk in wire.chunks(size) {
+                d.push(chunk).unwrap();
+                while let Some(m) = d.next().unwrap() {
+                    messages.push(m);
+                }
+            }
+            d.finish().unwrap();
+            assert_eq!(messages.len(), 2);
+            assert!(matches!(&messages[0],Message::LaserProgress(s) if s.as_ref()==&snapshot));
+            assert!(
+                matches!(&messages[1],Message::LaserComplete(Err(e)) if e=="restoration failed")
+            );
+            assert!(d.push(&[1]).is_err());
+        }
+        let mut bad =
+            crate::laser_display::tests::snapshot(crate::laser_display::Origin::Native, 0);
+        bad.frames[0].pixels.clear();
+        assert!(prepare_laser_progress(&bad).is_err());
+        for (kind, length) in [
+            (LASER_PROGRESS, MAX_LASER_PROGRESS + 1),
+            (LASER_COMPLETE, MAX_RESULT + 1),
+        ] {
+            let mut d = Decoder::default();
+            let mut header = vec![kind];
+            header.extend((length as u32).to_le_bytes());
+            d.push(&header).unwrap();
+            assert!(d.next().is_err());
+        }
+        let mut d = Decoder::default();
+        let invalid = serde_json::json!({"Ok":{"schema_version":1,"origin":"native","recorded":[1,1],"drops":[2,0],"processed":0,"failed":0,"pending":[0,0],"helper_omissions":0}});
+        let packet = prepare_json(LASER_COMPLETE, MAX_RESULT, |out| {
+            serde_json::to_writer(out, &invalid)
+        })
+        .unwrap();
+        d.push(&packet).unwrap();
+        assert!(d.next().is_err());
+        assert!(d.finish().is_err());
+    }
     #[test]
     fn fragmented_frame_and_completion_preserve_exact_data() {
         let frame = Frame {

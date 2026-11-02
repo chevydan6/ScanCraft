@@ -1,7 +1,8 @@
 //! Exact raw grayscale intensity summaries and display-only tone mapping.
 //! These values do not establish focus, optical validity or depth accuracy.
 use crate::GrayImage;
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct GrayStatistics {
     pub pixels: usize,
     pub minimum: u8,

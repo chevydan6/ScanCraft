@@ -2220,6 +2220,7 @@ dependencies = [
  "scancraft-image",
  "scancraft-recording",
  "scancraft-workflow",
+ "serde",
  "serde_json",
 ]
 
@@ -2300,6 +2301,7 @@ dependencies = [
  "scancraft-calibration",
  "scancraft-core",
  "scancraft-geometry",
+ "serde",
  "serde_json",
 ]
 

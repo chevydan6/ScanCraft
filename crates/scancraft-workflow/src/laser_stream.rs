@@ -4,9 +4,10 @@ mod association;
 pub mod bundle;
 mod runner;
 pub use association::{Association, AssociationCounts, Camera, Pair, Sample};
-pub use runner::{Failure, Journal, SourceReport, StopToken, Summary};
+pub use runner::{Failure, Journal, ProgressSnapshot, SourceReport, StopToken, Summary};
 use scancraft_calibration::stereo::StereoCalibration;
 use scancraft_core::StreamProfile;
+pub use scancraft_depth::laser_pair::CameraSummary;
 use scancraft_depth::laser_pair::{self, Settings};
 
 pub(crate) type Result<T> = std::result::Result<T, String>;

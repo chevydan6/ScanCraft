@@ -26,6 +26,12 @@ use std::{
 };
 const MAX_INPUT: u64 = 1_048_576;
 const MAX_TERMINAL: u64 = 1_048_576;
+pub struct PreviewInput<'a> {
+    pub pair: &'a Pair,
+    pub profiles: &'a [StreamProfile; 2],
+    pub outcome: &'a PairOutcome,
+    pub progress: super::ProgressSnapshot,
+}
 pub type PairOutcome = std::result::Result<laser_pair::Report, String>;
 #[derive(Clone, Copy)]
 pub enum PreviewStatus {
@@ -84,10 +90,16 @@ struct PairRecord<'a> {
     frames: [FrameReference; 2],
     raw_pts: u32,
     result: &'a PairOutcome,
+    acquisition: super::ProgressSnapshot,
 }
-fn record<'a>(pair: &Pair, result: &'a PairOutcome) -> PairRecord<'a> {
+fn record<'a>(
+    pair: &Pair,
+    result: &'a PairOutcome,
+    acquisition: super::ProgressSnapshot,
+) -> PairRecord<'a> {
     PairRecord {
         schema_version: 1,
+        acquisition,
         raw_pts: pair.raw_pts,
         result,
         frames: std::array::from_fn(|i| FrameReference {
@@ -182,7 +194,7 @@ impl Plan {
     ) -> Result<Value>
     where
         O: Fn(Camera, StreamProfile, StopToken) -> Result<S> + Send + Sync + 'static,
-        P: FnMut(&Pair, &PairOutcome) -> PreviewStatus,
+        P: FnMut(PreviewInput<'_>) -> PreviewStatus,
     {
         let mut partial: Option<PathBuf> = None;
         let mut terminal = None;
@@ -214,7 +226,7 @@ impl Plan {
             let slots = raw_digests.clone();
             let raw_dir = directory.clone();
             let raw_limit = self.request.maximum_recording_bytes_per_camera;
-            let result = pipeline.run(
+            let result = pipeline.run_progress(
                 self.request.maximum_frames_per_camera,
                 work,
                 stop,
@@ -237,12 +249,17 @@ impl Plan {
                         camera: camera.index(),
                     })
                 },
-                |pair, result| {
-                    serde_json::to_writer(&mut pairs, &record(pair, &result))
+                |pair, result, progress| {
+                    serde_json::to_writer(&mut pairs, &record(pair, &result, progress))
                         .map_err(|e| e.to_string())?;
                     pairs.write_all(b"\n").map_err(|e| e.to_string())?;
                     let offered = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                        preview(pair, &result)
+                        preview(PreviewInput {
+                            pair,
+                            profiles: pipeline.profiles(),
+                            outcome: &result,
+                            progress,
+                        })
                     }))
                     .unwrap_or(PreviewStatus::Omitted);
                     match offered {

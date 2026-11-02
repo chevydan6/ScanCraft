@@ -8,6 +8,8 @@ mod capture_worker;
 mod cloud_jobs;
 mod cloud_ui;
 mod discovery_process;
+mod laser_display;
+mod laser_process;
 mod live_fixture;
 mod live_process;
 mod live_ui;
@@ -139,6 +141,7 @@ impl App {
         self.running.is_some()
             || self.discovery.is_some()
             || self.live.is_busy()
+            || self.candidates.capture_busy()
             || self.capture_close.is_waiting()
             || self.closing_window
     }
@@ -152,7 +155,7 @@ impl App {
                 || self.candidates.is_busy())
     }
     fn request_window_close(&mut self, ctx: &egui::Context) {
-        if self.running.is_some() || self.live.is_busy() {
+        if self.running.is_some() || self.live.is_busy() || self.candidates.capture_busy() {
             self.capture_close_step(ctx, true, std::time::Instant::now());
         } else if self.needs_close_confirmation() {
             self.confirm_close = true;
@@ -170,7 +173,7 @@ impl App {
     ) -> bool {
         match self.capture_close.advance(
             requested,
-            self.running.is_some() || self.live.is_busy(),
+            self.running.is_some() || self.live.is_busy() || self.candidates.capture_busy(),
             now,
         ) {
             capture_close::Action::CancelViewportClose => {
@@ -181,6 +184,7 @@ impl App {
                     running.cancel.store(true, Ordering::Relaxed);
                 }
                 self.live.request_stop();
+                self.candidates.stop_capture();
                 ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
             }
             capture_close::Action::RetryViewportClose => self.request_window_close(ctx),
@@ -194,6 +198,7 @@ impl App {
             running.cancel.store(true, Ordering::Relaxed);
         }
         self.live.abort();
+        self.candidates.abort_capture();
     }
     fn window_close_step(
         &mut self,
@@ -344,8 +349,8 @@ impl App {
 impl eframe::App for App {
     fn update(&mut self, ctx: &egui::Context, _: &mut eframe::Frame) {
         self.cloud.tick();
-        self.candidates.tick();
-        let live_failed = self.live.tick(ctx);
+        let laser_failed = self.candidates.tick();
+        let live_failed = self.live.tick(ctx) || laser_failed;
         self.mesh.tick();
         self.recovery.tick();
         self.archive.tick();
@@ -368,7 +373,7 @@ impl eframe::App for App {
                     ui.label("Waiting for capture cleanup. Recordings are not finalized until capture stops.");
                     if self.capture_close.slow(std::time::Instant::now()) {
                         ui.label("Scanner cleanup is taking longer than expected. Restoration is not yet confirmed.");
-                        if (self.live.is_busy() || self.running.is_some()) && ui.button("Abort capture (keep partial data)").clicked() {
+                        if (self.live.is_busy() || self.running.is_some() || self.candidates.capture_busy()) && ui.button("Abort capture (keep partial data)").clicked() {
                             self.abort_pending_capture();
                         }
                     }
@@ -423,6 +428,7 @@ impl eframe::App for App {
         }
         if self.running.is_some()
             || self.live.is_busy()
+            || self.candidates.capture_busy()
             || self.cloud.is_busy()
             || self.mesh.is_busy()
             || self.recovery.is_busy()
@@ -478,9 +484,9 @@ impl eframe::App for App {
                 if ui.selectable_label(!self.candidates_active&&self.mesh_active,"Meshes").clicked(){self.candidates_active=false;self.mesh_active=true;self.live_active=false;}
                 if ui.selectable_label(self.candidates_active,"Laser candidates").clicked(){self.candidates_active=true;}
             });
-            if self.candidates_active {self.candidates.ui(ui);return;}
+            if self.candidates_active {let can=self.discovery.is_none()&&self.running.is_none()&&!self.live.is_busy()&&!self.capture_close.is_waiting()&&!self.closing_window&&!self.confirm_close;self.candidates.ui(ui,can);return;}
             if self.live_active {
-                let can_start=self.discovery.is_none()&&self.running.is_none()&&!self.capture_close.is_waiting()&&!self.closing_window;
+                let can_start=self.discovery.is_none()&&self.running.is_none()&&!self.candidates.capture_busy()&&!self.capture_close.is_waiting()&&!self.closing_window;
                 if let Some(path)=self.live.ui(ui,can_start,!self.cloud.is_busy()) && self.cloud.request_open(path) {self.editing=true;self.live_active=false;}
                 return;
             }
@@ -540,6 +546,10 @@ impl Drop for App {
 }
 #[derive(Debug, PartialEq)]
 enum Startup {
+    CaptureLaser {
+        paths: Vec<PathBuf>,
+        origin: laser_display::Origin,
+    },
     Candidates(PathBuf),
     ProcessCandidates {
         inputs: scancraft_workflow::recorded_traces::Inputs,
@@ -662,6 +672,8 @@ fn startup_args(args: Vec<std::ffi::OsString>) -> Result<Startup, String> {
         [flag,left,right,target] if flag=="--archive-recordings"=>Ok(Startup::ArchiveRecordings{left:left.into(),right:right.into(),target:target.into()}),
         [flag,project,sources,target] if flag=="--export-project-bundle" => Ok(Startup::ExportBundle{project:project.into(),sources:sources.into(),target:target.into()}),
         [flag,project,directory] if flag=="--verify-source-bundle" => Ok(Startup::VerifySources{project:project.into(),directory:directory.into()}),
+        [flag,g,r,out] if flag=="--capture-laser"=>Ok(Startup::CaptureLaser {paths:vec![g.into(),r.into(),out.into()],origin:laser_display::Origin::Native}),
+        [flag,g,r,a,b,out] if flag=="--replay-laser"=>Ok(Startup::CaptureLaser {paths:vec![g.into(),r.into(),a.into(),b.into(),out.into()],origin:laser_display::Origin::RecordingReplay}),
         [flag,path] if flag=="--laser-candidates" => Ok(Startup::Candidates(path.into())),
         [flag,geometry,first,fi,second,si,request,target] if flag=="--match-recorded-laser-traces" => {
             let index=|s:&std::ffi::OsString|s.to_str().ok_or("invalid recording index")?.parse::<usize>().map_err(|_|"invalid recording index");
@@ -701,11 +713,14 @@ fn startup_args(args: Vec<std::ffi::OsString>) -> Result<Startup, String> {
         [path] if !path.to_string_lossy().starts_with('-') => {
             Ok(Startup::File(PathBuf::from(path)))
         }
-        _ => Err("Usage: scancraft [PROJECT_OR_PLY_FILE] | --synthetic-live-scan NEW_SYNTHETIC_OUTPUT | --reconstruct CALIBRATION LEFT.PNG RIGHT.PNG SETTINGS NEW_RESULT_FOLDER | --reconstruct-recorded-sequence CAL LEFT_RECORDING RIGHT_RECORDING RECON_SETTINGS SEQUENCE_SETTINGS NEW_FOLDER | --fuse-sequence SETTINGS NEW_RESULT_FOLDER | --mesh MESH_JSON | --mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM | --mesh-boundaries MESH_OR_PROJECT | --fit-cylinder PROJECT_OR_PLY_FILE MAX_RMS_MM | --frame-document FRAME_FILE | --coordinate-frame PROJECT_OR_PLY_FILE | --measurement-outlines PROJECT_OR_PLY_FILE | --cloud-normals PROJECT_OR_PLY_FILE | --mesh-normals MESH_OR_PROJECT | --reconstruct-recordings CALIBRATION LEFT_RECORDING LEFT_INDEX RIGHT_RECORDING RIGHT_INDEX SETTINGS NEW_FOLDER | --statistical-preview PROJECT_OR_PLY K SIGMA_MULTIPLIER | --export-scan-project PROJECT SOURCE_BUNDLE LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --archive-recordings LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --export-project-bundle PROJECT SOURCE_BUNDLE NEW_DIRECTORY | --verify-source-bundle PROJECT DIRECTORY | --laser-candidates BUNDLE_DIRECTORY | --match-recorded-laser-traces GEOMETRY FIRST_RECORDING FIRST_INDEX SECOND_RECORDING SECOND_INDEX REQUEST NEW_FOLDER | --play-recording RECORDING | --recover-recording INPUT MAX_FRAMES NEW_FOLDER | --import-mesh FILE obj|stl mm|in|m separate|weld-exact NEW_FOLDER | --mesh-smooth-preview MESH_OR_PROJECT ITERATIONS RELAXATION MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG | --mesh-simplify-preview MESH_OR_PROJECT TARGET MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG MAX_COLLAPSES | --mesh-plane-preview MESH_JSON NX NY NZ OFFSET | --help | --smoke-test | --smoke-test-ir".into()),
+        _ => Err("Usage: scancraft [PROJECT_OR_PLY_FILE] | --synthetic-live-scan NEW_SYNTHETIC_OUTPUT | --reconstruct CALIBRATION LEFT.PNG RIGHT.PNG SETTINGS NEW_RESULT_FOLDER | --reconstruct-recorded-sequence CAL LEFT_RECORDING RIGHT_RECORDING RECON_SETTINGS SEQUENCE_SETTINGS NEW_FOLDER | --fuse-sequence SETTINGS NEW_RESULT_FOLDER | --mesh MESH_JSON | --mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM | --mesh-boundaries MESH_OR_PROJECT | --fit-cylinder PROJECT_OR_PLY_FILE MAX_RMS_MM | --frame-document FRAME_FILE | --coordinate-frame PROJECT_OR_PLY_FILE | --measurement-outlines PROJECT_OR_PLY_FILE | --cloud-normals PROJECT_OR_PLY_FILE | --mesh-normals MESH_OR_PROJECT | --reconstruct-recordings CALIBRATION LEFT_RECORDING LEFT_INDEX RIGHT_RECORDING RIGHT_INDEX SETTINGS NEW_FOLDER | --statistical-preview PROJECT_OR_PLY K SIGMA_MULTIPLIER | --export-scan-project PROJECT SOURCE_BUNDLE LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --archive-recordings LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --export-project-bundle PROJECT SOURCE_BUNDLE NEW_DIRECTORY | --verify-source-bundle PROJECT DIRECTORY | --capture-laser GEOMETRY_JSON STREAM_REQUEST_JSON NEW_DIRECTORY | --replay-laser GEOMETRY_JSON STREAM_REQUEST_JSON FIRST_RECORDING SECOND_RECORDING NEW_DIRECTORY | --laser-candidates BUNDLE_DIRECTORY | --match-recorded-laser-traces GEOMETRY FIRST_RECORDING FIRST_INDEX SECOND_RECORDING SECOND_INDEX REQUEST NEW_FOLDER | --play-recording RECORDING | --recover-recording INPUT MAX_FRAMES NEW_FOLDER | --import-mesh FILE obj|stl mm|in|m separate|weld-exact NEW_FOLDER | --mesh-smooth-preview MESH_OR_PROJECT ITERATIONS RELAXATION MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG | --mesh-simplify-preview MESH_OR_PROJECT TARGET MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG MAX_COLLAPSES | --mesh-plane-preview MESH_JSON NX NY NZ OFFSET | --help | --smoke-test | --smoke-test-ir".into()),
     }
 }
 fn main() -> eframe::Result {
     let args: Vec<_> = std::env::args_os().skip(1).collect();
+    if let Some(code) = laser_process::helper_entry(&args) {
+        std::process::exit(code);
+    }
     if let Some(code) = live_process::helper_entry(&args) {
         std::process::exit(code);
     }
@@ -718,7 +733,7 @@ fn main() -> eframe::Result {
     let startup = match startup_args(std::env::args_os().skip(1).collect()) {
         Ok(Startup::Help) => {
             println!(
-                "Usage: scancraft [PROJECT_OR_PLY_FILE]\n       scancraft --synthetic-live-scan NEW_SYNTHETIC_OUTPUT\n       scancraft --reconstruct CALIBRATION LEFT.PNG RIGHT.PNG SETTINGS NEW_RESULT_FOLDER\n       scancraft --reconstruct-recorded-sequence CAL LEFT_RECORDING RIGHT_RECORDING RECON_SETTINGS SEQUENCE_SETTINGS NEW_FOLDER\n       scancraft --fuse-sequence SETTINGS NEW_RESULT_FOLDER\n       scancraft --mesh MESH_JSON\n       scancraft --mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM | --mesh-boundaries MESH_OR_PROJECT\n       scancraft --fit-cylinder PROJECT_OR_PLY_FILE MAX_RMS_MM | --frame-document FRAME_FILE | --coordinate-frame PROJECT_OR_PLY_FILE | --measurement-outlines PROJECT_OR_PLY_FILE | --cloud-normals PROJECT_OR_PLY_FILE\n       scancraft --mesh-normals MESH_OR_PROJECT\n       scancraft --reconstruct-recordings CALIBRATION LEFT_RECORDING LEFT_INDEX RIGHT_RECORDING RIGHT_INDEX SETTINGS NEW_FOLDER | --statistical-preview PROJECT_OR_PLY K SIGMA_MULTIPLIER | --export-scan-project PROJECT SOURCE_BUNDLE LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --archive-recordings LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --export-project-bundle PROJECT SOURCE_BUNDLE NEW_DIRECTORY | --verify-source-bundle PROJECT DIRECTORY | --laser-candidates BUNDLE_DIRECTORY | --match-recorded-laser-traces GEOMETRY FIRST_RECORDING FIRST_INDEX SECOND_RECORDING SECOND_INDEX REQUEST NEW_FOLDER | --play-recording RECORDING | --recover-recording INPUT MAX_FRAMES NEW_FOLDER | --import-mesh FILE obj|stl mm|in|m separate|weld-exact NEW_FOLDER | --mesh-smooth-preview MESH_OR_PROJECT ITERATIONS RELAXATION MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG | --mesh-simplify-preview MESH_OR_PROJECT TARGET MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG MAX_COLLAPSES | --mesh-plane-preview MESH_JSON NX NY NZ OFFSET\nOpening geometry never starts camera acquisition. The synthetic-live diagnostic opens no scanner. Files without units require an explicit choice in the import panel."
+                "Usage: scancraft [PROJECT_OR_PLY_FILE]\n       scancraft --synthetic-live-scan NEW_SYNTHETIC_OUTPUT\n       scancraft --reconstruct CALIBRATION LEFT.PNG RIGHT.PNG SETTINGS NEW_RESULT_FOLDER\n       scancraft --reconstruct-recorded-sequence CAL LEFT_RECORDING RIGHT_RECORDING RECON_SETTINGS SEQUENCE_SETTINGS NEW_FOLDER\n       scancraft --fuse-sequence SETTINGS NEW_RESULT_FOLDER\n       scancraft --mesh MESH_JSON\n       scancraft --mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM | --mesh-boundaries MESH_OR_PROJECT\n       scancraft --fit-cylinder PROJECT_OR_PLY_FILE MAX_RMS_MM | --frame-document FRAME_FILE | --coordinate-frame PROJECT_OR_PLY_FILE | --measurement-outlines PROJECT_OR_PLY_FILE | --cloud-normals PROJECT_OR_PLY_FILE\n       scancraft --mesh-normals MESH_OR_PROJECT\n       scancraft --reconstruct-recordings CALIBRATION LEFT_RECORDING LEFT_INDEX RIGHT_RECORDING RIGHT_INDEX SETTINGS NEW_FOLDER | --statistical-preview PROJECT_OR_PLY K SIGMA_MULTIPLIER | --export-scan-project PROJECT SOURCE_BUNDLE LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --archive-recordings LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --export-project-bundle PROJECT SOURCE_BUNDLE NEW_DIRECTORY | --verify-source-bundle PROJECT DIRECTORY | --capture-laser GEOMETRY_JSON STREAM_REQUEST_JSON NEW_DIRECTORY | --replay-laser GEOMETRY_JSON STREAM_REQUEST_JSON FIRST_RECORDING SECOND_RECORDING NEW_DIRECTORY | --laser-candidates BUNDLE_DIRECTORY | --match-recorded-laser-traces GEOMETRY FIRST_RECORDING FIRST_INDEX SECOND_RECORDING SECOND_INDEX REQUEST NEW_FOLDER | --play-recording RECORDING | --recover-recording INPUT MAX_FRAMES NEW_FOLDER | --import-mesh FILE obj|stl mm|in|m separate|weld-exact NEW_FOLDER | --mesh-smooth-preview MESH_OR_PROJECT ITERATIONS RELAXATION MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG | --mesh-simplify-preview MESH_OR_PROJECT TARGET MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG MAX_COLLAPSES | --mesh-plane-preview MESH_JSON NX NY NZ OFFSET\nOpening geometry never starts camera acquisition. The synthetic-live diagnostic opens no scanner. Files without units require an explicit choice in the import panel."
             );
             return Ok(());
         }
@@ -737,6 +752,10 @@ fn main() -> eframe::Result {
         Box::new(move |_| {
             let mut app = App::default();
             match startup {
+                Startup::CaptureLaser { paths, origin } => {
+                    app.candidates_active = true;
+                    app.candidates.start_capture(paths, origin);
+                }
                 Startup::Candidates(path) => {
                     app.candidates_active = true;
                     app.candidates.open(path);
@@ -1106,6 +1125,25 @@ mod startup_tests {
         );
     }
     #[test]
+    fn laser_capture_and_replay_startup_are_explicit_and_do_not_alias_saved_view() {
+        assert_eq!(
+            startup_args(args(&["--capture-laser", "g", "r", "out"])).unwrap(),
+            Startup::CaptureLaser {
+                paths: vec!["g".into(), "r".into(), "out".into()],
+                origin: laser_display::Origin::Native
+            }
+        );
+        assert_eq!(
+            startup_args(args(&["--replay-laser", "g", "r", "a", "b", "out"])).unwrap(),
+            Startup::CaptureLaser {
+                paths: vec!["g".into(), "r".into(), "a".into(), "b".into(), "out".into()],
+                origin: laser_display::Origin::RecordingReplay
+            }
+        );
+        assert!(startup_args(args(&["--capture-laser", "g", "r"])).is_err());
+        assert!(startup_args(args(&["--replay-laser", "g", "r", "out"])).is_err());
+    }
+    #[test]
     fn recording_playback_startup_is_explicit_and_requires_one_path() {
         assert!(
             matches!(startup_args(vec!["--play-recording".into(),"example.raptor".into()]), Ok(Startup::Playback(p)) if p==std::path::Path::new("example.raptor"))
@@ -1456,6 +1494,42 @@ mod live_lifecycle_tests {
                 let _ = sender.send(());
             }
         }
+    }
+    #[test]
+    fn laser_close_requests_stop_and_explicit_abort_preserves_guard_and_failure_view() {
+        let mut app = App::default();
+        let ctx = egui::Context::default();
+        let (sender, receiver) = std::sync::mpsc::channel();
+        let mut release = Release(Some(sender));
+        let control = app.candidates.test_capture(move |_| {
+            receiver.recv().unwrap();
+            Err("retained partial laser data".into())
+        });
+        assert!(app.capture_active_or_closing());
+        let _ = ctx.run(Default::default(), |ctx| {
+            assert!(app.capture_close_step(ctx, true, std::time::Instant::now()));
+        });
+        assert!(control.stop.load(Ordering::Relaxed));
+        assert!(control.work.check().is_ok());
+        assert!(app.candidates.capture_busy());
+        app.abort_pending_capture();
+        assert!(control.work.check().is_err());
+        assert!(app.candidates.capture_busy());
+        release.0.take().unwrap().send(()).unwrap();
+        let deadline = std::time::Instant::now() + Duration::from_secs(5);
+        let mut failed = false;
+        while app.candidates.capture_busy() {
+            failed |= app.candidates.tick();
+            assert!(std::time::Instant::now() < deadline);
+            std::thread::yield_now();
+        }
+        assert!(failed);
+        let _ = ctx.run(Default::default(), |ctx| {
+            app.window_close_step(ctx, true, failed);
+        });
+        assert!(!app.closing_window);
+        assert!(!app.capture_close.is_waiting());
+        assert!(!app.close_allowed);
     }
     #[test]
     fn live_capture_close_waits_then_rechecks_other_work() {

@@ -10,8 +10,8 @@ use scancraft_geometry::work::WorkControl;
 use scancraft_recording::CaptureContext;
 use scancraft_workflow::{
     laser_stream::{
-        Pair, StopToken,
-        bundle::{PairOutcome, Plan, PreviewStatus},
+        StopToken,
+        bundle::{Plan, PreviewInput, PreviewStatus},
     },
     live_stereo::runner::{Source, require_new_target},
 };
@@ -63,7 +63,7 @@ pub fn scan(
     target: &Path,
     work: &Arc<WorkControl>,
     stop: &Arc<AtomicBool>,
-    preview: impl FnMut(&Pair, &PairOutcome) -> PreviewStatus,
+    preview: impl FnMut(PreviewInput<'_>) -> PreviewStatus,
 ) -> Result<Value> {
     require_new_target(target)?;
     let plan = Plan::open(geometry, request, work)?;

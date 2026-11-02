@@ -168,7 +168,10 @@ pub(crate) fn supervise(
                         }
                     }
                     Message::Complete(result) => completion = Some(result),
-                    Message::LiveProgress(_) | Message::LiveComplete(_) => {
+                    Message::LiveProgress(_)
+                    | Message::LiveComplete(_)
+                    | Message::LaserProgress(_)
+                    | Message::LaserComplete(_) => {
                         return Err("Live-scan packet in preview helper stream".into());
                     }
                 }

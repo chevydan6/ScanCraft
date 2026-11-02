@@ -206,7 +206,8 @@ pub struct Report {
 }
 
 /// Detector-run and continuity counters, not whole-image clipping or a quality pass.
-#[derive(Debug, Clone, Copy, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct CameraSummary {
     pub interface: u8,
     pub observations: usize,

@@ -66,7 +66,7 @@ pub fn run_laser(geometry: &Path, request: &Path, target: &Path) -> Result<Value
     let stop = Arc::new(AtomicBool::new(false));
     let requested = stop.clone();
     let _monitor = monitor(move || requested.store(true, Ordering::Relaxed))?;
-    scancraft_acquisition::laser::scan(geometry, request, target, &work, &stop, |_, _| {
+    scancraft_acquisition::laser::scan(geometry, request, target, &work, &stop, |_| {
         scancraft_workflow::laser_stream::bundle::PreviewStatus::NotRequested
     })
 }
