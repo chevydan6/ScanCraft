@@ -1839,3 +1839,20 @@ functions solely to reach an automated percentage would not establish correctnes
 No source changes or further review request were made for this warning. Whole-app
 cleanup and physical hardware qualification remain unproven (SCAN-REV-005/006).
 This included review used the available allowance; no paid review was requested.
+
+DEV-NATIVE-COMPONENTS — developer milestone, not an independent finding. Add
+original bounded eight-connected component measurements to scancraft-image and
+the offline CLI detect-components command. This moves the observation stage used
+in real board investigation into Rust without activating factory hypotheses or
+embedding private board coordinates. Existing reviewer findings retain their
+independent status. Source changes: image components/lib, CLI component_diagnostics/
+main, reference tools and BRIGHT_COMPONENT_OBSERVATIONS documentation. Full Rust
+gate passed 659 tests, formatting, strict Clippy and release compilation. The
+seeded OpenCV reference check passed 60 synthetic cases and a negative payload-CRC
+binding test; eight real frames matched reference component statistics exactly.
+These are segmentation checks, not physical accuracy qualification. Limitations:
+binary centroids, no circle fit or board indexing, no marker identity/tracking,
+bounded per-image scratch allocation, and no real-time performance claim.
+CodeRabbit review and development-branch publication follow after source/context
+secret scanning; no merge is authorized. Implementation commit identity and
+independent review disposition will be recorded after those steps complete.
