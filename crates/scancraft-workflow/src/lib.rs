@@ -2,6 +2,7 @@
 mod calibration_bundle;
 pub mod candidate_bundle;
 pub mod frame_document;
+pub mod laser_stream;
 pub mod mesh_document;
 pub mod mesh_history;
 pub mod mesh_trim;

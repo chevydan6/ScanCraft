@@ -2551,3 +2551,49 @@ corrected cwd and retained both logs. No paid review or independent pass claimed
 review/publication pending. Exact implementation commit/source/build/evidence
 bindings are recorded in the developer recovery checkpoint; independent reviewer
 retains sole authority to verify/close findings. See INDEXED_EPIPOLAR_TRACES.md.
+
+
+DEV-BOUNDED-LASER-STREAM — developer integration, not an independent finding.
+Accepted the need for a bounded raw-journal-first acquisition handoff before native
+laser GUI integration. Added workflow/laser_stream.rs, association.rs, runner.rs
+and tests.rs plus lib.rs export. Reuses generic Source ownership, recording Writer
+and existing laser_pair engine from1904d7ed06ef51547d9229a50290d3d9952f733b; no new
+thirdparty, copied upstream code, device or calibration activation. Two source owners
+append valid frames before nonblocking four-frame queue admission. Queue-full frames
+remain journaled and omissions counted. Pending frames/state are constant-size,
+with u64 source indices and explicit modular-counter/host-window/order policy.
+Initial nearest-peer counter alignment and cycle extension are inferred policy,
+not evidence of synchronized exposures or reset behavior. Ambiguous half-range
+gaps fail. No full-session seen set, query JSON, result list or metric Cloud retained.
+
+StopToken includes internal failure, external graceful stop and WorkControl.
+Source/journal failures and panics still attempt source close. Required callback
+failure aborts; optional display omissions must remain nonfatal (018). Pair-level
+processing failures are delivered/countable while raw recording continues; compact
+per-query errors remain in Report. Failure.partial retains available source/count/
+cleanup evidence. Finalized journal flag separates successful append from footer/
+flush/fsync. Queued-but-undelivered counts are explicit, None when unknown. Added
+4096metadata cap before queue/push to bound admitted frames. No hard-time cleanup
+claim, no automatic publication, hardware/GUI adapter or fusion in this component.
+
+Eight regressions:4000wrapped-counter associations; temporal/host/epoch ambiguity;
+1200controlled synthetic pairs with exact direct reports and Writer/Reader CRC;
+deterministic raw retention under pressure; admission errors; consumer failure/
+panic; source/journal/finish/cleanup and oversized-metadata failures; cancellation
+and graceful stop. Initial tests needed Debug on reports; initial Clippy caught
+nested-if. Corrected without suppression. Final746test/fmt/strictClippy/release
+PASS after metadata guard. Private replay of9 saved rotating pairs delivers every
+prior report exactly under consumer pacing; all9 raw frames/camera byte-identical
+through actual filejournals/footer/CRC and fsync. Unpaced replay also retains all
+raw frames with explicit processing drops; it is not live throughput qualification.
+Source/binary/test/replay bindings and exact commit are in recovery checkpoint.
+
+Current consumer also performs association; expensive processing can drop separate
+camera frames from the raw channel and reduce pair yield. Reports expose this;
+future complete-pair dispatch is an optimization opportunity requiring measurement.
+No constant-RSS/60min/driver-deadline claim. Old IR1000frame/history path unchanged,
+so021 remains open;005 and006 remain unresolved/unqualified. No scanner capture/
+control/firmware/physical calibration, private-data upload, reviewer-file/status
+change, main-branch merge or protection bypass. Fresh CodeRabbit quota/billing still
+lookup_failed, no paidusage/review/pass. Review/publication pending. See
+BOUNDED_LASER_STREAM.md for contracts, provenance and validation scope.

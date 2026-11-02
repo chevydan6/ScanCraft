@@ -1,5 +1,10 @@
 # Architecture
 
+`scancraft_workflow::laser_stream::Pipeline` adds raw-journal-first bounded
+source-to-laser processing with explicit queue omissions and structured cleanup
+results. Native hardware/GUI adapters and fusion remain future integration. See
+[stream contracts and evidence](docs/BOUNDED_LASER_STREAM.md).
+
 Prepared epipolar traces now include conservative 64-segment bounds, retaining
 the scalar solver for short traces and numerical fallback. See
 [indexed trace contracts and measurements](docs/INDEXED_EPIPOLAR_TRACES.md).

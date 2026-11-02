@@ -2,6 +2,11 @@
 
 Stage: experimental. Specification: docs/MISSION.txt.
 
+[Bounded laser frame handoff](docs/BOUNDED_LASER_STREAM.md) now joins raw journaling,
+fixed-size association and in-memory reconstruction in a reusable workflow. It
+passes 1200-pair synthetic and saved-frame replay checks. Hardware/GUI integration,
+tracking/fusion and continuous-duration qualification remain incomplete.
+
 [Conservative epipolar indexing](docs/INDEXED_EPIPOLAR_TRACES.md) reduces measured
 matching-only time on two larger saved workloads while retaining the scalar path
 and complete numerical results. No new live-scanning or accuracy qualification is
@@ -9,7 +14,7 @@ claimed; independent automated review remains pending.
 
 ## Latest local reconstruction checkpoint — 2026-11-03
 
-The local development tree passes 738 Rust tests, formatting, strict Clippy and
+The local development tree passes 746 Rust tests, formatting, strict Clippy and
 release build. Recording-backed seeded trace diagnostics preserve source frames
 and interpolation lineage. A new native sheet-supported full-trace matcher removes
 the need for supplied partner seeds at the numerical component boundary; it has
