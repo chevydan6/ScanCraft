@@ -1988,3 +1988,72 @@ run 7f685d52-4093-4760-9c84-f5f43f81eb86 on b7124d9. The example accepts
 both bounds accurately; implementation is unchanged. The standalone correction
 will also be applied to PR #27 after incremental review. This is a documentation
 correction, not a relaxation of input bounds or independent finding closure.
+
+
+CR-CAPTURE-DOCS outcome — incremental included CLI review of
+0d6eb4119e79e2220b3bd88227d41db4c5edb975 against b3644683b5d436ff96a16ad02df5f2592c4abd87
+completed with zero findings, major gate passed and exit 0. Published PR #29,
+stacked on PR #28; both Rust CI runs 41445940125 and 41445857654 passed.
+The App skipped the non-default base; no current-head App coverage is claimed.
+This outcome-only response addition is not covered by the preceding CLI review.
+
+SCAN-REV-022 — accepted. The documentation correction in 8b9e7dd is propagated
+to PR #27 as fe5470ee431b1a0d0490af714f98431f7508b571, preserving the implementation.
+Identical guide bytes were also propagated to PR #28 as 9181d0f so that its
+stacked diff does not undo the upstream fix. Static source-bound comparison and
+whitespace checks passed; both PR #27 Rust CI checks passed on the corrected head.
+The correction itself was covered by the zero-finding incremental CLI review
+above, not an exact-head GitHub App review of either propagated branch. Replied
+to inline 4442298976 with evidence in comment 4442447947; did not resolve the
+thread. The independent reviewer owns verification and status. No source change
+or redundant runtime test was necessary for this prose correction.
+
+DEV-BOARD-LASER-COMPARISON — developer experiment, not an independent finding
+or a production feature. New ten-frame stereo off/on recordings passed whole-file
+validation, with nine equal-PTS pairs each. Fixed Boolean 151 read back 0→1→0;
+complete illumination status matched before/after. Inspected images show lines
+on the board in the on capture and no such pattern in the off capture. Native
+shape/association/triangulation with prior fixed parameters accepted 36 off-image
+mark pairs, 35 passing the exploratory shape gate. Their plane RMS is about
+0.081 in unqualified factory raw units. On-image left target association fails
+its four-anchor requirement where lines intersect anchors; failure is retained.
+
+A private Rust probe uses existing CameraModel and QuadraticSheet methods under
+the prior reflected interface-2/lens-0 hypothesis. All 5,657 off/on candidate
+intersections satisfy independent Python substitution into the sheet equations
+to below 9e-14 raw units. This is numerical consistency, not physical accuracy.
+Opposite-camera support within the previously used 3-pixel bound, unique sheet
+candidate and greedy distinct matching yield 284 interior on-image pairs versus
+zero off-image pairs; shifted on-image controls yield 6/13/15. Selection does
+not use the reference plane. Crucially, retained on-image points include large
+false matches: plane RMS 23.30 raw units and maximum absolute residual 234.28,
+despite median absolute residual 0.510. No residual trimming or expected-distance
+fit is applied. Nearest-sheet-to-plane selection is retained separately and
+explicitly labeled circular as a line-identity/accuracy test. The reference plane
+shares factory camera geometry, and off/on stationarity, physical units and
+exposure timing remain unqualified. Raw captures, private probes and hashes stay
+local; no calibration is installed or firmware changed. Next reconstruction work
+needs reliable stripe correspondence and line identity, not more favorable
+reporting of selected points. Existing physical-qualification findings remain
+under independent reviewer control.
+
+
+DEV-STRIPE-CONTINUITY — accepted development priority arising from the private
+false-correspondence experiment, not an independent review finding. Added
+original image/laser_continuity.rs with mutually unique endpoint association,
+bounded gaps/displacements/comparison work, explicit fork/join termination and
+full input-index partitioning. The CLI trace-stripes command adds diagnostics
+while retaining all observations and recording integrity/provenance checks;
+no automatic filter, calibration installation or live pipeline change. Sources:
+image module/export, CLI laser_diagnostics/main, optional NumPy reference tool,
+STRIPE_CONTINUITY.md and architecture documentation. No upstream code copied
+or production dependency added. The first full gate caught one Clippy style
+violation; fixed it without disabling the lint. Final gate passed 680 tests,
+formatting, strict Clippy and release build. The optional matrix reference
+matched 32 synthetic recordings/7,620 observations and 12 real images. The same
+criteria on unused first/last equal-PTS pairs reduced provisional greedy matches
+292→83 and 284→75, with raw reference-plane RMS 22.392→0.671 and 19.963→0.667.
+No plane residual was used for selection. These remain same-pose exploratory
+results with substantial lost coverage, shared factory geometry and unqualified
+units/exposure timing. No physical-accuracy claim or independent finding closure.
+Commit and CodeRabbit outcomes follow after review; raw scans stay local.

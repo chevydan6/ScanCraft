@@ -8,6 +8,7 @@ pub mod components;
 pub mod corners;
 pub mod diagnostics;
 pub mod laser;
+pub mod laser_continuity;
 pub mod shape;
 pub mod stereo;
 
