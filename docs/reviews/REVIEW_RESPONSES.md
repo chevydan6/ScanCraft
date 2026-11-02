@@ -2790,3 +2790,7 @@ and review uploads. Official CodeRabbit 0.9.2 still returns lookup_failed for in
 quota/billing; no paid review, upload, review pass, push, PR, merge or protection
 bypass. Reviewer-owned files, firmware and physical calibration are untouched;
 the authorized scoped property-151 capture trial was restored.
+
+DEV-BUFFERED-LASER-JOURNAL implementation commit: `fdd02f2551fe606d1cd38c158c5fb9219f8b270d`.
+The later binding changes documentation only; tested Rust source and evidence are unchanged.
+Independent review remains pending.

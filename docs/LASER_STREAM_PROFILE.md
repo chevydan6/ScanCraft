@@ -2,7 +2,7 @@
 
 Status: experimental performance work; no live-rate or physical qualification.
 Base: `9dea6ac3f97bbddc14a91beaa44f397dbdab50c5`.
-The developer response and recovery checkpoint bind the implementation commit.
+Implementation: `fdd02f2551fe606d1cd38c158c5fb9219f8b270d`; this documentation binding follows it.
 
 ## Measurement before implementation
 
