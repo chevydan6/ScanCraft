@@ -2185,3 +2185,35 @@ reports authenticated/reachable services and nine passing checks. No paid usage
 or review bypass. This is local development evidence, not an automated-review pass.
 Commit/source/evidence bindings are retained in the private recovery checkpoint.
 Independent reviewer findings, main branch and physical setup remain untouched.
+
+DEV-RECORDED-SHEET-MATCHING — developer milestone, not an independent finding.
+Added recorded_traces/automatic.rs and match-recorded-laser-traces CLI command.
+Shared only detection/frame-binding helpers with the preserved seeded schema;
+extracted existing geometry Config::validate methods so empty datasets cannot
+skip numerical settings validation. Full recording validation/CRC/PTS/host-window
+and source guards precede native detection, continuity and automatic matching.
+All diagnostics stream with a byte cap; explicit query/total work bounds reject
+oversized inputs without sampling. Candidate coordinates retain source/trace/sheet
+lineage and unverified units; no calibration activation or PLY/project export.
+
+Five new regressions cover known geometry, exact artifacts/lineage/no-overwrite,
+ambiguity, invalid bounds/CRC/index/footer, cancellation, streaming-limit partial
+retention, reflection and empty continuity. Initial gate failed an existing error
+message regression during validator extraction; restored the original text.
+Final 700-test/fmt/strict-Clippy/release gate passed, and all 36 independent
+known-point reference cases pass. No tests or guards were weakened.
+
+Three private Raptor pairs reproduce every complete earlier native matcher result
+and coordinate exactly (473/480/473 candidates; no query errors), with original
+detections, exact geometry/request and artifact CRC/length checks. Older seeded
+workflow still reproduces 79/81/74 candidates exactly. Separate low per-query
+budget run preserves all 592 errors and zero points. Offline end-to-end observations
+are 0.38s elapsed, 0.29–0.30s user CPU, 0.06s system CPU, 18352–18360KiB peak RSS
+on Ryzen9 6900HS; shared workload/reused files and validation/fsync included, not
+isolated matching benchmarks or live throughput. Samepose/model evidence remains
+unqualified physically. Details in RECORDED_SHEET_MATCHING.md.
+
+CodeRabbit usage remains unavailable/lookup_failed; no automated-review pass or
+publication claimed, and no paid usage/merge/protection change. Local commit and
+evidence bindings follow in the recovery checkpoint. Reviewer files and physical
+scanner setup remain untouched. GUI/live integration and qualification remain open.

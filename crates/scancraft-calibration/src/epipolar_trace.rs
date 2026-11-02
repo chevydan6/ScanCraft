@@ -17,6 +17,25 @@ pub struct Config {
     pub minimum_plane_sine: f64,
 }
 
+impl Config {
+    pub fn validate(self) -> Result<(), String> {
+        let config = self;
+        if !config.maximum_segment_length_px.is_finite()
+            || !(0. ..=4096.).contains(&config.maximum_segment_length_px)
+            || config.maximum_segment_length_px == 0.
+            || !config.normalized_tolerance.is_finite()
+            || config.normalized_tolerance <= 0.
+            || config.normalized_tolerance > 1e-3
+            || !config.minimum_plane_sine.is_finite()
+            || config.minimum_plane_sine <= 0.
+            || config.minimum_plane_sine > 1.
+        {
+            return Err("invalid epipolar trace limits".into());
+        }
+        Ok(())
+    }
+}
+
 #[derive(Debug, Clone, Serialize)]
 pub struct Intersection {
     pub segment_index: usize,
@@ -89,17 +108,8 @@ impl<'a> PreparedTrace<'a> {
             }
         };
         check(cancelled)?;
-        if !(2..=4096).contains(&trace.len())
-            || !config.maximum_segment_length_px.is_finite()
-            || !(0. ..=4096.).contains(&config.maximum_segment_length_px)
-            || config.maximum_segment_length_px == 0.
-            || !config.normalized_tolerance.is_finite()
-            || config.normalized_tolerance <= 0.
-            || config.normalized_tolerance > 1e-3
-            || !config.minimum_plane_sine.is_finite()
-            || config.minimum_plane_sine <= 0.
-            || config.minimum_plane_sine > 1.
-        {
+        config.validate()?;
+        if !(2..=4096).contains(&trace.len()) {
             return Err("invalid epipolar trace limits".into());
         }
         let line = self.essential * Vector3::from(self.first.ray(first_pixel)?);

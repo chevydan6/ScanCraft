@@ -1,5 +1,8 @@
 //! Recording-backed, seeded trace correspondence diagnostics. No calibration
 //! activation, physical-unit inference, point-cloud export or identity attestation.
+mod automatic;
+pub use automatic::run as run_automatic;
+
 use crate::{
     Error, artifact, bounded,
     calibration_bundle::ensure_new,
@@ -90,11 +93,12 @@ struct Observations {
 }
 fn detect(
     frame: &SelectedFrame,
-    request: &Request,
+    detection: &Detection,
+    continuity: &Continuity,
     work: &WorkControl,
 ) -> Result<Observations, Error> {
     let image = GrayImage::from_frame(&frame.profile, &frame.frame)?;
-    let c = &request.detection;
+    let c = detection;
     let config = LineConfig {
         background: c.background,
         minimum_peak: c.minimum_peak,
@@ -106,7 +110,7 @@ fn detect(
         Some(radius) => laser::detect_rows_with_opening(image, config, radius, work)?,
         None => laser::detect_rows(image, config, work)?,
     };
-    let c = &request.continuity;
+    let c = continuity;
     let traces = laser_continuity::trace_rows(
         image.size(),
         &detections.observations,
@@ -143,6 +147,44 @@ fn observation_report(side: &Observations) -> Value {
             "span_rows":t.span_rows,"continuity_supported":t.continuity_supported})).collect::<Vec<_>>(),
         "continuity_ambiguous_observations":side.traces.ambiguous_observations,
         "continuity_comparisons":side.traces.comparisons})
+}
+
+fn validate_frames(
+    frames: &[SelectedFrame; 2],
+    geometry: &StereoCalibration,
+    expected_frames: &[ExpectedFrame; 2],
+    maximum_host_delta_us: u64,
+) -> Result<(), Error> {
+    for (side, frame) in frames.iter().enumerate() {
+        let expected = &expected_frames[side];
+        let camera = if side == 0 {
+            &geometry.left
+        } else {
+            &geometry.right
+        };
+        if frame.profile.interface != expected.interface
+            || frame.profile.fourcc != *b"GREY"
+            || [frame.profile.width, frame.profile.height] != [camera.width, camera.height]
+            || crc32fast::hash(&frame.frame.data) != expected.payload_crc32
+            || crc32fast::hash(&frame.frame.metadata) != expected.metadata_crc32
+        {
+            return Err("selected frame disagrees with expected profile or CRC binding".into());
+        }
+    }
+    let pts = [
+        scancraft_core::uvc_pts(&frames[0].frame.metadata)?,
+        scancraft_core::uvc_pts(&frames[1].frame.metadata)?,
+    ];
+    if pts[0] != pts[1]
+        || frames[0]
+            .frame
+            .host_timestamp_us
+            .abs_diff(frames[1].frame.host_timestamp_us)
+            > maximum_host_delta_us
+    {
+        return Err("selected frames fail raw-PTS/host-window pairing requirements".into());
+    }
+    Ok(())
 }
 
 /// Recompute detections from whole-file-validated selected recordings. Seeds refer
@@ -186,38 +228,15 @@ pub fn run(inputs: &Inputs, target: &Path, work: &WorkControl) -> Result<Value, 
         first_source.select_raw(inputs.first_index, work)?,
         second_source.select_raw(inputs.second_index, work)?,
     ];
-    for (side, frame) in frames.iter().enumerate() {
-        let expected = &request.expected_frames[side];
-        let camera = if side == 0 {
-            &geometry.left
-        } else {
-            &geometry.right
-        };
-        if frame.profile.interface != expected.interface
-            || frame.profile.fourcc != *b"GREY"
-            || [frame.profile.width, frame.profile.height] != [camera.width, camera.height]
-            || crc32fast::hash(&frame.frame.data) != expected.payload_crc32
-            || crc32fast::hash(&frame.frame.metadata) != expected.metadata_crc32
-        {
-            return Err("selected frame disagrees with expected profile or CRC binding".into());
-        }
-    }
-    let pts = [
-        scancraft_core::uvc_pts(&frames[0].frame.metadata)?,
-        scancraft_core::uvc_pts(&frames[1].frame.metadata)?,
-    ];
-    if pts[0] != pts[1]
-        || frames[0]
-            .frame
-            .host_timestamp_us
-            .abs_diff(frames[1].frame.host_timestamp_us)
-            > request.maximum_host_delta_us
-    {
-        return Err("selected frames fail raw-PTS/host-window pairing requirements".into());
-    }
+    validate_frames(
+        &frames,
+        &geometry,
+        &request.expected_frames,
+        request.maximum_host_delta_us,
+    )?;
     let sides = [
-        detect(&frames[0], &request, work)?,
-        detect(&frames[1], &request, work)?,
+        detect(&frames[0], &request.detection, &request.continuity, work)?,
+        detect(&frames[1], &request.detection, &request.continuity, work)?,
     ];
     let map_pixel = |side: usize, pixel: [f64; 2]| -> Result<[f64; 2], String> {
         if request.reflect_x[side] {
@@ -370,9 +389,9 @@ mod tests {
         fs,
         sync::atomic::{AtomicU64, Ordering},
     };
-    struct Temp(PathBuf);
+    pub(super) struct Temp(pub(super) PathBuf);
     impl Temp {
-        fn new() -> Self {
+        pub(super) fn new() -> Self {
             static NEXT: AtomicU64 = AtomicU64::new(0);
             let p = std::env::temp_dir().join(format!(
                 "scancraft-recorded-traces-{}-{}",
@@ -388,7 +407,7 @@ mod tests {
             let _ = fs::remove_dir_all(&self.0);
         }
     }
-    fn fixture(temp: &Temp) -> (Inputs, Value) {
+    pub(super) fn fixture(temp: &Temp) -> (Inputs, Value) {
         let camera = CameraModel {
             width: 32,
             height: 32,

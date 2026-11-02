@@ -19,6 +19,21 @@ pub struct Config {
     pub maximum_work: usize,
 }
 
+impl Config {
+    pub fn validate(self) -> Result<(), String> {
+        self.intersection.validate()?;
+        let config = self;
+        if !config.maximum_sheet_distance_px.is_finite()
+            || config.maximum_sheet_distance_px <= 0.
+            || config.maximum_sheet_distance_px > 32.
+            || !(1..=10_000_000).contains(&config.maximum_work)
+        {
+            return Err("invalid laser trace matching limits".into());
+        }
+        Ok(())
+    }
+}
+
 #[derive(Debug, Serialize)]
 pub struct SheetProjection {
     pub sheet_index: usize,
@@ -121,13 +136,10 @@ impl<'a> PreparedMatcher<'a> {
             }
         };
         check(cancelled)?;
+        config.validate()?;
         if !(1..=128).contains(&traces.len())
             || !(1..=128).contains(&sheets.len())
             || traces.iter().any(|t| !(2..=4096).contains(&t.len()))
-            || !config.maximum_sheet_distance_px.is_finite()
-            || config.maximum_sheet_distance_px <= 0.
-            || config.maximum_sheet_distance_px > 32.
-            || !(1..=10_000_000).contains(&config.maximum_work)
         {
             return Err("invalid laser trace matching bounds".into());
         }

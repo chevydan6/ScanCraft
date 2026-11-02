@@ -4,7 +4,7 @@ Stage: experimental. Specification: docs/MISSION.txt.
 
 ## Latest local reconstruction checkpoint — 2026-11-02
 
-The local development tree passes 695 Rust tests, formatting, strict Clippy and
+The local development tree passes 700 Rust tests, formatting, strict Clippy and
 release build. Recording-backed seeded trace diagnostics preserve source frames
 and interpolation lineage. A new native sheet-supported full-trace matcher removes
 the need for supplied partner seeds at the numerical component boundary; it has
@@ -12,6 +12,12 @@ the need for supplied partner seeds at the numerical component boundary; it has
 the prior composition on saved Raptor observations. See
 [sheet-supported traces](docs/SHEET_SUPPORTED_TRACES.md) and
 [recorded correspondence](docs/RECORDED_TRACE_CORRESPONDENCE.md).
+
+[Automatic recorded matching](docs/RECORDED_SHEET_MATCHING.md) now connects the
+matcher to validated real recordings, detection and continuity without supplied
+partner seeds. It preserves all query diagnostics and source-linked candidate
+coordinates. Three saved Raptor pairs reproduce earlier numerical results exactly;
+this remains provisional geometry, not a calibrated scan or a live GUI feature.
 
 These latest changes are local and await automated review/publication: CodeRabbit
 quota/billing lookup is unavailable although its local doctor passes. Genuine

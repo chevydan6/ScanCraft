@@ -1,5 +1,10 @@
 # Architecture
 
+`scancraft-workflow::recorded_traces::run_automatic` connects guarded recording
+selection, shared detection/continuity and sheet-supported matching. It streams
+full query diagnostics and preserves candidate/source lineage with explicit
+work/storage bounds; see [automatic recorded matching](docs/RECORDED_SHEET_MATCHING.md).
+
 `scancraft-calibration::laser_trace::PreparedMatcher` composes explicit quadratic
 sheet projections, full-trace epipolar crossings and stereo triangulation. It
 retains competing hypotheses and returns a unique candidate only under an explicit
