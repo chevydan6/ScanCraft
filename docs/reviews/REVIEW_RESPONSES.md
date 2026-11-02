@@ -1893,9 +1893,10 @@ context passed secret scanning. One included CodeRabbit CLI review against
 352d6629cca91f5f999cbe41f53497764faad864 completed with zero findings across
 five files, major gate passed and exit 0. Both GitHub CI runs (41437848205 and
 41437792579) passed on the published head. The App initially
-skipped the non-default base; its last reported included allowance was exhausted,
-so no additional manual request or paid usage has been made yet. The CLI pass
-does not substitute for completed GitHub feedback. No merge is authorized.
+skipped the non-default base. After the included hourly interval elapsed, one
+manual review was requested (comment 6576876169); App run
+7f685d52-4093-4760-9c84-f5f43f81eb86 is in progress. No paid usage was requested.
+The CLI pass does not substitute for completed GitHub feedback. No merge is authorized.
 This subsequent outcome-only text is not covered by the b7124d9 review.
 
 Additional private validation connects native association outputs to the existing
@@ -1923,5 +1924,50 @@ flags the known obscured mark and other irregular regions. It is not a qualified
 default scanner filter or physical-center correction. The first full Rust gate
 failed when /tmp returned Disk quota exceeded; retained its log and reran with
 a dedicated home-filesystem TMPDIR. The final gate passed 675 tests, formatting,
-strict Clippy and release compilation. Automated review follows separately.
+strict Clippy and release compilation. Commit
+9e72156970e75df96be9f57f0bff791edd8a5222 is published in PR #28, stacked on
+PR #27. One included CodeRabbit CLI review of the complete ten-file diff against
+b7124d917784afcf4f70eb06bac0ff96e6c565fd completed with zero findings,
+major gate passed and exit 0, after full diff/context secret scanning. Both GitHub Rust CI runs
+41440955042/41440857334 passed; the App review remains pending. No paid review was requested.
+This outcome-only addition is not claimed covered by the earlier CLI run.
 No independent reviewer file, hardware controls, calibration or main was changed.
+
+DEV-FRAME-PAIRING-AUDIT — developer evidence correction, not an independent
+finding. An unused-frame probe caught that equal frame indices in two of the
+three board recordings have different sensor PTS. Earlier index-5 geometry
+comparisons used a stationary target and retained false synchronization flags;
+they must not be described as synchronized pairs. Source recording timestamps
+and native selected-frame reports now determine exact-PTS associations. Equal
+PTS still does not prove simultaneous physical exposures. With fixed shape and
+association parameters on first/last matching timestamps, five of six stereo
+comparisons proceeded; one early frame failed the existing refinement-preserves-
+seed guard. No threshold was relaxed or failure omitted. Same-scene unused-frame
+results do not establish new-pose generalization or physical accuracy.
+
+The retained capture manifests also show acquisition faults: one board session
+recorded 100 left-camera buffers rejected before the first valid frame and 103
+afterward, with 103 sequence gaps. Another session had one right-camera rejection
+and gap after startup; the third had only startup rejections. Each recording
+contains ten validated saved frames, but exact-PTS matches across cameras are
+9, 9 and 10 respectively. CRC-valid saved files are not evidence of lossless
+acquisition. These are existing-session observations, not a regression attributed
+to the new offline shape code. SCAN-REV-006 remains under independent reviewer
+control. Next work should investigate capture reliability and integrate explicit
+pairing/quality evidence without installing unqualified calibration.
+
+DEV-CAPTURE-REPEATABILITY — developer hardware evidence, not an independent
+finding. At application commit 9e72156970e75df96be9f57f0bff791edd8a5222,
+three bounded 30-frame/camera recordings passed full replay/restoration; all
+had 30 exact-PTS matches. Two had no rejected buffers; the middle trial had
+one startup and one ongoing rejection per camera. A subsequent 18,010-frame
+probe ran over ten minutes per camera, exited 0 and restored stream settings.
+It reported 98/102 ongoing and 1/87 startup rejected buffers, with 18,007
+matching sensor PTS. Both ongoing and all-buffer rejection proxies exceed the
+0.1% mission threshold. This confirms sustained acquisition, not full reliability
+or scanning qualification. Sanitized statistics/source/binary binding are in
+benchmarks/capture-soak-2026-11-02.json and NATIVE_CAPTURE_REPEATABILITY.md;
+raw data remains local. No transport implementation, rejection guard, firmware,
+calibration or reviewer status was changed. Source code is unchanged; documentation
+checks passed: 675 tests, formatting, strict Clippy and release compilation;
+Sanitized statistics/binding checks passed. Automated review follows separately.
