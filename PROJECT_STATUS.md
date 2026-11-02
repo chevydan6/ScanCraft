@@ -1,5 +1,11 @@
 # Project status
 
+[Asynchronous laser previews](docs/ASYNC_LASER_PREVIEW.md) move full raw statistics
+and thumbnails to the existing bounded publisher. The 779-test gate passes; a
+native trial saves 32 raw frames/camera and processes 22 pairs (68.75%, below 90%).
+Geometry/accuracy, tracking/fusion, sustained reliability and a long-session pair-log
+policy remain incomplete. This is diagnostic preview, not a qualified fused scan.
+
 [Measured pair-journal buffering](docs/LASER_STREAM_PROFILE.md) reduces the saved-data
 report write component while retaining exact bytes and checksums. The 774-test
 Rust gate passes; a new native GUI trial saves 32 raw frames/camera and processes
@@ -33,7 +39,7 @@ claimed; independent automated review remains pending.
 
 ## Latest local reconstruction checkpoint — 2026-11-03
 
-The local development tree passes 774 Rust tests, formatting, strict Clippy and
+The local development tree passes 779 Rust tests, formatting, strict Clippy and
 release build. Recording-backed seeded trace diagnostics preserve source frames
 and interpolation lineage. A new native sheet-supported full-trace matcher removes
 the need for supplied partner seeds at the numerical component boundary; it has

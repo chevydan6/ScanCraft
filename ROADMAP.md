@@ -3,9 +3,14 @@
 Native laser Start/Stop and camera/candidate previews now use the supervised GUI
 helper. Next investigate renderer-load/startup transport failures and measure
 complete-pair dispatch/compute scheduling: the GUI finite trial processes only
-21/32 possible pairs after journal buffering, below the 90% target. Saved-data profiling still measures 43–46 ms of engine work alone; profile/validate
+22 pairs from 32 raw frames per camera after buffering/preview handoff, below 90%. Saved-data profiling still measures 43–46 ms of engine work alone; profile/validate
 computational scheduling before increasing buffers. Preserve raw journals independently
 of optional previews and retain failed-run evidence. See docs/LIVE_LASER_GUI.md.
+
+Before a dense 30-minute laser trial, design bounded long-session journals and
+recovery: the current 1 GiB full-report log cap holds only about 966 records at
+an observed 1.11 MB/record (conditional capacity arithmetic, not a duration test).
+Keep explicit storage quotas and truthful cleanup; do not merely remove limits.
 
 Calibrated dimensions, optical coverage, actual tracking/fusion and long-session
 project retention remain required, with physical calibration deferred. The old

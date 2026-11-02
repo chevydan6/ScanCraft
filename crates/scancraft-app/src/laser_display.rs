@@ -1,10 +1,11 @@
 //! Bounded display DTOs. These never create a metric Cloud or editable document.
-use scancraft_geometry::work::WorkControl;
 use scancraft_workflow::{
     candidate_bundle::FrameView,
-    laser_stream::{CameraSummary, ProgressSnapshot, bundle::PreviewInput},
+    laser_stream::{CameraSummary, ProgressSnapshot},
 };
 use serde::{Deserialize, Serialize};
+mod pending;
+pub(crate) use pending::Pending;
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Origin {
@@ -31,54 +32,6 @@ pub struct Snapshot {
     pub helper_omissions: u64,
 }
 impl Snapshot {
-    pub fn prepare(
-        input: PreviewInput<'_>,
-        origin: Origin,
-        work: &WorkControl,
-    ) -> Result<Self, String> {
-        let frames = [
-            FrameView::from_frame(&input.profiles[0], &input.pair.samples[0].frame, work)
-                .map_err(|e| e.to_string())?,
-            FrameView::from_frame(&input.profiles[1], &input.pair.samples[1].frame, work)
-                .map_err(|e| e.to_string())?,
-        ];
-        let mut s = Self {
-            schema_version: 1,
-            origin,
-            indices: input.pair.samples.each_ref().map(|v| v.index),
-            host_timestamp_us: input
-                .pair
-                .samples
-                .each_ref()
-                .map(|v| v.frame.host_timestamp_us),
-            raw_pts: input.pair.raw_pts,
-            frames,
-            positions: Vec::new(),
-            queries: 0,
-            query_failures: 0,
-            without_unique: 0,
-            cameras: None,
-            processing_error: None,
-            acquisition: input.progress,
-            helper_omissions: 0,
-        };
-        match input.outcome {
-            Ok(r) => {
-                s.positions = r
-                    .candidates
-                    .iter()
-                    .map(|c| c.position_in_supplied_geometry_units)
-                    .collect();
-                s.queries = r.queries;
-                s.query_failures = r.query_failures;
-                s.without_unique = r.queries_without_unique_match;
-                s.cameras = Some(r.cameras);
-            }
-            Err(e) => s.processing_error = Some(e.chars().take(1024).collect()),
-        };
-        s.validate()?;
-        Ok(s)
-    }
     pub fn validate(&self) -> Result<(), String> {
         if self.schema_version != 1
             || self.positions.len() > 4096

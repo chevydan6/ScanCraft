@@ -4,6 +4,10 @@ Status: experimental functional integration, not calibrated scanning qualificati
 Base implementation: `c223a7d26af005c1e49fff0af6d18a22d67aa87e`.
 Implementation: `a570c783111c1b6f25d64af8fb08c0f569e23d17`; the documentation binding is a later commit.
 
+Current preview preparation uses a bounded owned raw-input handoff to the existing
+publisher; full-frame statistics and thumbnails run there. See
+[asynchronous preview ownership and measurements](ASYNC_LASER_PREVIEW.md).
+
 ## Interface and data ownership
 
 The **Laser candidates → Native laser capture** panel accepts an existing camera
@@ -30,8 +34,9 @@ flowchart LR
   Owners --> Queue[Four-frame processing queue]
   Queue --> Match[Association and existing laser engine]
   Match --> Log[Required compact pair journal]
-  Match --> Mail[Latest preview mailbox]
-  Mail --> Publisher[Bounded display encoding]
+  Match --> Copy[Bounded raw/result copy]
+  Copy --> Mail[Latest Pending mailbox]
+  Mail --> Publisher[Statistics, thumbnails and encoding]
   Publisher --> IPC[Parent IPC supervisor]
   IPC --> Latest[Latest GUI mailbox]
   Latest --> View[Raw thumbnails and single-pair candidates]
@@ -52,7 +57,7 @@ exceeds the display cap is omitted from preview rather than rejected from raw
 recording. Preview validation/encoding errors increment omissions independently;
 a real write/flush failure requests source cleanup (SCAN-REV-018 principle).
 
-Each helper/GUI mailbox keeps one latest snapshot. Replaced snapshots count as
+The helper keeps one latest owned Pending input; the GUI keeps one latest Snapshot. Replaced snapshots count as
 preview omissions, separately from processing-queue drops and raw rejection
 counters. Completion drains the mailbox again after worker completion. The
 viewport displays one diagnostic pair, never a fused scan or metric editable

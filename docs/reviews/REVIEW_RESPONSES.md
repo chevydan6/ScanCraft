@@ -2794,3 +2794,78 @@ the authorized scoped property-151 capture trial was restored.
 DEV-BUFFERED-LASER-JOURNAL implementation commit: `fdd02f2551fe606d1cd38c158c5fb9219f8b270d`.
 The later binding changes documentation only; tested Rust source and evidence are unchanged.
 Independent review remains pending.
+
+DEV-ASYNC-LASER-PREVIEW — developer integration, not an independent finding.
+Accepted the measured need to remove full-frame statistics/thumbnail preparation
+from the reconstruction callback. Added app laser_display/pending.rs and helper
+worker tests; laser_display.rs retains unchanged wire DTO/validation while
+helper.rs offers bounded owned inputs and finishes them on its existing publisher.
+Raw frames are validated before copying, metadata is limited to 4096 bytes/frame,
+and positions/queries to 4096. One pending slot, one worker item and one producer
+copy bound additional raw payload to 24 MiB at the existing image maximum, plus
+bounded metadata/results, allocator and display buffers. No session history/full
+Report clone, core Frame rewrite, thread per frame, new algorithm or dependency.
+
+Required raw/pair journaling precedes optional handoff. Worker preparation or
+encoding rejection increments omissions without cancelling raw work; BrokenPipe
+still requests cleanup. Expensive preparation/output holds no mailbox lock.
+Completion acquires done before final take and joins the publisher. These apply
+resolved SCAN-REV-018/014 principles, not independent re-verification or closure.
+005 hard bounds, 006 physical qualification, 007 control coupling and 021 old IR
+capacity remain unresolved/unqualified. No independent finding status changed.
+
+Final formatting/strict-all-target-Clippy/779-tests/release PASS. Five regressions
+cover source reuse with exact output, input/cancellation/error limits, maximum
+4 MiB raw plus 4096-byte metadata boundaries, a slow publisher while offers
+continue with latest/final drain and omission counts, and worker rejection followed
+by healthy publication without cancelling raw work. Existing actual replay-helper,
+Stop/EOF/Abort/BrokenPipe/root-close tests pass. Initial compile required an explicit
+PreviewInput lifetime; corrected without suppression. The first 778-test pass
+precedes the maximum-boundary test; the final gate covers all 779.
+
+A same-binary private probe embeds exact old preparation and new Pending code on
+five actual pairs, 13 iterations/pair (first warm-up), alternating order. All 65
+complete Snapshot encodings match. Producer medians are 0.186–0.224 ms versus old
+6.665–6.710 ms; worker 6.662–6.710 ms; new sequential total 6.872–6.960 ms. This
+moves work and adds copying/total work, not an application/preview-rate speedup.
+Actual payload copied is 4.608 MB/pair. Three-pending RSS observations include all
+replay/engine allocations and allocator retention; no whole-app/60-minute proof.
+
+An actual private LP_NUM_THREADS=2 GUI trial saves 32 raw frames/camera and processes
+22 pairs, with 10/8 processing drops, one unmatched second input and 1879–2066
+candidates/pair (42,593 values). Startup rejects are 1/2, ongoing 0/0. The 68.75%
+processed fraction remains below 90%; helper reports seven preview omissions.
+Root close during another capture saves nine raw frames/camera and eight pairs
+(15,467 values), with one drop/camera, no unmatched input, startup rejects 1/90
+and ongoing 0/0. Both pass raw replay/publication/restoration and exact full stream/
+illumination GET readbacks, original property 151 restored. Helpers hold camera
+FDs, GUI none; all recorded processes exit. Screenshots inspected. One observed
+close-to-exit time of 0.334 seconds is not a hard bound. Default-renderer failures
+remain unresolved; no controlled whole-pipeline comparison or FPS/p95 pass.
+
+Actual device-free helper replay retains all 32 raw frames/camera, processes three
+pairs and explicitly drops 29 processing inputs/camera because replay is unpaced.
+It emits three previews/completion. Every actual preview body matches old
+preparation on retained input, including statistics/images/positions/timing/counters,
+with its runtime omission counter set; processed equals published plus omitted.
+Separate checks reproduce 33 reports / 63,924 candidate values, every frame CRC/
+sequence/flags/time/PTS reference and full record bytes from the unchanged base
+serializer; all three manifests match lengths/CRCs. Same-engine integrity proof,
+not calibrated physical truth, tracking/fusion or a complete scan-to-model pass.
+
+See docs/ASYNC_LASER_PREVIEW.md and updated architecture/status/acceptance/roadmap/
+benchmarks plus GUI contracts. Source/binary/evidence and commit bindings follow
+in the recovery checkpoint. All data/models/screenshots/private probes stay outside
+Git/review uploads. Official CodeRabbit 0.9.2 included-quota/billing lookup_failed;
+no paid review, upload, review pass, push/PR, merge or protection bypass. Reviewer
+files, firmware and physical calibration unchanged; authorized 151 trials restored.
+
+DEV-LASER-PAIRLOG-CAPACITY — additional developer-identified mission gap, unresolved.
+Plan::open caps the full required pair log at 1 GiB. The new finite trial averages
+1,110,905 bytes/record. Conditionally, at 27 processed pairs/s (90% of 30 FPS),
+that cap holds about 966 records/35.8 seconds. This is extrapolation at observed
+record size, not a soak test or claim about every scene. Dense 30-minute scans
+need a coordinated bounded journal/storage/replay/recovery policy. Preview
+preparation and CPU speed alone cannot satisfy that requirement. Do not blindly
+remove caps or silently sample observations. No capacity change is implemented;
+this neither duplicates nor closes the independently recorded old IR issue 021.

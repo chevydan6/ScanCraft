@@ -93,3 +93,182 @@ fn decode_caps_precede_geometry_allocation_and_unknown_fields_are_rejected() {
     v["unexpected"] = true.into();
     assert!(serde_json::from_value::<Snapshot>(v).is_err());
 }
+
+pub(crate) fn raw_pair(
+    index: u64,
+) -> (
+    scancraft_workflow::laser_stream::Pair,
+    [scancraft_core::StreamProfile; 2],
+    scancraft_workflow::laser_stream::bundle::PairOutcome,
+    ProgressSnapshot,
+) {
+    use scancraft_workflow::laser_stream::{Pair, Sample};
+    let mut metadata = vec![0; 16];
+    metadata[10] = 6;
+    metadata[11] = 4;
+    metadata[12..16].copy_from_slice(&(index as u32).to_le_bytes());
+    (
+        Pair {
+            samples: std::array::from_fn(|_| Sample {
+                index,
+                frame: scancraft_core::Frame {
+                    sequence: index as u32,
+                    host_timestamp_us: 1000 + index,
+                    flags: 0,
+                    metadata: metadata.clone(),
+                    data: vec![0, 30, 60, 255],
+                },
+            }),
+            raw_pts: index as u32,
+        },
+        [0, 2].map(|interface| scancraft_core::StreamProfile {
+            interface,
+            width: 2,
+            height: 2,
+            fourcc: *b"GREY",
+            fps: 30,
+        }),
+        Err("diagnostic processing error".into()),
+        ProgressSnapshot {
+            journaled_frames: [index + 1; 2],
+            processing_queue_drops: [0; 2],
+        },
+    )
+}
+#[test]
+fn owned_preview_keeps_exact_original_pixels_statistics_and_result_after_source_reuse() {
+    use scancraft_geometry::work::WorkControl;
+    use scancraft_workflow::laser_stream::bundle::PreviewInput;
+    let (mut pair, profiles, outcome, progress) = raw_pair(3);
+    let work = WorkControl::default();
+    let pending = Pending::capture(
+        PreviewInput {
+            pair: &pair,
+            profiles: &profiles,
+            outcome: &outcome,
+            progress,
+        },
+        Origin::RecordingReplay,
+        &work,
+    )
+    .unwrap();
+    for sample in &mut pair.samples {
+        sample.frame.data.fill(77);
+        sample.frame.metadata.clear();
+    }
+    let received = pending.finish(&work).unwrap();
+    let mut expected = snapshot(Origin::RecordingReplay, 3);
+    expected.positions.clear();
+    expected.queries = 0;
+    expected.cameras = None;
+    expected.processing_error = Some("diagnostic processing error".into());
+    assert_eq!(received, expected);
+    assert!(pair.samples.iter().all(|s| s.frame.data == [77; 4]));
+}
+#[test]
+fn pending_input_bounds_validation_and_cancellation_remain_separate_from_wire_validation() {
+    use scancraft_geometry::work::WorkControl;
+    use scancraft_workflow::laser_stream::bundle::PreviewInput;
+    for invalid in 0..4 {
+        let (mut pair, mut profiles, outcome, progress) = raw_pair(0);
+        match invalid {
+            0 => pair.samples[0].frame.metadata = vec![0; 4097],
+            1 => pair.samples[0].frame.data.truncate(3),
+            2 => profiles[0].width = 4_194_305,
+            _ => pair.samples[0].frame.flags = 0x40,
+        };
+        let work = WorkControl::default();
+        assert!(
+            Pending::capture(
+                PreviewInput {
+                    pair: &pair,
+                    profiles: &profiles,
+                    outcome: &outcome,
+                    progress
+                },
+                Origin::Native,
+                &work
+            )
+            .is_err()
+        );
+        assert!(work.check().is_ok());
+    }
+    let (pair, profiles, _, progress) = raw_pair(0);
+    let error = "界".repeat(2000);
+    let outcome = Err(error);
+    let work = WorkControl::default();
+    let pending = Pending::capture(
+        PreviewInput {
+            pair: &pair,
+            profiles: &profiles,
+            outcome: &outcome,
+            progress,
+        },
+        Origin::Native,
+        &work,
+    )
+    .unwrap();
+    let snapshot = pending.finish(&work).unwrap();
+    assert_eq!(snapshot.processing_error.unwrap().chars().count(), 1024);
+    let pending = Pending::capture(
+        PreviewInput {
+            pair: &pair,
+            profiles: &profiles,
+            outcome: &outcome,
+            progress,
+        },
+        Origin::Native,
+        &work,
+    )
+    .unwrap();
+    work.cancel();
+    assert!(pending.finish(&work).is_err());
+    assert!(
+        Pending::capture(
+            PreviewInput {
+                pair: &pair,
+                profiles: &profiles,
+                outcome: &outcome,
+                progress
+            },
+            Origin::Native,
+            &work
+        )
+        .is_err()
+    );
+}
+
+#[test]
+fn maximum_raw_payload_and_metadata_are_preserved_without_sampling() {
+    use scancraft_geometry::work::WorkControl;
+    use scancraft_workflow::laser_stream::bundle::PreviewInput;
+    let (mut pair, mut profiles, outcome, progress) = raw_pair(0);
+    for (profile, sample) in profiles.iter_mut().zip(&mut pair.samples) {
+        profile.width = 2048;
+        profile.height = 2048;
+        sample.frame.data = vec![17; scancraft_image::MAX_PIXELS];
+        sample.frame.metadata = sample.frame.metadata.repeat(256);
+        assert_eq!(sample.frame.metadata.len(), 4096);
+    }
+    let work = WorkControl::default();
+    let pending = Pending::capture(
+        PreviewInput {
+            pair: &pair,
+            profiles: &profiles,
+            outcome: &outcome,
+            progress,
+        },
+        Origin::Native,
+        &work,
+    )
+    .unwrap();
+    let snapshot = pending.finish(&work).unwrap();
+    for frame in &snapshot.frames {
+        assert_eq!(frame.source_size, [2048, 2048]);
+        assert_eq!(frame.statistics.pixels, scancraft_image::MAX_PIXELS);
+        assert_eq!(frame.statistics.minimum, 17);
+        assert_eq!(frame.statistics.maximum, 17);
+        assert_eq!(frame.statistics.mean, 17.);
+        assert!(frame.pixels.iter().all(|&v| v == 17));
+    }
+}

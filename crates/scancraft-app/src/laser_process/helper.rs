@@ -1,7 +1,7 @@
 use super::{Completion, replay};
 use crate::{
     capture_ipc,
-    laser_display::{Origin, Snapshot},
+    laser_display::{Origin, Pending, Snapshot},
 };
 use scancraft_geometry::work::WorkControl;
 use scancraft_workflow::laser_stream::bundle::{PreviewInput, PreviewStatus};
@@ -57,46 +57,17 @@ fn deliver(
     }
     Ok(())
 }
-fn session(paths: &[PathBuf], origin: Origin) -> Result<Completion, String> {
-    let work = Arc::new(WorkControl::default());
-    let stop = Arc::new(AtomicBool::new(false));
-    let w = work.clone();
-    let s = stop.clone();
-    std::thread::Builder::new()
-        .name("scancraft-laser-control".into())
-        .spawn(move || controls(io::stdin(), &w, &s))
-        .map_err(|e| e.to_string())?;
-    let mailbox: Arc<Mutex<Option<Snapshot>>> = Arc::new(Mutex::new(None));
-    let omitted = Arc::new(AtomicU64::new(0));
-    let done = Arc::new(AtomicBool::new(false));
-    let m = mailbox.clone();
-    let o = omitted.clone();
-    let d = done.clone();
-    let w = work.clone();
-    let s = stop.clone();
-    let publisher = std::thread::Builder::new()
-        .name("scancraft-laser-display".into())
-        .spawn(move || -> Result<(), String> {
-            loop {
-                let finished = d.load(Ordering::Acquire);
-                let snapshot = m
-                    .lock()
-                    .map_err(|_| "laser helper mailbox poisoned")?
-                    .take();
-                if let Some(snapshot) = snapshot {
-                    deliver(snapshot, &mut io::stdout().lock(), &w, &s, &o)?;
-                }
-                if finished {
-                    return Ok(());
-                }
-                std::thread::sleep(Duration::from_millis(30));
-            }
-        })
-        .map_err(|e| e.to_string())?;
-    let preview = |input: PreviewInput<'_>| match Snapshot::prepare(input, origin, &work) {
-        Ok(snapshot) => match mailbox.lock() {
+fn offer(
+    input: PreviewInput<'_>,
+    origin: Origin,
+    work: &WorkControl,
+    mailbox: &Mutex<Option<Pending>>,
+    omitted: &AtomicU64,
+) -> PreviewStatus {
+    match Pending::capture(input, origin, work) {
+        Ok(pending) => match mailbox.lock() {
             Ok(mut slot) => {
-                if slot.replace(snapshot).is_some() {
+                if slot.replace(pending).is_some() {
                     omitted.fetch_add(1, Ordering::Relaxed);
                 }
                 PreviewStatus::Accepted
@@ -108,10 +79,70 @@ fn session(paths: &[PathBuf], origin: Origin) -> Result<Completion, String> {
         },
         Err(e) => {
             omitted.fetch_add(1, Ordering::Relaxed);
-            eprintln!("Laser preview preparation omitted; raw recording continues: {e}");
+            eprintln!("Laser preview handoff omitted; raw recording continues: {e}");
             PreviewStatus::Omitted
         }
-    };
+    }
+}
+fn publish(
+    mailbox: &Mutex<Option<Pending>>,
+    done: &AtomicBool,
+    omitted: &AtomicU64,
+    work: &WorkControl,
+    mut send: impl FnMut(Snapshot) -> Result<(), String>,
+) -> Result<(), String> {
+    loop {
+        let finished = done.load(Ordering::Acquire);
+        let pending = mailbox
+            .lock()
+            .map_err(|_| "laser helper mailbox poisoned")?
+            .take();
+        // Expensive work and output I/O never hold the mailbox mutex.
+        if let Some(pending) = pending {
+            match pending.finish(work) {
+                Ok(snapshot) => send(snapshot)?,
+                Err(e) => {
+                    omitted.fetch_add(1, Ordering::Relaxed);
+                    eprintln!(
+                        "Laser preview omitted during worker preparation; raw recording continues: {e}"
+                    );
+                }
+            }
+        }
+        // Acquire done before taking the slot: every completed producer offer
+        // precedes it, so final work cannot be missed when stopping the publisher.
+        if finished {
+            return Ok(());
+        }
+        std::thread::sleep(Duration::from_millis(30));
+    }
+}
+fn session(paths: &[PathBuf], origin: Origin) -> Result<Completion, String> {
+    let work = Arc::new(WorkControl::default());
+    let stop = Arc::new(AtomicBool::new(false));
+    let w = work.clone();
+    let s = stop.clone();
+    std::thread::Builder::new()
+        .name("scancraft-laser-control".into())
+        .spawn(move || controls(io::stdin(), &w, &s))
+        .map_err(|e| e.to_string())?;
+    let mailbox: Arc<Mutex<Option<Pending>>> = Arc::new(Mutex::new(None));
+    let omitted = Arc::new(AtomicU64::new(0));
+    let done = Arc::new(AtomicBool::new(false));
+    let m = mailbox.clone();
+    let o = omitted.clone();
+    let d = done.clone();
+    let w = work.clone();
+    let s = stop.clone();
+    let publisher = std::thread::Builder::new()
+        .name("scancraft-laser-display".into())
+        .spawn(move || -> Result<(), String> {
+            publish(&m, &d, &o, &w, |snapshot| {
+                deliver(snapshot, &mut io::stdout().lock(), &w, &s, &o)
+            })
+        })
+        .map_err(|e| e.to_string())?;
+    let preview = |input: PreviewInput<'_>| offer(input, origin, &work, &mailbox, &omitted);
     let outcome = if origin == Origin::Native {
         scancraft_acquisition::laser::scan(&paths[0], &paths[1], &paths[2], &work, &stop, preview)
     } else {
@@ -227,3 +258,6 @@ mod tests {
         assert!(stop.load(Ordering::Relaxed));
     }
 }
+
+#[cfg(test)]
+mod worker_tests;

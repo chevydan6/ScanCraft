@@ -4,6 +4,7 @@ PASS means the stated narrow experiment passed, not the full release gate.
 
 | Experiment | Result | Evidence |
 | --- | --- | --- |
+| Bounded asynchronous preview preparation | PASS narrow scope: 779-test gate, 65 old/new snapshot comparisons exact, 33 saved reports and three actual IPC previews verified; native 32 raw/camera and 22 pairs, below 90% | [Ownership, measurements and limitations](docs/ASYNC_LASER_PREVIEW.md); no sustained/physical qualification |
 | Buffered laser pair journals | PASS narrow scope: 774-test gate, same-byte/checksum serializer comparison; new native GUI saves 32 raw/camera and processes 21 pairs, still below 90%; verified root-close publication/restoration | [Profile and limits](docs/LASER_STREAM_PROFILE.md); default-renderer failures and physical qualification unchanged |
 | Native laser GUI diagnostic integration | PASS narrow renderer-limited scope: 32 raw/camera, 19 pairs, raw/candidate previews, verified recording and restoration; actual close during acquisition saves 7/7 raw and 6 pairs | [GUI contracts and evidence](docs/LIVE_LASER_GUI.md); default-renderer starts fail; no calibrated scanning qualification |
 | Default private software-renderer native start | FAIL in two trials: zero accepted frames, incomplete/error-flagged buffers and timeout; cleanup/restoration reported and readbacks match | Same report; correlation with renderer condition is not causal proof |

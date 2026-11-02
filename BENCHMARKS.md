@@ -1,5 +1,11 @@
 # Benchmarks
 
+[Bounded preview handoff](docs/ASYNC_LASER_PREVIEW.md): same-binary old/new complete
+Snapshot bytes match in 65 comparisons. Producer work changes from 6.665–6.710 ms
+to 0.186–0.224 ms by copying raw inputs; worker preparation still costs about
+6.7 ms and sequential total work increases slightly. No application-wide speedup,
+preview FPS/p95 or memory-soak qualification is claimed.
+
 [Laser stream profiling](docs/LASER_STREAM_PROFILE.md): same-binary alternating
 journal comparison on five saved pairs reduces encoding/flush medians from
 6.875–7.076 ms to 1.894–2.029 ms with exact output equality. Engine time remains

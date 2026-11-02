@@ -1,5 +1,11 @@
 # Architecture
 
+Laser preview handoff now copies bounded raw inputs/compact results into one
+Pending slot. The existing publisher owns full-frame statistics, thumbnails and
+wire encoding outside the mailbox lock. The parent still receives validated
+Snapshot DTOs; required raw/pair journals and numerical methods are unchanged.
+See [ownership, memory and validation](docs/ASYNC_LASER_PREVIEW.md).
+
 Required laser pair records now batch serializer fragments in a fixed 64 KiB
 buffer before the existing capped/checksummed writer. Complete records flush
 before optional previews; errors discard pending bytes without Drop retry. Raw
