@@ -1761,3 +1761,81 @@ CLI pass for the combined corner/readiness milestone; no unchanged repeat is
 requested. Complete diff and tracked context pass secret scans; fresh included
 capacity and inactive billing were checked, with no paid flags. Source code
 remains the tested/reviewed99de067; this outcome note is documentation-only.
+
+
+CR-AUDIT-ENTRYPOINT-INDEX — accepted as a clarity/completeness improvement.
+The first audit-documentation CLI review covered all eight new reports at
+ eadd10b versus ced7697: zero major findings, one minor entry-index finding,
+major gate passed, exit 0. Source inspection qualifies its premise: CLI main.rs
+has private binary/dispatch functions and no local #[test]; output.rs only
+re-exports shared publication functions. The original lexical index intentionally
+selected public definitions/local tests, so no public implementation or local
+test was actually dropped by that filter. Nevertheless both modules are now
+explicit rows, accurately labeled private entry/re-export with no invented tests.
+Source files changed: ALGORITHM_PROVENANCE.md and ARCHITECTURE.md under the audit
+folder, plus this developer-owned response. Also clarified the data-flow diagram
+so unorganized fused clouds do not appear to feed the organized-grid mesher,
+and replaced three generic module descriptions with inspected responsibilities.
+No application implementation or independent reviewer file changes. Report links,
+frozen source identity, notice inventory, whitespace and secret scans are checked;
+no historical hardware/numerical benchmark is claimed rerun. Incremental doc
+review follows separately. Audit source remains ced7697 even while normal
+development/checker fixes proceed outside the frozen snapshot.
+
+Audit clarification review of exact 50c0a07 versus ba6b3a1 completed across four
+documentation files with zero findings, major gate passed and exit 0. This was
+the second audit-doc review; no unchanged third review is requested. All eight
+reports still identify frozen source ced7697, and 364 local source links resolve
+to tracked files at that revision. No application Rust, calibration, firmware or
+reviewer-owned record was changed. The final outcome note is documentation-only.
+
+
+DEV-LIVE-SESSION-CAPACITY — developer-identified mission gap, not an independent
+review finding. At audited Rust source ced7697, Processor::open and
+Association::new reject more than 1,000 frames per camera. The source runner
+records at most that many frames, verify_recording rejects larger files, and
+LiveSession::validate independently caps counts/pairs at 1,000 and references
+at 1 MiB; ScanSession has a separate 100,000-history cap. A no-device synthetic
+probe against the verified release libraries confirms 1,000 accepted and 1,001
+rejected at both public boundaries. At nominal 50 FPS this is 20 seconds of frame
+time, not a measured hardware duration; 30 minutes at 50 FPS means 90,000 frames
+per camera. Conditional raw-storage arithmetic and assumptions are documented in
+architecture-audit/PERFORMANCE_AND_VALIDATION.md. Recording/write/finalization,
+PTS handling, per-pair files, memory and reference compatibility all require
+analysis; changing one limit is insufficient. Source files modified: audit
+ARCHITECTURE, PERFORMANCE_AND_VALIDATION, RECOMMENDATIONS and EXECUTIVE_SUMMARY,
+plus this developer-owned response. No production code, independent findings,
+scanner state, firmware or physical calibration changed. The audit recommendation
+is documented for owner direction; it has not been implemented. The developer
+probe is stored privately under live-capacity-audit; reviewer verification and
+any independent finding/status remain solely under reviewer control.
+
+SCAN-REV-021 — accepted. Independent assignment 262 corroborates the live
+session capacity gap previously recorded as DEV-LIVE-SESSION-CAPACITY. The
+current limits are coordinated across acquisition, recording verification and
+persisted references; changing a single bound would not establish sustained
+scanning or bounded resource use. The audit recommends a coordinated design,
+but the audit instructions reserve implementation of recommendations for explicit
+owner authorization. No production correction has been made. The audit reports
+changed in commit d46decb36f4e262314e01a2d4a98d0c4bf3b57c2; this response
+records the subsequent independent finding. Developer testing: synthetic release-library boundary probe accepted
+1,000 and rejected 1,001 frames at both public entry points. The reviewer checked
+the probe's retained hashes and source but did not independently run it. No
+physical scan duration or throughput has been measured. The finding remains
+under independent reviewer control; long-session design and validation remain
+outstanding.
+
+CR-DISCOVERY-APP-REVIEW — GitHub App review completed for exact PR #23 head
+ a5deec7249d944c4f9f9fa70d0c019c5821fa37f against 224621b491a6a1811d184ac30f619e09d2713754.
+Run 5ced998c-8bd3-4223-9345-a78c2c37fb75 reports no actionable comments across
+five selected files; API returned no formal reviews or inline comments. The
+read-only readiness diagnostic identifies the matching current-head clean summary
+and zero unresolved threads; it explicitly does not authorize a merge. Both
+Rust CI checks for that PR passed; 646 tests and the actual CI integration tree
+were previously verified. The App's separate docstring-coverage warning is
+acknowledged: the helper lifecycle and its limits are described in
+CAPTURE_PROCESS_ISOLATION.md, and requiring generated docstrings on private
+functions solely to reach an automated percentage would not establish correctness.
+No source changes or further review request were made for this warning. Whole-app
+cleanup and physical hardware qualification remain unproven (SCAN-REV-005/006).
+This included review used the available allowance; no paid review was requested.
