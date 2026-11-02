@@ -2248,3 +2248,33 @@ Private source/build/library/binary hashes and raw timing/result evidence stay l
 Automated review/publication remain pending the unavailable CodeRabbit quota and
 billing lookup. No paid service, review bypass, merge or reviewer-file change.
 Commit and evidence binding are recorded in the recovery checkpoint.
+
+DEV-BLOCK-LASER-OPENING — developer optimization, not an independent finding.
+Measured the next bottleneck before integration. A private same-binary paired
+probe compares the original project queue function with independently written
+neutral-padded block prefix/suffix extrema, alternating order over ten measured
+iterations after a warm-up at each of five radii. Every contrast byte matches.
+At current radius12, medians70.22ms versus14.60ms, median paired speedup4.81x for
+two-image morphology only. Method family/reference and original implementation
+provenance are documented in BLOCK_LASER_OPENING.md; no upstream code/dependency added.
+
+Changed image/laser.rs row extrema and tests, plus architecture/status/detector
+documentation. Detector thresholds, raw saturation, centroid math and ordering are
+unchanged. Extra row scratch is O(width),3888bytes at1920/radius12; image/window
+bounds and row cancellation remain. Existing direct-window regression retained;
+two new tests cover all supported radii and complete detections against independent
+neighborhood extrema. Initial gate caught a Clippy test expression, corrected;
+the next formatting check caught its layout, formatted without disabling checks.
+Final705-test/fmt/strict-Clippy/release gate PASS.
+
+All12 saved on/off camera JSON reports equal prior queue reports exactly. Automatic
+473/480/473 candidates and EVERY complete query result remain exact; seeded79/81/74
+and artifact/input checks pass. Public-library detector phase observed18.79ms
+versus earlier71.52ms, but those are separately built phase probes, not a paired
+detector benchmark. Whole CLI0.13/0.13/0.14s with about18MiB RSS are shared-host,
+reused-file observations includingvalidation/fsync, not live FPS/accuracy evidence.
+
+No hardware/configuration/calibration changes or independent-reviewer-file edits.
+CodeRabbit quota/billing lookup remains unavailable; no paid usage, review pass,
+publication, merge or protection change claimed. Recovery checkpoint binds commit,
+private source/binary/library hashes, raw timing rows and full numerical evidence.

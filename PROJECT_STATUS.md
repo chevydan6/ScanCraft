@@ -4,7 +4,7 @@ Stage: experimental. Specification: docs/MISSION.txt.
 
 ## Latest local reconstruction checkpoint — 2026-11-02
 
-The local development tree passes 703 Rust tests, formatting, strict Clippy and
+The local development tree passes 705 Rust tests, formatting, strict Clippy and
 release build. Recording-backed seeded trace diagnostics preserve source frames
 and interpolation lineage. A new native sheet-supported full-trace matcher removes
 the need for supplied partner seeds at the numerical component boundary; it has
@@ -23,6 +23,12 @@ this remains provisional geometry, not a calibrated scan or a live GUI feature.
 and reduced the measured matching workload from 187.3 ms to 7.9 ms plus 0.31 ms
 preparation in a paired benchmark. This is a matching-stage result on one saved
 scene; detection, recording I/O and live/physical qualification remain separate.
+
+[Block-based laser opening](docs/BLOCK_LASER_OPENING.md) preserves all twelve
+saved on/off camera reports exactly and reduces the radius-12 morphology workload
+from 70.2 ms to 14.6 ms in a paired probe. Integrated two-image detection measured
+18.8 ms; whole recorded CLI runs measured 0.13–0.14 seconds. These remain offline
+observations, with unchanged physical qualification and review/publication gaps.
 
 These latest changes are local and await automated review/publication: CodeRabbit
 quota/billing lookup is unavailable although its local doctor passes. Genuine

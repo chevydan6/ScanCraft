@@ -2,7 +2,6 @@
 //! Detections are image observations, not identified projector lines or depth.
 use crate::GrayImage;
 use scancraft_geometry::work::{Stage, WorkControl};
-use std::collections::VecDeque;
 
 #[derive(Debug, Clone, Copy)]
 pub struct LineConfig {
@@ -75,12 +74,19 @@ pub fn detect_rows_with_opening(
     let mut contrast = vec![0; image.data.len()];
     let mut eroded = vec![0; width];
     let mut opened = vec![0; width];
-    let mut queue = VecDeque::with_capacity(2 * radius as usize + 1);
+    let mut prefix = vec![0; width + 2 * radius as usize];
+    let mut suffix = vec![0; prefix.len()];
     for y in 0..image.height as usize {
         work.update(Stage::ImageMapping, y, image.height as usize)?;
         let raw = &image.data[y * width..(y + 1) * width];
-        row_extreme(raw, radius as usize, true, &mut eroded, &mut queue);
-        row_extreme(&eroded, radius as usize, false, &mut opened, &mut queue);
+        row_extreme::<true>(raw, radius as usize, &mut eroded, &mut prefix, &mut suffix);
+        row_extreme::<false>(
+            &eroded,
+            radius as usize,
+            &mut opened,
+            &mut prefix,
+            &mut suffix,
+        );
         for x in 0..width {
             contrast[y * width + x] = raw[x].saturating_sub(opened[x]);
         }
@@ -92,40 +98,51 @@ pub fn detect_rows_with_opening(
         work,
     )
 }
-// Monotone queue: each sample enters/leaves at most once, independent of radius.
-fn row_extreme(
+// Block prefix/suffix extrema (van Herk/Gil-Werman family), independently written.
+// Reference: van Herk (1992), doi:10.1016/0167-8655(92)90069-C; no upstream code.
+// Neutral padding makes every window a full block-width interval: it spans at
+// most two blocks, so suffix[start] and prefix[end] cover exactly its samples.
+// Padding is 255 for min and 0 for max, preserving clipped image-edge windows.
+fn row_extreme<const MINIMUM: bool>(
     input: &[u8],
     radius: usize,
-    minimum: bool,
     output: &mut [u8],
-    queue: &mut VecDeque<usize>,
+    prefix: &mut [u8],
+    suffix: &mut [u8],
 ) {
-    queue.clear();
-    let mut end = 0;
+    let neutral = if MINIMUM { 255 } else { 0 };
+    let block_width = 2 * radius + 1;
+    prefix.fill(neutral);
+    prefix[radius..radius + input.len()].copy_from_slice(input);
+    suffix.copy_from_slice(prefix);
+    for block in prefix.chunks_mut(block_width) {
+        let mut value = neutral;
+        for pixel in block {
+            value = if MINIMUM {
+                value.min(*pixel)
+            } else {
+                value.max(*pixel)
+            };
+            *pixel = value;
+        }
+    }
+    for block in suffix.chunks_mut(block_width) {
+        let mut value = neutral;
+        for pixel in block.iter_mut().rev() {
+            value = if MINIMUM {
+                value.min(*pixel)
+            } else {
+                value.max(*pixel)
+            };
+            *pixel = value;
+        }
+    }
     for (x, value) in output.iter_mut().enumerate() {
-        let limit = (x + radius + 1).min(input.len());
-        while end < limit {
-            while let Some(&last) = queue.back() {
-                if if minimum {
-                    input[last] >= input[end]
-                } else {
-                    input[last] <= input[end]
-                } {
-                    queue.pop_back();
-                } else {
-                    break;
-                }
-            }
-            queue.push_back(end);
-            end += 1;
-        }
-        while queue
-            .front()
-            .is_some_and(|&first| first < x.saturating_sub(radius))
-        {
-            queue.pop_front();
-        }
-        *value = input[*queue.front().unwrap()];
+        *value = if MINIMUM {
+            suffix[x].min(prefix[x + 2 * radius])
+        } else {
+            suffix[x].max(prefix[x + 2 * radius])
+        };
     }
 }
 fn detect_rows_impl(
@@ -219,7 +236,7 @@ mod tests {
         }
     }
     #[test]
-    fn monotone_queue_matches_independent_window_extrema_at_every_boundary() {
+    fn block_extrema_match_independent_window_extrema_at_every_boundary() {
         let mut seed = 17u32;
         for width in 3usize..40 {
             let input: Vec<_> = (0..width)
@@ -231,7 +248,13 @@ mod tests {
             for radius in 1..=((width - 1) / 2).min(8) {
                 for minimum in [true, false] {
                     let mut output = vec![0; width];
-                    row_extreme(&input, radius, minimum, &mut output, &mut VecDeque::new());
+                    let mut prefix = vec![0; width + 2 * radius];
+                    let mut suffix = vec![0; prefix.len()];
+                    if minimum {
+                        row_extreme::<true>(&input, radius, &mut output, &mut prefix, &mut suffix);
+                    } else {
+                        row_extreme::<false>(&input, radius, &mut output, &mut prefix, &mut suffix);
+                    }
                     for x in 0..width {
                         let slice = &input[x.saturating_sub(radius)..(x + radius + 1).min(width)];
                         let expected = if minimum {
@@ -242,6 +265,112 @@ mod tests {
                         assert_eq!(output[x], expected);
                     }
                 }
+            }
+        }
+    }
+
+    #[test]
+    fn block_extrema_cover_every_radius_and_partial_block_edges() {
+        let mut seed = 53u32;
+        for radius in 1..=128 {
+            for width in [2 * radius + 1, 2 * radius + 2, 4 * radius + 1] {
+                let random = (0..width)
+                    .map(|_| {
+                        seed = seed.wrapping_mul(1664525).wrapping_add(1013904223);
+                        (seed >> 24) as u8
+                    })
+                    .collect::<Vec<_>>();
+                let alternating = (0..width)
+                    .map(|x| if x % 2 == 0 { 0 } else { 255 })
+                    .collect::<Vec<_>>();
+                for input in [random, alternating, vec![0; width], vec![255; width]] {
+                    let mut lo = vec![0; width];
+                    let mut hi = vec![0; width];
+                    let mut prefix = vec![0; width + 2 * radius];
+                    let mut suffix = prefix.clone();
+                    row_extreme::<true>(&input, radius, &mut lo, &mut prefix, &mut suffix);
+                    row_extreme::<false>(&input, radius, &mut hi, &mut prefix, &mut suffix);
+                    for x in 0..width {
+                        let window = &input[x.saturating_sub(radius)..(x + radius + 1).min(width)];
+                        assert_eq!(
+                            lo[x],
+                            *window.iter().min().unwrap(),
+                            "minimum radius={radius} width={width} x={x}"
+                        );
+                        assert_eq!(
+                            hi[x],
+                            *window.iter().max().unwrap(),
+                            "maximum radius={radius} width={width} x={x}"
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn complete_opening_detections_match_direct_neighborhood_reference() {
+        let mut seed = 731u32;
+        for width in [7usize, 25, 257, 263] {
+            let data = (0..width * 3)
+                .map(|_| {
+                    seed = seed.wrapping_mul(1664525).wrapping_add(1013904223);
+                    (seed >> 24) as u8
+                })
+                .collect::<Vec<_>>();
+            let original = data.clone();
+            for radius in [1usize, 2, 12, 128].into_iter().filter(|r| 2 * r < width) {
+                let mut contrast = vec![0; data.len()];
+                for (raw, out) in data
+                    .chunks_exact(width)
+                    .zip(contrast.chunks_exact_mut(width))
+                {
+                    let eroded = (0..width)
+                        .map(|x| {
+                            *raw[x.saturating_sub(radius)..(x + radius + 1).min(width)]
+                                .iter()
+                                .min()
+                                .unwrap()
+                        })
+                        .collect::<Vec<_>>();
+                    for x in 0..width {
+                        let opened = *eroded[x.saturating_sub(radius)..(x + radius + 1).min(width)]
+                            .iter()
+                            .max()
+                            .unwrap();
+                        out[x] = raw[x].saturating_sub(opened);
+                    }
+                }
+                let raw = GrayImage::new(width as u32, 3, &data).unwrap();
+                let contrast = GrayImage::new(width as u32, 3, &contrast).unwrap();
+                let config = LineConfig {
+                    background: 30,
+                    minimum_peak: 50,
+                    maximum_width: width as u32,
+                    saturation: 255,
+                    maximum_observations: 100000,
+                };
+                let expected =
+                    detect_rows_impl(contrast, raw, config, &WorkControl::default()).unwrap();
+                let actual =
+                    detect_rows_with_opening(raw, config, radius as u32, &WorkControl::default())
+                        .unwrap();
+                assert_eq!(actual.observations, expected.observations);
+                assert_eq!(
+                    (
+                        actual.rejected_border,
+                        actual.rejected_width,
+                        actual.rejected_peak,
+                        actual.rejected_saturation
+                    ),
+                    (
+                        expected.rejected_border,
+                        expected.rejected_width,
+                        expected.rejected_peak,
+                        expected.rejected_saturation
+                    )
+                );
+                assert_eq!(data, original);
             }
         }
     }

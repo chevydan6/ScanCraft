@@ -1,5 +1,9 @@
 # Architecture
 
+Laser background removal uses reusable block-prefix/suffix row extrema before
+the existing stripe detector. Exact border/clipping semantics are preserved; see
+[method provenance and measurements](docs/BLOCK_LASER_OPENING.md).
+
 `scancraft-workflow::recorded_traces::run_automatic` connects guarded recording
 selection, shared detection/continuity and sheet-supported matching. It streams
 full query diagnostics and preserves candidate/source lineage with explicit

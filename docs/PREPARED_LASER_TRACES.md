@@ -73,6 +73,9 @@ streaming them as the CLI does. This is not a full scanner speedup or a claim ab
 different scenes, trace sizes or hardware. The shared machine is not an isolated
 benchmark host. Cache lifetime is one frame pair, not reuse across changing frames.
 
+Subsequent [block-based opening](BLOCK_LASER_OPENING.md) addresses the detection
+cost measured below; these figures retain this prepared-trace checkpoint's scope.
+
 In the same phase probe, medians for two-image stripe detection, full recording
 validation/selection and continuity were about 71.5, 56.0 and 0.56 ms. A separate
 repeated right-ray conversion loop took 164.5 ms; this is comparison work, not an
