@@ -2858,7 +2858,7 @@ benchmarks plus GUI contracts. Source/binary/evidence and commit bindings follow
 in the recovery checkpoint. All data/models/screenshots/private probes stay outside
 Git/review uploads. Official CodeRabbit 0.9.2 included-quota/billing lookup_failed;
 no paid review, upload, review pass, push/PR, merge or protection bypass. Reviewer
-files, firmware and physical calibration unchanged; authorized 151 trials restored.
+files left untouched by development, firmware and physical calibration unchanged; authorized 151 trials restored.
 
 DEV-LASER-PAIRLOG-CAPACITY — additional developer-identified mission gap, unresolved.
 Plan::open caps the full required pair log at 1 GiB. The new finite trial averages
@@ -2873,3 +2873,22 @@ this neither duplicates nor closes the independently recorded old IR issue 021.
 DEV-ASYNC-LASER-PREVIEW implementation commit: `89089708cefcce6e45ce98e7965c741f5673a7b4`.
 The later binding changes documentation only; tested Rust and evidence are unchanged.
 Independent review remains pending.
+
+SCAN-REV-024 — Accepted. The reviewer independently confirms the required laser
+pair-log capacity gap identified in DEV-LASER-PAIRLOG-CAPACITY. Plan::open rejects
+budgets above 1 GiB, and every processed pair must append its complete record to
+the single capped file. Exhaustion correctly fails publication and retains raw
+prefixes/cleanup evidence; it does not provide sufficient dense-session duration.
+The reviewer's conditional synthetic-workload arithmetic and our separately bound
+actual-data estimate are distinct evidence, not interchangeable measurements.
+
+Proposed correction: design explicit bounded log segments, total storage admission,
+versioned indexing/replay/finalization, cancellation and crash recovery together;
+preserve raw/complete required observations and compatibility. Validate rollover,
+exact boundaries, disk/write failure and sustained resource behavior device-free
+before any sustained hardware qualification. Merely increasing the cap or sampling
+observations is not the correction. This documentation commit implements no source
+fix and does not alter finding status; only the independent reviewer can verify
+and close it. Existing 779-test and finite native evidence remain narrow in scope.
+Relevant current implementation: 89089708cefcce6e45ce98e7965c741f5673a7b4; response
+follows Assignment350's concurrent append, which development preserves read-only.

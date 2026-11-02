@@ -146,7 +146,10 @@ the required full-report pair log is capped at 1 GiB. This finite trial averages
 30-FPS input), the maximum cap would hold approximately 966 records or 35.8 seconds.
 This is conditional arithmetic, not a soak measurement. Dense 30-minute scans
 therefore require a deliberate long-session journal/storage/recovery policy;
-preview decoupling alone cannot satisfy that requirement. Do not blindly remove
+preview decoupling alone cannot satisfy that requirement. The independent reviewer
+subsequently confirms this gap as SCAN-REV-024; the developer response accepts it
+and records coordinated follow-up work. No capacity fix is implemented here.
+Do not blindly remove
 caps or hide observations. The older IR 1000-frame limit (SCAN-REV-021) is unchanged.
 
 Physical geometry/units/coverage, tracking/fusion, direct stream-bundle reopen,
@@ -156,7 +159,7 @@ physical calibration is deferred. No physical qualification flag changes.
 New handoff code independently adapts the project's own helper/Snapshot patterns;
 FrameView/statistics/geometry algorithms are reused unchanged. No copied upstream
 implementation, new dependency/license, firmware action, physical calibration,
-reviewer-owned file change or merge. Private raw/model/probe/screenshot evidence
+developer modification of reviewer-owned files or merge. Private raw/model/probe/screenshot evidence
 stays outside Git/uploads. CodeRabbit 0.9.2 quota/billing lookups remain unavailable,
 so independent review/publication are pending. Exact commits, source/binaries and
 evidence hashes are in the recovery checkpoint and developer response.
