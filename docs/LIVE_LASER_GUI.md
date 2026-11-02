@@ -2,7 +2,7 @@
 
 Status: experimental functional integration, not calibrated scanning qualification.
 Base implementation: `c223a7d26af005c1e49fff0af6d18a22d67aa87e`.
-The exact implementation commit is bound in the developer response/checkpoint.
+Implementation: `a570c783111c1b6f25d64af8fb08c0f569e23d17`; the documentation binding is a later commit.
 
 ## Interface and data ownership
 

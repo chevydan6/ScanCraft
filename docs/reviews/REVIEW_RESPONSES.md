@@ -2728,3 +2728,7 @@ outsideGit/reviewuploads. OfficialCodeRabbit0.9.2 latestusage stillincludedquota
 billinglookup_failed; no paidreview/pass/push/PR/merge/protectionbypass. Firmware,
 physicalcalibration and reviewer-owned files/status unchanged. Scoped151line trial
 was temporarily enabled and verified restored, as authorized for capture testing.
+
+DEV-LIVE-LASER-GUI implementation commit: `a570c783111c1b6f25d64af8fb08c0f569e23d17`.
+This follow-up binds documentation only; the 771-test build and hardware/replay evidence
+remain the exact implementation source. Independent review remains pending.
