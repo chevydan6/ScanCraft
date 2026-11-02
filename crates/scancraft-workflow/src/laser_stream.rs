@@ -1,6 +1,7 @@
 //! Bounded raw-journal-first laser processing, independent of device/UI ownership.
 //! Equal raw PTS and inferred modular progression are not verified exposures.
 mod association;
+pub mod bundle;
 mod runner;
 pub use association::{Association, AssociationCounts, Camera, Pair, Sample};
 pub use runner::{Failure, Journal, SourceReport, StopToken, Summary};

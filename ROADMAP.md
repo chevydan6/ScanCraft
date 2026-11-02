@@ -1,5 +1,13 @@
 # Roadmap
 
+Native CLI laser capture now retains raw frames, computes diagnostic candidates,
+restores scoped settings and publishes verified bundles. Next connect Start/Stop
+and camera/candidate previews through the supervised native GUI helper, then
+measure complete-pair dispatch/compute scheduling against the observed processing
+omissions. Preserve required raw journals separately from optional previews.
+Calibrated dimensions, coverage, tracking/fusion and long sessions remain required;
+physical calibration is deferred. See docs/NATIVE_LASER_CAPTURE.md.
+
 Current laser priority: connect the bounded raw-journal-first workflow
 (`16b9092dbcd5fcd09162569a941691cbfa75fee3`) to the native acquisition helper and
 GUI with explicit source/settings ownership, queue omissions and recovery.

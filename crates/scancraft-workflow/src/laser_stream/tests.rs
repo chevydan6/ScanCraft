@@ -14,7 +14,7 @@ use std::sync::{
     atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering},
 };
 
-fn fixture() -> (StereoCalibration, Settings, [StreamProfile; 2], [Frame; 2]) {
+pub(super) fn fixture() -> (StereoCalibration, Settings, [StreamProfile; 2], [Frame; 2]) {
     let camera = CameraModel {
         width: 10,
         height: 5,
@@ -259,16 +259,16 @@ fn association_rejects_ambiguous_order_and_keeps_pending_host_and_epoch_failures
     }
     assert_eq!(a.counts.paired, 0);
 }
-struct Fake {
-    template: Frame,
-    next: u64,
-    count: u64,
-    gate: Option<Arc<Barrier>>,
-    gate_once: bool,
-    token: StopToken,
-    closed: Arc<AtomicUsize>,
-    fail_close: bool,
-    fail_next: bool,
+pub(super) struct Fake {
+    pub(super) template: Frame,
+    pub(super) next: u64,
+    pub(super) count: u64,
+    pub(super) gate: Option<Arc<Barrier>>,
+    pub(super) gate_once: bool,
+    pub(super) token: StopToken,
+    pub(super) closed: Arc<AtomicUsize>,
+    pub(super) fail_close: bool,
+    pub(super) fail_next: bool,
 }
 impl Source for Fake {
     fn context(&self) -> Result<CaptureContext> {

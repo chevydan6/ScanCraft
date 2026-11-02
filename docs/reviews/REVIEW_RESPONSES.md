@@ -2601,3 +2601,70 @@ BOUNDED_LASER_STREAM.md for contracts, provenance and validation scope.
 DEV-BOUNDED-LASER-STREAM commit binding: implementation `16b9092dbcd5fcd09162569a941691cbfa75fee3`.
 Follow-up acceptance/roadmap documentation records this exact revision; application
 source and final746-test/replay evidence are unchanged. Independent review pending.
+
+
+DEV-NATIVE-LASER-CAPTURE — developer integration, not an independent finding.
+Accepted the need to connect bounded frame computation to native source ownership,
+required raw retention and reviewable, recoverable outputs. Added workflow
+laser_stream/bundle.rs, bundle/io.rs and bundle/tests.rs; acquisition/laser.rs;
+CLI dispatch/run_laser and device-free preflight integration test. Reuses existing
+Source, recording Writer/Reader, Guard, RENAME_NOREPLACE publication, SessionLock,
+SettingsLease and fixed ScopedLine. Settings DTOs gain Serialize only; shared test
+fixtures gain test-only visibility. Existing IR context/statistics helpers are
+reused and now expose before/after-first-valid rejects with V4L2 buffer units.
+No geometry/matching arithmetic, third-party dependency or license change.
+
+Plan preflights original detector validators on blank discarded images before
+hardware, retains exact bounded inputs/identity guards, caps raw and typed compact
+pair journals, compares write-time lengths/CRCs to streamed readback, verifies raw
+v2 header/profile/frame CRC/order/footer/count, then checks identities and publishes
+without overwrite only after cleanup/restoration. Required journal failures retain
+staging/failure.json; optional preview omission/panic never aborts raw journaling.
+Parent-sync failure after rename identifies the published target. No metric PLY,
+mesh or editable cloud export; diagnostic coordinates remain in pairs.ndjson and
+all physical flags are false.
+
+Native default preserves illumination. Explicit backend source_options accepts
+only preserve or line_boolean_trial, enabling existing property151 with range and
+readback checks, verifying at end and restoring original before publication.
+Opaque options stay in workflow; native adapter validates them before hardware.
+No arbitrary property, mode, energy, gain, mirror, firmware or installed-calibration
+write. Native header stores the declaration. CLI Ctrl-C requests graceful stop and
+retains finalizable journals; old IR signal semantics are unchanged. No hard driver,
+cleanup or whole-application shutdown bound claimed (005 remains open).
+
+Final756-test/fmt/strict-alltarget-Clippy/release gate PASS, 10 added tests cover
+bundle/lineage/integrity, caps/required-journal failure, optional-preview independence,
+restoration/mutation/race/no-overwrite, preflight and strict native options. First
+compile needed a named result lifetime and removed unused import; fixed without
+suppression. Private offline-adapter request initially omitted its separate report
+byte cap; corrected that test input, retaining failed logs, without production
+algorithm changes. One private probe command initially used a not-yet-created
+working directory; created it before building in an isolated Cargo target.
+
+Actual warm Raptor tests: initial preserve16/camera→16pairs/zeroqueries; option
+preserve4/camera→3pairs/zeroqueries, with explicit pending inputs and startup issues.
+Final counter-build line trial16/camera→12pairs (four processing drops/camera),
+1857–2023candidates/pair, zero query failures; startup rejects4/85 and ongoing0/0.
+That75% processed fraction is below90% target. Graceful own-child SIGINT saved3/2raw,
+processed2pairs (1987/1904candidates), retainedoneunmatchedinput and completed about
+0.190s aftersignal in one warm observation. Startup2/1, ongoing0/0. All raw replay/
+restoration pass; full stream and illumination readbacks exactly equal before/after,
+including original property151=0 restored. Earlier preserve reopening had1/89total
+rejects andoneongoing rejection sample; do not cherry-pick clean warm observations
+or equate V4L2 buffers with physical exposures. No qualification thresholds relaxed.
+
+Separate offline same-engine check reproduces all17 compact reports and all27249
+candidate values across preserve/line/graceful captures, with every frame-reference
+CRC/sequence/flags/time/PTS verified. Selected pair2023candidatevalues exactly match
+existing full recorded diagnostics and display in native viewer with both raw
+images and unverified labels; screenshots inspected, zero scannerfds, app exited.
+Source/build/data/evidence bindings and exact implementation commit are in recovery
+checkpoint. Basea5e640a08537424a2963c29a48785dc31f931cc4; commit binding follows milestone.
+
+No private payload uploaded or committed, reviewer file/status modified, physical
+calibration performed, merge or protection bypass. Firmware untouched. CodeRabbit
+included-quota/billing lookup still lookup_failed; no paid review/pass/push claimed.
+Live GUI controls, performance/coverage, calibrated geometry, tracking/fusion and
+long-session qualification remain incomplete. Old IR1000frame/session021 unchanged;
+006 remains physically unqualified,007 coupling unchanged. See NATIVE_LASER_CAPTURE.md.

@@ -1,8 +1,15 @@
 # Architecture
 
+Native laser capture now connects `scancraft-acquisition::laser::scan` and
+`scan-live-laser` to the bounded stream engine through verified capture bundles.
+Source/settings ownership and optional scoped line control remain in acquisition;
+workflow owns bounded journaling, verification and no-overwrite publication.
+See [native laser capture contracts](docs/NATIVE_LASER_CAPTURE.md).
+
 `scancraft_workflow::laser_stream::Pipeline` adds raw-journal-first bounded
 source-to-laser processing with explicit queue omissions and structured cleanup
-results. Native hardware/GUI adapters and fusion remain future integration. See
+results. The native CLI adapter is connected; live GUI controls and fusion remain
+future integration. See
 [stream contracts and evidence](docs/BOUNDED_LASER_STREAM.md).
 
 Prepared epipolar traces now include conservative 64-segment bounds, retaining

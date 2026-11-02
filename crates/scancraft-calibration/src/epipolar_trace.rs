@@ -16,7 +16,7 @@ struct Span<'a> {
     distances: &'a [f64],
 }
 
-#[derive(Debug, Clone, Copy, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Config {
     /// Euclidean raw-image endpoint separation. Longer gaps fail the whole call.

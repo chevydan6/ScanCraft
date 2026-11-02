@@ -2,9 +2,16 @@
 
 Stage: experimental. Specification: docs/MISSION.txt.
 
+[Native laser candidate capture](docs/NATIVE_LASER_CAPTURE.md) now runs through the
+CLI and shared acquisition API with raw retention, explicit processing drops,
+verified restoration and saved-pair replay. A real scoped-line trial saved 16 frames
+per camera and processed 12 pairs with 1,857–2,023 unqualified candidates each. The
+processed fraction was 75% in that short trial; throughput, calibrated accuracy, tracking/
+fusion and live GUI capture controls remain incomplete.
+
 [Bounded laser frame handoff](docs/BOUNDED_LASER_STREAM.md) now joins raw journaling,
 fixed-size association and in-memory reconstruction in a reusable workflow. It
-passes 1200-pair synthetic and saved-frame replay checks. Hardware/GUI integration,
+passes 1200-pair synthetic and saved-frame replay checks. Live GUI integration,
 tracking/fusion and continuous-duration qualification remain incomplete.
 
 [Conservative epipolar indexing](docs/INDEXED_EPIPOLAR_TRACES.md) reduces measured
@@ -14,7 +21,7 @@ claimed; independent automated review remains pending.
 
 ## Latest local reconstruction checkpoint — 2026-11-03
 
-The local development tree passes 746 Rust tests, formatting, strict Clippy and
+The local development tree passes 756 Rust tests, formatting, strict Clippy and
 release build. Recording-backed seeded trace diagnostics preserve source frames
 and interpolation lineage. A new native sheet-supported full-trace matcher removes
 the need for supplied partner seeds at the numerical component boundary; it has

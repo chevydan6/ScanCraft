@@ -15,7 +15,7 @@ use scancraft_image::{
 };
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Detection {
     pub background: u8,
@@ -25,7 +25,7 @@ pub struct Detection {
     pub maximum_observations: usize,
     pub opening_radius: Option<u32>,
 }
-#[derive(Debug, Clone, Copy, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Continuity {
     pub maximum_row_gap: u32,
@@ -85,7 +85,7 @@ pub fn detect(
     })
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Settings {
     pub interfaces: [u8; 2],

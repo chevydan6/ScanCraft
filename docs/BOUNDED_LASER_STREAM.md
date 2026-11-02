@@ -1,8 +1,8 @@
 # Bounded laser frame handoff
 
 Status: reusable workflow component, tested with synthetic sources and saved
-Raptor frames. Native hardware and GUI adapters are not connected to this entry
-point yet. This does not provide qualified live scanning, tracking or fusion.
+Raptor frames. The [native CLI adapter and verified bundle publisher](NATIVE_LASER_CAPTURE.md)
+now use this entry point. Live GUI controls remain pending. This does not provide qualified live scanning, tracking or fusion.
 The existing IR live path remains unchanged, including its 1000-frame/session cap.
 
 ## Interfaces and ownership

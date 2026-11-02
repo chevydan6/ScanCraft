@@ -145,3 +145,9 @@ The explicit input-file workflow can also start with `scancraft-app --reconstruc
 CALIBRATION LEFT.PNG RIGHT.PNG SETTINGS NEW_RESULT_FOLDER`. See
 [GUI reconstruction](docs/GUI_RECONSTRUCTION.md). Current validation is synthetic;
 actual Raptor calibration and live scanning remain unfinished.
+
+Experimental native laser candidate capture is available through
+`scancraft-cli scan-live-laser`; see [configuration, data integrity and current
+limitations](docs/NATIVE_LASER_CAPTURE.md). It saves raw frames and unqualified
+candidate coordinates. Live GUI capture controls, calibrated accuracy and
+continuous tracking/fusion remain under development.

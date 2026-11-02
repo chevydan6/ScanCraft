@@ -5,6 +5,8 @@ PASS means the stated narrow experiment passed, not the full release gate.
 | Experiment | Result | Evidence |
 | --- | --- | --- |
 | Bounded laser handoff, offline | PASS narrow scope: 8 new regressions, 1200-pair synthetic run, 9 saved Raptor pair reports exact with raw-journal CRC/frame equality | [Contracts and limitations](docs/BOUNDED_LASER_STREAM.md); implementation `16b9092dbcd5fcd09162569a941691cbfa75fee3`; no native live/physical qualification |
+| Native laser candidate stream, short warm trial | PASS narrow functional scope: 16 raw/camera, 12 processed pairs, 1857–2023 diagnostic candidates/pair, replay/restoration pass; 75% processed is below 90% target | [Native capture evidence and limits](docs/NATIVE_LASER_CAPTURE.md); no calibrated or sustained-live qualification |
+| Native laser graceful Ctrl-C | PASS one warm trial: 3/2 raw frames, 2 pairs, valid publication/restoration; ~0.190s signal-to-exit | Same report; no hard shutdown bound |
 | Native discovery | PASS, one observation | CLI discovery, six Raptor nodes |
 | Left IR structural acquisition | PASS, 100 payloads; optical usability unqualified | evidence/native-left-ir.json |
 | Right IR structural acquisition | PASS, 100 payloads; optical usability unqualified | evidence/native-right-ir.json |
