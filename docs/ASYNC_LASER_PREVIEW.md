@@ -2,7 +2,7 @@
 
 Status: experimental integration; no calibrated scanning or live-rate qualification.
 Base: `4d10668270cac41835b8b1c4af9d5c3862f1df5f`.
-Implementation commit is bound in the developer response and recovery checkpoint.
+Implementation: `89089708cefcce6e45ce98e7965c741f5673a7b4`; documentation binding follows it.
 
 ## Ownership and failure boundaries
 

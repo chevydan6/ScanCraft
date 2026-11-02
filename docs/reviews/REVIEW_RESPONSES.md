@@ -2869,3 +2869,7 @@ need a coordinated bounded journal/storage/replay/recovery policy. Preview
 preparation and CPU speed alone cannot satisfy that requirement. Do not blindly
 remove caps or silently sample observations. No capacity change is implemented;
 this neither duplicates nor closes the independently recorded old IR issue 021.
+
+DEV-ASYNC-LASER-PREVIEW implementation commit: `89089708cefcce6e45ce98e7965c741f5673a7b4`.
+The later binding changes documentation only; tested Rust and evidence are unchanged.
+Independent review remains pending.
