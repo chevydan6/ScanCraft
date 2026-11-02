@@ -4,7 +4,7 @@ Stage: experimental. Specification: docs/MISSION.txt.
 
 ## Latest local reconstruction checkpoint — 2026-11-02
 
-The local development tree passes 700 Rust tests, formatting, strict Clippy and
+The local development tree passes 703 Rust tests, formatting, strict Clippy and
 release build. Recording-backed seeded trace diagnostics preserve source frames
 and interpolation lineage. A new native sheet-supported full-trace matcher removes
 the need for supplied partner seeds at the numerical component boundary; it has
@@ -18,6 +18,11 @@ matcher to validated real recordings, detection and continuity without supplied
 partner seeds. It preserves all query diagnostics and source-linked candidate
 coordinates. Three saved Raptor pairs reproduce earlier numerical results exactly;
 this remains provisional geometry, not a calibrated scan or a live GUI feature.
+
+[Prepared trace reuse](docs/PREPARED_LASER_TRACES.md) preserves complete results
+and reduced the measured matching workload from 187.3 ms to 7.9 ms plus 0.31 ms
+preparation in a paired benchmark. This is a matching-stage result on one saved
+scene; detection, recording I/O and live/physical qualification remain separate.
 
 These latest changes are local and await automated review/publication: CodeRabbit
 quota/billing lookup is unavailable although its local doctor passes. Genuine

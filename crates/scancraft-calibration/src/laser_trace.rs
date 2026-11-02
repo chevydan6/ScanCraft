@@ -92,6 +92,34 @@ pub struct PreparedMatcher<'a> {
     depth: [f64; 2],
 }
 
+/// Immutable trace-ray cache bound to the exact preparing matcher, input traces,
+/// sheets and limits. Borrowing prevents changing these inputs while reusing it.
+/// Preparation errors for individual traces are retained and propagated when
+/// queried, after the same first-ray/sheet checks as the uncached path.
+pub struct PreparedQueries<'m, 'g, 't> {
+    matcher: &'m PreparedMatcher<'g>,
+    traces: &'t [Vec<[f64; 2]>],
+    sheets: &'t [QuadraticSheet],
+    config: Config,
+    cache: Vec<Result<epipolar_trace::NormalizedTrace<'t>, String>>,
+}
+impl PreparedQueries<'_, '_, '_> {
+    pub fn match_pixel(
+        &self,
+        first_pixel: [f64; 2],
+        cancelled: &mut impl FnMut() -> bool,
+    ) -> Result<Matches, String> {
+        self.matcher.match_impl(
+            first_pixel,
+            self.traces,
+            self.sheets,
+            self.config,
+            Some(&self.cache),
+            cancelled,
+        )
+    }
+}
+
 impl<'a> PreparedMatcher<'a> {
     pub fn new(
         geometry: &'a StereoCalibration,
@@ -104,6 +132,44 @@ impl<'a> PreparedMatcher<'a> {
             epipolar: PreparedTrace::new(geometry)?,
             stereo: geometry.prepare(limits)?,
             depth: [limits.min_depth_z_mm, limits.max_depth_z_mm],
+        })
+    }
+
+    /// Prepare second-camera inverse distortion once for repeated first pixels.
+    /// Work counters/acceptance budgets keep their uncached meaning. Preparation
+    /// checks cancellation per vertex; it never returns a partly prepared cache.
+    pub fn prepare_traces<'m, 't>(
+        &'m self,
+        traces: &'t [Vec<[f64; 2]>],
+        sheets: &'t [QuadraticSheet],
+        config: Config,
+        cancelled: &mut impl FnMut() -> bool,
+    ) -> Result<PreparedQueries<'m, 'a, 't>, String> {
+        let mut stopped = false;
+        let mut checkpoint = || {
+            stopped |= cancelled();
+            stopped
+        };
+        if checkpoint() {
+            return Err("laser trace matching cancelled".into());
+        }
+        validate_inputs(traces, sheets, config)?;
+        let mut cache = Vec::with_capacity(traces.len());
+        for trace in traces {
+            cache.push(
+                self.epipolar
+                    .prepare_trace(trace, config.intersection, &mut checkpoint),
+            );
+            if checkpoint() {
+                return Err("laser trace matching cancelled".into());
+            }
+        }
+        Ok(PreparedQueries {
+            matcher: self,
+            traces,
+            sheets,
+            config,
+            cache,
         })
     }
 
@@ -128,6 +194,18 @@ impl<'a> PreparedMatcher<'a> {
         config: Config,
         cancelled: &mut impl FnMut() -> bool,
     ) -> Result<Matches, String> {
+        self.match_impl(first_pixel, traces, sheets, config, None, cancelled)
+    }
+
+    fn match_impl(
+        &self,
+        first_pixel: [f64; 2],
+        traces: &[Vec<[f64; 2]>],
+        sheets: &[QuadraticSheet],
+        config: Config,
+        cache: Option<&[Result<epipolar_trace::NormalizedTrace<'_>, String>]>,
+        cancelled: &mut impl FnMut() -> bool,
+    ) -> Result<Matches, String> {
         let check = |cancelled: &mut dyn FnMut() -> bool| {
             if cancelled() {
                 Err("laser trace matching cancelled".to_string())
@@ -136,17 +214,7 @@ impl<'a> PreparedMatcher<'a> {
             }
         };
         check(cancelled)?;
-        config.validate()?;
-        if !(1..=128).contains(&traces.len())
-            || !(1..=128).contains(&sheets.len())
-            || traces.iter().any(|t| !(2..=4096).contains(&t.len()))
-        {
-            return Err("invalid laser trace matching bounds".into());
-        }
-        let vertices: usize = traces.iter().map(Vec::len).sum();
-        if vertices > 65536 || vertices > config.maximum_work {
-            return Err("laser trace vertex or work limit exceeded".into());
-        }
+        let vertices = validate_inputs(traces, sheets, config)?;
         let ray = self.first.ray(first_pixel)?;
         let mut projections = Vec::new();
         for (sheet_index, sheet) in sheets.iter().enumerate() {
@@ -173,9 +241,20 @@ impl<'a> PreparedMatcher<'a> {
         let mut ambiguous = false;
         for (trace_index, trace) in traces.iter().enumerate() {
             check(cancelled)?;
-            let intersections =
-                self.epipolar
-                    .intersections(first_pixel, trace, config.intersection, cancelled)?;
+            let intersections = match cache {
+                Some(cache) => self.epipolar.intersections_cached(
+                    first_pixel,
+                    &cache[trace_index],
+                    config.intersection,
+                    cancelled,
+                )?,
+                None => self.epipolar.intersections(
+                    first_pixel,
+                    trace,
+                    config.intersection,
+                    cancelled,
+                )?,
+            };
             ambiguous |= !intersections.ambiguous_segments.is_empty();
             let mut crossings = Vec::with_capacity(intersections.intersections.len());
             for (crossing_index, intersection) in
@@ -234,6 +313,25 @@ impl<'a> PreparedMatcher<'a> {
             work,
         })
     }
+}
+
+fn validate_inputs(
+    traces: &[Vec<[f64; 2]>],
+    sheets: &[QuadraticSheet],
+    config: Config,
+) -> Result<usize, String> {
+    config.validate()?;
+    if !(1..=128).contains(&traces.len())
+        || !(1..=128).contains(&sheets.len())
+        || traces.iter().any(|t| !(2..=4096).contains(&t.len()))
+    {
+        return Err("invalid laser trace matching bounds".into());
+    }
+    let vertices: usize = traces.iter().map(Vec::len).sum();
+    if vertices > 65536 || vertices > config.maximum_work {
+        return Err("laser trace vertex or work limit exceeded".into());
+    }
+    Ok(vertices)
 }
 
 #[cfg(test)]
@@ -552,5 +650,156 @@ mod tests {
                     .is_err()
             );
         }
+    }
+
+    #[test]
+    fn cached_results_preserve_all_crossings_errors_and_ambiguity() {
+        let (mut rig, limits, config, sheet) = fixture();
+        rig.left.skew = 2.;
+        rig.right.skew = -3.;
+        rig.left.distortion = Brown5 {
+            k1: 0.05,
+            k2: -0.002,
+            p1: 0.001,
+            p2: -0.001,
+            k3: 0.0001,
+        };
+        rig.right.distortion = rig.left.distortion;
+        let matcher = PreparedMatcher::new(&rig, limits).unwrap();
+        let traces_cases = [
+            vec![trace(270.), trace(290.)],
+            vec![trace(290.), trace(290.)],
+            vec![vec![[289., 250.], [291., 250.]], trace(290.)],
+            vec![vec![[290., 249.], [290., 250.], [290., 251.]]],
+            vec![vec![[290., 249.], [290., 279.]]],
+            vec![vec![[f64::NAN, 249.], [290., 251.]]],
+        ];
+        for traces in traces_cases {
+            for sheets in [
+                vec![sheet],
+                vec![sheet, sheet],
+                vec![QuadraticSheet {
+                    offset: 80.,
+                    ..sheet
+                }],
+                vec![QuadraticSheet {
+                    offset: f64::NAN,
+                    ..sheet
+                }],
+            ] {
+                let cached = matcher
+                    .prepare_traces(&traces, &sheets, config, &mut || false)
+                    .unwrap();
+                for pixel in [[340., 250.], [340., 249.], [340., 280.], [-10., 250.]] {
+                    let expected =
+                        matcher.match_pixel(pixel, &traces, &sheets, config, &mut || false);
+                    let actual = cached.match_pixel(pixel, &mut || false);
+                    assert_eq!(
+                        serde_json::to_value(actual).unwrap(),
+                        serde_json::to_value(expected).unwrap()
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn cache_preserves_budgets_and_cancellation_in_preparation_and_queries() {
+        let (rig, limits, config, sheet) = fixture();
+        let matcher = PreparedMatcher::new(&rig, limits).unwrap();
+        let traces = [trace(290.)];
+        let sheets = [sheet];
+        assert!(
+            matcher
+                .prepare_traces(&traces, &sheets, config, &mut || true)
+                .is_err()
+        );
+        let mut calls = 0;
+        // A one-shot cancellation must not become a cached numerical error.
+        assert!(
+            matcher
+                .prepare_traces(&traces, &sheets, config, &mut || {
+                    calls += 1;
+                    calls == 3
+                })
+                .is_err()
+        );
+        for budget in [1, 2, 3] {
+            let config = Config {
+                maximum_work: budget,
+                ..config
+            };
+            let expected =
+                matcher.match_pixel([340., 250.], &traces, &sheets, config, &mut || false);
+            let actual = match matcher.prepare_traces(&traces, &sheets, config, &mut || false) {
+                Ok(cache) => cache.match_pixel([340., 250.], &mut || false),
+                Err(e) => Err(e),
+            };
+            assert_eq!(
+                serde_json::to_value(actual).unwrap(),
+                serde_json::to_value(expected).unwrap()
+            );
+        }
+        let cache = matcher
+            .prepare_traces(&traces, &sheets, config, &mut || false)
+            .unwrap();
+        assert!(cache.match_pixel([340., 250.], &mut || true).is_err());
+        let mut calls = 0;
+        assert!(
+            cache
+                .match_pixel([340., 250.], &mut || {
+                    calls += 1;
+                    calls == 5
+                })
+                .is_err()
+        );
+        assert!(
+            cache
+                .match_pixel([340., 250.], &mut || false)
+                .unwrap()
+                .unique
+                .is_some()
+        );
+    }
+
+    #[test]
+    fn separately_prepared_geometry_and_trace_sets_do_not_share_cached_rays() {
+        let (rig, limits, config, sheet) = fixture();
+        let mut other = rig.clone();
+        other.right.fx *= 1.5;
+        other.right_from_left.translation_mm[0] *= 1.2;
+        let first = PreparedMatcher::new(&rig, limits).unwrap();
+        let second = PreparedMatcher::new(&other, limits).unwrap();
+        let traces = [trace(290.)];
+        let sheets = [sheet];
+        let a = first
+            .prepare_traces(&traces, &sheets, config, &mut || false)
+            .unwrap();
+        let b = second
+            .prepare_traces(&traces, &sheets, config, &mut || false)
+            .unwrap();
+        let actual_a =
+            serde_json::to_value(a.match_pixel([340., 250.], &mut || false).unwrap()).unwrap();
+        let actual_b =
+            serde_json::to_value(b.match_pixel([340., 250.], &mut || false).unwrap()).unwrap();
+        assert_eq!(
+            actual_a,
+            serde_json::to_value(
+                first
+                    .match_pixel([340., 250.], &traces, &sheets, config, &mut || false)
+                    .unwrap()
+            )
+            .unwrap()
+        );
+        assert_eq!(
+            actual_b,
+            serde_json::to_value(
+                second
+                    .match_pixel([340., 250.], &traces, &sheets, config, &mut || false)
+                    .unwrap()
+            )
+            .unwrap()
+        );
+        assert_ne!(actual_a, actual_b);
     }
 }

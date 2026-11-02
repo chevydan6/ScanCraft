@@ -10,6 +10,11 @@ invokes the [sheet-supported matcher](SHEET_SUPPORTED_TRACES.md). No partner see
 or externally prepared image observations are required. Geometry and sheets remain
 explicit hypotheses. No calibration, PLY, editable project or live session is created.
 
+The workflow now [prepares corrected trace vertices once per pair](PREPARED_LASER_TRACES.md),
+preserving the output schema and complete query results while avoiding repeated
+inverse distortion. The verification/timing checkpoint below predates this optimization;
+the linked report contains current 703-test and comparative performance evidence.
+
 ## Input contract
 
 Geometry uses `StereoCalibration` JSON. The request has these fields:

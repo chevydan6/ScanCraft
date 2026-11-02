@@ -4,6 +4,9 @@
 selection, shared detection/continuity and sheet-supported matching. It streams
 full query diagnostics and preserves candidate/source lineage with explicit
 work/storage bounds; see [automatic recorded matching](docs/RECORDED_SHEET_MATCHING.md).
+Its `PreparedQueries` cache binds normalized trace vertices to immutable input
+geometry and is reused only within a frame pair; see
+[prepared trace contracts and measurements](docs/PREPARED_LASER_TRACES.md).
 
 `scancraft-calibration::laser_trace::PreparedMatcher` composes explicit quadratic
 sheet projections, full-trace epipolar crossings and stereo triangulation. It

@@ -38,8 +38,9 @@ vertices, positive support radius at most 32 pixels. The configurable work budge
 counts trace vertices and crossing-to-projection comparisons and is at most ten
 million. Cancellation is checked between bounded numerical operations. Work units
 are not time or CPU-instruction measurements. Storage grows with retained
-crossings and support combinations. Inverse distortion is currently repeated per
-query; throughput, latency and large-data memory use have not been benchmarked.
+crossings and support combinations. The uncached API repeats inverse distortion
+per query. [Prepared traces](PREPARED_LASER_TRACES.md) now provide a measured reuse
+path; general throughput, latency and large-data memory qualification remain open.
 
 The matcher does not parse factory records, detect traces, validate recordings,
 infer reflection, prove projector identity or activate calibration. Uniqueness is

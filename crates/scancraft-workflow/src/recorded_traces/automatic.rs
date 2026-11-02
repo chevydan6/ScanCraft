@@ -192,6 +192,16 @@ pub fn run(inputs: &Inputs, target: &Path, work: &WorkControl) -> Result<Value, 
         "clock_domains_verified":false,"synchronization_verified":false,
         "geometry_binding_verified":false,"geometry_translation_units_verified":false,
         "physical_accuracy_qualified":false,"projector_line_identity_verified":false,"calibration_activated":false});
+    let prepared_queries = if traces.is_empty() {
+        None
+    } else {
+        Some(
+            matcher.prepare_traces(&traces, &request.sheets, request.matching, &mut || {
+                work.check().is_err()
+            }),
+        )
+    };
+    work.check()?;
     let partial = staging(target)?;
     let manifest=(||->Result<Value,Error>{
         let mut artifacts=Vec::new();
@@ -207,8 +217,10 @@ pub fn run(inputs: &Inputs, target: &Path, work: &WorkControl) -> Result<Value, 
             let mut out=LimitedWriter {inner:out,remaining:request.maximum_report_bytes};
             for &index in &first_indices {
                 work.check()?;let pixel=map_pixel(0,sides[0].detections.observations[index].pixel)?;
-                let result=if traces.is_empty() {Err("no supported second-camera traces".into())} else {
-                    matcher.match_pixel(pixel,&traces,&request.sheets,request.matching,&mut ||work.check().is_err())
+                let result=match &prepared_queries {
+                    None=>Err("no supported second-camera traces".into()),
+                    Some(Err(error))=>Err(error.clone()),
+                    Some(Ok(prepared))=>prepared.match_pixel(pixel,&mut ||work.check().is_err()),
                 };
                 work.check()?;
                 match &result {

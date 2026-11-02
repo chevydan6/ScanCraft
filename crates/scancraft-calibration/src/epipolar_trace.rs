@@ -55,6 +55,13 @@ pub struct Intersections {
     pub ambiguous_segments: Vec<usize>,
 }
 
+// Only crate geometry code can construct/use a normalized trace. Public cached
+// matching retains the preparing matcher and immutable raw traces together.
+pub(crate) struct NormalizedTrace<'t> {
+    raw: &'t [[f64; 2]],
+    points: Vec<Vector3<f64>>,
+}
+
 /// Numerically validated camera geometry; preparation does not qualify calibration.
 pub struct PreparedTrace<'a> {
     first: PreparedCamera<'a>,
@@ -100,6 +107,24 @@ impl<'a> PreparedTrace<'a> {
         config: Config,
         cancelled: &mut impl FnMut() -> bool,
     ) -> Result<Intersections, String> {
+        if cancelled() {
+            return Err("epipolar trace cancelled".into());
+        }
+        config.validate()?;
+        if !(2..=4096).contains(&trace.len()) {
+            return Err("invalid epipolar trace limits".into());
+        }
+        let line = self.line(first_pixel, config, cancelled)?;
+        let trace = self.prepare_trace(trace, config, cancelled)?;
+        self.intersect_line(line, &trace, config, cancelled)
+    }
+
+    pub(crate) fn prepare_trace<'t>(
+        &self,
+        trace: &'t [[f64; 2]],
+        config: Config,
+        cancelled: &mut impl FnMut() -> bool,
+    ) -> Result<NormalizedTrace<'t>, String> {
         let check = |cancelled: &mut dyn FnMut() -> bool| {
             if cancelled() {
                 Err("epipolar trace cancelled".to_string())
@@ -112,18 +137,7 @@ impl<'a> PreparedTrace<'a> {
         if !(2..=4096).contains(&trace.len()) {
             return Err("invalid epipolar trace limits".into());
         }
-        let line = self.essential * Vector3::from(self.first.ray(first_pixel)?);
-        let norm = line.x.hypot(line.y).hypot(line.z);
-        let xy_norm = line.x.hypot(line.y);
-        if !norm.is_finite() || norm < config.minimum_plane_sine || xy_norm == 0. {
-            return Err("degenerate reference-ray epipolar constraint".into());
-        }
-        let line = line / xy_norm;
-        if !line.iter().all(|v| v.is_finite()) {
-            return Err("epipolar constraint normalization overflow".into());
-        }
         let mut points = Vec::with_capacity(trace.len());
-        let mut distances = Vec::with_capacity(trace.len());
         for (i, &pixel) in trace.iter().enumerate() {
             check(cancelled)?;
             if i > 0 {
@@ -134,11 +148,79 @@ impl<'a> PreparedTrace<'a> {
             }
             let ray = self.second.ray(pixel)?;
             let point = Vector3::new(ray[0] / ray[2], ray[1] / ray[2], 1.);
-            let distance = line.dot(&point);
-            if !point.iter().all(|v| v.is_finite()) || !distance.is_finite() {
+            if !point.iter().all(|v| v.is_finite()) {
                 return Err("epipolar trace coordinate overflow".into());
             }
             points.push(point);
+        }
+        check(cancelled)?;
+        Ok(NormalizedTrace { raw: trace, points })
+    }
+
+    fn line(
+        &self,
+        first_pixel: [f64; 2],
+        config: Config,
+        cancelled: &mut impl FnMut() -> bool,
+    ) -> Result<Vector3<f64>, String> {
+        let check = |cancelled: &mut dyn FnMut() -> bool| {
+            if cancelled() {
+                Err("epipolar trace cancelled".to_string())
+            } else {
+                Ok(())
+            }
+        };
+        check(cancelled)?;
+        let line = self.essential * Vector3::from(self.first.ray(first_pixel)?);
+        let norm = line.x.hypot(line.y).hypot(line.z);
+        let xy_norm = line.x.hypot(line.y);
+        if !norm.is_finite() || norm < config.minimum_plane_sine || xy_norm == 0. {
+            return Err("degenerate reference-ray epipolar constraint".into());
+        }
+        let line = line / xy_norm;
+        if !line.iter().all(|v| v.is_finite()) {
+            return Err("epipolar constraint normalization overflow".into());
+        }
+        Ok(line)
+    }
+
+    pub(crate) fn intersections_cached(
+        &self,
+        first_pixel: [f64; 2],
+        trace: &Result<NormalizedTrace<'_>, String>,
+        config: Config,
+        cancelled: &mut impl FnMut() -> bool,
+    ) -> Result<Intersections, String> {
+        let line = self.line(first_pixel, config, cancelled)?;
+        self.intersect_line(
+            line,
+            trace.as_ref().map_err(Clone::clone)?,
+            config,
+            cancelled,
+        )
+    }
+
+    fn intersect_line(
+        &self,
+        line: Vector3<f64>,
+        trace: &NormalizedTrace<'_>,
+        config: Config,
+        cancelled: &mut impl FnMut() -> bool,
+    ) -> Result<Intersections, String> {
+        let check = |cancelled: &mut dyn FnMut() -> bool| {
+            if cancelled() {
+                Err("epipolar trace cancelled".to_string())
+            } else {
+                Ok(())
+            }
+        };
+        let mut distances = Vec::with_capacity(trace.points.len());
+        for point in &trace.points {
+            check(cancelled)?;
+            let distance = line.dot(point);
+            if !distance.is_finite() {
+                return Err("epipolar trace coordinate overflow".into());
+            }
             distances.push(distance);
         }
         let mut output = Intersections {
@@ -146,7 +228,7 @@ impl<'a> PreparedTrace<'a> {
             ambiguous_segments: Vec::new(),
         };
         let mut vertices = BTreeSet::new();
-        for i in 0..trace.len() - 1 {
+        for i in 0..trace.raw.len() - 1 {
             check(cancelled)?;
             let a = distances[i];
             let b = distances[i + 1];
@@ -176,9 +258,9 @@ impl<'a> PreparedTrace<'a> {
             {
                 continue;
             }
-            let point = points[i] * (1. - fraction) + points[i + 1] * fraction;
+            let point = trace.points[i] * (1. - fraction) + trace.points[i + 1] * fraction;
             let pixel = match vertex_index {
-                Some(vertex) => trace[vertex],
+                Some(vertex) => trace.raw[vertex],
                 None => self.second.project(point.into())?,
             };
             let residual = line.dot(&point).abs();

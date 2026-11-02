@@ -2217,3 +2217,34 @@ CodeRabbit usage remains unavailable/lookup_failed; no automated-review pass or
 publication claimed, and no paid usage/merge/protection change. Local commit and
 evidence bindings follow in the recovery checkpoint. Reviewer files and physical
 scanner setup remain untouched. GUI/live integration and qualification remain open.
+
+DEV-PREPARED-LASER-TRACES — developer optimization, not an independent finding.
+Profiled before changing implementation: uncached matching about189ms, a separate
+repeated right-ray loop164ms, detection70ms and recording validation/selection57ms.
+Added crate-private normalized traces and public PreparedQueries borrowing its
+exact matcher, traces, sheets and config. Automatic recorded workflow prepares
+once per pair. Shared intersection math preserves raw endpoint/interpolation
+lineage and error/budget semantics. No precision changes, sampling or relaxed limits.
+One-shot preparation cancellation is latched rather than cached as a numerical error.
+
+Changed calibration/epipolar_trace.rs, laser_trace.rs, workflow automatic.rs,
+diagnostic example/reference flag and architecture/status/contract documentation.
+Three new equivalence/model-separation/budget/cancellation tests; full703-test,
+format/strict-Clippy/release gate PASS. Both cached and uncached36-case independent
+known-point references pass. Three real saved pairs preserve EVERY complete query
+result and candidate coordinate exactly (473/480/473), as well as detections and
+artifact checksums. Seeded workflow79/81/74 remains exact; low-budget592 errors
+remain byte-identical. No hardware/model qualification is inferred.
+
+Ten measured iterations after one warm-up, alternating cached/uncached order in
+the same optimized probe, give matching median187.26ms versus7.87ms plus0.310ms
+preparation; median paired matching speedup including preparation22.9x on this
+specific592-query workload. Shared machine, one scene, results retained in memory;
+not a full scanner speedup. Subsequent offline CLI runs0.19s each versus earlier
+0.38s are limited end-to-end observations, not a controlled paired benchmark.
+PREPARED_LASER_TRACES.md records method, limits and remaining70ms-class detection cost.
+Private source/build/library/binary hashes and raw timing/result evidence stay local.
+
+Automated review/publication remain pending the unavailable CodeRabbit quota and
+billing lookup. No paid service, review bypass, merge or reviewer-file change.
+Commit and evidence binding are recorded in the recovery checkpoint.

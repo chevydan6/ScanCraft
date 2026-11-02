@@ -26,6 +26,7 @@ def project(camera, point):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--binary", default="target/release/examples/match_laser_traces")
+    parser.add_argument("--prepared", action="store_true", help="Exercise cached trace preparation")
     args = parser.parse_args()
     count, max_position_error, max_pixel_error = 0, 0.0, 0.0
     for scale, angle, distortion, y in itertools.product(
@@ -70,7 +71,8 @@ def main():
             "config": {"intersection": {"maximum_segment_length_px": 16,
                                         "normalized_tolerance": 1e-10, "minimum_plane_sine": 1e-8},
                        "maximum_sheet_distance_px": 1, "maximum_work": 1000}}
-        run = subprocess.run([args.binary], input=json.dumps(request), text=True,
+        command = [args.binary] + (["--prepared"] if args.prepared else [])
+        run = subprocess.run(command, input=json.dumps(request), text=True,
                              capture_output=True, check=True)
         result = json.loads(run.stdout)["result"]
         assert result["unique"] == {"trace_index": correct, "crossing_index": 0, "support_index": 0}
@@ -84,7 +86,7 @@ def main():
         max_position_error = max(max_position_error, position_error)
         max_pixel_error = max(max_pixel_error, pixel_error)
         count += 1
-    print(json.dumps({"synthetic_cases": count, "max_position_error": max_position_error,
+    print(json.dumps({"synthetic_cases": count, "prepared": args.prepared, "max_position_error": max_position_error,
                       "max_pixel_error": max_pixel_error, "physical_accuracy_qualified": False}, indent=2))
 
 
