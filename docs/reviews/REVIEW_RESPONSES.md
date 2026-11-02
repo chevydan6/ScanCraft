@@ -2732,3 +2732,61 @@ was temporarily enabled and verified restored, as authorized for capture testing
 DEV-LIVE-LASER-GUI implementation commit: `a570c783111c1b6f25d64af8fb08c0f569e23d17`.
 This follow-up binds documentation only; the 771-test build and hardware/replay evidence
 remain the exact implementation source. Independent review remains pending.
+
+DEV-BUFFERED-LASER-JOURNAL — developer optimization, not an independent finding.
+Accepted a measured serializer/checksum bottleneck before considering broader
+scheduling changes. A private same-binary probe uses five retained Raptor pairs,
+11 iterations per pair (first warm-up), and alternating direct/buffered order.
+Final report-plus-newline encode/flush medians are 6.875–7.076 ms direct versus
+1.894–2.029 ms buffered, with median paired ratios 3.412–3.622. Every output's
+bytes, length and CRC match. Fsync is measured separately; creation, raw I/O,
+publication and the full record wrapper are excluded. Engine time remains
+42.788–46.298 ms and full preview preparation 6.70–6.77 ms. These are component
+observations on a warm shared host, not an application-wide speedup or live pass.
+
+Added a fixed 64 KiB outer BufWriter in workflow laser_stream/bundle/io.rs::pair_record.
+bundle.rs flushes the complete record and newline before optional preview.
+CappedFile limits, CRC, final fsync/readback and publication remain unchanged.
+On serialization/cap/write/flush error, into_parts explicitly discards pending
+bytes without a Drop retry; accepted prefixes remain in failed staging. No session
+history buffer, copied upstream algorithm, mathematical/format/threshold change,
+new device control, dependency or license change was introduced.
+
+Three new regressions and the full 774-test/format/strict-Clippy/release gate pass.
+Coverage includes Unicode/floating-point multi-record equality and CRC across
+buffer boundaries, exact/one-byte-short caps, partial write and flush errors,
+no Drop retry, serializer failure, and a parseable record visible before preview.
+The initial test assumed four queries where the fixture has five queries/four
+candidates; it now compares the actual borrowed report. An unused Write import
+moved to tests. The first private probe needed its direct image-crate dependency;
+its manifest was corrected. The exploratory newline-less probe is separate from
+the final exact-helper comparison. All failed logs and both binaries are retained;
+no lint suppression was added.
+
+An actual GUI trial with private LP_NUM_THREADS=2 rendering saves 32 raw frames per
+camera, processes 21 pairs, records 11/10 processing drops and one unmatched second
+input, and yields 1869–2089 candidates per pair. Startup rejects are 91/86, ongoing
+0/0. The 65.625% processed fraction remains below 90%. The earlier 19/32 trial had
+different frames/scheduling, so it is not a controlled application comparison.
+A separate root-close trial saves 9/10 raw frames and seven pairs, with two drops
+per camera, one unmatched input and startup rejects 101/1 (ongoing 0/0). Both pass
+raw replay/publication/cleanup/restoration and exact full stream/illumination GET
+readbacks, including original property 151 restored. One 0.281-second close-to-exit
+observation is not a hard bound. Sampling all GUI tasks positively observes helper
+camera descriptors with none in the GUI; helpers/GUI processes exit. Screenshots
+are inspected. Default software-renderer acquisition failures remain unresolved.
+
+Separate saved-frame checks reproduce 28 reports / 54,381 candidate values, every
+frame CRC/sequence/flags/time/PTS reference and the complete pair-record bytes using
+the unchanged base serializer. Both artifact manifests match lengths/CRCs. Physical
+geometry/units/coverage, tracking/fusion and sustained performance remain unqualified.
+SCAN-REV-005/006/021 and 007 remain unresolved/unqualified; no independent finding
+status, severity or closure was changed.
+
+See docs/LASER_STREAM_PROFILE.md and updated status/acceptance/architecture/roadmap/
+benchmarks. Exact source, binary, evidence and commit bindings are in the recovery
+checkpoint. Private probes, raw frames, models and screenshots remain outside Git
+and review uploads. Official CodeRabbit 0.9.2 still returns lookup_failed for included
+quota/billing; no paid review, upload, review pass, push, PR, merge or protection
+bypass. Reviewer-owned files, firmware and physical calibration are untouched;
+the authorized scoped property-151 capture trial was restored.

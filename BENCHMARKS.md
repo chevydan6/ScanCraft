@@ -1,5 +1,11 @@
 # Benchmarks
 
+[Laser stream profiling](docs/LASER_STREAM_PROFILE.md): same-binary alternating
+journal comparison on five saved pairs reduces encoding/flush medians from
+6.875–7.076 ms to 1.894–2.029 ms with exact output equality. Engine time remains
+42.788–46.298 ms; preview preparation adds 6.70–6.77 ms. These component timings
+are not an application-wide speedup or live-rate qualification.
+
 Native laser GUI diagnostics (2026-11-03) save all 32 raw frames/camera in one
 private renderer-limited trial but process only 19 pairs (59.375%, below 90%).
 Two default private software-renderer starts accept zero frames; rendering-load

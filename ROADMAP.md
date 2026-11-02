@@ -3,7 +3,8 @@
 Native laser Start/Stop and camera/candidate previews now use the supervised GUI
 helper. Next investigate renderer-load/startup transport failures and measure
 complete-pair dispatch/compute scheduling: the GUI finite trial processes only
-19/32 possible pairs, below the 90% target. Preserve raw journals independently
+21/32 possible pairs after journal buffering, below the 90% target. Saved-data profiling still measures 43–46 ms of engine work alone; profile/validate
+computational scheduling before increasing buffers. Preserve raw journals independently
 of optional previews and retain failed-run evidence. See docs/LIVE_LASER_GUI.md.
 
 Calibrated dimensions, optical coverage, actual tracking/fusion and long-session

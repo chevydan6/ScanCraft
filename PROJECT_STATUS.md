@@ -1,5 +1,10 @@
 # Project status
 
+[Measured pair-journal buffering](docs/LASER_STREAM_PROFILE.md) reduces the saved-data
+report write component while retaining exact bytes and checksums. The 774-test
+Rust gate passes; a new native GUI trial saves 32 raw frames/camera and processes
+21 pairs (65.625%, still below 90%). Engine time remains the larger bottleneck.
+
 [Native laser GUI diagnostics](docs/LIVE_LASER_GUI.md) now provide Start/Stop,
 raw camera and single-pair candidate previews through a supervised helper. All
 771 tests and the Rust gate pass. A renderer-limited native trial saves 32 frames
@@ -28,7 +33,7 @@ claimed; independent automated review remains pending.
 
 ## Latest local reconstruction checkpoint — 2026-11-03
 
-The local development tree passes 771 Rust tests, formatting, strict Clippy and
+The local development tree passes 774 Rust tests, formatting, strict Clippy and
 release build. Recording-backed seeded trace diagnostics preserve source frames
 and interpolation lineage. A new native sheet-supported full-trace matcher removes
 the need for supplied partner seeds at the numerical component boundary; it has

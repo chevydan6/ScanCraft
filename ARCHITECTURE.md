@@ -1,5 +1,11 @@
 # Architecture
 
+Required laser pair records now batch serializer fragments in a fixed 64 KiB
+buffer before the existing capped/checksummed writer. Complete records flush
+before optional previews; errors discard pending bytes without Drop retry. Raw
+recording, numerical methods and publication boundaries are unchanged. See
+[profiling and invariants](docs/LASER_STREAM_PROFILE.md).
+
 The laser candidate GUI now supervises a device-owning helper via bounded typed
 IPC, latest-only preview mailboxes and explicit Stop/Abort/cleanup state. It renders
 raw thumbnails and single-pair diagnostic coordinates separately from metric

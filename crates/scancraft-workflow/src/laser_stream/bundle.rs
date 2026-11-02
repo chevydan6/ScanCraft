@@ -17,7 +17,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::{
     fs::{self, File},
-    io::Write,
     path::{Path, PathBuf},
     sync::{
         Arc, Mutex,
@@ -250,9 +249,8 @@ impl Plan {
                     })
                 },
                 |pair, result, progress| {
-                    serde_json::to_writer(&mut pairs, &record(pair, &result, progress))
+                    io::pair_record(&mut pairs, &record(pair, &result, progress))
                         .map_err(|e| e.to_string())?;
-                    pairs.write_all(b"\n").map_err(|e| e.to_string())?;
                     let offered = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                         preview(PreviewInput {
                             pair,

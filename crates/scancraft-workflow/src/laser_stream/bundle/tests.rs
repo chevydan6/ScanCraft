@@ -1,6 +1,6 @@
 use super::*;
 use crate::laser_stream::tests::{Fake, fixture};
-use std::sync::atomic::AtomicUsize;
+use std::{io::Write, sync::atomic::AtomicUsize};
 struct Files {
     root: PathBuf,
     geometry: PathBuf,
@@ -393,4 +393,130 @@ fn raw_mutation_after_cleanup_is_detected_before_publication() {
     assert!(!target.exists());
     assert!(error.contains("incomplete capture retained"));
     assert!(f.partial().join("failure.json").exists());
+}
+
+#[test]
+fn buffered_pair_records_preserve_bytes_checksums_and_exact_budget_across_flushes() {
+    let f = Files::new();
+    let value = json!({"observations":(0..4096).map(|i|json!({"index":i,"position":[i as f64/7.,-0.,1e-50],"error":"full diagnostic \u{03bb}"})).collect::<Vec<_>>()});
+    let mut expected = Vec::new();
+    for _ in 0..2 {
+        serde_json::to_writer(&mut expected, &value).unwrap();
+        expected.push(b'\n');
+    }
+    for (role, maximum, ok) in [
+        ("exact", expected.len() as u64, true),
+        ("one_short", expected.len() as u64 - 1, false),
+    ] {
+        let mut out = CappedFile::new(&f.root, role, maximum).unwrap();
+        io::pair_record(&mut out, &value).unwrap();
+        assert_eq!(io::pair_record(&mut out, &value).is_ok(), ok);
+        let digest = out.finish().unwrap();
+        let actual = fs::read(f.root.join(role)).unwrap();
+        assert!(actual.len() as u64 <= maximum);
+        assert_eq!(actual, expected[..actual.len()]);
+        assert_eq!(digest.bytes, actual.len() as u64);
+        assert_eq!(digest.crc32, crc32fast::hash(&actual));
+        if ok {
+            assert_eq!(actual, expected);
+        }
+        io::verify(
+            &f.root,
+            &digest,
+            &mut Guard::default(),
+            &WorkControl::default(),
+        )
+        .unwrap();
+    }
+}
+#[test]
+fn buffered_record_errors_never_retry_pending_bytes_on_drop() {
+    struct Partial {
+        bytes: Vec<u8>,
+        calls: usize,
+    }
+    impl Write for Partial {
+        fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+            self.calls += 1;
+            if self.calls == 1 {
+                let n = bytes.len().min(17);
+                self.bytes.extend_from_slice(&bytes[..n]);
+                Ok(n)
+            } else {
+                Err(std::io::Error::other("injected partial write failure"))
+            }
+        }
+        fn flush(&mut self) -> std::io::Result<()> {
+            Ok(())
+        }
+    }
+    let value = json!({"observations":vec![12345;30000]});
+    let mut expected = serde_json::to_vec(&value).unwrap();
+    expected.push(b'\n');
+    let mut out = Partial {
+        bytes: Vec::new(),
+        calls: 0,
+    };
+    let e = io::pair_record(&mut out, &value).unwrap_err();
+    assert!(e.to_string().contains("partial write"));
+    assert_eq!(
+        out.calls, 2,
+        "error return must not trigger a Drop write retry"
+    );
+    assert_eq!(out.bytes, expected[..17]);
+    struct BrokenFlush;
+    impl Write for BrokenFlush {
+        fn write(&mut self, b: &[u8]) -> std::io::Result<usize> {
+            Ok(b.len())
+        }
+        fn flush(&mut self) -> std::io::Result<()> {
+            Err(std::io::Error::other("flush failed"))
+        }
+    }
+    assert!(
+        io::pair_record(&mut BrokenFlush, &json!([1, 2]))
+            .unwrap_err()
+            .to_string()
+            .contains("flush failed")
+    );
+}
+#[test]
+fn serialization_failure_discards_unwritten_tail_and_success_is_visible_before_preview() {
+    struct Incomplete;
+    impl Serialize for Incomplete {
+        fn serialize<S: serde::Serializer>(&self, s: S) -> std::result::Result<S::Ok, S::Error> {
+            use serde::ser::SerializeSeq;
+            let mut seq = s.serialize_seq(None)?;
+            seq.serialize_element("prefix")?;
+            Err(serde::ser::Error::custom("injected serialization failure"))
+        }
+    }
+    let mut bytes = Vec::new();
+    assert!(io::pair_record(&mut bytes, &Incomplete).is_err());
+    assert!(bytes.is_empty());
+    let f = Files::new();
+    let target = f.root.join("complete");
+    let mut previews = 0;
+    f.plan()
+        .capture(
+            &target,
+            &Arc::new(WorkControl::default()),
+            &Arc::new(AtomicBool::new(false)),
+            source(&f, Arc::new(AtomicUsize::new(0))),
+            || Ok(()),
+            |input| {
+                let staged = f.partial();
+                let bytes = fs::read(staged.join("pairs.ndjson")).unwrap();
+                assert_eq!(bytes.last(), Some(&b'\n'));
+                let record: Value = serde_json::from_slice(&bytes).unwrap();
+                assert_eq!(
+                    record["result"]["Ok"]["queries"],
+                    input.outcome.as_ref().unwrap().queries
+                );
+                previews += 1;
+                PreviewStatus::Accepted
+            },
+        )
+        .unwrap();
+    assert_eq!(previews, 1);
 }

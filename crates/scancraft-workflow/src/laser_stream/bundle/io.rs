@@ -63,6 +63,19 @@ impl Write for CappedFile {
         self.out.flush()
     }
 }
+/// Batch small serializer writes before CappedFile's checksum/write path. The
+/// fixed buffer is discarded explicitly on error: Drop must not retry rejected
+/// bytes. A successful complete record is flushed before optional preview.
+pub(super) fn pair_record(out: &mut impl Write, value: &impl Serialize) -> io::Result<()> {
+    let mut buffered = BufWriter::with_capacity(64 * 1024, out);
+    let result = (|| {
+        serde_json::to_writer(&mut buffered, value)?;
+        buffered.write_all(b"\n")?;
+        buffered.flush()
+    })();
+    let (_out, _pending) = buffered.into_parts();
+    result
+}
 pub(super) struct RawJournal {
     pub writer: Writer<CappedFile>,
     pub digests: RawDigests,
