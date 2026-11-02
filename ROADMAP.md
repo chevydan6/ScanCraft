@@ -1,5 +1,14 @@
 # Roadmap
 
+Current laser priority: connect the bounded raw-journal-first workflow
+(`16b9092dbcd5fcd09162569a941691cbfa75fee3`) to the native acquisition helper and
+GUI with explicit source/settings ownership, queue omissions and recovery.
+Measure real scheduling, pair yield and preview latency before changing queue
+policy or claiming live throughput. Tracking/fusion and long-session project
+retention remain separate work; the old IR 1000-frame limit is unchanged.
+Calibrated reconstruction and optical coverage remain higher release priorities
+than additional editing features. Physical calibration is still deferred.
+
 1. Complete native acquisition: decoding, timestamps, controls, cold-start,
    reconnection, multiple cameras, explicit dropped-frame/error accounting.
 2. Complete recording schema for device/settings/calibration metadata; replay

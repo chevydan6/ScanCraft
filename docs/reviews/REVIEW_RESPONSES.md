@@ -2597,3 +2597,7 @@ control/firmware/physical calibration, private-data upload, reviewer-file/status
 change, main-branch merge or protection bypass. Fresh CodeRabbit quota/billing still
 lookup_failed, no paidusage/review/pass. Review/publication pending. See
 BOUNDED_LASER_STREAM.md for contracts, provenance and validation scope.
+
+DEV-BOUNDED-LASER-STREAM commit binding: implementation `16b9092dbcd5fcd09162569a941691cbfa75fee3`.
+Follow-up acceptance/roadmap documentation records this exact revision; application
+source and final746-test/replay evidence are unchanged. Independent review pending.
