@@ -2,9 +2,14 @@
 
 Stage: experimental. Specification: docs/MISSION.txt.
 
-## Latest local reconstruction checkpoint — 2026-11-02
+[Conservative epipolar indexing](docs/INDEXED_EPIPOLAR_TRACES.md) reduces measured
+matching-only time on two larger saved workloads while retaining the scalar path
+and complete numerical results. No new live-scanning or accuracy qualification is
+claimed; independent automated review remains pending.
 
-The local development tree passes 732 Rust tests, formatting, strict Clippy and
+## Latest local reconstruction checkpoint — 2026-11-03
+
+The local development tree passes 738 Rust tests, formatting, strict Clippy and
 release build. Recording-backed seeded trace diagnostics preserve source frames
 and interpolation lineage. A new native sheet-supported full-trace matcher removes
 the need for supplied partner seeds at the numerical component boundary; it has

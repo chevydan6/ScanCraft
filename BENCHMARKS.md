@@ -144,3 +144,13 @@ median changed from 89.930 to 43.795 ms with bit-identical outputs/masks. The 58
 passes; single-CPU and thread-denied child fallbacks passed. This is not full
 scan throughput, accuracy or RSS qualification. See docs/PAIRED_REMAP_CONCURRENCY.md
 and docs/benchmarks/paired-remap-2026-10-27.json. Automated review remains pending.
+
+## Conservative epipolar block indexing
+
+Final same-binary production-library versus 72ea37c scalar/prepared comparison,
+real WorkControl callbacks, 13 iterations/first warmup/rotating order: expensive
+saved pose median86.610→32.485ms (median paired ratio2.672), box49.997→23.592ms
+(ratio2.117), small scalar-fallback pose1.502→1.524ms (ratio0.985). Every complete
+result equal outside timers. Matching only, excluding preparation/image/JSON/I/O;
+shared warm host, no live/accuracy/general speedup inference.
+See docs/INDEXED_EPIPOLAR_TRACES.md for exact scope, cancellation counts and limits.

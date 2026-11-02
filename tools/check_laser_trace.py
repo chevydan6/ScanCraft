@@ -29,6 +29,7 @@ def main():
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument("--prepared-pixel", action="store_true", help="Exercise cached first-pixel projections and execution")
     modes.add_argument("--prepared", action="store_true", help="Exercise cached trace preparation")
+    parser.add_argument("--dense-traces", action="store_true", help="Use 192 vertices per trace to exercise conservative block indexing")
     args = parser.parse_args()
     count, max_position_error, max_pixel_error = 0, 0.0, 0.0
     for scale, angle, distortion, y in itertools.product(
@@ -53,10 +54,11 @@ def main():
         traces = []
         # Three points on the SAME first-camera ray, at distinct depths. Each
         # right trace crosses the epipolar line. Sheet support must select depth 1.
+        offsets = [-2 + 4*i/191 for i in range(192)] if args.dense_traces else [-2, 2]
         for ratio in [0.8, 1.0, 1.3]:
             center = [v * ratio for v in point]
             traces.append([project(second, transform([center[0], center[1] + dy * scale, center[2]]))
-                           for dy in [-2, 2]])
+                           for dy in offsets])
         correct = 1
         if count % 2:
             traces = [traces[1], traces[2], traces[0]]
@@ -88,7 +90,7 @@ def main():
         max_position_error = max(max_position_error, position_error)
         max_pixel_error = max(max_pixel_error, pixel_error)
         count += 1
-    print(json.dumps({"synthetic_cases": count, "prepared": args.prepared, "prepared_pixel": args.prepared_pixel, "max_position_error": max_position_error,
+    print(json.dumps({"synthetic_cases": count, "prepared": args.prepared, "prepared_pixel": args.prepared_pixel, "dense_traces": args.dense_traces, "max_position_error": max_position_error,
                       "max_pixel_error": max_pixel_error, "physical_accuracy_qualified": False}, indent=2))
 
 

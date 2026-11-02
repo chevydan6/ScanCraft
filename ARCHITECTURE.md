@@ -1,5 +1,9 @@
 # Architecture
 
+Prepared epipolar traces now include conservative 64-segment bounds, retaining
+the scalar solver for short traces and numerical fallback. See
+[indexed trace contracts and measurements](docs/INDEXED_EPIPOLAR_TRACES.md).
+
 `scancraft_depth::laser_pair::Processor` processes borrowed raw frame pairs without
 files or JSON and returns bounded candidates, per-query outcomes and camera
 counters. Optional `Sink` events carry full diagnostics. Recording workflows supply

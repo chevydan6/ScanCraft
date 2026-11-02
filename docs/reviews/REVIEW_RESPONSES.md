@@ -2501,3 +2501,53 @@ merge or protection bypass. Freshest CodeRabbit usage still alllookup_failed;
 review/publication pending, not passed. Goals005/006/021 remain open/unqualified;
 compute speed, calibration, coverage, tracking/fusion and sustained live scanning
 remain incomplete.
+
+
+DEV-INDEXED-EPIPOLAR-TRACES — developer optimization, not an independent finding.
+Accepted the measured need to reduce full-trace matching cost before live laser
+integration. Generic cancellation helpers alone gave only small gains. Added
+conservative 64-segment normalized bounds in calibration/epipolar_trace/index.rs,
+indexed preparation/query paths and shared original scalar interpolation in
+epipolar_trace.rs; laser_trace.rs selects indexed preparation. Independently
+written interval culling, adapting existing project code from72ea37c5d07bf09ca54eb5ee26b23b14e4e3364a;
+no copied upstream source or new dependency. Entire raw trace validation remains.
+Risky bounds force original scalar distance prepass before any emitted result.
+Global indices/shared-vertex dedup, all competing/ambiguous supports, arithmetic,
+configured budgets and unqualified physical flags are unchanged.
+
+Six new tests cover extreme exponents, conservative tolerance/rounding, long
+reversed/distorted traces and length threshold, boundary/coincident lineage,
+numerical fallback/error precedence and cancellation through skipped/retained
+work. Extended existing full matcher equivalence with long competing traces.
+First adversarial fixture mistakenly expected a projection error for a valid
+center pixel; corrected its geometry and explicit expected errors. Initial gate
+caught a test-only Clippy integer-expression warning; fixed without suppression.
+Final738-test/fmt/strict-alltarget-Clippy/release PASS. Reference tool adds
+--dense-traces; all36known-point cases in each sparse/dense and three preparation
+modes PASS, dense maxposition1.303e-8syntheticunits/maxpixel3.222e-10. No physical
+calibration or accuracy qualification inferred.
+
+All11 actual/synthetic saved pair reports retain complete match bytes,
+observations, camera counters and candidate values. All7artifacts+manifest exact
+for every11automatic and3seeded bundles, inputSHA/CRC/lengthsPASS. Native renders
+retain2532/1764 diagnostic points and both images, inspected withzero scannerfds.
+Original source is byte-verified against72ea37c in a same-binary benchmark using
+final production library, own isolated Cargo targets,13iterations/firstwarmup/
+rotating3mode order. Matching-only realWorkControl medians86.610→32.485ms on
+expensivepose (medianpairedratio2.672),49.997→23.592ms box (2.117), small fallback
+1.502→1.524ms (0.985; no improvement claimed). Full results equal outside timers.
+Counts drop only with skipped numerical work; perblock and retained scalar/final
+checks remain. No wholeapplication cancellation bound or universal speedup claim.
+
+Separate fullengine noJSON medians51.968/41.272ms on pose/box are saveddata
+observations, not paired index speedups/liveFPS. Optical coverage, physical
+model/units/synchronization/accuracy, tracking/fusion, shutdown005 and session021
+remain unqualified/open. Generic work-control architecture007 remains unchanged.
+No scanner capture/control/firmware/physical calibration, private payload upload,
+reviewer-file modification, finding-state change, merge or protection bypass.
+OfficialCLI0.9.2; fresh repository-scoped usage still returns lookup_failed for
+includedquota/billing. First usage invocation from home reported not_git_repository;
+corrected cwd and retained both logs. No paid review or independent pass claimed;
+review/publication pending. Exact implementation commit/source/build/evidence
+bindings are recorded in the developer recovery checkpoint; independent reviewer
+retains sole authority to verify/close findings. See INDEXED_EPIPOLAR_TRACES.md.

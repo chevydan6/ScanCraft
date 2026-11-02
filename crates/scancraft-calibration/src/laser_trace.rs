@@ -213,10 +213,11 @@ impl<'a> PreparedMatcher<'a> {
         let vertices = validate_inputs(traces, sheets, config)?;
         let mut cache = Vec::with_capacity(traces.len());
         for trace in traces {
-            cache.push(
-                self.epipolar
-                    .prepare_trace(trace, config.intersection, &mut checkpoint),
-            );
+            cache.push(self.epipolar.prepare_indexed_trace(
+                trace,
+                config.intersection,
+                &mut checkpoint,
+            ));
             if checkpoint() {
                 return Err("laser trace matching cancelled".into());
             }
@@ -264,13 +265,13 @@ impl<'a> PreparedMatcher<'a> {
         cache: Option<CachedInputs<'_, '_>>,
         cancelled: &mut impl FnMut() -> bool,
     ) -> Result<Matches, String> {
-        let check = |cancelled: &mut dyn FnMut() -> bool| {
+        fn check(cancelled: &mut impl FnMut() -> bool) -> Result<(), String> {
             if cancelled() {
                 Err("laser trace matching cancelled".to_string())
             } else {
                 Ok(())
             }
-        };
+        }
         check(cancelled)?;
         let vertices = validate_inputs(traces, sheets, config)?;
         let (cache, projections) = match cache {
@@ -834,6 +835,16 @@ mod tests {
             vec![vec![[290., 249.], [290., 250.], [290., 251.]]],
             vec![vec![[290., 249.], [290., 279.]]],
             vec![vec![[f64::NAN, 249.], [290., 251.]]],
+            vec![(0..193).map(|i| [290., 240. + i as f64 * 0.1]).collect()],
+            vec![
+                (0..193).map(|i| [280. + i as f64 * 0.1, 250.]).collect(),
+                trace(290.),
+            ],
+            vec![
+                (0..257)
+                    .map(|i| [290., 250. + (i as f64 * 0.3).sin()])
+                    .collect(),
+            ],
         ];
         for traces in traces_cases {
             for sheets in [

@@ -89,3 +89,10 @@ ten-frame recordings and publication/fsync, and were not a controlled paired
 end-to-end benchmark. They do not establish live FPS, preview latency, sustained
 memory bounds, acquisition reliability or physical accuracy. No hardware settings
 or calibration changed.
+
+## Conservative block culling
+
+Prepared queries additionally cache 64-segment normalized bounds for long traces.
+The scalar solver remains the reference and fallback. Selection, ambiguity, work
+budgets and numerical values are unchanged. See [indexed trace contracts and
+measurements](INDEXED_EPIPOLAR_TRACES.md) for rounding, cancellation and evidence.

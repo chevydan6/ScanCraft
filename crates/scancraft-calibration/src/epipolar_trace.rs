@@ -4,6 +4,17 @@ use crate::{PreparedCamera, epipolar::raw_field_matrices, stereo::StereoCalibrat
 use nalgebra::{Matrix3, Vector3};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
+mod index;
+use index::{BLOCK_SEGMENTS, Block, MAX_TRACE_VERTICES};
+
+struct Constraint {
+    line: Vector3<f64>,
+    config: Config,
+}
+struct Span<'a> {
+    first: usize,
+    distances: &'a [f64],
+}
 
 #[derive(Debug, Clone, Copy, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -60,6 +71,7 @@ pub struct Intersections {
 pub(crate) struct NormalizedTrace<'t> {
     raw: &'t [[f64; 2]],
     points: Vec<Vector3<f64>>,
+    blocks: Vec<Block>,
 }
 
 /// Numerically validated camera geometry; preparation does not qualify calibration.
@@ -116,7 +128,7 @@ impl<'a> PreparedTrace<'a> {
         }
         let line = self.line(first_pixel, config, cancelled)?;
         let trace = self.prepare_trace(trace, config, cancelled)?;
-        self.intersect_line(line, &trace, config, cancelled)
+        self.intersect_line_linear(line, &trace, config, cancelled)
     }
 
     pub(crate) fn prepare_trace<'t>(
@@ -125,13 +137,13 @@ impl<'a> PreparedTrace<'a> {
         config: Config,
         cancelled: &mut impl FnMut() -> bool,
     ) -> Result<NormalizedTrace<'t>, String> {
-        let check = |cancelled: &mut dyn FnMut() -> bool| {
+        fn check(cancelled: &mut impl FnMut() -> bool) -> Result<(), String> {
             if cancelled() {
                 Err("epipolar trace cancelled".to_string())
             } else {
                 Ok(())
             }
-        };
+        }
         check(cancelled)?;
         config.validate()?;
         if !(2..=4096).contains(&trace.len()) {
@@ -154,22 +166,59 @@ impl<'a> PreparedTrace<'a> {
             points.push(point);
         }
         check(cancelled)?;
-        Ok(NormalizedTrace { raw: trace, points })
+        Ok(NormalizedTrace {
+            raw: trace,
+            points,
+            blocks: Vec::new(),
+        })
     }
 
+    // Raw validation and inverse distortion still visit every vertex. The index
+    // only accelerates subsequent queries; it cannot turn an invalid trace valid.
+    pub(crate) fn prepare_indexed_trace<'t>(
+        &self,
+        raw: &'t [[f64; 2]],
+        config: Config,
+        cancelled: &mut impl FnMut() -> bool,
+    ) -> Result<NormalizedTrace<'t>, String> {
+        let mut trace = self.prepare_trace(raw, config, cancelled)?;
+        if raw.len() >= 2 * BLOCK_SEGMENTS {
+            for first in (0..raw.len() - 1).step_by(BLOCK_SEGMENTS) {
+                if cancelled() {
+                    return Err("epipolar trace cancelled".into());
+                }
+                let end = (first + BLOCK_SEGMENTS).min(raw.len() - 1);
+                let mut min = [f64::INFINITY; 2];
+                let mut max = [f64::NEG_INFINITY; 2];
+                for point in &trace.points[first..=end] {
+                    for axis in 0..2 {
+                        min[axis] = min[axis].min(point[axis]);
+                        max[axis] = max[axis].max(point[axis]);
+                    }
+                }
+                trace.blocks.push(Block {
+                    first,
+                    end,
+                    min,
+                    max,
+                });
+            }
+        }
+        Ok(trace)
+    }
     fn line(
         &self,
         first_pixel: [f64; 2],
         config: Config,
         cancelled: &mut impl FnMut() -> bool,
     ) -> Result<Vector3<f64>, String> {
-        let check = |cancelled: &mut dyn FnMut() -> bool| {
+        fn check(cancelled: &mut impl FnMut() -> bool) -> Result<(), String> {
             if cancelled() {
                 Err("epipolar trace cancelled".to_string())
             } else {
                 Ok(())
             }
-        };
+        }
         check(cancelled)?;
         let line = self.essential * Vector3::from(self.first.ray(first_pixel)?);
         let norm = line.x.hypot(line.y).hypot(line.z);
@@ -192,7 +241,7 @@ impl<'a> PreparedTrace<'a> {
         cancelled: &mut impl FnMut() -> bool,
     ) -> Result<Intersections, String> {
         let line = self.line(first_pixel, config, cancelled)?;
-        self.intersect_line(
+        self.intersect_line_indexed(
             line,
             trace.as_ref().map_err(Clone::clone)?,
             config,
@@ -200,20 +249,20 @@ impl<'a> PreparedTrace<'a> {
         )
     }
 
-    fn intersect_line(
+    fn intersect_line_linear(
         &self,
         line: Vector3<f64>,
         trace: &NormalizedTrace<'_>,
         config: Config,
         cancelled: &mut impl FnMut() -> bool,
     ) -> Result<Intersections, String> {
-        let check = |cancelled: &mut dyn FnMut() -> bool| {
+        fn check(cancelled: &mut impl FnMut() -> bool) -> Result<(), String> {
             if cancelled() {
                 Err("epipolar trace cancelled".to_string())
             } else {
                 Ok(())
             }
-        };
+        }
         let mut distances = Vec::with_capacity(trace.points.len());
         for point in &trace.points {
             check(cancelled)?;
@@ -228,12 +277,102 @@ impl<'a> PreparedTrace<'a> {
             ambiguous_segments: Vec::new(),
         };
         let mut vertices = BTreeSet::new();
-        for i in 0..trace.raw.len() - 1 {
-            check(cancelled)?;
-            let a = distances[i];
-            let b = distances[i + 1];
-            let close_a = a.abs() <= config.normalized_tolerance;
-            let close_b = b.abs() <= config.normalized_tolerance;
+        self.append_span(
+            trace,
+            &Constraint { line, config },
+            Span {
+                first: 0,
+                distances: &distances,
+            },
+            &mut output,
+            &mut vertices,
+            cancelled,
+        )?;
+        check(cancelled)?;
+        Ok(output)
+    }
+    fn intersect_line_indexed(
+        &self,
+        line: Vector3<f64>,
+        trace: &NormalizedTrace<'_>,
+        config: Config,
+        cancelled: &mut impl FnMut() -> bool,
+    ) -> Result<Intersections, String> {
+        const MAX_BLOCKS: usize = (MAX_TRACE_VERTICES - 1).div_ceil(BLOCK_SEGMENTS);
+        if trace.blocks.is_empty() || trace.blocks.len() > MAX_BLOCKS {
+            return self.intersect_line_linear(line, trace, config, cancelled);
+        }
+        // Classify every block before any scalar interpolation. If a bound risks
+        // overflow, use the original full distance prepass and its error order.
+        let mut active = [false; MAX_BLOCKS];
+        for (i, block) in trace.blocks.iter().enumerate() {
+            if cancelled() {
+                return Err("epipolar trace cancelled".into());
+            }
+            let Some(value) = block.may_cross(line, config.normalized_tolerance) else {
+                return self.intersect_line_linear(line, trace, config, cancelled);
+            };
+            active[i] = value;
+        }
+        let mut output = Intersections {
+            intersections: Vec::new(),
+            ambiguous_segments: Vec::new(),
+        };
+        let mut vertices = BTreeSet::new();
+        let mut distances = Vec::with_capacity(BLOCK_SEGMENTS + 1);
+        for (block, &active) in trace.blocks.iter().zip(&active) {
+            if cancelled() {
+                return Err("epipolar trace cancelled".into());
+            }
+            if !active {
+                continue;
+            }
+            distances.clear();
+            for point in &trace.points[block.first..=block.end] {
+                if cancelled() {
+                    return Err("epipolar trace cancelled".into());
+                }
+                let distance = line.dot(point);
+                if !distance.is_finite() {
+                    return Err("epipolar trace coordinate overflow".into());
+                }
+                distances.push(distance);
+            }
+            self.append_span(
+                trace,
+                &Constraint { line, config },
+                Span {
+                    first: block.first,
+                    distances: &distances,
+                },
+                &mut output,
+                &mut vertices,
+                cancelled,
+            )?;
+        }
+        if cancelled() {
+            return Err("epipolar trace cancelled".into());
+        }
+        Ok(output)
+    }
+    fn append_span(
+        &self,
+        trace: &NormalizedTrace<'_>,
+        query: &Constraint,
+        span: Span<'_>,
+        output: &mut Intersections,
+        vertices: &mut BTreeSet<usize>,
+        cancelled: &mut impl FnMut() -> bool,
+    ) -> Result<(), String> {
+        for local in 0..span.distances.len() - 1 {
+            let i = span.first + local;
+            if cancelled() {
+                return Err("epipolar trace cancelled".into());
+            }
+            let a = span.distances[local];
+            let b = span.distances[local + 1];
+            let close_a = a.abs() <= query.config.normalized_tolerance;
+            let close_b = b.abs() <= query.config.normalized_tolerance;
             if close_a && close_b {
                 output.ambiguous_segments.push(i);
                 continue;
@@ -263,7 +402,7 @@ impl<'a> PreparedTrace<'a> {
                 Some(vertex) => trace.raw[vertex],
                 None => self.second.project(point.into())?,
             };
-            let residual = line.dot(&point).abs();
+            let residual = query.line.dot(&point).abs();
             if !residual.is_finite() || !self.calibration.right.contains_pixel(pixel) {
                 return Err("epipolar intersection leaves the supported image".into());
             }
@@ -275,8 +414,7 @@ impl<'a> PreparedTrace<'a> {
                 normalized_epipolar_distance: residual,
             });
         }
-        check(cancelled)?;
-        Ok(output)
+        Ok(())
     }
 }
 
@@ -288,7 +426,7 @@ mod tests {
         fixtures::camera,
         stereo::{RigidPose, TriangulationLimits},
     };
-    fn rig(distorted: bool) -> StereoCalibration {
+    pub(super) fn rig(distorted: bool) -> StereoCalibration {
         let mut left = camera();
         left.skew = 1.3;
         if !distorted {
@@ -303,7 +441,7 @@ mod tests {
             },
         }
     }
-    fn config() -> Config {
+    pub(super) fn config() -> Config {
         Config {
             maximum_segment_length_px: 64.,
             normalized_tolerance: 1e-10,
@@ -513,3 +651,6 @@ mod tests {
         );
     }
 }
+
+#[cfg(test)]
+mod index_tests;
