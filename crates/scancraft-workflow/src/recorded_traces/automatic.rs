@@ -38,8 +38,8 @@ struct Request {
     triangulation: TriangulationLimits,
     matching: laser_trace::Config,
     maximum_queries: usize,
-    /// Conservative upper bound: vertices + segments * twice the sheet count,
-    /// summed over all supported first observations before processing begins.
+    /// Conservative matching bound. Try vertices + segments * twice the sheet
+    /// count, then actual projected roots if needed, before any matching begins.
     maximum_total_work: usize,
     maximum_report_bytes: usize,
 }
@@ -162,12 +162,50 @@ pub fn run(inputs: &Inputs, target: &Path, work: &WorkControl) -> Result<Value, 
     if vertices > 65536 {
         return Err("automatic trace vertex limit exceeded".into());
     }
+    let prepared_queries = if traces.is_empty() {
+        None
+    } else {
+        Some(
+            matcher.prepare_traces(&traces, &request.sheets, request.matching, &mut || {
+                work.check().is_err()
+            }),
+        )
+    };
     let per_query_bound = vertices + segments * 2 * request.sheets.len();
-    let total_work_bound = per_query_bound
+    let coarse_work_bound = per_query_bound
         .checked_mul(first_indices.len())
         .ok_or("automatic work bound overflow")?;
-    if total_work_bound > request.maximum_total_work {
-        return Err("automatic total work budget exceeded before matching".into());
+    // Preserve the cheap admission path and its existing output for ordinary
+    // inputs. When it rejects, count actual projected roots before any matching.
+    let mut total_work_bound = coarse_work_bound;
+    let mut prepared_pixels = None;
+    let mut projection_failures = 0usize;
+    if coarse_work_bound > request.maximum_total_work {
+        let Some(Ok(prepared)) = &prepared_queries else {
+            return Err("automatic total work budget exceeded before matching".into());
+        };
+        total_work_bound = 0;
+        let mut pixels = Vec::with_capacity(first_indices.len());
+        for (query, &index) in first_indices.iter().enumerate() {
+            work.update(Stage::Validating, query, first_indices.len())?;
+            let pixel = map_pixel(0, sides[0].detections.observations[index].pixel)?;
+            let prepared = prepared.prepare_pixel(pixel, &mut || work.check().is_err());
+            work.check()?;
+            match &prepared {
+                Ok(pixel) => {
+                    total_work_bound = total_work_bound
+                        .checked_add(pixel.work_bound())
+                        .ok_or("automatic work bound overflow")?;
+                }
+                // These errors precede any counted matching work and are retained.
+                Err(_) => projection_failures += 1,
+            }
+            if total_work_bound > request.maximum_total_work {
+                return Err("automatic total work budget exceeded before matching".into());
+            }
+            pixels.push(prepared);
+        }
+        prepared_pixels = Some(pixels.into_iter());
     }
     first_source.check_source()?;
     second_source.check_source()?;
@@ -192,15 +230,6 @@ pub fn run(inputs: &Inputs, target: &Path, work: &WorkControl) -> Result<Value, 
         "clock_domains_verified":false,"synchronization_verified":false,
         "geometry_binding_verified":false,"geometry_translation_units_verified":false,
         "physical_accuracy_qualified":false,"projector_line_identity_verified":false,"calibration_activated":false});
-    let prepared_queries = if traces.is_empty() {
-        None
-    } else {
-        Some(
-            matcher.prepare_traces(&traces, &request.sheets, request.matching, &mut || {
-                work.check().is_err()
-            }),
-        )
-    };
     work.check()?;
     let partial = staging(target)?;
     let manifest=(||->Result<Value,Error>{
@@ -217,10 +246,16 @@ pub fn run(inputs: &Inputs, target: &Path, work: &WorkControl) -> Result<Value, 
             let mut out=LimitedWriter {inner:out,remaining:request.maximum_report_bytes};
             for (query,&index) in first_indices.iter().enumerate() {
                 work.update(Stage::Matching,query,first_indices.len())?;let pixel=map_pixel(0,sides[0].detections.observations[index].pixel)?;
-                let result=match &prepared_queries {
-                    None=>Err("no supported second-camera traces".into()),
-                    Some(Err(error))=>Err(error.clone()),
-                    Some(Ok(prepared))=>prepared.match_pixel(pixel,&mut ||work.check().is_err()),
+                let result=match &mut prepared_pixels {
+                    Some(pixels)=>match pixels.next().ok_or("inconsistent prepared query count")? {
+                        Ok(pixel)=>pixel.execute(&mut ||work.check().is_err()),
+                        Err(error)=>Err(error),
+                    },
+                    None=>match &prepared_queries {
+                        None=>Err("no supported second-camera traces".into()),
+                        Some(Err(error))=>Err(error.clone()),
+                        Some(Ok(prepared))=>prepared.match_pixel(pixel,&mut ||work.check().is_err()),
+                    },
                 };
                 work.check()?;
                 match &result {
@@ -248,11 +283,16 @@ pub fn run(inputs: &Inputs, target: &Path, work: &WorkControl) -> Result<Value, 
             "units_verified":false,"physical_accuracy_qualified":false,"projector_line_identity_verified":false,
             "cross_observation_uniqueness_verified":false,"points":points});
         artifacts.push(artifact(&partial,"candidate-points.json",work,|out|{serde_json::to_writer_pretty(out,&points_report)?;Ok(())})?);
-        let manifest=json!({"schema_version":1,"kind":"recorded_sheet_supported_matching",
+        let mut manifest=json!({"schema_version":1,"kind":"recorded_sheet_supported_matching",
             "queries":first_indices.len(),"candidate_points":points.len(),"query_failures":failures,
             "queries_without_unique_match":no_unique,"conservative_total_work_bound":total_work_bound,
             "artifacts":artifacts,"physical_accuracy_qualified":false,"units_verified":false,
             "geometry_binding_verified":false,"projector_line_identity_verified":false,"calibration_activated":false});
+        if prepared_pixels.is_some() {
+            manifest["coarse_total_work_bound"]=json!(coarse_work_bound);
+            manifest["work_bound_method"]=json!("per_pixel_projected_roots");
+            manifest["projected_root_preparation_failures"]=json!(projection_failures);
+        }
         artifact(&partial,"manifest.json",work,|out|{serde_json::to_writer_pretty(out,&manifest)?;Ok(())})?;
         work.update(Stage::Finishing,0,0)?;File::open(&partial)?.sync_all()?;first_source.check_source()?;second_source.check_source()?;work.check()?;publish(&partial,target)?;Ok(manifest)
     })().map_err(|e|format!("{e}; incomplete automatic trace bundle retained at {}",partial.display()))?;
@@ -385,7 +425,7 @@ mod tests {
         let mut cases = Vec::new();
         for (key, value) in [
             ("maximum_queries", json!(31)),
-            ("maximum_total_work", json!(3007)),
+            ("maximum_total_work", json!(2015)),
             ("maximum_report_bytes", json!(134217729)),
             ("sheets", json!([])),
         ] {
@@ -443,6 +483,62 @@ mod tests {
             .unwrap();
         assert!(fs::metadata(partial.join("matches.ndjson")).unwrap().len() <= 1);
         assert!(!partial.join("manifest.json").exists());
+    }
+    #[test]
+    fn tighter_projected_bound_admits_exact_limit_without_changing_matches_or_caps() {
+        let temp = Temp::new();
+        let (inputs, mut request) = fixture(&temp);
+        let baseline = temp.0.join("baseline");
+        run(&inputs, &baseline, &WorkControl::default()).unwrap();
+        request["maximum_total_work"] = json!(2016);
+        fs::write(&inputs.request, serde_json::to_vec(&request).unwrap()).unwrap();
+        let target = temp.0.join("tight");
+        let report = run(&inputs, &target, &WorkControl::default()).unwrap();
+        assert_eq!(report["conservative_total_work_bound"], 2016);
+        assert_eq!(report["coarse_total_work_bound"], 3008);
+        assert_eq!(report["work_bound_method"], "per_pixel_projected_roots");
+        assert_eq!(report["projected_root_preparation_failures"], 0);
+        assert_eq!(report["candidate_points"], 31);
+        for name in ["matches.ndjson", "candidate-points.json"] {
+            assert_eq!(
+                fs::read(target.join(name)).unwrap(),
+                fs::read(baseline.join(name)).unwrap()
+            );
+        }
+        request["maximum_total_work"] = json!(2015);
+        fs::write(&inputs.request, serde_json::to_vec(&request).unwrap()).unwrap();
+        let target = temp.0.join("too-low");
+        assert!(run(&inputs, &target, &WorkControl::default()).is_err());
+        assert!(!target.exists());
+        assert!(!fs::read_dir(&temp.0).unwrap().any(|e| {
+            e.unwrap()
+                .file_name()
+                .to_string_lossy()
+                .starts_with("too-low.partial-")
+        }));
+    }
+    #[test]
+    fn projected_admission_retains_early_geometry_errors_without_counted_matching() {
+        let temp = Temp::new();
+        let (inputs, mut request) = fixture(&temp);
+        let mut geometry = read(&inputs.geometry);
+        geometry["left"]["valid_radius"] = json!(0.0001);
+        fs::write(&inputs.geometry, serde_json::to_vec(&geometry).unwrap()).unwrap();
+        let baseline = temp.0.join("baseline");
+        let high = run(&inputs, &baseline, &WorkControl::default()).unwrap();
+        assert_eq!(high["query_failures"], 32);
+        request["maximum_total_work"] = json!(1);
+        fs::write(&inputs.request, serde_json::to_vec(&request).unwrap()).unwrap();
+        let target = temp.0.join("tight");
+        let report = run(&inputs, &target, &WorkControl::default()).unwrap();
+        assert_eq!(report["conservative_total_work_bound"], 0);
+        assert_eq!(report["projected_root_preparation_failures"], 32);
+        assert_eq!(report["query_failures"], 32);
+        assert_eq!(report["candidate_points"], 0);
+        assert_eq!(
+            fs::read(target.join("matches.ndjson")).unwrap(),
+            fs::read(baseline.join("matches.ndjson")).unwrap()
+        );
     }
     #[test]
     fn reflection_preserves_raw_pixels_and_empty_continuity_is_explicit() {

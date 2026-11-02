@@ -102,8 +102,62 @@ pub struct PreparedQueries<'m, 'g, 't> {
     sheets: &'t [QuadraticSheet],
     config: Config,
     cache: Vec<Result<epipolar_trace::NormalizedTrace<'t>, String>>,
+    vertices: usize,
 }
-impl PreparedQueries<'_, '_, '_> {
+struct CachedInputs<'c, 't> {
+    traces: &'c [Result<epipolar_trace::NormalizedTrace<'t>, String>],
+    first: Option<Vec<SheetProjection>>,
+}
+
+/// Projected roots for one first pixel, bound to the exact immutable preparing
+/// queries. Consuming execution reuses these roots without recomputing or cloning.
+/// This is numerical preparation, not calibration or correspondence attestation.
+pub struct PreparedPixel<'p, 'm, 'g, 't> {
+    queries: &'p PreparedQueries<'m, 'g, 't>,
+    pixel: [f64; 2],
+    projections: Vec<SheetProjection>,
+}
+impl PreparedPixel<'_, '_, '_, '_> {
+    /// Conservative bound on Matches::work: vertices + segments * actual roots.
+    /// Each segment contributes at most one crossing, and shared endpoints only
+    /// reduce that count. Preparation, image processing and CPU time are separate.
+    pub fn work_bound(&self) -> usize {
+        self.queries.vertices
+            + (self.queries.vertices - self.queries.traces.len()) * self.projections.len()
+    }
+    pub fn execute(self, cancelled: &mut impl FnMut() -> bool) -> Result<Matches, String> {
+        self.queries.matcher.match_impl(
+            self.pixel,
+            self.queries.traces,
+            self.queries.sheets,
+            self.queries.config,
+            Some(CachedInputs {
+                traces: &self.queries.cache,
+                first: Some(self.projections),
+            }),
+            cancelled,
+        )
+    }
+}
+impl<'m, 'g, 't> PreparedQueries<'m, 'g, 't> {
+    /// Preserve every in-range sheet root before bounded batch admission. Failure
+    /// occurs before any Matches::work units; callers must retain the error and
+    /// separately propagate cancellation rather than treating it as geometry.
+    pub fn prepare_pixel<'p>(
+        &'p self,
+        pixel: [f64; 2],
+        cancelled: &mut impl FnMut() -> bool,
+    ) -> Result<PreparedPixel<'p, 'm, 'g, 't>, String> {
+        if cancelled() {
+            return Err("laser trace matching cancelled".into());
+        }
+        let projections = self.matcher.project_sheets(pixel, self.sheets, cancelled)?;
+        Ok(PreparedPixel {
+            queries: self,
+            pixel,
+            projections,
+        })
+    }
     pub fn match_pixel(
         &self,
         first_pixel: [f64; 2],
@@ -114,7 +168,10 @@ impl PreparedQueries<'_, '_, '_> {
             self.traces,
             self.sheets,
             self.config,
-            Some(&self.cache),
+            Some(CachedInputs {
+                traces: &self.cache,
+                first: None,
+            }),
             cancelled,
         )
     }
@@ -153,7 +210,7 @@ impl<'a> PreparedMatcher<'a> {
         if checkpoint() {
             return Err("laser trace matching cancelled".into());
         }
-        validate_inputs(traces, sheets, config)?;
+        let vertices = validate_inputs(traces, sheets, config)?;
         let mut cache = Vec::with_capacity(traces.len());
         for trace in traces {
             cache.push(
@@ -170,6 +227,7 @@ impl<'a> PreparedMatcher<'a> {
             sheets,
             config,
             cache,
+            vertices,
         })
     }
 
@@ -203,7 +261,7 @@ impl<'a> PreparedMatcher<'a> {
         traces: &[Vec<[f64; 2]>],
         sheets: &[QuadraticSheet],
         config: Config,
-        cache: Option<&[Result<epipolar_trace::NormalizedTrace<'_>, String>]>,
+        cache: Option<CachedInputs<'_, '_>>,
         cancelled: &mut impl FnMut() -> bool,
     ) -> Result<Matches, String> {
         let check = |cancelled: &mut dyn FnMut() -> bool| {
@@ -215,25 +273,14 @@ impl<'a> PreparedMatcher<'a> {
         };
         check(cancelled)?;
         let vertices = validate_inputs(traces, sheets, config)?;
-        let ray = self.first.ray(first_pixel)?;
-        let mut projections = Vec::new();
-        for (sheet_index, sheet) in sheets.iter().enumerate() {
-            check(cancelled)?;
-            let roots = match sheet.intersect([ray[0] / ray[2], ray[1] / ray[2]], self.depth)? {
-                RaySheetIntersections::None => Vec::new(),
-                RaySheetIntersections::One(p) => vec![p],
-                RaySheetIntersections::Two(ps) => ps.to_vec(),
-            };
-            for (root_index, point) in roots.into_iter().enumerate() {
-                let transformed = self.geometry.right_from_left.apply(point);
-                projections.push(SheetProjection {
-                    sheet_index,
-                    root_index,
-                    first_camera_point: point,
-                    second_pixel: self.second.project(transformed)?,
-                });
-            }
-        }
+        let (cache, projections) = match cache {
+            Some(cache) => (Some(cache.traces), cache.first),
+            None => (None, None),
+        };
+        let projections = match projections {
+            Some(projections) => projections,
+            None => self.project_sheets(first_pixel, sheets, cancelled)?,
+        };
         let mut results = Vec::with_capacity(traces.len());
         let mut work = vertices;
         let mut supported_combinations = 0;
@@ -313,6 +360,36 @@ impl<'a> PreparedMatcher<'a> {
             work,
         })
     }
+
+    fn project_sheets(
+        &self,
+        first_pixel: [f64; 2],
+        sheets: &[QuadraticSheet],
+        cancelled: &mut impl FnMut() -> bool,
+    ) -> Result<Vec<SheetProjection>, String> {
+        let ray = self.first.ray(first_pixel)?;
+        let mut projections = Vec::new();
+        for (sheet_index, sheet) in sheets.iter().enumerate() {
+            if cancelled() {
+                return Err("laser trace matching cancelled".into());
+            }
+            let roots = match sheet.intersect([ray[0] / ray[2], ray[1] / ray[2]], self.depth)? {
+                RaySheetIntersections::None => Vec::new(),
+                RaySheetIntersections::One(p) => vec![p],
+                RaySheetIntersections::Two(ps) => ps.to_vec(),
+            };
+            for (root_index, point) in roots.into_iter().enumerate() {
+                let transformed = self.geometry.right_from_left.apply(point);
+                projections.push(SheetProjection {
+                    sheet_index,
+                    root_index,
+                    first_camera_point: point,
+                    second_pixel: self.second.project(transformed)?,
+                });
+            }
+        }
+        Ok(projections)
+    }
 }
 
 fn validate_inputs(
@@ -391,6 +468,90 @@ mod tests {
     }
     fn trace(x: f64) -> Vec<[f64; 2]> {
         vec![[x, 249.], [x, 251.]]
+    }
+
+    #[test]
+    fn prepared_pixels_bound_every_crossing_and_preserve_zero_one_two_root_results() {
+        let (rig, limits, mut config, sheet) = fixture();
+        config.maximum_sheet_distance_px = 32.;
+        let matcher = PreparedMatcher::new(&rig, limits).unwrap();
+        let zigzag = vec![[289., 249.], [291., 251.], [289., 249.], [291., 251.]];
+        let traces = vec![trace(290.), zigzag, vec![[289., 250.], [291., 250.]]];
+        let mut root_counts = Vec::new();
+        for sheets in [
+            vec![QuadraticSheet {
+                offset: 80.,
+                ..sheet
+            }],
+            vec![sheet],
+            vec![QuadraticSheet {
+                quadratic_y: 1.,
+                linear_y: 0.,
+                linear_z: -0.36,
+                offset: 96.,
+            }],
+            vec![sheet, sheet],
+        ] {
+            let queries = matcher
+                .prepare_traces(&traces, &sheets, config, &mut || false)
+                .unwrap();
+            let prepared = queries.prepare_pixel([340., 250.], &mut || false).unwrap();
+            let bound = prepared.work_bound();
+            let actual = prepared.execute(&mut || false).unwrap();
+            let reference = queries.match_pixel([340., 250.], &mut || false).unwrap();
+            assert_eq!(
+                serde_json::to_value(&actual).unwrap(),
+                serde_json::to_value(reference).unwrap()
+            );
+            let vertices = traces.iter().map(Vec::len).sum::<usize>();
+            assert_eq!(
+                bound,
+                vertices + (vertices - traces.len()) * actual.projections.len()
+            );
+            assert!(actual.work <= bound);
+            assert!(actual.unique.is_none()); // coincident segment and competing crossings retained.
+            root_counts.push(actual.projections.len());
+        }
+        assert_eq!(root_counts, [0, 1, 2, 2]);
+    }
+
+    #[test]
+    fn prepared_pixel_failures_and_per_query_budget_remain_explicit() {
+        let (rig, limits, config, sheet) = fixture();
+        let matcher = PreparedMatcher::new(&rig, limits).unwrap();
+        let traces = [trace(290.)];
+        let sheets = [sheet];
+        for maximum_work in [2, 3] {
+            let queries = matcher
+                .prepare_traces(
+                    &traces,
+                    &sheets,
+                    Config {
+                        maximum_work,
+                        ..config
+                    },
+                    &mut || false,
+                )
+                .unwrap();
+            assert!(queries.prepare_pixel([340., 250.], &mut || true).is_err());
+            assert!(
+                queries
+                    .prepare_pixel([340., 250.], &mut || false)
+                    .unwrap()
+                    .execute(&mut || true)
+                    .is_err()
+            );
+            for pixel in [[f64::NAN, 250.], [99999., 250.], [340., 250.]] {
+                let reference = queries.match_pixel(pixel, &mut || false);
+                let actual = queries
+                    .prepare_pixel(pixel, &mut || false)
+                    .and_then(|p| p.execute(&mut || false));
+                assert_eq!(
+                    serde_json::to_value(actual).unwrap(),
+                    serde_json::to_value(reference).unwrap()
+                );
+            }
+        }
     }
 
     #[test]

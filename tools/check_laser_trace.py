@@ -26,7 +26,9 @@ def project(camera, point):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--binary", default="target/release/examples/match_laser_traces")
-    parser.add_argument("--prepared", action="store_true", help="Exercise cached trace preparation")
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument("--prepared-pixel", action="store_true", help="Exercise cached first-pixel projections and execution")
+    modes.add_argument("--prepared", action="store_true", help="Exercise cached trace preparation")
     args = parser.parse_args()
     count, max_position_error, max_pixel_error = 0, 0.0, 0.0
     for scale, angle, distortion, y in itertools.product(
@@ -71,7 +73,7 @@ def main():
             "config": {"intersection": {"maximum_segment_length_px": 16,
                                         "normalized_tolerance": 1e-10, "minimum_plane_sine": 1e-8},
                        "maximum_sheet_distance_px": 1, "maximum_work": 1000}}
-        command = [args.binary] + (["--prepared"] if args.prepared else [])
+        command = [args.binary] + (["--prepared-pixel"] if args.prepared_pixel else ["--prepared"] if args.prepared else [])
         run = subprocess.run(command, input=json.dumps(request), text=True,
                              capture_output=True, check=True)
         result = json.loads(run.stdout)["result"]
@@ -86,7 +88,7 @@ def main():
         max_position_error = max(max_position_error, position_error)
         max_pixel_error = max(max_pixel_error, pixel_error)
         count += 1
-    print(json.dumps({"synthetic_cases": count, "prepared": args.prepared, "max_position_error": max_position_error,
+    print(json.dumps({"synthetic_cases": count, "prepared": args.prepared, "prepared_pixel": args.prepared_pixel, "max_position_error": max_position_error,
                       "max_pixel_error": max_pixel_error, "physical_accuracy_qualified": False}, indent=2))
 
 

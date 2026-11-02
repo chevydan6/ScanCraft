@@ -2404,3 +2404,47 @@ shutdown005, sustained-session capacity021, and continuous laser tracking/fusion
 No private payload upload, firmware/calibration/control action, reviewer-file edit,
 main merge or protection change. Fresh CodeRabbit quota/billing lookup remains
 unavailable/lookup_failed; automated review and publication are pending, not passed.
+
+DEV-PROJECTED-ROOT-WORK-BOUND — developer optimization, not an independent finding.
+Measured the rotating-pose rejection using original public native components,
+before changing production code: sample2 has3145 queries, coarse bound169811130,
+actual counted matching work11414357 and2532 candidates withzero errors. Its actual
+projected-root bound64691538 fits the existing100million cap. The baseline's other
+eight complete match files equal historical workflow files byte-for-byte.
+
+Added PreparedQueries::prepare_pixel/PreparedPixel in calibration/laser_trace.rs.
+Private roots borrow their exact preparing queries and move into consuming execute;
+shared project_sheets math remains unchanged. work_bound=V+S*actualRoots is proved
+by at most one crossing per segment, retaining both roots, duplicate models and
+all competing traces. Workflow automatic.rs uses this only when cheap admission
+fails; checked sum precedes matching/staging, with early geometry errors retained.
+Hard caps, thresholds, numerical acceptance and qualification flags are unchanged.
+Fallback manifest adds method/coarse/preparation-failure metadata. No new dependency,
+copied upstream implementation, hardware control, calibration or firmware action.
+
+Four new regressions and full725-test/fmt/strict-Clippy/release gate PASS. Covers
+full-result equality withzero/one/tworoots/zigzags/coincidentsegments, invalidpixel/
+cancellation/perquerybudget, exacttight2016boundary and2015rejection/no partial,
+and retention of32earlygeometryerrors. Updated prior coarse3007 failure fixture to
+the newproved2015 boundary; explicit equality test protects the numerical output
+and configured cap. Reference example/tool add --prepared-pixel; all36 independent
+known-point cases pass in all3 modes (maxposition9.05e-9 synthetic units,
+maxpixel1.24e-10), with no physical accuracy inference.
+
+New CLI publishes all9 saved poses:0/779/2532/953/1275/1449/648/1276/0 candidates,
+zero query errors. ALL complete match bytes equal pre-change direct-probe results;
+all8 earlier candidate files exact; new2532positions/supports checked individually.
+Input hashes and output artifact CRCs/lengths pass. Realdata bound64691537 rejects
+before staging;64691538 admits identical matches. Nativeapp also displays2532points
+and both images; screenshot inspected and no scanner descriptors. Private evidence
+and exact source/binary/commit bindings are in the recovery checkpoint.
+
+Limits: geometric coverage stillfails atfront views; signal/model/units/accuracy,
+tracking/fusion, shutdown005 and long-session021 remain unqualified/open. Pre-change
+probe6iterations/pose(firstwarmup) holds results in memory: sample2matching60.58ms,
+detection16.07ms, JSON-to-memory53.30ms. Complete newCLI0.29s/29216KiB RSS is a
+shared-host warmfile observation, not speedup/liveFPS qualification. Additional
+fallback root storage is bounded but worstcaseRSS/deadline unqualified. Match work
+units exclude root/image/serialization costs; no wholeoperation budget claim.
+CodeRabbit usage stillalllookup_failed; no review/upload/paidusage/publication or
+merge/protection change. Reviewer files and independent finding statuses untouched.

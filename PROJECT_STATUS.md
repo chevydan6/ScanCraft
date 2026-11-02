@@ -4,7 +4,7 @@ Stage: experimental. Specification: docs/MISSION.txt.
 
 ## Latest local reconstruction checkpoint — 2026-11-02
 
-The local development tree passes 721 Rust tests, formatting, strict Clippy and
+The local development tree passes 725 Rust tests, formatting, strict Clippy and
 release build. Recording-backed seeded trace diagnostics preserve source frames
 and interpolation lineage. A new native sheet-supported full-trace matcher removes
 the need for supplied partner seeds at the numerical component boundary; it has
@@ -49,6 +49,13 @@ diagnostic output. Native-app results exactly reproduce earlier complete synthet
 box and zero-candidate board reports. Over-budget input fails without publication;
 saved output remains identifiable if subsequent display loading fails. This remains
 an offline diagnostic path with unqualified geometry and no scanner controls.
+
+[Projected-root work admission](docs/PROJECTED_ROOT_WORK_BOUND.md) now processes
+the formerly over-budget rotating pose: 2532 candidates, with a proved bound of
+64.7 million under the unchanged 100-million cap. All eight previous pose results
+remain exact, including the two zero-candidate cases. Native-app processing is
+verified. Worst-pose matching and full JSON serialization remain too expensive
+to claim live throughput; calibration, coverage and tracking/fusion remain open.
 
 These latest changes are local and await automated review/publication: CodeRabbit
 quota/billing lookup is unavailable although its local doctor passes. Genuine

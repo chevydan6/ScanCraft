@@ -30,7 +30,7 @@ Geometry uses `StereoCalibration` JSON. The request has these fields:
 | `triangulation` | Existing `TriangulationLimits` fields |
 | `matching` | `intersection` limits, `maximum_sheet_distance_px`, `maximum_work` |
 | `maximum_queries` | Explicit cap, 1–4096 supported first observations |
-| `maximum_total_work` | Conservative matching bound, at most 100 million |
+| `maximum_total_work` | Conservative matching bound, at most 100 million; projected-root fallback when coarse admission fails |
 | `maximum_report_bytes` | Maximum `matches.ndjson` bytes, at most 128 MiB |
 
 The seeded schema's `seeds`, `seed_radius_px` and top-level `intersection` are
@@ -48,8 +48,12 @@ All supported first observations and second traces participate; no silent sampli
 or dropping competing hypotheses. Bounds also include 128 second traces, 4096
 vertices per trace and 65536 vertices total. The conservative matching work bound
 is `queries * (vertices + segments * 2 * sheets)`, accounting for up to two roots
-per sheet and one crossing per segment. It is checked before matching. Detection
-and continuity have separate existing bounds. The per-query matcher budget also applies.
+per sheet and one crossing per segment. When this exceeds the configured limit,
+[projected-root admission](PROJECTED_ROOT_WORK_BOUND.md) prepares actual roots and
+checks the tighter sum `vertices + segments * roots_for_this_pixel` before trace
+matching/staging. Early projection failures remain explicit errors. Detection,
+root preparation and continuity have separate bounded inputs; the counter is not
+a whole-operation CPU/memory cap. The per-query matcher budget also applies.
 
 Each query's numerical/budget errors are explicit `Err` records; other queries
 may succeed. No second traces produces an error per first query; no first queries
@@ -68,6 +72,8 @@ published, not that every query succeeded: inspect manifest failure/candidate co
 - `candidate-points.json` retains unique candidate coordinates, first observation
   and trace IDs, second pixels, sheet/root indices and full-result selection references.
 - `manifest.json` lists counts, conservative work bound and artifact lengths/CRCs.
+  Fallback admission also records its method, original coarse bound and number
+  of early projection failures; the existing reader accepts this metadata.
 
 The report byte cap applies only to `matches.ndjson`. Native matching still
 allocates bounded per-query crossing/support results; this is not a comprehensive

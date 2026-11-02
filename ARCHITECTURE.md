@@ -13,6 +13,11 @@ it through the shared candidate loader. Publication and display failures remain
 distinct; a saved result is never hidden or deleted by display cancellation.
 See [native recorded-pair processing](docs/NATIVE_RECORDED_LASER_PROCESSING.md).
 
+After coarse work admission fails, recorded laser matching can prepare first-pixel
+sheet projections and prove a tighter bound before trace matching/staging. Borrowed
+`PreparedPixel` values reuse those exact roots without changing selection or caps.
+See [projected-root accounting](docs/PROJECTED_ROOT_WORK_BOUND.md).
+
 Laser background removal uses reusable block-prefix/suffix row extrema before
 the existing stripe detector. Exact border/clipping semantics are preserved; see
 [method provenance and measurements](docs/BLOCK_LASER_OPENING.md).

@@ -19,10 +19,15 @@ struct Input {
 }
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<_> = std::env::args().skip(1).collect();
-    let cached = match args.as_slice() {
-        [] => false,
-        [flag] if flag == "--prepared" => true,
-        _ => return Err("usage: match_laser_traces [--prepared] < request.json".into()),
+    let mode = match args.as_slice() {
+        [] => 0,
+        [flag] if flag == "--prepared" => 1,
+        [flag] if flag == "--prepared-pixel" => 2,
+        _ => {
+            return Err(
+                "usage: match_laser_traces [--prepared | --prepared-pixel] < request.json".into(),
+            );
+        }
     };
     let mut bytes = Vec::new();
     std::io::stdin().take(1_048_577).read_to_end(&mut bytes)?;
@@ -31,15 +36,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     let input: Input = serde_json::from_slice(&bytes)?;
     let matcher = PreparedMatcher::new(&input.calibration, input.limits)?;
-    let result = if cached {
-        matcher
-            .prepare_traces(
-                &input.right_traces,
-                &input.sheets,
-                input.config,
-                &mut || false,
-            )?
-            .match_pixel(input.first_pixel, &mut || false)?
+    let result = if mode != 0 {
+        let prepared = matcher.prepare_traces(
+            &input.right_traces,
+            &input.sheets,
+            input.config,
+            &mut || false,
+        )?;
+        if mode == 2 {
+            prepared
+                .prepare_pixel(input.first_pixel, &mut || false)?
+                .execute(&mut || false)?
+        } else {
+            prepared.match_pixel(input.first_pixel, &mut || false)?
+        }
     } else {
         matcher.match_pixel(
             input.first_pixel,
