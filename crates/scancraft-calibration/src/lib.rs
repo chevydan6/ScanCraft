@@ -18,6 +18,7 @@ pub mod refinement;
 pub mod stereo;
 pub mod stereo_fit;
 pub mod storage;
+pub mod target;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
 #[serde(deny_unknown_fields)]

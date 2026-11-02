@@ -1853,6 +1853,38 @@ binding test; eight real frames matched reference component statistics exactly.
 These are segmentation checks, not physical accuracy qualification. Limitations:
 binary centroids, no circle fit or board indexing, no marker identity/tracking,
 bounded per-image scratch allocation, and no real-time performance claim.
-CodeRabbit review and development-branch publication follow after source/context
-secret scanning; no merge is authorized. Implementation commit identity and
-independent review disposition will be recorded after those steps complete.
+Implementation commit: 352d6629cca91f5f999cbe41f53497764faad864, published in
+PR #26 against 008f9b76334c871f6b769c5ae24f22a6ab9e04a3. The complete selected
+diff and tracked source context passed secret scanning before review upload.
+One included CodeRabbit CLI review completed with zero findings, major gate
+passed and exit 0. GitHub App run 467ac6cb-8cca-4dfe-8343-2d24339a5227
+completed on that exact head with no actionable comments across all eight files.
+Both GitHub Rust CI runs (41434551576 and 41434472246) passed. The read-only
+readiness diagnostic confirmed exact-head clean-summary coverage and zero
+unresolved threads; it reports merge_authorized=false. No merge or paid review
+was requested, and no private hardware evidence was uploaded.
+
+The App's separate 10% docstring-coverage warning is acknowledged, but a blanket
+80% requirement is not adopted as a correctness gate. The public detector's
+rustdoc documents connectivity, rejection order, scratch bounds and cancellation;
+the module and BRIGHT_COMPONENT_OBSERVATIONS.md document provenance, pixel
+semantics, command behavior and qualification limits. Private dispatch/reference
+helpers and tests do not need generated prose merely to increase a percentage.
+Specific missing interface contracts should still be corrected when identified.
+This disposition does not alter the independent reviewer's findings or statuses.
+The review evidence above covers implementation commit 352d662; this subsequent
+response-only outcome update is not claimed to have been reviewed by that run.
+
+DEV-TARGET-ASSOCIATION — developer milestone, not an independent finding. Add
+original bounded four-anchor planar pattern association in calibration/target.rs
+and an offline associate_target example. Reuse the existing normalized DLT
+solver; no camera geometry, physical units or device-specific target data is
+embedded. Reject ambiguous support, conflicting neighborhoods, horizon-crossing
+models, degenerate anchors and refinement that loses/relabels seed matches.
+Preserve existing independent findings, scanner controls and calibration state.
+Seven focused tests pass. Six real saved-image comparisons retain all 37/26/25
+previously indexed small marks per camera across three scenes; these are
+image-correspondence comparisons, not physical accuracy qualification or a
+held-out parameter test. Documentation: TARGET_ASSOCIATION.md. Full gate passed
+666 tests, formatting, strict all-target Clippy and release compilation.
+CodeRabbit outcomes will be recorded after execution; no merge is authorized.
