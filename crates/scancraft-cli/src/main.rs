@@ -676,12 +676,16 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             )?;
             println!("{}", serde_json::to_string_pretty(&report)?);
         }
-        Some("detect-stripes") => {
-            if args.len() != 9 && !(args.len() == 11 && args[9] == "--opening-radius") {
-                return Err("detect-stripes requires RECORDING INDEX BACKGROUND MIN_PEAK MAX_WIDTH SATURATION MAX_OBSERVATIONS [--opening-radius RADIUS]".into());
+        Some("detect-stripes" | "trace-stripes") => {
+            let tracing = args[1] == "trace-stripes";
+            let positional = if tracing { 14 } else { 9 };
+            if args.len() != positional
+                && !(args.len() == positional + 2 && args[positional] == "--opening-radius")
+            {
+                return Err("detect-stripes requires RECORDING INDEX BACKGROUND MIN_PEAK MAX_WIDTH SATURATION MAX_OBSERVATIONS; trace-stripes additionally requires MAX_ROW_GAP MAX_X_STEP MAX_SLOPE MIN_SPAN MIN_POINTS; both accept [--opening-radius RADIUS]".into());
             }
-            let opening_radius = if args.len() == 11 {
-                Some(args[10].parse()?)
+            let opening_radius = if args.len() == positional + 2 {
+                Some(args[positional + 1].parse()?)
             } else {
                 None
             };
@@ -697,6 +701,18 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 args[3].parse()?,
                 config,
                 opening_radius,
+                if tracing {
+                    Some(scancraft_image::laser_continuity::Config {
+                        maximum_row_gap: args[9].parse()?,
+                        maximum_horizontal_step: args[10].parse()?,
+                        maximum_slope: args[11].parse()?,
+                        minimum_span_rows: args[12].parse()?,
+                        minimum_observations: args[13].parse()?,
+                        maximum_comparisons: 20_000_000,
+                    })
+                } else {
+                    None
+                },
             )?;
             println!("{}", serde_json::to_string_pretty(&report)?);
         }
@@ -1141,7 +1157,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         }
         _ => {
             return Err(
-                "Usage: scancraft-cli inspect-components RECORDING INDEX THRESHOLD MIN_AREA MAX_AREA MAX_COMPONENTS MAX_RMS_PX | detect-components RECORDING INDEX THRESHOLD MIN_AREA MAX_AREA MAX_COMPONENTS | refine-target-corners IMAGE.PNG SEEDS_JSON NEW_OUTPUT_DIRECTORY | recording-scr RECORDING | calibrate-stereo-extrinsics OBSERVATIONS_JSON NEW_OUTPUT_DIRECTORY | calibrate-planar OBSERVATIONS_JSON NEW_OUTPUT_DIRECTORY | scan-live-stereo CALIBRATION RECONSTRUCTION_SETTINGS SCAN_SETTINGS NEW_DIRECTORY | reconstruct-recorded-sequence CALIBRATION LEFT_RECORDING RIGHT_RECORDING RECONSTRUCTION_SETTINGS SEQUENCE_SETTINGS NEW_DIRECTORY | recording-timing LEFT_RECORDING RIGHT_RECORDING MAX_HOST_DELTA_US | filter-statistical PROJECT_OR_PLY K SIGMA_MULTIPLIER NEW_DIRECTORY | verify-project-recordings PROJECT RECORDINGS_DIRECTORY | verify-scan-project SCAN_FOLDER | export-scan-project PROJECT SOURCE_BUNDLE LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | archive-recordings LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | export-project-bundle PROJECT SOURCE_BUNDLE NEW_OUTPUT_DIRECTORY | verify-source-bundle PROJECT BUNDLE_DIRECTORY | reconstruct-recordings CALIBRATION LEFT_RECORDING LEFT_INDEX RIGHT_RECORDING RIGHT_INDEX SETTINGS NEW_OUTPUT_DIRECTORY | recover-recording INPUT MAX_FRAMES NEW_OUTPUT_DIRECTORY | stream-state INTERFACE | import-mesh FILE obj|stl mm|in|m separate|weld-exact NEW_OUTPUT_DIRECTORY | smooth-mesh MESH_OR_PROJECT ITERATIONS RELAXATION MAX_DISPLACEMENT_MM MAX_NORMAL_DEGREES CREASE_DEGREES NEW_OUTPUT_DIRECTORY | stereo-line-capture FRAME_COUNT NEW_OUTPUT_DIRECTORY [--fps FPS] | orient-mesh MESH_OR_PROJECT REVERSE_COMPONENT_IDS_OR_none NEW_RESULT_FOLDER | fill-mesh-boundary MESH_OR_PROJECT BOUNDARY_ID MAX_PLANARITY_MM NEW_OUTPUT_DIRECTORY | split-mesh-vertex-fans MESH_OR_PROJECT COMMA_SEPARATED_VERTEX_IDS NEW_RESULT_FOLDER | simplify-mesh MESH_OR_PROJECT TARGET_TRIANGLES MAX_DISPLACEMENT_MM MAX_NORMAL_DEGREES CREASE_DEGREES MAX_COLLAPSES NEW_OUTPUT_DIRECTORY | mesh-topology MESH_OR_PROJECT | mesh-boundaries MESH_OR_PROJECT | save-mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM NEW_OUTPUT_DIRECTORY | mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM | mesh-components MESH_OR_PROJECT | select-mesh-components MESH_OR_PROJECT [keep|remove] IDS NEW_OUTPUT_DIRECTORY | cleanup-mesh MESH_OR_PROJECT [duplicates|unused|both] NEW_OUTPUT_DIRECTORY | mesh-history PROJECT [undo|redo] NEW_OUTPUT_DIRECTORY | trim-mesh MESH_JSON NX NY NZ OFFSET NEW_OUTPUT_DIRECTORY | mesh-grid ORGANIZED_GRID_JSON NEW_OUTPUT_DIRECTORY | fuse-sequence SETTINGS_JSON NEW_OUTPUT_DIRECTORY | detect-stripes RECORDING INDEX BACKGROUND MIN_PEAK MAX_WIDTH SATURATION MAX_OBSERVATIONS [--opening-radius RADIUS] | discover | controls | mirror-status | illumination-status | stereo-flood-capture FRAME_COUNT NEW_OUTPUT_DIRECTORY [--fps FPS] | stereo-gain-capture FRAME_COUNT RAW_GAIN NEW_OUTPUT_DIRECTORY [--fps FPS] | factory-laser-fields FACTORY_REGION_FILE | factory-lenses FACTORY_REGION_FILE | factory-verify FACTORY_REGION_FILE | factory-inspect FACTORY_REGION_FILE | factory-header REGION | factory-read REGION NEW_OUTPUT_DIRECTORY | protocol-version | validate INTERFACE FRAME_COUNT [--fps FPS] | capture INTERFACE OUTPUT FRAME_COUNT [--fps FPS] | replay FILE [--decode] | export-image FILE OUTPUT.PNG | stereo-probe FRAME_COUNT [--fps FPS] | extract-frame RECORDING INDEX NEW_OUTPUT_DIRECTORY | stereo-capture FRAME_COUNT NEW_OUTPUT_DIRECTORY [--fps FPS] | reconstruct-stereo CALIBRATION LEFT.PNG RIGHT.PNG REQUEST.JSON OUTPUT_DIRECTORY"
+                "Usage: scancraft-cli trace-stripes RECORDING INDEX BACKGROUND MIN_PEAK MAX_WIDTH SATURATION MAX_OBSERVATIONS MAX_ROW_GAP MAX_X_STEP MAX_SLOPE MIN_SPAN MIN_POINTS [--opening-radius RADIUS] | inspect-components RECORDING INDEX THRESHOLD MIN_AREA MAX_AREA MAX_COMPONENTS MAX_RMS_PX | detect-components RECORDING INDEX THRESHOLD MIN_AREA MAX_AREA MAX_COMPONENTS | refine-target-corners IMAGE.PNG SEEDS_JSON NEW_OUTPUT_DIRECTORY | recording-scr RECORDING | calibrate-stereo-extrinsics OBSERVATIONS_JSON NEW_OUTPUT_DIRECTORY | calibrate-planar OBSERVATIONS_JSON NEW_OUTPUT_DIRECTORY | scan-live-stereo CALIBRATION RECONSTRUCTION_SETTINGS SCAN_SETTINGS NEW_DIRECTORY | reconstruct-recorded-sequence CALIBRATION LEFT_RECORDING RIGHT_RECORDING RECONSTRUCTION_SETTINGS SEQUENCE_SETTINGS NEW_DIRECTORY | recording-timing LEFT_RECORDING RIGHT_RECORDING MAX_HOST_DELTA_US | filter-statistical PROJECT_OR_PLY K SIGMA_MULTIPLIER NEW_DIRECTORY | verify-project-recordings PROJECT RECORDINGS_DIRECTORY | verify-scan-project SCAN_FOLDER | export-scan-project PROJECT SOURCE_BUNDLE LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | archive-recordings LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | export-project-bundle PROJECT SOURCE_BUNDLE NEW_OUTPUT_DIRECTORY | verify-source-bundle PROJECT BUNDLE_DIRECTORY | reconstruct-recordings CALIBRATION LEFT_RECORDING LEFT_INDEX RIGHT_RECORDING RIGHT_INDEX SETTINGS NEW_OUTPUT_DIRECTORY | recover-recording INPUT MAX_FRAMES NEW_OUTPUT_DIRECTORY | stream-state INTERFACE | import-mesh FILE obj|stl mm|in|m separate|weld-exact NEW_OUTPUT_DIRECTORY | smooth-mesh MESH_OR_PROJECT ITERATIONS RELAXATION MAX_DISPLACEMENT_MM MAX_NORMAL_DEGREES CREASE_DEGREES NEW_OUTPUT_DIRECTORY | stereo-line-capture FRAME_COUNT NEW_OUTPUT_DIRECTORY [--fps FPS] | orient-mesh MESH_OR_PROJECT REVERSE_COMPONENT_IDS_OR_none NEW_RESULT_FOLDER | fill-mesh-boundary MESH_OR_PROJECT BOUNDARY_ID MAX_PLANARITY_MM NEW_OUTPUT_DIRECTORY | split-mesh-vertex-fans MESH_OR_PROJECT COMMA_SEPARATED_VERTEX_IDS NEW_RESULT_FOLDER | simplify-mesh MESH_OR_PROJECT TARGET_TRIANGLES MAX_DISPLACEMENT_MM MAX_NORMAL_DEGREES CREASE_DEGREES MAX_COLLAPSES NEW_OUTPUT_DIRECTORY | mesh-topology MESH_OR_PROJECT | mesh-boundaries MESH_OR_PROJECT | save-mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM NEW_OUTPUT_DIRECTORY | mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM | mesh-components MESH_OR_PROJECT | select-mesh-components MESH_OR_PROJECT [keep|remove] IDS NEW_OUTPUT_DIRECTORY | cleanup-mesh MESH_OR_PROJECT [duplicates|unused|both] NEW_OUTPUT_DIRECTORY | mesh-history PROJECT [undo|redo] NEW_OUTPUT_DIRECTORY | trim-mesh MESH_JSON NX NY NZ OFFSET NEW_OUTPUT_DIRECTORY | mesh-grid ORGANIZED_GRID_JSON NEW_OUTPUT_DIRECTORY | fuse-sequence SETTINGS_JSON NEW_OUTPUT_DIRECTORY | detect-stripes RECORDING INDEX BACKGROUND MIN_PEAK MAX_WIDTH SATURATION MAX_OBSERVATIONS [--opening-radius RADIUS] | discover | controls | mirror-status | illumination-status | stereo-flood-capture FRAME_COUNT NEW_OUTPUT_DIRECTORY [--fps FPS] | stereo-gain-capture FRAME_COUNT RAW_GAIN NEW_OUTPUT_DIRECTORY [--fps FPS] | factory-laser-fields FACTORY_REGION_FILE | factory-lenses FACTORY_REGION_FILE | factory-verify FACTORY_REGION_FILE | factory-inspect FACTORY_REGION_FILE | factory-header REGION | factory-read REGION NEW_OUTPUT_DIRECTORY | protocol-version | validate INTERFACE FRAME_COUNT [--fps FPS] | capture INTERFACE OUTPUT FRAME_COUNT [--fps FPS] | replay FILE [--decode] | export-image FILE OUTPUT.PNG | stereo-probe FRAME_COUNT [--fps FPS] | extract-frame RECORDING INDEX NEW_OUTPUT_DIRECTORY | stereo-capture FRAME_COUNT NEW_OUTPUT_DIRECTORY [--fps FPS] | reconstruct-stereo CALIBRATION LEFT.PNG RIGHT.PNG REQUEST.JSON OUTPUT_DIRECTORY"
                     .into(),
             );
         }

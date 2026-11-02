@@ -1,5 +1,13 @@
 # Architecture
 
+Within-image stripe continuity now has a separate bounded module,
+`scancraft-image::laser_continuity`, consuming immutable row observations and
+returning index traces with explicit support/ambiguity diagnostics. The CLI
+`trace-stripes` adapter verifies the source recording and retains every raw
+observation. This is separate from temporal tracking, projector-line identity
+and calibrated depth; no live reconstruction default changes. See
+[stripe continuity](docs/STRIPE_CONTINUITY.md) for its contracts and evidence.
+
 - `scancraft-core`: sensor profiles, owned raw frames, UVC metadata validation.
 - `scancraft-device`: sysfs identity, Linux UAPI bindings, V4L2 mmap streams,
   exact-sequence metadata pairing, bounded startup retries and RAII cleanup.
