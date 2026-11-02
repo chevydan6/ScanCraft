@@ -42,8 +42,8 @@ target/release/examples/associate_target < target-observations.json
 Input contains `target` and `observed` arrays of
 `{"position":[x,y],"anchor":false}` objects, plus `config` with
 `seed_radius_px`, `refined_radius_px`, `minimum_matches` and
-`minimum_support_margin`. The example reads at most 1 MiB from stdin and
-rejects unknown fields. It does not authenticate observations against a raw
+`minimum_support_margin`. The example accepts at most 1 MiB from stdin, reading
+one additional byte to detect oversized input, and rejects unknown fields. It does not authenticate observations against a raw
 recording; its output explicitly retains that limitation. Capture data and
 device-specific target information must remain local. A caller integrating
 this primitive must preserve the source-recording provenance separately.
