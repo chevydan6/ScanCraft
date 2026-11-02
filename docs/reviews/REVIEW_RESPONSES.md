@@ -2278,3 +2278,30 @@ No hardware/configuration/calibration changes or independent-reviewer-file edits
 CodeRabbit quota/billing lookup remains unavailable; no paid usage, review pass,
 publication, merge or protection change claimed. Recovery checkpoint binds commit,
 private source/binary/library hashes, raw timing rows and full numerical evidence.
+
+DEV-ROTATING-TARGET-EVIDENCE — developer hardware investigation, not an independent
+finding. Owner operated turntable, moved board and supplied a stationary cardboard
+box before leaving. Existing authorized line-capture paths restored illumination
+and stream settings; no firmware/physical calibration or persistent control change.
+Saved900 accepted frames/camera at about29.863Hz,900 equalPTS/host-window pairs;
+four ongoing rejected buffers/camera (~0.442%) plus80/108startup rejects remain
+unqualified and exceed the provisional reliability target. Full recording integrity
+and exposure-content validity remain distinct.
+
+Timing diagnostics expose only100example pairs, so a private indexed helper
+selected9pairs across all900 frames rather than calling that truncated list a full
+rotation. Helper initially assumed optional PTS; actual FrameTiming is u32, corrected
+and rebuilt with original failure/source retained. Frame copies preserve timing/CRC
+lineage. Eight matching bundles pass checksums; one pose fails conservative work
+admission. Counts and zero-match failures are retained in ROTATING_TARGET_EVIDENCE.md.
+Front-facing saturation removes most supported second traces; that is an input
+limitation requiring quality feedback, not grounds to silently relax clipping.
+
+New box color/IR captures show weak laser signal. Software threshold10/20 produces
+1764 candidates from2604 queries withzero perqueryerrors; offcontrolzero. Original
+30/50 produceszero;5/12 exceeds the explicit query bound. No target residual was
+used for selection. Candidate surface identity/units/accuracy remain unverified.
+No production code changed after705-test gate2441a17; this report records actual
+failure modes and updates priorities. Reviewer files untouched, no independent
+finding states changed. Private source/build/data/evidence references are retained
+in the recovery checkpoint; no private payload uploaded or paid review requested.

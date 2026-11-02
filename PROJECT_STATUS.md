@@ -30,6 +30,12 @@ from 70.2 ms to 14.6 ms in a paired probe. Integrated two-image detection measur
 18.8 ms; whole recorded CLI runs measured 0.13–0.14 seconds. These remain offline
 observations, with unchanged physical qualification and review/publication gaps.
 
+[New rotating-board and box trials](docs/ROTATING_TARGET_EVIDENCE.md) retain 900
+frames per camera and show both useful candidates and failures across viewpoints.
+Ongoing rejected buffers remain about 0.442% in that run. Front-view clipping,
+weak box return and conservative processing limits prevent declaring reliable
+end-to-end reconstruction; material-aware quality feedback is a current priority.
+
 These latest changes are local and await automated review/publication: CodeRabbit
 quota/billing lookup is unavailable although its local doctor passes. Genuine
 calibrated reconstruction, reliable full live scans and professional release
