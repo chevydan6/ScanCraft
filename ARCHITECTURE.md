@@ -7,6 +7,12 @@ state remains separate. Retained-frame feedback reuses the image crate's exact
 raw statistics and display-only contrast LUT; bounded original-orientation
 thumbnails never enter reconstruction. See [candidate viewport contracts](docs/CANDIDATE_VIEWER.md).
 
+`CandidateUi::process` runs the existing recording-backed automatic matcher via
+`cloud_jobs/candidates.rs`, publishes a diagnostic bundle, then verifies and opens
+it through the shared candidate loader. Publication and display failures remain
+distinct; a saved result is never hidden or deleted by display cancellation.
+See [native recorded-pair processing](docs/NATIVE_RECORDED_LASER_PROCESSING.md).
+
 Laser background removal uses reusable block-prefix/suffix row extrema before
 the existing stripe detector. Exact border/clipping semantics are preserved; see
 [method provenance and measurements](docs/BLOCK_LASER_OPENING.md).

@@ -2365,3 +2365,42 @@ SCAN-REV-005/006 and long-session021 remain unchanged and open/unqualified.
 Fresh CodeRabbit usage still reports unavailable/lookup_failed for included quota
 and billing; no review/paid usage/publication claimed. Local commit/source/evidence
 bindings follow in the recovery checkpoint. Independent findings remain untouched.
+
+DEV-NATIVE-RECORDED-LASER-PROCESSING — developer continuation, not an independent
+finding. Accepted the need to make the existing recorded laser reconstruction
+workflow directly usable in the native app. Added candidate_ui/processing.rs,
+Operation::ProcessLaserCandidates and explicit startup action; extracted existing
+candidate view handling into cloud_jobs/candidates.rs. Calls run_automatic then
+verified bundle loading. Numerical selection, limits and formats are unchanged;
+only per-query/finishing WorkControl progress was added to automatic.rs. Inputs
+equality traits support path/index startup checks. No new algorithm or dependency.
+
+Publication and display are separate outcomes: a failure/cancellation while loading
+an already published result reports its saved folder and reopen action. Prior
+camera/point views and loaded-source label survive failure. No editable document,
+selection or history mutation, hardware opening, calibration activation or device
+control occurs. Existing output is rejected; incomplete workflow diagnostics and
+their paths remain available. Saved per-query failures or zero points are not
+claimed successful scanning.
+
+Three actual synthetic-worker regressions pass: four reconstructed candidates and
+verified display without editable-state mutation; pre-cancellation/no overwrite;
+post-publication display cancellation with retained output and successful reopening.
+Startup index/path validation and GUI form-button/error preservation add two more
+tests. The GUI regression sends real egui pointer events to the header and Process
+pair button. Initial full gate caught three test-only owned-path comparisons;
+fixed to borrowed Path comparisons without lint suppression. Final721-test/fmt/
+strict-Clippy/release gate passes. No numerical acceptance gates were relaxed.
+
+Four private native-app runs check actual processing from recordings: synthetic126,
+box1764 and front-board0 candidates reproduce EVERY match record and candidate-point
+file byte-for-byte, including input hashes and output artifact CRCs/lengths. A path
+with spaces works. Total-work1 control is rejected before publication with visible
+error. Box/error screens inspected; no scanner descriptors held. Source/binary/test
+and runtime evidence remain local and are bound in the recovery checkpoint.
+
+Limitations remain unqualified physical geometry/synchronization/units, whole-app
+shutdown005, sustained-session capacity021, and continuous laser tracking/fusion.
+No private payload upload, firmware/calibration/control action, reviewer-file edit,
+main merge or protection change. Fresh CodeRabbit quota/billing lookup remains
+unavailable/lookup_failed; automated review and publication are pending, not passed.

@@ -31,7 +31,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Inputs {
     pub geometry: PathBuf,
     pub first_recording: PathBuf,

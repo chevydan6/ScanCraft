@@ -1,4 +1,5 @@
 //! One owned document per bounded background job. Failed/cancelled proposals never commit.
+mod candidates;
 use scancraft_geometry::{
     Cloud, Editor,
     filtering::{radius_filter_with, remove_duplicates_with},
@@ -41,6 +42,10 @@ pub struct Preview {
 #[derive(Clone)]
 pub enum Operation {
     ViewCandidates(PathBuf),
+    ProcessLaserCandidates {
+        inputs: scancraft_workflow::recorded_traces::Inputs,
+        target: PathBuf,
+    },
     StatisticalPreview {
         neighbors: usize,
         sigma: f64,
@@ -354,44 +359,12 @@ fn execute(
     operation: Operation,
     work: &WorkControl,
 ) -> Result<Report, String> {
-    if let Operation::ViewCandidates(path) = &operation {
-        let loaded =
-            scancraft_workflow::candidate_bundle::load(path, work).map_err(|e| e.to_string())?;
-        let mut preview = Preview {
-            total: loaded.positions.len(),
-            ..Preview::default()
-        };
-        for (index, position) in loaded.positions.into_iter().enumerate() {
-            work.check()?;
-            if let Some((min, max)) = &mut preview.bounds {
-                for axis in 0..3 {
-                    min[axis] = min[axis].min(position[axis]);
-                    max[axis] = max[axis].max(position[axis]);
-                }
-            } else {
-                preview.bounds = Some((position, position));
-            }
-            preview.points.push(DisplayPoint {
-                normal: None,
-                position,
-                color: [101, 190, 226],
-                selected: false,
-                index: loaded.first_observations[index],
-            });
+    match &operation {
+        Operation::ViewCandidates(path) => return candidates::view(path, work),
+        Operation::ProcessLaserCandidates { inputs, target } => {
+            return candidates::process(inputs, target, work);
         }
-        let mut result = report(
-            format!(
-                "{} candidates from {} queries · {} numerical failures · {} without a unique match. Artifact checks and retained frame bindings passed.",
-                loaded.report["candidate_points"],
-                loaded.report["queries"],
-                loaded.report["query_failures"],
-                loaded.report["queries_without_unique_match"]
-            ),
-            Some(preview),
-        );
-        result.reset_view = true;
-        result.candidate_frames = Some(loaded.frames);
-        return Ok(result);
+        _ => {}
     }
     if let Operation::ExportProjectBundle { sources, target } = &operation {
         let editor = document

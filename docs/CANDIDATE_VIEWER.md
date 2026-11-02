@@ -126,7 +126,8 @@ device descriptors. A private-display checkbox interaction also checks the box's
 display stretching. All screenshots and raw evidence remain local. No matching
 algorithm, persistent bundle format, dependency or scanner setting changed.
 
-This connects existing recorded numerical candidates to native visualization.
-It does not yet start reconstruction from the tab, continuously scan, qualify
-the box surface, track/fuse poses or generate a calibrated model. Signal-quality
-feedback and bounded continuous processing remain important next steps.
+The tab also supports [processing recorded laser pairs](NATIVE_RECORDED_LASER_PROCESSING.md)
+with explicit model/settings files and a new output directory, then verifying and
+opening the result. It does not yet continuously scan, qualify the box surface,
+track/fuse poses or generate a calibrated model. Bounded continuous processing
+and physical reconstruction qualification remain important next steps.

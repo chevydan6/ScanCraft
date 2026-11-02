@@ -15,7 +15,7 @@ use scancraft_calibration::{
     orientation::reflect_pixel_x,
     stereo::{StereoCalibration, TriangulationLimits},
 };
-use scancraft_geometry::work::WorkControl;
+use scancraft_geometry::work::{Stage, WorkControl};
 use scancraft_recording::Writer;
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -215,8 +215,8 @@ pub fn run(inputs: &Inputs, target: &Path, work: &WorkControl) -> Result<Value, 
         let mut points=Vec::new();let mut failures=0usize;let mut no_unique=0usize;
         artifacts.push(artifact(&partial,"matches.ndjson",work,|out|{
             let mut out=LimitedWriter {inner:out,remaining:request.maximum_report_bytes};
-            for &index in &first_indices {
-                work.check()?;let pixel=map_pixel(0,sides[0].detections.observations[index].pixel)?;
+            for (query,&index) in first_indices.iter().enumerate() {
+                work.update(Stage::Matching,query,first_indices.len())?;let pixel=map_pixel(0,sides[0].detections.observations[index].pixel)?;
                 let result=match &prepared_queries {
                     None=>Err("no supported second-camera traces".into()),
                     Some(Err(error))=>Err(error.clone()),
@@ -241,6 +241,7 @@ pub fn run(inputs: &Inputs, target: &Path, work: &WorkControl) -> Result<Value, 
                 serde_json::to_writer(&mut out,&json!({"first_observation":index,"first_calibration_pixel":pixel,"result":result}))?;
                 out.write_all(b"\n")?;
             }
+            work.update(Stage::Matching,first_indices.len(),first_indices.len())?;
             Ok(())
         })?);
         let points_report=json!({"schema_version":1,"coordinate_frame":"supplied first-camera frame",
@@ -253,7 +254,7 @@ pub fn run(inputs: &Inputs, target: &Path, work: &WorkControl) -> Result<Value, 
             "artifacts":artifacts,"physical_accuracy_qualified":false,"units_verified":false,
             "geometry_binding_verified":false,"projector_line_identity_verified":false,"calibration_activated":false});
         artifact(&partial,"manifest.json",work,|out|{serde_json::to_writer_pretty(out,&manifest)?;Ok(())})?;
-        File::open(&partial)?.sync_all()?;first_source.check_source()?;second_source.check_source()?;work.check()?;publish(&partial,target)?;Ok(manifest)
+        work.update(Stage::Finishing,0,0)?;File::open(&partial)?.sync_all()?;first_source.check_source()?;second_source.check_source()?;work.check()?;publish(&partial,target)?;Ok(manifest)
     })().map_err(|e|format!("{e}; incomplete automatic trace bundle retained at {}",partial.display()))?;
     let parent = target
         .parent()

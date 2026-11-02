@@ -1,4 +1,5 @@
 //! Read-only diagnostic viewport. Uses the shared worker and renderer, not Editor.
+mod processing;
 use crate::{
     cloud_jobs::{Document, Job, Operation, Preview},
     cloud_ui::{self, View},
@@ -6,6 +7,11 @@ use crate::{
 use eframe::egui;
 use scancraft_workflow::candidate_bundle::FrameView;
 use std::path::PathBuf;
+
+enum Action {
+    Open,
+    Process,
+}
 
 pub struct CandidateUi {
     path: String,
@@ -17,6 +23,8 @@ pub struct CandidateUi {
     frames: Option<[FrameView; 2]>,
     cameras: [Option<egui::TextureHandle>; 2],
     stretch_display: bool,
+    processing: processing::Processing,
+    action: Action,
 }
 
 impl Default for CandidateUi {
@@ -36,6 +44,8 @@ impl Default for CandidateUi {
             frames: None,
             cameras: Default::default(),
             stretch_display: false,
+            processing: Default::default(),
+            action: Action::Open,
         }
     }
 }
@@ -53,10 +63,29 @@ impl CandidateUi {
             return;
         }
         self.path = path.display().to_string();
+        self.action = Action::Open;
         self.message = "Checking candidate artifacts and retained frames…".into();
         self.job = Some(Job::start(
             Document::default(),
             Operation::ViewCandidates(path),
+        ));
+    }
+    pub fn process(
+        &mut self,
+        inputs: scancraft_workflow::recorded_traces::Inputs,
+        target: PathBuf,
+    ) {
+        if self.is_busy() {
+            return;
+        }
+        self.processing.set(&inputs, &target);
+        self.path = target.display().to_string();
+        self.action = Action::Process;
+        self.message =
+            "Validating recordings, detecting laser traces and matching the selected pair…".into();
+        self.job = Some(Job::start(
+            Document::default(),
+            Operation::ProcessLaserCandidates { inputs, target },
         ));
     }
     pub fn tick(&mut self) {
@@ -80,7 +109,15 @@ impl CandidateUi {
                 self.message = report.message;
                 self.loaded_path = self.path.clone();
             }
-            Err(error) => self.message = format!("Could not open candidates: {error}"),
+            Err(error) => {
+                self.message = format!(
+                    "{}: {error}",
+                    match self.action {
+                        Action::Open => "Could not open candidates",
+                        Action::Process => "Recorded-pair processing failed",
+                    }
+                )
+            }
         }
     }
     pub fn ui(&mut self, ui: &mut egui::Ui) {
@@ -99,7 +136,7 @@ impl CandidateUi {
                 self.open(self.path.clone().into());
             }
             if ui
-                .add_enabled(self.is_busy(), egui::Button::new("Cancel loading"))
+                .add_enabled(self.is_busy(), egui::Button::new("Cancel operation"))
                 .clicked()
             {
                 self.cancel();
@@ -110,8 +147,15 @@ impl CandidateUi {
             ui.label(format!("Showing: {}", self.loaded_path));
         }
         ui.small("Drag to orbit · Shift-drag to pan · Scroll to zoom. Coordinates depend on an unverified camera and laser model.");
-        if self.is_busy() {
-            ui.spinner();
+        if let Some(job) = &self.job {
+            let (stage, fraction) = job.control.progress();
+            ui.add(egui::ProgressBar::new(fraction).text(format!("Current stage: {stage}")));
+            ui.ctx()
+                .request_repaint_after(std::time::Duration::from_millis(30));
+        }
+        let can_process = !self.is_busy();
+        if let Some((inputs, target)) = self.processing.show(ui, can_process) {
+            self.process(inputs, target);
         }
         ui.horizontal(|ui| {
             if ui.button("Reset view").clicked() {
@@ -257,6 +301,96 @@ mod tests {
         }
         assert!(view.preview.points.is_empty());
         assert!(!view.is_busy());
+    }
+    #[test]
+    fn failed_processing_keeps_prior_frames_points_and_source_label() {
+        let mut ui = CandidateUi {
+            loaded_path: "prior bundle".into(),
+            frames: Some([frame(0), frame(2)]),
+            preview: Preview {
+                total: 7,
+                ..Preview::default()
+            },
+            ..CandidateUi::default()
+        };
+        let absent = std::env::temp_dir().join(format!(
+            "scancraft-absent-laser-input-{}",
+            std::process::id()
+        ));
+        ui.processing.set(
+            &scancraft_workflow::recorded_traces::Inputs {
+                geometry: absent.join("geometry.json"),
+                first_recording: absent.join("first.raptor"),
+                first_index: 0,
+                second_recording: absent.join("second.raptor"),
+                second_index: 0,
+                request: absent.join("request.json"),
+            },
+            &absent.join("result"),
+        );
+        // Click the actual form header and button through egui, rather than
+        // calling process directly; verify dispatch as well as failure retention.
+        let context = egui::Context::default();
+        let draw = |ui: &mut CandidateUi, time: f64, click: Option<egui::Pos2>| {
+            let mut input = egui::RawInput {
+                time: Some(time),
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO,
+                    egui::vec2(1280., 900.),
+                )),
+                ..Default::default()
+            };
+            if let Some(pos) = click {
+                input.events = vec![
+                    egui::Event::PointerMoved(pos),
+                    egui::Event::PointerButton {
+                        pos,
+                        button: egui::PointerButton::Primary,
+                        pressed: true,
+                        modifiers: Default::default(),
+                    },
+                    egui::Event::PointerButton {
+                        pos,
+                        button: egui::PointerButton::Primary,
+                        pressed: false,
+                        modifiers: Default::default(),
+                    },
+                ];
+            }
+            context.run(input, |ctx| {
+                egui::CentralPanel::default().show(ctx, |panel| ui.ui(panel));
+            })
+        };
+        let text_position = |output: &egui::FullOutput, label: &str| {
+            output
+                .shapes
+                .iter()
+                .find_map(|shape| match &shape.shape {
+                    egui::epaint::Shape::Text(t) if t.galley.job.text == label => {
+                        Some(t.pos + t.galley.size() * 0.5)
+                    }
+                    _ => None,
+                })
+                .unwrap()
+        };
+        let output = draw(&mut ui, 0., None);
+        let header = text_position(&output, "Process recorded laser pair");
+        let _ = draw(&mut ui, 1., Some(header));
+        let output = draw(&mut ui, 2., None);
+        let button = text_position(&output, "Process pair");
+        let _ = draw(&mut ui, 3., Some(button));
+        assert!(ui.is_busy());
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
+        while ui.is_busy() && std::time::Instant::now() < deadline {
+            ui.tick();
+            std::thread::sleep(std::time::Duration::from_millis(1));
+        }
+        assert!(!ui.is_busy());
+        assert!(ui.message.contains("Recorded-pair processing failed"));
+        assert_eq!(ui.loaded_path, "prior bundle");
+        assert_eq!(ui.preview.total, 7);
+        assert_eq!(ui.frames.as_ref().unwrap()[0].pixels, [0, 30, 60, 255]);
+        assert!(!absent.join("result").exists());
     }
     #[test]
     fn camera_panel_labels_raw_statistics_and_keeps_display_stretch_out_of_frame_data() {

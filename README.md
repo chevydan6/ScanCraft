@@ -21,6 +21,7 @@ are not yet qualified. This is not currently a professional CrealityScan replace
 - [Compatibility and migration](docs/MIGRATION.md)
 - [Offline planar calibration fitting](docs/BROWN_CALIBRATION_REFINEMENT.md) (experimental; supplied observations only)
 - [Fixed-intrinsic stereo fitting](docs/STEREO_EXTRINSIC_CALIBRATION.md) (experimental; no hardware calibration)
+- [Native recorded laser processing](docs/NATIVE_RECORDED_LASER_PROCESSING.md) and [candidate viewer](docs/CANDIDATE_VIEWER.md) (unqualified diagnostic geometry)
 - [Contribution guide](CONTRIBUTING.md), [security reporting](SECURITY.md)
 - [Rebranding verification](docs/publication/VERIFICATION.md)
 - [Publication review](docs/publication/PUBLICATION_AUDIT.md)
@@ -57,8 +58,10 @@ not authentication, and retain incomplete `.partial` files on failure.
 
 Acquisition, image preview, raw recording/replay and diagnostics, plus imported
 point-cloud viewing, box trimming, voxel downsampling, undo/redo, PLY interchange
-and versioned editable projects. No scanner-generated point clouds yet. Calibration
-is deferred at the user's request. No geometric scale or accuracy claims.
+and versioned editable projects. Saved Raptor frames can produce and display laser
+matching candidates in a separate native diagnostic view. Qualified scanner-generated
+models remain unavailable. Calibration is deferred at the user's request; no
+geometric scale or accuracy claims are made.
 The historical Python prototype under `prototypes/` is not production code.
 Private hardware captures are excluded from git. Do not distribute vendor
 binaries or private scans. Read PROJECT_STATUS.md and ACCEPTANCE_RESULTS.md
