@@ -1931,7 +1931,8 @@ b7124d917784afcf4f70eb06bac0ff96e6c565fd completed with zero findings,
 major gate passed and exit 0, after full diff/context secret scanning. Both GitHub Rust CI runs
 41440955042/41440857334 passed; the App review remains pending. No paid review was requested.
 This outcome-only addition is not claimed covered by the earlier CLI run.
-No independent reviewer file, hardware controls, calibration or main was changed.
+No independent reviewer file, hardware controls, calibration or the Git `main`
+branch was changed. CLI `main.rs` was updated to expose `inspect-components`.
 
 DEV-FRAME-PAIRING-AUDIT — developer evidence correction, not an independent
 finding. An unused-frame probe caught that equal frame indices in two of the
