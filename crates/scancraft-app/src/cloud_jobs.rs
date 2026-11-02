@@ -40,6 +40,7 @@ pub struct Preview {
 }
 #[derive(Clone)]
 pub enum Operation {
+    ViewCandidates(PathBuf),
     StatisticalPreview {
         neighbors: usize,
         sigma: f64,
@@ -351,6 +352,44 @@ fn execute(
     operation: Operation,
     work: &WorkControl,
 ) -> Result<Report, String> {
+    if let Operation::ViewCandidates(path) = &operation {
+        let loaded =
+            scancraft_workflow::candidate_bundle::load(path, work).map_err(|e| e.to_string())?;
+        let mut preview = Preview {
+            total: loaded.positions.len(),
+            ..Preview::default()
+        };
+        for (index, position) in loaded.positions.into_iter().enumerate() {
+            work.check()?;
+            if let Some((min, max)) = &mut preview.bounds {
+                for axis in 0..3 {
+                    min[axis] = min[axis].min(position[axis]);
+                    max[axis] = max[axis].max(position[axis]);
+                }
+            } else {
+                preview.bounds = Some((position, position));
+            }
+            preview.points.push(DisplayPoint {
+                normal: None,
+                position,
+                color: [101, 190, 226],
+                selected: false,
+                index: loaded.first_observations[index],
+            });
+        }
+        let mut result = report(
+            format!(
+                "{} candidates from {} queries · {} numerical failures · {} without a unique match. Artifact checks and retained frame bindings passed.",
+                loaded.report["candidate_points"],
+                loaded.report["queries"],
+                loaded.report["query_failures"],
+                loaded.report["queries_without_unique_match"]
+            ),
+            Some(preview),
+        );
+        result.reset_view = true;
+        return Ok(result);
+    }
     if let Operation::ExportProjectBundle { sources, target } = &operation {
         let editor = document
             .editor

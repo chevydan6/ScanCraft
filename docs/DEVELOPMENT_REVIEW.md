@@ -12,7 +12,9 @@ status`, and `coderabbit doctor`. Use `coderabbit auth login` if authentication
 expires; never paste tokens into a tracked file. The official CodeRabbit Codex
 skills were installed using `coderabbit skills install` (release v1.1.1). Start a
 new Codex session to discover newly installed skills. Existing sessions can invoke
-the CLI directly. CLI 0.9.1 is the initial verified version; consult `--help` after
+the CLI directly. CLI 0.9.1 was initially verified; the official updater subsequently
+installed 0.9.2. A temporary-directory quota failure was resolved using writable
+home-directory temporary space. Consult `--help` after
 upgrades because old skill examples include flags that have since changed.
 
 GitHub PR review separately requires the official CodeRabbit GitHub App to have

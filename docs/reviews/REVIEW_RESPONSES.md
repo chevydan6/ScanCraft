@@ -2305,3 +2305,35 @@ No production code changed after705-test gate2441a17; this report records actual
 failure modes and updates priorities. Reviewer files untouched, no independent
 finding states changed. Private source/build/data/evidence references are retained
 in the recovery checkpoint; no private payload uploaded or paid review requested.
+
+DEV-CANDIDATE-VIEWER — developer integration, not an independent finding.
+Added workflow/candidate_bundle.rs, app/candidate_ui.rs, a synthetic recorded-laser
+fixture and native --laser-candidates/tab integration. Reuses scan-project Guard
+internally, cloud_jobs ownership/cancellation and cloud_ui rendering. The diagnostic
+path builds Preview directly, never treating raw positions as metric Cloud/Editor.
+Normal editable state remains separate. Failed loads preserve the prior view and
+its loaded-folder label; root close guards include the new job.
+
+Fixed seven-role layout, byte/CRC/identity checks and complete retained one-frame
+recordings precede bounded finite coordinates. Frame/request bindings and pairing
+are checked; historical originals, physical calibration and numerical matching are
+not attested. Typed summaries skip unused observation data and enforce100000/4096
+array limits during parsing, avoiding a large generic observation JSON tree.
+No filesystem/parse hard deadline or worst-case memory qualification is claimed.
+
+Nine added regressions and full714-test/fmt/strict-Clippy/release gate pass.
+Initial focused build required Debug on Loaded for error assertions; added it.
+Initial full gate caught test placement/default initialization style; fixed without
+disabling lints. A later parser-memory concern justified typed bounded parsing and
+its regression, followed by the final gate. Native renders of126synthetic and1764
+saved box-scene points were inspected with unverified-unit labels. Both process
+checks showzero scanner descriptors. Initial Xvfb lookup failed, then explicit
+legacy installation path worked. Corrected render metadata mode to laser_candidates
+and reran final screenshots; source/binary evidence retained privately.
+
+CodeRabbit official updater moved0.9.1 to0.9.2 after a download EDQUOT failure was
+resolved with homeTMPDIR. Authstatus reports authenticated; usage still reports
+lookup_failed for included allowance/billing, so no paid usage or review started.
+Review/publication remain pending, not passed. Local source/commit/evidence hashes
+are in the recovery checkpoint. No reviewer-file, firmware/calibration, hardware
+capture, main-branch merge or protection change occurred in this viewer task.
