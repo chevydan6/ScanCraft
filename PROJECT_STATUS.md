@@ -2,6 +2,26 @@
 
 Stage: experimental. Specification: docs/MISSION.txt.
 
+## Latest local reconstruction checkpoint — 2026-11-02
+
+The local development tree passes 695 Rust tests, formatting, strict Clippy and
+release build. Recording-backed seeded trace diagnostics preserve source frames
+and interpolation lineage. A new native sheet-supported full-trace matcher removes
+the need for supplied partner seeds at the numerical component boundary; it has
+36 independent known-point synthetic reference cases and exact agreement with
+the prior composition on saved Raptor observations. See
+[sheet-supported traces](docs/SHEET_SUPPORTED_TRACES.md) and
+[recorded correspondence](docs/RECORDED_TRACE_CORRESPONDENCE.md).
+
+These latest changes are local and await automated review/publication: CodeRabbit
+quota/billing lookup is unavailable although its local doctor passes. Genuine
+calibrated reconstruction, reliable full live scans and professional release
+qualification remain incomplete. No physical calibration or device changes were
+performed. The checkpoint sections below record earlier development evidence;
+their counts and publication statements describe those historical stages.
+
+## Earlier checkpoints
+
 Latest robust-registration checkpoint: 489 workspace Rust tests and 19 reference/tooling
 tests pass, with strict all-target lint, formatting and release binaries/examples.
 Native manual recording playback is implemented; calibration remains deferred.

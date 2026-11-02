@@ -2155,3 +2155,33 @@ capacity, and no paid usage was authorized. Automated review and publication of
 this change remain pending; earlier epipolar documentation review is also pending.
 Source commit binding follows in the recovery checkpoint. Independent reviewer
 files, Git main, scanner controls and installed calibration remain untouched.
+
+DEV-SHEET-SUPPORTED-TRACES — developer continuation, not an independent finding.
+Accepted the development need to remove externally supplied partner seeds rather
+than treating sparse seeded interpolation as an end-to-end scanner. Private
+all-trace evaluation found three depth-valid crossings for every observation in
+the fixed target ROI (96/99/92), demonstrating unresolved stripe identity from
+stereo alone. Explicit sheet support retained 93/96/89 ROI points, with no
+reference-plane selection. A 200px translated-trace control retained zero/592.
+
+Added calibration/laser_trace.rs and export, bounded match_laser_traces example,
+known-point reference tool, architecture/status and SHEET_SUPPORTED_TRACES docs.
+Reuses original native primitives; retains both quadratic roots, competing traces,
+all supports, triangulation rejection reasons and ambiguous segments. Numerical
+or budget failures cannot produce a partial unique selection. No factory parsing,
+calibration activation, recording attestation or project export is introduced.
+
+Six new tests and full 695-test/fmt/strict-Clippy/release gate passed. Independent
+known-point projection reference: 36 synthetic cases, maximum position error
+9.05e-9 synthetic units, pixel error 1.24e-10. Actual private saved-frame matches
+exactly agree with the previous explicit composition (473/480/473 whole-image,
+93/96/89 within target region); translated control gives zero. Shared primitives,
+same-pose data and provisional geometry do not establish physical accuracy or
+projector identity. Current matcher repeats trace preparation per first pixel;
+live performance and cross-pixel association remain unqualified.
+
+Current automated review remains unavailable: usage lookup fails, while doctor
+reports authenticated/reachable services and nine passing checks. No paid usage
+or review bypass. This is local development evidence, not an automated-review pass.
+Commit/source/evidence bindings are retained in the private recovery checkpoint.
+Independent reviewer findings, main branch and physical setup remain untouched.

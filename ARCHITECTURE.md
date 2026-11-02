@@ -1,5 +1,11 @@
 # Architecture
 
+`scancraft-calibration::laser_trace::PreparedMatcher` composes explicit quadratic
+sheet projections, full-trace epipolar crossings and stereo triangulation. It
+retains competing hypotheses and returns a unique candidate only under an explicit
+support policy; no recording/device binding or calibration activation is implied.
+See [sheet-supported traces](docs/SHEET_SUPPORTED_TRACES.md).
+
 `scancraft-workflow::recorded_traces` connects validated recording selection,
 native stripe detection/continuity and epipolar intersections into an offline
 candidate-correspondence bundle. It preserves input and interpolation lineage

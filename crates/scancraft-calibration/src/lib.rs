@@ -11,6 +11,7 @@ pub mod factory_laser;
 pub mod factory_named;
 pub mod factory_pose;
 pub mod laser_surface;
+pub mod laser_trace;
 mod normal_blocks;
 pub mod orientation;
 pub mod planar;
