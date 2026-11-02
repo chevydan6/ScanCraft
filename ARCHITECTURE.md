@@ -1,5 +1,11 @@
 # Architecture
 
+`scancraft-workflow::recorded_traces` connects validated recording selection,
+native stripe detection/continuity and epipolar intersections into an offline
+candidate-correspondence bundle. It preserves input and interpolation lineage
+without activating calibration or exporting depth; see
+[recorded trace correspondence](docs/RECORDED_TRACE_CORRESPONDENCE.md).
+
 `scancraft-calibration::epipolar_trace` consumes explicit stereo geometry and
 image-trace vertices, returning all epipolar intersections and ambiguous segments.
 It interpolates in undistorted normalized coordinates and labels endpoint versus

@@ -2130,3 +2130,28 @@ change. No implementation change is needed. Verified the actual changed-file
 scope and whitespace; no redundant runtime test added for prose. Propagation
 back to the older PR and stacked descendants follows incremental review. No
 independent finding or GitHub thread was resolved by the developer.
+
+DEV-RECORDED-TRACE-CORRESPONDENCE — developer milestone, not an independent finding.
+Added workflow/recorded_traces.rs, its library export and CLI dispatch, with an
+explicit bounded request and recording-backed observation indices. Whole-recording
+validation, selected frame CRC/profile binding, raw-PTS/host-window pairing and
+source rechecks precede no-overwrite publication. Native detection, continuity and
+epipolar geometry retain observations, rejected seeds, ambiguity and interpolation
+lineage. Exact request/geometry and selected frame data accompany candidate pairs.
+No calibration activation, inferred units, projector identity or 3D export.
+
+Five new regressions cover known interpolation, artifact preservation, reflection,
+input mismatch, late corruption, ambiguity, cancellation and overwrite refusal.
+The initial full gate exposed CLI error-adapter/import issues; corrected using the
+existing qualified WorkControl and string-error adapter pattern. Final gate passed
+689 tests, formatting, strict Clippy and release build. Three private saved Raptor
+pairs reproduce prior native-example coordinates exactly (79/80, 81/83, 74/75),
+with artifact lengths/CRCs verified. This is reproducibility on existing same-pose
+evidence, not physical accuracy or reliable automatic seed discovery.
+
+CodeRabbit CLI quota/billing lookup currently reports unavailable/lookup_failed
+even from the repository. No new review was started without verified included
+capacity, and no paid usage was authorized. Automated review and publication of
+this change remain pending; earlier epipolar documentation review is also pending.
+Source commit binding follows in the recovery checkpoint. Independent reviewer
+files, Git main, scanner controls and installed calibration remain untouched.
