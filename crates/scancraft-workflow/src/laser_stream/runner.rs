@@ -222,7 +222,9 @@ impl Drop for Workers {
         self.signals.stop.store(true, Ordering::Relaxed);
         for h in self.handles.drain(..) {
             if h.join().is_err() {
-                eprintln!("laser source worker panicked during cleanup");
+                scancraft_core::diagnostics::note(format_args!(
+                    "laser source worker panicked during cleanup"
+                ));
             }
         }
     }

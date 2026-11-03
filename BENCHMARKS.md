@@ -1,5 +1,11 @@
 # Benchmarks
 
+[Helper diagnostic validation](docs/HELPER_DIAGNOSTICS.md) adds failure-isolation
+evidence, not a performance claim: 808-test gate, successful synthetic/full-stderr
+processing and exact matches for 37 saved Raptor pair records. A finite healthy GUI trial processes
+25/32 (78.125%, below 90%); one root-close observation is 0.292 s. No sustained latency,
+whole-app memory, transport reliability or calibrated accuracy qualification follows.
+
 [Concurrent camera detection](docs/PARALLEL_LASER_DETECTION.md): same-executable
 old/new numerical medians are 40.1–40.9 / 32.3–33.2 ms on five saved native pairs;
 130 complete executions match. Alternating short native trials process 41–42/64

@@ -1,4 +1,5 @@
 //! Versioned sensor data. Coordinates remain undefined until calibrated reconstruction.
+pub mod diagnostics;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]

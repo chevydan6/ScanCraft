@@ -46,7 +46,9 @@ fn deliver(
         Ok(packet) => packet,
         Err(e) => {
             omitted.fetch_add(1, Ordering::Relaxed);
-            eprintln!("Laser preview omitted; raw recording continues: {e}");
+            crate::helper_diagnostics::note(format_args!(
+                "Laser preview omitted; raw recording continues: {e}"
+            ));
             return Ok(());
         }
     };
@@ -79,7 +81,9 @@ fn offer(
         },
         Err(e) => {
             omitted.fetch_add(1, Ordering::Relaxed);
-            eprintln!("Laser preview handoff omitted; raw recording continues: {e}");
+            crate::helper_diagnostics::note(format_args!(
+                "Laser preview handoff omitted; raw recording continues: {e}"
+            ));
             PreviewStatus::Omitted
         }
     }
@@ -103,9 +107,9 @@ fn publish(
                 Ok(snapshot) => send(snapshot)?,
                 Err(e) => {
                     omitted.fetch_add(1, Ordering::Relaxed);
-                    eprintln!(
+                    crate::helper_diagnostics::note(format_args!(
                         "Laser preview omitted during worker preparation; raw recording continues: {e}"
-                    );
+                    ));
                 }
             }
         }
@@ -171,19 +175,19 @@ pub(super) fn entry(args: &[std::ffi::OsString]) -> Option<i32> {
     let result = if args.len() != if origin == Origin::Native { 4 } else { 6 } {
         Err("invalid laser helper arguments".into())
     } else {
-        eprintln!(
+        crate::helper_diagnostics::note(format_args!(
             "laser helper PID {} started ({origin:?})",
             std::process::id()
-        );
+        ));
         let paths = args[1..].iter().map(PathBuf::from).collect::<Vec<_>>();
         session(&paths, origin)
     };
     if let Err(e) = &result {
-        eprintln!("Laser helper failed: {e}");
+        crate::helper_diagnostics::note(format_args!("Laser helper failed: {e}"));
     }
     let sent = capture_ipc::write_laser_complete(&mut io::stdout().lock(), &result);
     if let Err(e) = &sent {
-        eprintln!("Laser completion transport failed: {e}");
+        crate::helper_diagnostics::note(format_args!("Laser completion transport failed: {e}"));
     }
     Some(if result.is_ok() && sent.is_ok() { 0 } else { 1 })
 }

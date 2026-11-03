@@ -163,6 +163,7 @@ pub fn run(
 ) -> Result<Completion, String> {
     control.work.check()?;
     let (log_path, log) = private_log().map_err(|e| e.to_string())?;
+    let observation = log.try_clone().map_err(|e| e.to_string())?;
     let mut command = Command::new(std::env::current_exe().map_err(|e| e.to_string())?);
     command
         .arg(if origin == Origin::Native {
@@ -180,8 +181,15 @@ pub fn run(
         "Helper PID {pid} owns acquisition; diagnostics: {}",
         log_path.display()
     ));
-    monitor(&mut child, control, Duration::from_secs(2))
-        .map_err(|e| format!("{e}; helper PID {pid}; diagnostics: {}", log_path.display()))
+    monitor(&mut child, control, Duration::from_secs(2)).map_err(|e| {
+        crate::helper_diagnostics::failure(
+            child.child(),
+            "laser helper",
+            &log_path,
+            &observation,
+            &e,
+        )
+    })
 }
 fn monitor(
     child: &mut OwnedChild,
@@ -273,7 +281,9 @@ fn supervise(child: &mut OwnedChild, c: &Control, grace: Duration) -> Result<Com
         if let Some(status) = child.child().try_wait().map_err(|e| e.to_string())?
             && eof
         {
-            decoder.finish().map_err(|e| e.to_string())?;
+            decoder
+                .finish()
+                .map_err(|e| format!("Laser helper exited {status}; IPC: {e}"))?;
             if !status.success() {
                 return Err(format!(
                     "Laser helper exited {status}; result: {complete:?}"

@@ -3085,3 +3085,121 @@ No review request/upload/paid usage/review-pass claim/push/PR/merge/protection c
 Independent review of this performance change remains pending. Geometry/coverage,
 tracking/fusion, reliable helpers/rendering,90%yield/20FPS/p95,30minscan/60minmemory
 and full editable scan-to-mesh release remain incomplete;005/006/007/021 unchanged.
+
+DEV-DIAGNOSTIC-WRITE-PANIC / DEV-HELPER-EXIT-STATUS — Developer-identified defects,
+accepted and corrected for independent verification. These are not invented
+independent findings. The earlier DEV-LASER-HELPER-EARLYEXIT remains unattributed;
+this reproduction does not establish that its cause was stderr failure.
+
+At base `e87c14b6d1294bdeb728191d5f5d81ee180c8674`, real release laser/live helper
+processes with deliberately invalid arguments (no device access) normally exit1
+with kind6/kind4 error packets. Redirecting stderr to /dev/full instead gives
+panic exit101 and no stdout. An initial app-only fix corrects this, but the actual
+synthetic capture regression still fails because the workflow's per-pair eprintln
+panics the coordinator. That failed run is retained; the test is not weakened.
+Also, capture/laser/live Decoder::finish errors discard the already known exit
+status on missing final IPC, obscuring normal/nonzero/signal termination.
+
+Implementation: shared `scancraft-core/src/diagnostics.rs::note` bounds each UTF-8
+note to4096 bytes and total attempted notes to1MiB/process, ignores optional output
+failure and does not retry it. All app helper, workflow and device Drop/unwind
+stderr sites use this primitive. Typed raw/journal/transport/cleanup errors retain
+their authority; no scanner or reconstruction state is routed through notes.
+There is no new dependency or copied algorithm. The existing core crate provides
+this small shared leaf utility without introducing a GUI dependency into libraries.
+
+App `helper_diagnostics::{private_log,failure}` replaces temporary diagnostics with
+private state logs, checked absolute XDG_STATE_HOME or HOME/.local/state, owner/
+mode checks, directory-anchored openat/mkdirat/unlinkat, no-follow leaves, header+
+file/directory sync before launch, and mode0700 directory/mode0600 files. Inventory
+is bounded1024; pruning retains64 inactive recognized files plus active/new files.
+Inherited flock protects a live helper's log, even after the GUI stops waiting.
+Unknown names/headers, unsafe files, symlinks and active files are preserved.
+No user scan/project or unrelated file is pruned; permissions are never silently
+changed. Parent retains an append descriptor and stores bounded supervisor failure
+metadata/status. Exit lookup uses try_wait; original ownership/reaping/Stop/Abort
+loops remain. Missing/nonregular log paths and observation-write errors are reported
+without replacing the actual operation error. EOF protocol errors keep exit status.
+
+Changed sources: core lib.rs/diagnostics.rs; device lib.rs/stream_group.rs/ir_gain.rs/
+control/{line_trial,flood_trial}.rs; workflow live_stereo/runner.rs and laser_stream/
+runner.rs; app capture_process.rs/discovery_process.rs/laser_process.rs/
+laser_process/{helper,tests}.rs/live_process.rs/main.rs, new helper_diagnostics.rs
+and its tests; app process integration tests. Documentation links current behavior
+and limitations. Base hash above; exact implementation hash is bound after commit.
+
+Verification:
+
+- Final frozen full gate:808 tests, one existing explicitly ignored storage test,
+  formatting, strict all-target Clippy and release build pass, verified-gate.log.
+  Initial app-only gate exposes the deeper coordinator panic; core atomic API
+  deprecation and an intermediate function-signature mismatch are corrected without
+  suppression or lost coverage. Final Rust/binary maps match the frozen build.
+- Pure/core tests: bounded valid UTF-8/truncation, exact atomic attempt budget,
+  failed writer behavior and oversized JSON formatting. Private-state tests cover
+  explicit/absolute paths, symlink/mode/non-directory rejection, persistent private
+  files, inherited active-file protection, inactive retention, unknown preservation,
+  inventory cap and stored process status. Tests use isolated state fixtures/process
+  environments, never mutate process-global environment or prune user diagnostics.
+- Supervisor tests retain exit0/42 plus self-SIGTERM from a synthetic script (not
+  a scanner owner); failed IPC/abort tests still retain locks until child exit,
+  only teardown abandons waiting, graceful Stop still permits finalization.
+- Actual subprocess tests prove invalid-request final IPC is byte-identical with
+  normal/full stderr, setup failure precedes launch/publication with unchanged
+  input, and successful synthetic/full-stderr reconstruction saves both verified
+  two-frame recordings with explicit synthetic provenance. No physical fault injection.
+- Exact final release malformed helper tests now exit1/send identical error packets
+  under both stderr sinks. Actual saved-Raptor replay with /dev/full stderr exits0,
+  retains32raw/camera,processes4pairs/7662values,reports28drops/camera,no unmatched,
+  sends4previews+completion and zero helper omissions. Original failure class fixed;
+  no claim that every possible abnormal helper exit is prevented.
+- Final healthy native GUI finite:32raw/camera,25pairs/24segments/46843values,
+  processingdrops7/7,pending0/0,startup rejects2/1,ongoing1/1;78.125% below90%.
+  Rootclose:10/9raw,8pairs/8segments/14931values,drops1/1,pending1/0,startup0/87,
+  ongoing0/0,one stopped incomplete buffer/camera. Close-to-exit0.292310s is one
+  observation, not a bound. Both raw integrity/publication/restoration and complete
+  before/after stream/illumination GET equality pass; original scoped151 restored.
+  Helper camera descriptors positive/GUIzero; all observed helpers/apps exit.
+  LP_NUM_THREADS=2 isolated software-renderer condition remains explicit. Earlier
+  draft native captures are retained separately and not bound to the final binary.
+- Preserved pre-change engine/serializer verifies all37 final native/replay records,
+  69436candidate values, every rawCRC/sequence/flags/host/PTS reference and full old
+  record bytes exactly. All3 final artifact manifests pass lengths/CRCs. Same-engine
+  integrity is not calibrated physical truth. No geometry/threshold/format change.
+- Device-free GUI existing-target replay refusal displays real exit1/reason/logpath,
+  appends supervisor_failure with that status, retains the log after normal app
+  exit, leaves all existing capture hashes unchanged and observes zero scanner FDs.
+  Screenshot inspected. Default-state native logs are600 within700 directory,
+  survive GUI closure, and are privately copied before future retention can prune.
+  Subsequent accessible-FD inventory finds zero camera/USB holders.
+
+Private evidence: developer state artifacts/helper-diagnostics-tzj3ssk2, including
+baseline/failing intermediate/final tests, synthetic failures, release probes,
+retained state logs, native readbacks and source/binary/commit hashes. Private
+models/raw/screenshots/probes/logs are excluded from Git/review uploads. Source
+has not changed since the final passing gate; later changes are documentation.
+
+Unsafe review: openat uses a live held directory, validated NUL-terminated leaf and
+explicit mode; FromRawFd consumes only a newly returned valid descriptor exactly
+once. mkdirat/unlinkat operate on retained directories/validated leaves; managed
+header/mode/owner/nlink/lock checks precede retention deletion. flock borrows live
+files and survives the stderr duplicate; geteuid has no preconditions. RAII closes
+failed-path descriptors. Relevant symlink/permission/retention/inheritance tests
+pass. Same-user hostile mutation is not an authenticity boundary or a power-loss
+qualification. No new driver/firmware/sysfs/protection change.
+
+Limits: later notes and supervisor records are not individually fsynced; only
+setup is synchronized. Pruning is inactive retention, not a global disk quota
+against arbitrarily many active/external writers. Other library/panic stderr writers
+are outside the core attempt budget. A blocking filesystem/sink can still block;
+no hard shutdown guarantee or005 closure follows. Initial log setup can refuse
+launch; future log write failure is optional, while required capture errors remain
+fatal. Original native early-exit attribution, default renderer/rejection issues,
+physical calibration/accuracy, tracking/fusion,90%/20FPS/p95,30minscan/60minmemory
+and complete editable scan-to-mesh release remain incomplete.005/006/007/021
+unchanged;024 remains independently Resolved per354.
+
+CodeRabbit skill/workflow consulted; fresh22652 usage exits1 with all included-quota/
+billing fields lookup_failed. No review request, paid usage, upload, review-pass
+claim, push/PR, merge or protection bypass. Independent review of this change remains
+pending. Reviewer-owned findings/charter remain read-only and unstaged.

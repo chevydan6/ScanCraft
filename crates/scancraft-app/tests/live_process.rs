@@ -25,6 +25,7 @@ fn synthetic_process_publishes_verified_recordings_and_retains_synthetic_labels(
     fs::create_dir(&root.0).unwrap();
     let target = root.0.join("scan");
     let output = Command::new(env!("CARGO_BIN_EXE_scancraft"))
+        .env("XDG_STATE_HOME", root.0.join("state"))
         .arg("--synthetic-live-process")
         .arg(&target)
         .output()
@@ -63,6 +64,7 @@ fn synthetic_process_publishes_verified_recordings_and_retains_synthetic_labels(
     }
     let before = fs::read(target.join("report.json")).unwrap();
     let retry = Command::new(env!("CARGO_BIN_EXE_scancraft"))
+        .env("XDG_STATE_HOME", root.0.join("state"))
         .arg("--synthetic-live-process")
         .arg(&target)
         .output()

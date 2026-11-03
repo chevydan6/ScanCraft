@@ -211,8 +211,12 @@ impl Drop for Workers {
         for handle in self.handles.drain(..) {
             match handle.join() {
                 Ok(Ok(_)) => {}
-                Ok(Err(error)) => eprintln!("live capture cleanup during unwind: {error}"),
-                Err(_) => eprintln!("live capture worker panicked during unwind"),
+                Ok(Err(error)) => scancraft_core::diagnostics::note(format_args!(
+                    "live capture cleanup during unwind: {error}"
+                )),
+                Err(_) => scancraft_core::diagnostics::note(format_args!(
+                    "live capture worker panicked during unwind"
+                )),
             }
         }
     }
@@ -338,10 +342,10 @@ fn execute<S: Source + 'static>(
                         if control.preview_enabled() {
                             latest_pair = Some(pair);
                         }
-                        eprintln!(
+                        scancraft_core::diagnostics::note(format_args!(
                             "{}",
                             json!({"event":"live_stereo_pair","pairs":reports.len(),"tracking":result["tracking"]})
-                        );
+                        ));
                     }
                 }
                 Err(mpsc::RecvTimeoutError::Timeout) => {}

@@ -318,7 +318,10 @@ impl Stream {
 impl Drop for Stream {
     fn drop(&mut self) {
         if let Err(e) = self.close() {
-            eprintln!("stream cleanup failed (buffer type {}): {e}", self.kind);
+            scancraft_core::diagnostics::note(format_args!(
+                "stream cleanup failed (buffer type {}): {e}",
+                self.kind
+            ));
         }
     }
 }

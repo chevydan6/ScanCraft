@@ -1,5 +1,12 @@
 # Roadmap
 
+Reproduced stderr-write panics and lost process status are corrected with bounded
+best-effort notes and retained private failure logs. The original early native helper
+exit remains unattributed; use the new records if it recurs, preserving locks and
+source cleanup. Resume measured matching/dispatch optimization and software geometry
+validation while physical calibration is deferred. No further editing expansion
+before complete reliable reconstruction/scan workflows. See docs/HELPER_DIAGNOSTICS.md.
+
 Large-pair concurrent detection now reduces measured numerical work while preserving
 complete results. New finite GUI trials reach 47–50/64 processed pairs, still below
 90%; next profile remaining serial matching/dispatch, transport rejects and early

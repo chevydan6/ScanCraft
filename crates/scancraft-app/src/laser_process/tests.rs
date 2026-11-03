@@ -96,3 +96,23 @@ fn latest_mailbox_counts_overwrites_and_rejects_wrong_origin_or_regression() {
     assert!(c.take().is_none());
     assert!(c.offer(snapshot(Origin::Native, 1)).is_err());
 }
+
+#[test]
+fn missing_laser_completion_retains_zero_nonzero_and_signal_exit_status() {
+    for (script, expected) in [
+        ("import sys; sys.exit(0)", "exit status: 0"),
+        ("import sys; sys.exit(42)", "exit status: 42"),
+        (
+            "import os,signal; os.kill(os.getpid(),signal.SIGTERM)",
+            "signal: 15",
+        ),
+    ] {
+        // All children are synthetic scripts; no device or native helper is opened.
+        let mut child = spawn_child(script, &[]);
+        let control = Control::new(Origin::RecordingReplay);
+        let error = monitor(&mut child, &control, Duration::from_secs(1)).unwrap_err();
+        assert!(error.contains("complete final result"), "{error}");
+        assert!(error.contains(expected), "{error}");
+        assert!(child.child().try_wait().unwrap().is_some());
+    }
+}

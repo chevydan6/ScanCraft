@@ -46,6 +46,7 @@ fn run_command(
 ) -> Result<Value, String> {
     work.check()?;
     let (log_path, log) = private_log().map_err(|e| e.to_string())?;
+    let observation = log.try_clone().map_err(|e| e.to_string())?;
     command
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
@@ -56,11 +57,13 @@ fn run_command(
             log_path.display()
         )
     })?;
-    let pid = helper.child().id();
     supervise(&mut helper, work, control, ABORT_GRACE).map_err(|e| {
-        format!(
-            "{e}; scan helper PID {pid}; cleanup diagnostics: {}",
-            log_path.display()
+        crate::helper_diagnostics::failure(
+            helper.child(),
+            "scan helper",
+            &log_path,
+            &observation,
+            &e,
         )
     })
 }
@@ -139,7 +142,9 @@ fn supervise(
         if let Some(status) = helper.child().try_wait().map_err(|e| e.to_string())?
             && eof
         {
-            decoder.finish().map_err(|e| e.to_string())?;
+            decoder
+                .finish()
+                .map_err(|e| format!("Scan helper exited {status}; IPC: {e}"))?;
             if !status.success() {
                 return Err(format!("Scan helper exited {status}; result: {complete:?}"));
             }
@@ -216,11 +221,15 @@ fn send_display(
                 *omitted = omitted.saturating_add(1);
                 update.skipped_previews = update.skipped_previews.saturating_add(1);
             }
-            eprintln!("Display preview omitted (scan continues): {error}");
+            crate::helper_diagnostics::note(format_args!(
+                "Display preview omitted (scan continues): {error}"
+            ));
             match capture_ipc::prepare_live_progress(&update) {
                 Ok(packet) => packet,
                 Err(error) => {
-                    eprintln!("Display counter update omitted (scan continues): {error}");
+                    crate::helper_diagnostics::note(format_args!(
+                        "Display counter update omitted (scan continues): {error}"
+                    ));
                     return Ok(());
                 }
             }
@@ -234,11 +243,11 @@ fn send_display(
     Ok(())
 }
 fn child_session(paths: &[PathBuf], synthetic: bool) -> Result<Value, String> {
-    eprintln!(
+    crate::helper_diagnostics::note(format_args!(
         "{}",
         json!({"helper_pid":std::process::id(),"status":"starting",
         "kind":if synthetic {"synthetic_fixture"} else {"native_scan_candidate"}})
-    );
+    ));
     let work = Arc::new(WorkControl::default());
     let control = Arc::new(Control::new(true));
     let w = work.clone();
@@ -247,7 +256,7 @@ fn child_session(paths: &[PathBuf], synthetic: bool) -> Result<Value, String> {
         .name("scancraft-scan-helper-control".into())
         .spawn(move || {
             if let Err(error) = read_controls(io::stdin(), &w, &c) {
-                eprintln!("Control failed: {error}");
+                crate::helper_diagnostics::note(format_args!("Control failed: {error}"));
             }
         })
         .map_err(|e| e.to_string())?;
@@ -285,10 +294,10 @@ fn child_session(paths: &[PathBuf], synthetic: bool) -> Result<Value, String> {
     let transport = progress
         .join()
         .map_err(|_| "live display helper panicked".to_string())?;
-    eprintln!(
+    crate::helper_diagnostics::note(format_args!(
         "{}",
         json!({"scan_result":outcome.as_ref().map(|_| "completed").map_err(|e|e.as_str()),"transport_error":transport.as_ref().err()})
-    );
+    ));
     match (outcome, transport) {
         (Ok(report), Ok(omitted)) => {
             let mut report = summary(&report)?;
@@ -322,7 +331,9 @@ pub(crate) fn helper_entry(args: &[OsString]) -> Option<i32> {
         };
         match &result {
             Ok(report) => println!("{}", report),
-            Err(error) => eprintln!("Synthetic process diagnostic failed: {error}"),
+            Err(error) => crate::helper_diagnostics::note(format_args!(
+                "Synthetic process diagnostic failed: {error}"
+            )),
         }
         return Some(if result.is_ok() { 0 } else { 1 });
     }
@@ -337,10 +348,10 @@ pub(crate) fn helper_entry(args: &[OsString]) -> Option<i32> {
         let paths: Vec<PathBuf> = args[1..].iter().map(PathBuf::from).collect();
         child_session(&paths, synthetic)
     };
-    eprintln!("{}", json!({"live_helper_result":result}));
+    crate::helper_diagnostics::note(format_args!("{}", json!({"live_helper_result":result})));
     let write = capture_ipc::write_live_complete(&mut io::stdout().lock(), &result);
     if let Err(error) = &write {
-        eprintln!("Final IPC failed: {error}");
+        crate::helper_diagnostics::note(format_args!("Final IPC failed: {error}"));
     }
     Some(if result.is_ok() && write.is_ok() {
         0
@@ -582,5 +593,32 @@ mod tests {
         let control = Control::new(true);
         assert!(read_controls([255].as_slice(), &work, &control).is_err());
         assert!(work.check().is_err());
+    }
+}
+
+#[cfg(test)]
+mod exit_diagnostic_tests {
+    use super::*;
+    #[test]
+    fn missing_scan_completion_retains_actual_process_exit_status() {
+        for exit in [0, 42] {
+            let mut command = Command::new("sh");
+            command
+                .arg("-c")
+                .arg(format!("exit {exit}"))
+                .stdin(Stdio::piped())
+                .stdout(Stdio::piped())
+                .stderr(Stdio::null());
+            let mut child = OwnedChild::spawn(&mut command).unwrap();
+            let error = supervise(
+                &mut child,
+                &WorkControl::default(),
+                &Control::new_remote_display(true),
+                Duration::from_secs(1),
+            )
+            .unwrap_err();
+            assert!(error.contains("complete final result"), "{error}");
+            assert!(error.contains(&format!("exit status: {exit}")), "{error}");
+        }
     }
 }

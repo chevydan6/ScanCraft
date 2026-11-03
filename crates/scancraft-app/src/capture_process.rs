@@ -3,19 +3,19 @@ use crate::capture_ipc::{self, Decoder, Message};
 use scancraft_core::Frame;
 use std::{
     ffi::OsString,
-    fs::{File, OpenOptions},
     io::{self, Read, Write},
-    os::{fd::AsRawFd, unix::fs::OpenOptionsExt},
-    path::{Path, PathBuf},
+    os::fd::AsRawFd,
+    path::Path,
     process::{Child, Command, Stdio},
     sync::{
         Arc,
-        atomic::{AtomicBool, AtomicU64, Ordering},
+        atomic::{AtomicBool, Ordering},
         mpsc,
     },
-    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
+    time::{Duration, Instant},
 };
 const GRACE: Duration = Duration::from_secs(2);
+pub(crate) use crate::helper_diagnostics::private_log;
 
 // Allocate the waiter before launching a helper. On early return it can reap a
 // surviving child without any GUI join or scanner restoration duties of its own.
@@ -51,25 +51,6 @@ impl Drop for OwnedChild {
         }
     }
 }
-pub(crate) fn private_log() -> io::Result<(PathBuf, File)> {
-    static NEXT: AtomicU64 = AtomicU64::new(0);
-    let stamp = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .map_err(io::Error::other)?
-        .as_nanos();
-    let path = std::env::temp_dir().join(format!(
-        "scancraft-capture-{}-{stamp}-{}.log",
-        std::process::id(),
-        NEXT.fetch_add(1, Ordering::Relaxed)
-    ));
-    let file = OpenOptions::new()
-        .write(true)
-        .create_new(true)
-        .mode(0o600)
-        .custom_flags(libc::O_CLOEXEC | libc::O_NOFOLLOW)
-        .open(&path)?;
-    Ok((path, file))
-}
 /// Run from a GUI worker, which owns only IPC and process supervision. On a
 /// cancellation timeout the helper retains locks and cleanup responsibilities;
 /// its private stderr log remains available after the GUI stops waiting.
@@ -85,6 +66,7 @@ pub(crate) fn run(
         return Ok("Cancelled before launching capture helper".into());
     }
     let (log_path, log) = private_log().map_err(|e| e.to_string())?;
+    let observation = log.try_clone().map_err(|e| e.to_string())?;
     let mut command = Command::new(std::env::current_exe().map_err(|e| e.to_string())?);
     command
         .arg("--capture-helper")
@@ -100,11 +82,13 @@ pub(crate) fn run(
             log_path.display()
         )
     })?;
-    let pid = helper.child().id();
     supervise(&mut helper, cancel, abort, deliver, GRACE).map_err(|e| {
-        format!(
-            "{e}; helper PID {pid}; cleanup diagnostics: {}",
-            log_path.display()
+        crate::helper_diagnostics::failure(
+            helper.child(),
+            "capture helper",
+            &log_path,
+            &observation,
+            &e,
         )
     })
 }
@@ -180,7 +164,9 @@ pub(crate) fn supervise(
         if let Some(status) = helper.child().try_wait().map_err(|e| e.to_string())?
             && eof
         {
-            decoder.finish().map_err(|e| e.to_string())?;
+            decoder
+                .finish()
+                .map_err(|e| format!("Capture helper exited {status}; IPC: {e}"))?;
             if !status.success() {
                 return Err(format!(
                     "Capture helper exited {status}; result: {completion:?}"
@@ -217,10 +203,10 @@ pub(crate) fn helper_entry(args: &[OsString]) -> Option<i32> {
             Some("preview") => false,
             _ => return Err("invalid capture mode".into()),
         };
-        eprintln!(
+        crate::helper_diagnostics::note(format_args!(
             "{}",
             serde_json::json!({"helper_pid":std::process::id(),"status":"starting","kind":"camera_preview_or_recording"})
-        );
+        ));
         let cancel = Arc::new(AtomicBool::new(false));
         let c = cancel.clone();
         std::thread::Builder::new()
@@ -255,10 +241,10 @@ pub(crate) fn helper_entry(args: &[OsString]) -> Option<i32> {
         );
         // stderr is a private file supplied by the supervisor, independent of
         // stdout transport. Keep the final cleanup outcome even after IPC loss.
-        eprintln!(
+        crate::helper_diagnostics::note(format_args!(
             "{}",
             serde_json::json!({"capture_result": outcome, "ipc_error": transport_error})
-        );
+        ));
         let outcome = if let Some(error) = transport_error {
             Err(format!(
                 "Capture display transport failed: {error}; capture outcome: {outcome:?}"
@@ -271,7 +257,7 @@ pub(crate) fn helper_entry(args: &[OsString]) -> Option<i32> {
         outcome.map(|_| ())
     })();
     if let Err(error) = &result {
-        eprintln!("Capture helper failed: {error}");
+        crate::helper_diagnostics::note(format_args!("Capture helper failed: {error}"));
     }
     Some(if result.is_ok() { 0 } else { 1 })
 }
@@ -279,6 +265,11 @@ pub(crate) fn helper_entry(args: &[OsString]) -> Option<i32> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::{
+        fs::OpenOptions,
+        path::PathBuf,
+        time::{SystemTime, UNIX_EPOCH},
+    };
     #[test]
     fn pre_cancelled_request_does_not_launch_a_helper() {
         assert_eq!(
@@ -496,35 +487,51 @@ mod tests {
     #[test]
     fn helper_diagnostic_is_private_and_independent_of_ipc() {
         use std::os::unix::fs::PermissionsExt;
-        let (path, mut file) = private_log().unwrap();
+        let root = std::env::temp_dir().join(format!(
+            "scancraft-preview-log-test-{}-{}",
+            std::process::id(),
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        let (path, mut file) = crate::helper_diagnostics::test_log(&root).unwrap();
         assert_eq!(file.metadata().unwrap().permissions().mode() & 0o777, 0o600);
         file.write_all(b"cleanup failed after parent transport closed")
             .unwrap();
         drop(file);
-        assert_eq!(
-            std::fs::read(&path).unwrap(),
-            b"cleanup failed after parent transport closed"
+        let content = std::fs::read(&path).unwrap();
+        assert!(content.ends_with(b"cleanup failed after parent transport closed"));
+        assert!(
+            serde_json::from_slice::<serde_json::Value>(
+                content.split(|&b| b == b'\n').next().unwrap()
+            )
+            .is_ok()
         );
-        std::fs::remove_file(path).unwrap();
+        std::fs::remove_dir_all(root).unwrap();
     }
 
     #[test]
     fn helper_exit_without_completion_is_not_success() {
-        let mut command = Command::new("sh");
-        command
-            .args(["-c", "exit 0"])
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::null());
-        let mut helper = OwnedChild::spawn(&mut command).unwrap();
-        let error = supervise(
-            &mut helper,
-            &AtomicBool::new(false),
-            &AtomicBool::new(false),
-            |_| true,
-            Duration::from_secs(1),
-        )
-        .unwrap_err();
-        assert!(error.contains("complete final result"));
+        for exit in [0, 42] {
+            let mut command = Command::new("sh");
+            command
+                .arg("-c")
+                .arg(format!("exit {exit}"))
+                .stdin(Stdio::piped())
+                .stdout(Stdio::piped())
+                .stderr(Stdio::null());
+            let mut helper = OwnedChild::spawn(&mut command).unwrap();
+            let error = supervise(
+                &mut helper,
+                &AtomicBool::new(false),
+                &AtomicBool::new(false),
+                |_| true,
+                Duration::from_secs(1),
+            )
+            .unwrap_err();
+            assert!(error.contains("complete final result"));
+            assert!(error.contains(&format!("exit status: {exit}")), "{error}");
+        }
     }
 }

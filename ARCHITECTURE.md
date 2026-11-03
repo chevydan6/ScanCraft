@@ -1,5 +1,11 @@
 # Architecture
 
+Optional helper/device/workflow stderr notes now use a bounded, best-effort Rust
+core primitive. Private app state logs use checked directory descriptors, inherited
+active-file locks and bounded inactive retention. Supervisors keep exit status and
+append failure observations without changing ownership/reaping, required IPC or
+raw publication. See [failure isolation and limits](docs/HELPER_DIAGNOSTICS.md).
+
 Large eligible camera pairs detect concurrently using one scoped worker and the
 caller. Thread creation failure/single CPU/small images retain serial execution;
 results rejoin before ordered matching, journaling or previews. Source frames remain

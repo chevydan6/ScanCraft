@@ -8,6 +8,7 @@ mod capture_worker;
 mod cloud_jobs;
 mod cloud_ui;
 mod discovery_process;
+mod helper_diagnostics;
 mod laser_display;
 mod laser_process;
 mod live_fixture;

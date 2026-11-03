@@ -124,7 +124,7 @@ impl SettingsLease {
 impl Drop for SettingsLease {
     fn drop(&mut self) {
         if let Err(e) = self.restore() {
-            eprintln!("{e}");
+            scancraft_core::diagnostics::note(format_args!("{e}"));
         }
     }
 }

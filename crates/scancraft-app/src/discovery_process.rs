@@ -53,6 +53,7 @@ fn run(cancel: &AtomicBool, abort: &AtomicBool) -> Result<String, String> {
         return Ok("Discovery cancelled before launch".into());
     }
     let (path, log) = capture_process::private_log().map_err(|e| e.to_string())?;
+    let observation = log.try_clone().map_err(|e| e.to_string())?;
     let mut command = Command::new(std::env::current_exe().map_err(|e| e.to_string())?);
     command
         .arg("--discovery-helper")
@@ -60,7 +61,6 @@ fn run(cancel: &AtomicBool, abort: &AtomicBool) -> Result<String, String> {
         .stdout(Stdio::piped())
         .stderr(Stdio::from(log));
     let mut helper = OwnedChild::spawn(&mut command).map_err(|e| e.to_string())?;
-    let pid = helper.child().id();
     let mut unexpected_frame = false;
     let result = capture_process::supervise(
         &mut helper,
@@ -74,12 +74,21 @@ fn run(cancel: &AtomicBool, abort: &AtomicBool) -> Result<String, String> {
     );
     retain_until_exit(&mut helper, abort);
     if unexpected_frame {
-        return Err("Unexpected frame in discovery protocol".into());
+        return Err(crate::helper_diagnostics::failure(
+            helper.child(),
+            "discovery helper",
+            &path,
+            &observation,
+            "Unexpected frame in discovery protocol",
+        ));
     }
     result.map_err(|e| {
-        format!(
-            "Discovery: {e}; helper PID {pid}; diagnostics: {}",
-            path.display()
+        crate::helper_diagnostics::failure(
+            helper.child(),
+            "discovery helper",
+            &path,
+            &observation,
+            &e,
         )
     })
 }
@@ -99,10 +108,13 @@ pub(crate) fn helper_entry(args: &[OsString]) -> Option<i32> {
         return None;
     }
     if args.len() != 1 {
-        eprintln!("discovery helper accepts no arguments");
+        crate::helper_diagnostics::note(format_args!("discovery helper accepts no arguments"));
         return Some(1);
     }
-    eprintln!("discovery helper PID {} starting", std::process::id());
+    crate::helper_diagnostics::note(format_args!(
+        "discovery helper PID {} starting",
+        std::process::id()
+    ));
     let result = scancraft_device::discover()
         .map(|nodes| {
             format!(
@@ -121,7 +133,7 @@ pub(crate) fn helper_entry(args: &[OsString]) -> Option<i32> {
             )
         })
         .map_err(|e| e.to_string());
-    eprintln!("discovery result: {result:?}");
+    crate::helper_diagnostics::note(format_args!("discovery result: {result:?}"));
     let success = result.is_ok();
     let written = capture_ipc::write_complete(&mut std::io::stdout().lock(), &result);
     Some(if success && written.is_ok() { 0 } else { 1 })
