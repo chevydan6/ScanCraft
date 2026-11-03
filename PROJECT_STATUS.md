@@ -1,5 +1,13 @@
 # Project status
 
+Latest software correction: [synthetic capacity-test pacing](docs/CAPACITY_TEST_PACING.md)
+now waits for processing and bounded progress from both recording files. A controlled
+dual-writer stall verifies that either stopped consumer prevents further source
+advancement. Production eight-frame/nonblocking overflow behavior is unchanged.
+Full892-test/fmt/Clippy/release gate and six tests on one CPU pass; independent
+SCAN-REV-031 verification and new-head CI remain pending. This corrects a test
+precondition, not the remaining hardware rejection or physical reconstruction gaps.
+
 Latest one-minute mitigation trials: [capture without diagnostic lid polling](docs/RAPTOR_NO_LID_SUSTAINED.md)
 saves/replays7,200 real frames, but ongoing rejects per camera remain2 then4.
 The first monitor's60-second deadline expired; corrected instrumentation retains

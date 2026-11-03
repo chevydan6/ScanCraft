@@ -1,4 +1,7 @@
-//! Device-free capacity/compatibility tests. Pacing follows consumed previews, not real hardware speed.
+//! Device-free capacity/compatibility tests; pacing observes processing AND recording progress.
+#[path = "support/recording_progress.rs"]
+mod recording_progress;
+use recording_progress::RecordingProgress;
 use scancraft_core::Frame;
 use scancraft_geometry::{
     formats::{load_project, save_project},
@@ -57,22 +60,40 @@ fn open(root: &Path, settings: &Value) -> Result<Processor, scancraft_workflow::
         &WorkControl::default(),
     )
 }
+fn context() -> CaptureContext {
+    CaptureContext {
+        controls: json!({"synthetic":true}),
+        calibration_status: "synthetic_fixture".into(),
+        ..Default::default()
+    }
+}
+fn frame(side: Side, index: usize, pixels: &[u8]) -> Frame {
+    let pts = 1000 + index as u32 * 33333;
+    let mut metadata = vec![0; 16];
+    metadata[10] = 6;
+    metadata[11] = 4;
+    metadata[12..16].copy_from_slice(&pts.to_le_bytes());
+    Frame {
+        sequence: index as u32,
+        host_timestamp_us: u64::from(pts) + side.index() as u64 * 10,
+        flags: 0,
+        metadata,
+        data: pixels.to_vec(),
+    }
+}
 struct Paced {
     side: Side,
     next: usize,
     maximum: usize,
     pixels: Vec<u8>,
     acknowledged: Arc<AtomicUsize>,
+    recording: Arc<RecordingProgress>,
     closed: Arc<AtomicUsize>,
     control: Arc<Control>,
 }
 impl Source for Paced {
     fn context(&self) -> Result<CaptureContext, String> {
-        Ok(CaptureContext {
-            controls: json!({"synthetic":true}),
-            calibration_status: "synthetic_fixture".into(),
-            ..Default::default()
-        })
+        Ok(context())
     }
     fn next(&mut self) -> Result<Option<Frame>, String> {
         self.next_until(&|| false)
@@ -81,34 +102,12 @@ impl Source for Paced {
         if self.next == self.maximum {
             return Ok(None);
         }
-        let deadline = Instant::now() + Duration::from_secs(10);
-        while self.acknowledged.load(Ordering::Acquire) < self.next {
-            if cancelled() {
-                return Ok(None);
-            }
-            if let Some(preview) = self.control.take_preview() {
-                self.acknowledged
-                    .fetch_max(preview.pair_id + 1, Ordering::AcqRel);
-            }
-            if Instant::now() > deadline {
-                return Err("synthetic pacing timed out".into());
-            }
-            std::thread::sleep(Duration::from_micros(100));
+        if !self.wait_for_progress(cancelled, Instant::now() + Duration::from_secs(10))? {
+            return Ok(None);
         }
         let index = self.next;
         self.next += 1;
-        let pts = 1000 + index as u32 * 33333;
-        let mut metadata = vec![0; 16];
-        metadata[10] = 6;
-        metadata[11] = 4;
-        metadata[12..16].copy_from_slice(&pts.to_le_bytes());
-        Ok(Some(Frame {
-            sequence: index as u32,
-            host_timestamp_us: u64::from(pts) + self.side.index() as u64 * 10,
-            flags: 0,
-            metadata,
-            data: self.pixels.clone(),
-        }))
+        Ok(Some(frame(self.side, index, &self.pixels)))
     }
     fn statistics(&self) -> Value {
         json!({"synthetic":true})
@@ -118,12 +117,61 @@ impl Source for Paced {
         Ok(())
     }
 }
+impl Paced {
+    fn wait_for_progress(
+        &self,
+        cancelled: &dyn Fn() -> bool,
+        deadline: Instant,
+    ) -> Result<bool, String> {
+        loop {
+            if cancelled() {
+                return Ok(false);
+            }
+            if let Some(preview) = self.control.take_preview() {
+                self.acknowledged
+                    .fetch_max(preview.pair_id + 1, Ordering::AcqRel);
+            }
+            if self.acknowledged.load(Ordering::Acquire) >= self.next
+                && self
+                    .recording
+                    .ready(self.next, self.side.index())
+                    .map_err(|e| e.to_string())?
+            {
+                return Ok(true);
+            }
+            if Instant::now() >= deadline {
+                return Err(format!(
+                    "synthetic pacing timed out at {} frames",
+                    self.next
+                ));
+            }
+            // Only a polling interval: progress, never elapsed sleep, admits a frame.
+            std::thread::sleep(Duration::from_micros(100));
+        }
+    }
+}
 fn capture(processor: &mut Processor, target: &Path, count: usize) -> Result<Value, String> {
     let control = Arc::new(Control::new(true));
     let commands = control.clone();
     let acknowledged = Arc::new(AtomicUsize::new(0));
     let closed = Arc::new(AtomicUsize::new(0));
     let owners = closed.clone();
+    let pixels = ["left.png", "right.png"].map(|name| {
+        image::open(fixture().join(name))
+            .unwrap()
+            .to_luma8()
+            .into_raw()
+    });
+    let prototypes = [
+        frame(Side::Left, 0, &pixels[0]),
+        frame(Side::Right, 0, &pixels[1]),
+    ];
+    let recording = Arc::new(RecordingProgress::for_target(
+        target,
+        processor.profiles().clone(),
+        context(),
+        &prototypes,
+    ));
     runner::bundle_controlled(
         processor,
         target,
@@ -133,14 +181,8 @@ fn capture(processor: &mut Processor, target: &Path, count: usize) -> Result<Val
                 side,
                 next: 0,
                 maximum: count,
-                pixels: image::open(fixture().join(if side.index() == 0 {
-                    "left.png"
-                } else {
-                    "right.png"
-                }))
-                .unwrap()
-                .to_luma8()
-                .into_raw(),
+                pixels: pixels[side.index()].clone(),
+                recording: recording.clone(),
                 acknowledged: acknowledged.clone(),
                 closed: owners.clone(),
                 control: commands.clone(),
@@ -163,6 +205,7 @@ fn extended_capture_exceeds_legacy_limit_and_preserves_edit_reopen_export_and_jo
     let target = t.0.join("scan");
     let report = capture(&mut processor, &target, count).unwrap();
     assert_eq!(report["schema_version"], 2);
+    assert_eq!(report["recording_queue_capacity_per_camera"], 8);
     assert_eq!(report["pair_count"], count);
     assert!(report.get("pairs").is_none());
     let fused = report["fused_points"].as_u64().unwrap() as usize;

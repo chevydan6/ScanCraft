@@ -4777,3 +4777,39 @@ original logger remain unchanged. Public report docs/RAPTOR_NO_LID_SUSTAINED.md,
 PROJECT_STATUS.md and this response retain methods, failures, exact counts,
 resource scope and CI031. Publication commit is recorded in history/private metadata.
 No completedCodeRabbit review or physical reconstruction qualification is claimed.
+
+
+## SCAN-REV-031 — implemented: bound fixture admission by both recordings
+
+Accepted and implemented on dev/capacity-recording-progress from75759bc. The
+synthetic fixture now waits for processing previews AND observed recording-byte
+progress on both sides. ActualWriter-derived header/frame lengths and default
+BufWriter capacity give a five-frame outstanding allowance below the unchanged
+eight-frame queue. Missing progress blocks; ambiguity/errors/cancellation/deadline
+remain explicit. This uses real test files and introduces no production hook, API,
+queue-size change, blocking admission, longer sleep or retry-until-green behavior.
+It is specific to the fixture's constant-size records and current buffered sinks,
+not a durable-write or hardware-throughput guarantee.
+
+Changed source: crates/scancraft-workflow/tests/live_capacity.rs and support/
+recording_progress.rs,recording_progress_tests.rs. Controlled regression holds
+both actualQueuedWriter sinks, observes both sources stop at five, releases left
+only and verifies neither source advances, then releases right and replays32
+frames/side. Cancellation/expired-deadline regression passes. Existing1,001-pair
+CRC/journal/edit/reopen/export/recovery assertions remain; queuecapacity8 is now
+explicitly asserted. Fulltools/check.sh:892passed0failed1ignored,fmt/strictClippy/
+releasePASS. Six capacity tests on CPU0 with six test threads PASS.
+
+Documentation: docs/CAPACITY_TEST_PACING.md,PROJECT_STATUS.md and this response.
+Exact correction commit is recorded in Git history/private publication metadata.
+Originala4d2de1 push41702132020failure and PR41702142669success are retained; both
+75759bcCI runs pass but do not independently close031. New-headCI and independent
+review remain required; only reviewer may verify/close. No hardware action or
+physical-accuracy claim follows from this test-only correction.
+
+Negative regression evidence: isolated source copy, separateCargo target, only the
+recording-progress conjunct removed. The held-consumer test fails with explicit
+queue overflow on both sides and exits101 after10.01s; live worktree unchanged.
+This checks sensitivity to preview-only admission, not the exact CI scheduling
+cause. CodeRabbit quota/billing lookup remains unavailable; no review upload,
+completed automated review or paid usage is claimed.
