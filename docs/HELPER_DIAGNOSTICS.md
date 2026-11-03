@@ -1,6 +1,6 @@
 # Helper diagnostics and failure isolation
 
-Optional stderr writes must not stop acquisition, restoration or final IPC.
+An optional stderr write error must not abort acquisition, restoration or final IPC.
 This milestone fixes a reproduced failure class and improves retained failure
 information. The earlier unexplained native helper exit remains unproven: these
 experiments do not establish that stderr caused that specific incident.
@@ -110,7 +110,7 @@ scancraft-app --test helper_diagnostics`. The internal malformed requests never
 open a device; the successful fixture is explicitly synthetic and retains that
 provenance. No fault is injected into physical hardware.
 
-Final release subprocess checks reproduce the corrected error packets (laser kind 6,
+Implementation `1507747` release subprocess checks reproduce the corrected error packets (laser kind 6,
 live kind 4, exit 1) under both stderr sinks. Saved Raptor replay with `/dev/full`
 stderr succeeds: 32 raw/camera, 4 pairs, 28 processing drops/camera, no unmatched
 input, four previews and completion with zero helper omissions.
@@ -144,3 +144,21 @@ are excluded from Git and review uploads. Original helper-exit attribution, hard
 shutdown bounds, sustained reliability, physical calibration/accuracy, tracking/fusion
 and full end-to-end scanning qualification remain incomplete. Independent review is
 pending; no bot result or local test authorizes merging.
+
+The follow-up encodes each supervisor observation into a complete append buffer
+before file I/O, avoiding interleaving at serializer-fragment boundaries with a
+live child's notes. This is a code-inspection correction, not a claim that an
+interleaving incident was reproduced. Short writes/I/O failure remain best effort.
+The 808-test gate is repeated successfully. On the follow-up binary, native finite
+capture saves 32 raw/camera, processes 24 pairs (75%, below 90%), drops 7/7,
+unmatched 1/1, startup rejects 4/1 and ongoing 0/0. Root close saves 10/9 raw,
+8 pairs, drops 1/1, unmatched 1/0, startup 0/5, ongoing 0/0 and one stopped
+incomplete buffer/camera. One close-to-exit observation is 0.294 s. Both pass
+raw/publication/restoration and full stream/illumination readback equality.
+Full-stderr saved replay retains 32 raw/camera and processes 3 pairs, drops 28/27,
+unmatched 1/2, with three previews/completion and zero helper omissions.
+All 35 follow-up records / 65,579 values match the preserved engine, raw references
+and original serializer; all three manifests pass byte/CRC checks. GUI existing-target
+error/status/log retention is rerun and inspected; its input hashes remain unchanged.
+Earlier results stay attached to their implementation build, rather than being
+misrepresented as repeatable rate guarantees. No scanner fault is induced.

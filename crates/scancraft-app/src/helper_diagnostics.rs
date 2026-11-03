@@ -279,7 +279,15 @@ pub(crate) fn failure(
     let record = serde_json::json!({"schema_version":1,"kind":"supervisor_failure",
         "helper_pid":child.id(),"label":prefix(label,32),"status":prefix(&status,128),
         "reason":prefix(reason,384),"reason_truncated":reason.len()>384});
-    let recorded = writeln!(observation, "{record}").err();
+    // Encode before append, so a live child's note cannot be inserted between
+    // the small serializer fragments of a supervisor observation.
+    let recorded = serde_json::to_vec(&record)
+        .map_err(io::Error::other)
+        .and_then(|mut bytes| {
+            bytes.push(b'\n');
+            observation.write_all(&bytes)
+        })
+        .err();
     let note = recorded
         .map(|e| format!("; supervisor observation could not be written: {e}"))
         .unwrap_or_default();

@@ -3,7 +3,7 @@
 [Helper diagnostic validation](docs/HELPER_DIAGNOSTICS.md) adds failure-isolation
 evidence, not a performance claim: 808-test gate, successful synthetic/full-stderr
 processing and exact matches for 37 saved Raptor pair records. A finite healthy GUI trial processes
-25/32 (78.125%, below 90%); one root-close observation is 0.292 s. No sustained latency,
+24/32 (75%, below 90%); one root-close observation is 0.294 s. No sustained latency,
 whole-app memory, transport reliability or calibrated accuracy qualification follows.
 
 [Concurrent camera detection](docs/PARALLEL_LASER_DETECTION.md): same-executable

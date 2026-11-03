@@ -3126,7 +3126,8 @@ control/{line_trial,flood_trial}.rs; workflow live_stereo/runner.rs and laser_st
 runner.rs; app capture_process.rs/discovery_process.rs/laser_process.rs/
 laser_process/{helper,tests}.rs/live_process.rs/main.rs, new helper_diagnostics.rs
 and its tests; app process integration tests. Documentation links current behavior
-and limitations. Base hash above; exact implementation hash is bound after commit.
+and limitations. Implementation: `1507747f46b4b32b3d846f8b26b30a4e3da78ae5`.
+This follow-up binds documentation only; verified Rust and executables are unchanged.
 
 Verification:
 
@@ -3203,3 +3204,25 @@ CodeRabbit skill/workflow consulted; fresh22652 usage exits1 with all included-q
 billing fields lookup_failed. No review request, paid usage, upload, review-pass
 claim, push/PR, merge or protection bypass. Independent review of this change remains
 pending. Reviewer-owned findings/charter remain read-only and unstaged.
+
+DEV-SUPERVISOR-RECORD-APPEND — Developer follow-up from source inspection: serialize
+one complete bounded supervisor record before append, avoiding its small formatter
+writes interleaving with live-child notes. No incident reproduction is asserted.
+This builds on implementation1507747f46b4b32b3d846f8b26b30a4e3da78ae5; final follow-up
+commit and exact source/binary/evidence hashes are bound in the recovery checkpoint.
+A repeated808-test full gate passes (append-record-gate.log). Final source/binary
+maps and actual runtime probes use this follow-up, with the original150 evidence
+preserved separately. The change does not alter scanner ownership or numerical work.
+
+Follow-up native finite:32raw/camera,24pairs(75%,below90%),drops7/7,pending1/1,
+startup4/1,ongoing0/0;rootclose10/9raw,8pairs,drops1/1,pending1/0,startup0/5,
+ongoing0/0,incomplete1/camera. Close0.293860s is one observation, not a deadline.
+Both raw/publication/restoration/fullGET stream+illumination equality pass;
+original151 restored. Final release malformed-request stderr normal/full packet
+comparison passes. Full-stderr actual saved replay:32raw/camera,3pairs,drops28/27,
+pending1/2,3previews+completion/zeroomissions.
+Preserved pre-change engine verifies all35 records/65579values, every raw reference
+and complete old serializer bytes; all3 manifests match lengths/CRC. The final
+GUI-error test shows retained exit1/reason/path and a valid persisted supervisor
+record after app exit, with all existing capture hashes unchanged and no scanner
+FDs. Screenshot inspected. Source has not changed since the repeated gate.

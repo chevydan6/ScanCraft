@@ -4,7 +4,7 @@
 write panics that prevent final IPC or abort synthetic reconstruction. Private
 state logs retain process failure status after GUI closure. The 808-test gate,
 full-stderr saved-data replay and short healthy native capture/close checks pass;
-25/32 processed frames remain below 90%. The original unexplained helper exit
+24/32 processed frames remain below 90%. The original unexplained helper exit
 is not attributed or declared fixed; sustained and physical qualification remain open.
 
 [Concurrent camera detection](docs/PARALLEL_LASER_DETECTION.md) reuses the existing
