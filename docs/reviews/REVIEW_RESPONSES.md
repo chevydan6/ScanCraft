@@ -3627,3 +3627,29 @@ approval. PR32's earlier f7a9a02 GitHub Rust offline run41609776225 completed
 successfully; that result does not cover this new source commit. No PR32 reviews
 or review threads were present at the checked snapshot. Source remains available
 for independent review; developer has not modified or closed reviewer findings.
+
+## Recorded target observation integration — 2026-11-03
+
+SCAN-REV-006 remains accepted and physically unqualified. Source commit
+6697e14355c7b4f2e2affc9bd27e7c372b2bae39 connects recorded genuine board images
+to existing calibration observation types through the new workflow
+calibration_observations.rs/tests.rs, workflow lib.rs export and CLI main.rs
+dispatch. Reuses original component, shape, target and recording code. Exact
+request/frame snapshots, full source integrity, explicit frame indices/PTS/window,
+shape decisions and unit declarations are retained. Unverified units cannot emit
+mm-typed view files. Caller-declared millimeters remain unverified physically.
+
+Four focused synthetic regressions and the complete 839-pass/1-existing-ignored
+gate pass, including strict Clippy, formatting and release build. Initial fixture
+PTS ordering and one Clippy style issue were corrected before the final gate.
+Four retained genuine board poses match every prior raw observation, shape result
+and association exactly; source hashes unchanged, eight snapshots replay and
+artifact CRC/length checks pass. Counts and reproduction evidence are documented
+in docs/RECORDED_TARGET_OBSERVATIONS.md. No new capture, calibration activation,
+physical scale/accuracy result or completed object scan is claimed. GUI/multi-pose
+fit assembly and full end-to-end qualification remain future work.
+
+CodeRabbit0.9.2 usage returned lookup_failed; no review or paid request performed.
+PR32 had no reviews or review threads at the checked snapshot; its prior c292711
+CI passed, which does not cover this source commit. Independent review remains
+outstanding; no reviewer findings file, status, severity or closure modified.

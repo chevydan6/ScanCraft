@@ -1,5 +1,11 @@
 # Architecture
 
+`calibration_observations` composes guarded recording playback, native component
+shape measurement and target association, then publishes original-frame snapshots
+and explicit per-view fit inputs. Unit declarations and source lineage stay with
+the observations; hardware and numerical fitting remain separate. See
+[recorded target workflow](docs/RECORDED_TARGET_OBSERVATIONS.md).
+
 Finite CLI stereo acquisition now has a two-worker completion gate before either
 worker closes its camera. Ownership stays on the original threads; cancellation
 and termination remain explicit. Live IR/laser runners are separate and unchanged.

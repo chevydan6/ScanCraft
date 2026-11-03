@@ -1,11 +1,20 @@
 # Project status
 
+[Recorded board observations](docs/RECORDED_TARGET_OBSERVATIONS.md) now connect
+explicit Raptor frame pairs to source-bound calibration inputs. Four saved real
+poses reproduce prior component/shape/association results exactly; all eight
+snapshots replay. The full 839-test gate passes. Unverified units remain explicit;
+no calibrated object surface, GUI calibration wizard or physical-accuracy claim.
+Next: integrate multi-pose fitting/GUI and collect diverse board poses with
+independent dimensional evidence. CodeRabbit review remains unavailable.
+
 [Native device-version query](docs/DEVICE_VERSION.md) now reports the connected
 Raptor firmware as 1.5.7. Three native reads match the retained reference; a
 subsequent 20-frame stereo capture passes replay and state restoration. The
 835-test gate passes. The official downloaded V1.4.8 package is older; no firmware
-change occurred. Calibration binding remains unverified. Public CI passed for
-integration PR32 head f7a9a02; that result does not yet cover this follow-up.
+change occurred. Calibration binding remains unverified. Public CI also passed for
+integration PR32 head c292711; the new recorded-board workflow has local gate
+evidence and needs its own published-head CI/review.
 
 First genuine scan mission: [all 30 PRs audited](docs/FIRST_SCAN_INTEGRATION_AUDIT.md).
 Local `dev/first-genuine-scan-integration` preserves all 29 developer heads; reviewer

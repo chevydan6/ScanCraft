@@ -19,6 +19,7 @@ are not yet qualified. This is not currently a professional CrealityScan replace
 - [Build and install](docs/BUILD.md)
 - [Architecture](ARCHITECTURE.md), [current status](PROJECT_STATUS.md), [roadmap](ROADMAP.md)
 - [Compatibility and migration](docs/MIGRATION.md)
+- [Recorded board observations](docs/RECORDED_TARGET_OBSERVATIONS.md) (native image-to-fit inputs; physical units require verification)
 - [Offline planar calibration fitting](docs/BROWN_CALIBRATION_REFINEMENT.md) (experimental; supplied observations only)
 - [Fixed-intrinsic stereo fitting](docs/STEREO_EXTRINSIC_CALIBRATION.md) (experimental; no hardware calibration)
 - [Native recorded laser processing](docs/NATIVE_RECORDED_LASER_PROCESSING.md) and [candidate viewer](docs/CANDIDATE_VIEWER.md) (unqualified diagnostic geometry)

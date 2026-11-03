@@ -128,3 +128,13 @@ corroborate physical target scale with independent measurements, rerun calibrati
 and reserved-pose tests, then bind the validated model to reconstruction and
 measure a separate object in three trials. Continue investigating transport loss.
 The first independently validated object scan remains unfinished.
+
+## Reproducible native observation preparation
+
+The [recorded target workflow](RECORDED_TARGET_OBSERVATIONS.md) now reproduces
+these three training poses and the held-out pose through one Rust CLI command,
+retaining exact request, source lineage, raw selected frames and marker decisions.
+Its four saved-data comparisons match the preceding separate diagnostic commands
+exactly. Real target units remain explicitly unverified, so this validation emits
+generic coordinate measurements rather than millimeter-typed fit views. No fit,
+calibration activation or physical-accuracy claim is added by this integration.
