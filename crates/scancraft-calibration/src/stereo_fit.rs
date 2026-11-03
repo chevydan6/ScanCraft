@@ -18,6 +18,8 @@ use crate::{
 use nalgebra::{Matrix3, SMatrix, SVector, Vector3, linalg::SVD};
 use serde::{Deserialize, Serialize};
 use std::cell::Cell;
+// Existing final stationarity gate, also used when objective rounding stalls a step.
+const MAX_STATIONARITY_GRADIENT: f64 = 1e-6;
 type PairResidual = SVector<f64, 4>;
 type PoseJacobian = SMatrix<f64, 4, 6>;
 
@@ -204,6 +206,13 @@ pub fn fit_stereo_extrinsics(
             }
         }
         let Some((trial, trial_score, step)) = improved else {
+            // Near a minimum, rounding can hide any further objective decrease.
+            // Accept the current state only under the unchanged final gradient
+            // gate; residual, information, domain and rig checks still follow.
+            if scaled_gradient_inf(&normal) <= MAX_STATIONARITY_GRADIENT {
+                converged = true;
+                break;
+            }
             return Err("stereo fit could not find a decreasing finite step".into());
         };
         let improvement = score.squared - trial_score.squared;
@@ -225,7 +234,7 @@ pub fn fit_stereo_extrinsics(
     }
     let normal = build_normal(&cameras, &state, views, cancel)?;
     let gradient = scaled_gradient_inf(&normal);
-    if !gradient.is_finite() || gradient > 1e-6 {
+    if !gradient.is_finite() || gradient > MAX_STATIONARITY_GRADIENT {
         return Err("stereo fit stalled before numerical stationarity".into());
     }
     let information = information_min_eigenvalue(&normal)?;
@@ -566,6 +575,42 @@ mod tests {
         }
         (left, right, rig, views, poses)
     }
+    #[test]
+    fn stationary_noisy_fit_survives_objective_roundoff_and_keeps_final_gates() {
+        // Entirely synthetic: three views from the existing asymmetric rig.
+        // This noise level reproduced a rounded objective plateau after seven
+        // accepted steps, with gradient 1.57e-8 (below the existing final gate).
+        let (left, right, _, mut views, _) = fixture(false, 90. / 137.);
+        views.truncate(3);
+        let options = StereoFitOptions {
+            max_reprojection_error_px: 2.,
+            ..Default::default()
+        };
+        let fit = fit_stereo_extrinsics(&left, &right, &views, &options, &|| false).unwrap();
+        let expected_rms = (139.89769894891845_f64 / 378.).sqrt();
+        assert!((fit.rms_px - expected_rms).abs() < 1e-7);
+        assert!(fit.scaled_gradient_inf <= 1e-6);
+        assert!(fit.scaled_information_min_eigenvalue >= 1e-10);
+        let strict = StereoFitOptions {
+            max_reprojection_error_px: 0.1,
+            ..options.clone()
+        };
+        assert!(
+            fit_stereo_extrinsics(&left, &right, &views, &strict, &|| false)
+                .unwrap_err()
+                .contains("final reprojection limit")
+        );
+        let short = StereoFitOptions {
+            max_iterations: 1,
+            ..options
+        };
+        assert!(
+            fit_stereo_extrinsics(&left, &right, &views, &short, &|| false)
+                .unwrap_err()
+                .contains("iteration limit")
+        );
+    }
+
     #[test]
     fn recovers_asymmetric_distorted_skewed_rig_and_target_poses() {
         for skew in [false, true] {
