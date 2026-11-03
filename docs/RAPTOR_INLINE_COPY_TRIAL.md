@@ -25,8 +25,22 @@ temporary flood illumination and complete native replay. USB monitoring explicit
 uses a 64 MiB ring and 32 payload-prefix bytes per transfer. The private monotonic
 ftrace instance retains scanner xHCI/IRQ, filtered camera-copy workqueue events,
 all scheduler switches/wakeups and local timers, with 128 MiB per CPU on 16 CPUs.
-Effective controller IRQ affinity is CPU8 in every trial. Instrumentation is
-substantial; this is not an isolated performance benchmark.
+Saved effective-affinity readbacks and actual IRQ39 trace placement differ:
+
+| Arm | Before → after readbacks | Observed IRQ39 intervals by CPU |
+| --- | --- | --- |
+| Smoke disabled | CPU8 → CPU8 | CPU8: 12,104 |
+| Smoke enabled | CPU8 → CPU8 | CPU8: 12,042 |
+| A1 disabled | CPU8 → CPU8 | CPU8: 226,539 |
+| B1 enabled | CPU8 → CPU14 | CPU8: 228,157 |
+| A2 disabled | CPU14 → CPU14 | CPU14: 226,565 |
+
+The readbacks do not locate the exact migration time or establish its cause.
+Affinity drift is an uncontrolled comparison variable, further limiting IRQ-maxima
+and rejection-rate comparisons. No affinity writes were performed. This corrects
+the original constant-CPU8 claim identified by independent SCAN-REV-029; the raw
+evidence and measured results are unchanged. Instrumentation is substantial;
+this is not an isolated performance benchmark.
 
 ## Short capture and cancellation checks
 

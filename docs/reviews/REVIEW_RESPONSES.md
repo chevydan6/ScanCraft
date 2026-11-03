@@ -4636,3 +4636,23 @@ Remaining: host-wide gaps and observer effects, malformed headers/startup, exact
 cause of earlier exception, disconnect safety, physical scale and measured object
 reconstruction. Recommend keeping candidate disabled and investigating observed
 boundaries with explicit semantic gates; do not weaken frame validation.
+
+
+## SCAN-REV-029 — accepted: correct IRQ affinity comparison
+
+Accepted. The constant-CPU8 sentence in docs/RAPTOR_INLINE_COPY_TRIAL.md was
+incorrect. Independent465 identified B1readbacks8→14 and A2readbacks14→14.
+Development reread all ten saved readbacks and independently counted IRQ39entry
+CPU fields in all five complete traces, agreeing with saved irq-analysis.json:
+smokeoff CPU8:12104, smokeon CPU8:12042, A1CPU8:226539, B1CPU8:228157,
+A2CPU14:226565. No exact migration time or reason is established.
+
+The report now provides each arm's readbacks and observed distribution and names
+affinity drift as an uncontrolled variable. Measurements, raw evidence, failed
+qualification results, application/kernel code and affinity settings are unchanged.
+No hardware trial was repeated for this correction. Source publication8a97cb2;
+correction commit is recorded in history/private metadata. Changed files are the
+report and this response. Private irq-affinity-correction-20261104/verification.json
+retains readback/report hashes and fresh raw-trace counts. Markdown whitespace
+check passes; unchanged source retains890-test/fmt/Clippy/release evidence and both
+8a97cb2CI successes. No claim of independent closure: only reviewer may verify029.
