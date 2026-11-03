@@ -2995,7 +2995,8 @@ implemented for independent review; not an invented independent finding.
 
 Source: `crates/scancraft-depth/src/laser_pair.rs`, new `laser_pair/detection.rs`,
 and `laser_pair/tests.rs`. Base `fcd8be8ecf4bcd508ba75037fa79fcdf3375d035`.
-The verified implementation commit will be bound after committing these changes.
+Implementation commit: `bb2d79b49edda77feb2f2c16013ac937550e62e6`. This binding follow-up changes
+only developer documentation; tested Rust and executables remain identical.
 One scoped standard-library worker detects the first large image while the caller
 detects the second, then rejoins in first-camera order. CPU availability >1 is
 cached at Processor construction; unknown/single CPU, either image <256*1024 pixels,
@@ -3074,7 +3075,7 @@ Private evidence: developer state artifacts/parallel-laser-detection-8bo89lpy,
 including raw profiles/binary/source hashes, initial/retry failures, readiness and
 cache migration evidence, actual native/compatibility/replay results. Failed
 attempts remain failures. Production Rust is unchanged since the passing gate.
-Full selected diff and complete tracked source context require secret checks before
+Full selected diff and complete tracked source context pass secret checks before
 commit; raw/models/screenshots/probes and reviewer-owned files stay excluded.
 
 Official CodeRabbit0.9.2 usage6236 exits1 with every included-quota/billing field
