@@ -19,6 +19,7 @@ are not yet qualified. This is not currently a professional CrealityScan replace
 - [Build and install](docs/BUILD.md)
 - [Architecture](ARCHITECTURE.md), [current status](PROJECT_STATUS.md), [roadmap](ROADMAP.md)
 - [Compatibility and migration](docs/MIGRATION.md)
+- [Recorded multi-pose calibration sessions](docs/BOARD_CALIBRATION_SESSION.md) (separate training/validation; optional camera fits)
 - [Native calibration preparation panel](docs/NATIVE_BOARD_PREPARATION.md) (recorded camera views and marker decisions)
 - [Recorded board observations](docs/RECORDED_TARGET_OBSERVATIONS.md) (native image-to-fit inputs; physical units require verification)
 - [Offline planar calibration fitting](docs/BROWN_CALIBRATION_REFINEMENT.md) (experimental; supplied observations only)

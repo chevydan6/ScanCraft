@@ -72,8 +72,9 @@ staging name the retained partial directory. Cancellation is checked through
 WorkControl in image/indexing operations and through the external callback between
 stages and during association; this does not establish a hard cancellation deadline.
 The [native preparation panel](NATIVE_BOARD_PREPARATION.md) can run this request
-and inspect its camera views/marker decisions. Guided target setup, a calibration
-wizard and automatic multi-pose fit assembly remain unfinished.
+and inspect its camera views/marker decisions. The [session workflow](BOARD_CALIBRATION_SESSION.md)
+can now assemble multiple requests and run explicit camera fits. Guided target
+setup, session GUI integration and a complete calibration wizard remain unfinished.
 
 ## Verification and scope
 

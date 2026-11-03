@@ -1,5 +1,11 @@
 # Architecture
 
+`board_session` composes existing observation and planar-fitting workflows. It
+processes poses sequentially, preserves per-pose bundles, checks common target/
+profiles and separates validation observations from camera fit requests. No
+new numerical solver or dependency is introduced. See
+[session data flow and limits](docs/BOARD_CALIBRATION_SESSION.md).
+
 `board_ui` adds a standalone offline preparation worker and camera/marker display.
 `calibration_observations::run_with_frames` transfers the exact selected frames and
 published measurements to that worker; existing manifest-only callers retain their

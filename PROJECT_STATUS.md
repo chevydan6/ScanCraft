@@ -1,5 +1,13 @@
 # Project status
 
+[Recorded multi-pose sessions](docs/BOARD_CALIBRATION_SESSION.md) now retain
+training/validation splits, check target/profile consistency and reject reused
+camera-frame fingerprints. Optional independent camera fits use training only
+and require declared millimeters. The 845-test gate passes; actual three-training/
+one-validation collection preserves all prior artifact bytes and refuses fitting
+for unverified units. Session GUI integration, physical scale and the first
+independently measured object surface remain open. Prior ba495f6 CI passed.
+
 [Native calibration preparation](docs/NATIVE_BOARD_PREPARATION.md) now runs the
 recorded-board workflow in the desktop app and displays both source images with
 aligned marker decisions. Final 842-test gate passes; the held-out board GUI

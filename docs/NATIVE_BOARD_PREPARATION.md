@@ -65,7 +65,9 @@ source/binary hashes, gate logs, exact outputs, reproduction scripts and initial
 corrected render images. No private captures or target coordinates are published.
 CodeRabbit quota lookup remains `lookup_failed`; no review approval or paid request.
 
-Multi-pose fit assembly, saved observation-bundle reopening, guided target setup,
+The [CLI session workflow](BOARD_CALIBRATION_SESSION.md) now assembles multiple
+poses and can run the existing camera fitters. GUI session integration, saved
+observation-bundle reopening, guided target setup,
 calibration activation, physical scale/accuracy qualification and the first real
 object surface remain unfinished. The existing request format remains explicit;
 this is not an automatic calibration wizard. See [real-board evidence](REAL_BOARD_CALIBRATION.md).

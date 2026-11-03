@@ -3685,3 +3685,33 @@ b516f27 publicCI41614080917 completed success, not coverage of this new commit.
 Independent reviewer files remain untouched; no severity, conclusion or closure
 was changed. Existing cleanup005 and broader architectural007 findings remain
 separate from this bounded offline worker; no hard cleanup deadline is claimed.
+
+## Recorded board session integration — 2026-11-03
+
+SCAN-REV-006 remains accepted and physically unqualified. Source commit
+10049dd46548a73cc27053c615653d5cea01b600 adds workflow board_session.rs/tests.rs,
+lib.rs export and CLI prepare-board-session dispatch. calibration_observations
+Completed now also transfers its owned request for consistency checks. Existing
+CLI and single-pose bundle bytes remain unchanged; no new numerical algorithm or
+third-party dependency. Training/validation split is explicit and retained; same
+target/unit/profile and per-camera reused-frame checks prevent accidental mixing.
+Declared millimeters remain unverified; unknown units cannot produce mm requests
+or trigger camera fits. No stereo-domain assumption or capture activation.
+
+Full845pass/1existingignored gate,format/strictClippy/releasePASS. Three new
+synthetic-image tests run both camera fits on six training poses and retain one
+validation pose separately, with unit/mismatch/reuse/cancel/nooverwrite/digest
+checks. Initial /tmp quota failure was corrected by the established homeTMPDIR;
+all final checks passed. Genuine three-training/one-validation collection retains
+all preceding single-pose artifact bytes exactly, all recursive CRC/length checks
+pass, sourceSHAunchanged. A separate unverified-unit fit attempt correctly fails
+and retains its partial dataset; no real coordinates were relabeled millimeters
+for testing. See docs/BOARD_CALIBRATION_SESSION.md for evidence and limits.
+
+Session GUI integration, held-out scoring, physical scale/stereo qualification and
+first measured object scan remain outstanding. Snapshot/source validity is per
+pose, not a simultaneous entire-session snapshot. Frame fingerprints do not prove
+optical pose diversity or cryptographic identity. No measured RSS/FPS or hard
+cleanup deadline claimed. CodeRabbit usage returned lookup_failed; no review/paid
+request or approval. Prior ba495f6 publicCI41616702836 completed success. Independent
+reviewer records and finding status/severity/closure remain exclusively unchanged.
