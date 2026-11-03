@@ -12,6 +12,7 @@ use std::{
     time::{Duration, Instant},
 };
 mod cleanup_errors;
+mod paired_dequeue;
 mod wait_policy;
 use cleanup_errors::CleanupErrors;
 use v4l2_sys_mit as v;
@@ -238,6 +239,16 @@ impl Stream {
         b
     }
     fn dequeue(&mut self, timeout: Duration) -> io::Result<Packet> {
+        self.dequeue_then(timeout, Ok)
+    }
+    /// Copy into owned memory, complete dependent dequeue work, then requeue.
+    /// Keep this video slot unavailable until dependent metadata processing and
+    /// requeue finish, closing the observed gap between returning the two slots.
+    fn dequeue_then<T>(
+        &mut self,
+        timeout: Duration,
+        complete: impl FnOnce(Packet) -> io::Result<T>,
+    ) -> io::Result<T> {
         let mut p = libc::pollfd {
             fd: self.fd.as_raw_fd(),
             events: libc::POLLIN,
@@ -287,8 +298,7 @@ impl Stream {
                 data,
             })
         })();
-        ioctl(&self.fd, 15, 3, &mut b)?;
-        packet
+        paired_dequeue::complete_then_requeue(packet, complete, || ioctl(&self.fd, 15, 3, &mut b))
     }
     fn close(&mut self) -> io::Result<()> {
         let mut errors = CleanupErrors::default();
@@ -402,42 +412,36 @@ impl Capture {
     pub fn next_frame_until(&mut self, stopped: impl Fn() -> bool) -> io::Result<Option<Frame>> {
         let deadline = Instant::now() + Duration::from_secs(8);
         while Instant::now() < deadline {
-            let Some(v) =
+            let metadata = &mut self.metadata;
+            let pending = &mut self.pending;
+            let Some((v, matched)) =
                 wait_policy::dequeue(deadline, Duration::from_secs(2), &stopped, |timeout| {
-                    self.video.dequeue(timeout)
+                    self.video.dequeue_then(timeout, |v| {
+                        let matched =
+                            paired_dequeue::matching_metadata(v.sequence, pending, || {
+                                wait_policy::dequeue(
+                                    deadline,
+                                    Duration::from_millis(200),
+                                    &stopped,
+                                    |timeout| metadata.dequeue(timeout),
+                                )
+                            })?;
+                        Ok((v, matched))
+                    })
                 })?
             else {
                 return Ok(None);
             };
-            let mut meta = None;
-            for _ in 0..32 {
-                let m = if let Some(m) = self.pending.take() {
-                    m
-                } else {
-                    let Some(packet) = wait_policy::dequeue(
-                        deadline,
-                        Duration::from_millis(200),
-                        &stopped,
-                        |timeout| self.metadata.dequeue(timeout),
-                    )?
-                    else {
-                        self.stopped_incomplete_video_buffers += 1;
-                        return Ok(None);
-                    };
-                    packet
-                };
-                if m.sequence == v.sequence {
-                    meta = Some(m);
-                    break;
+            let m = match matched {
+                paired_dequeue::Metadata::Matched(packet) => packet,
+                paired_dequeue::Metadata::Missing => {
+                    self.metadata_missing += 1;
+                    continue;
                 }
-                if m.sequence.wrapping_sub(v.sequence) < 0x8000_0000 {
-                    self.pending = Some(m);
-                    break;
+                paired_dequeue::Metadata::Stopped => {
+                    self.stopped_incomplete_video_buffers += 1;
+                    return Ok(None);
                 }
-            }
-            let Some(m) = meta else {
-                self.metadata_missing += 1;
-                continue;
             };
             let metadata_flags = m.flags;
             let frame = Frame {
