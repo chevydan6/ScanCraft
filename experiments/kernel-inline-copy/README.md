@@ -1,7 +1,7 @@
 # Bounded Raptor completion-copy experiment
 
-**Opt-in experimental kernel patch. Built and tested with userspace kernel
-stubs; not loaded or hardware-qualified.** It is not a required ScanCraft
+**Opt-in experimental kernel patch. Offline checks and finite capture/cancellation
+trials pass within their scope; acquisition reliability remains unqualified.** It is not a required ScanCraft
 dependency, persistent driver installation, or established acquisition fix.
 
 The patch and test harness are **GPL-2.0-only**, separately from the MIT Rust
@@ -20,7 +20,11 @@ for a small, bounded copy changes the observed starvation mechanism.
 The same trace contains other truncations overlapping longer intervals without
 selected host events. This patch does not purport to fix those intervals, startup
 framing, the earlier exceptional byte count, physical synchronization or accuracy.
-No rejection-rate or performance improvement has been measured for this candidate.
+The [same-candidate hardware comparison](../../docs/RAPTOR_INLINE_COPY_TRIAL.md)
+records ongoing rejects per camera of 2 → 9 → 3 with the option off → on → off.
+The enabled sample has no camera-copy worker events but still loses frame data.
+No reliable acquisition or general performance improvement is established. The
+installed baseline was restored after each trial; keep this option experimental.
 
 ## Scope and invariants
 

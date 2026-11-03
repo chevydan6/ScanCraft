@@ -4598,3 +4598,41 @@ module byte for byte. Assignment458 independently verifies the preceding
 host-service observations, including the shorter incident's worker/task identity
 and queue-starvation accounting, and confirms both e178af3 CI runs passed. That
 supports the experiment's motivation, not this candidate's runtime correctness.
+
+
+## DEV-INLINE-HARDWARE — runtime comparison and framing exceptions
+
+Developer investigation; not a new independent finding or status change.
+Accepted assignments461/464's limits: offline source/stub verification and CI do
+not qualify kernel concurrency, cancellation bounds or acquisition improvement.
+At source08adf1be077be172538131d3accf42f317bb7421, two30-frame/camera smoke trials
+and a600-frame/camera off/on/off comparison save/replay3,720 genuine frames.
+Four SIGTERM/SIGINT cases restore state and reopen. Installed baseline, service,
+five formats per arm and tracing restore;119native state-field comparisons match.
+
+Ongoing rejects per camera2/9/3; startup0/86,1/1,1/0 in the long trials. All total
+proxies FAIL. Enabled trace has zero copy-worker cycles but paired truncations
+remain. No permanent install, fix, isolated speedup or qualified scan is claimed.
+Strict B1header checks retain3semantic exceptions and2length mismatches. Separate
+firstEOF/FID accounting explains native lengths, including20,664trailing bytes
+in each sequence147buffer. Original analyzers remain unchanged; recycling refuses
+B1. Their earlier exit0despite JSON failures allowed A2before semantic inspection;
+this diagnostic orchestration mistake is recorded, not reclassified as a pass.
+No further hardware trial followed discovery. All saved accepted frames replay.
+
+Changed public files: docs/RAPTOR_INLINE_COPY_TRIAL.md, PROJECT_STATUS.md,
+experiments/kernel-inline-copy/README.md and this response. No application/kernel
+source or reviewer-record changes. Acquisition revision08adf1b; publication commit
+is recorded in Git history and private publication metadata. Freshfullgate:
+890passed0failed1ignored,fmt/strictClippy/releasePASS. Exact08adf1b push/PR CI passed,
+independently confirmed464; evidence publication CI is separate. CodeRabbit usage
+lookup again unavailable; no completed/paid review claimed. PR33threads currently
+empty; draft skip is not substantive review. Independent runtime review pending.
+
+Private inline-smoke-20261104/inline-aba-20261104 bind all raw data, restoration,
+trace counters, input hashes, initial diagnostic failures and framing follow-up.
+Keep005hardcleanup bounds/006physical qualification and prior open limitations.
+Remaining: host-wide gaps and observer effects, malformed headers/startup, exact
+cause of earlier exception, disconnect safety, physical scale and measured object
+reconstruction. Recommend keeping candidate disabled and investigating observed
+boundaries with explicit semantic gates; do not weaken frame validation.

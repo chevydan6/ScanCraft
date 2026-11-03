@@ -1,13 +1,15 @@
 # Project status
 
-Latest experiment: an opt-in [bounded completion-copy kernel patch](experiments/kernel-inline-copy/README.md)
-targets the observed camera-worker scheduling delay. It limits copying to one
-operation of at most 12 KiB on the original Raptor IR bulk-input streams, retaining
-the original fallback, cancellation and error paths. Candidate compilation,
-54 actual-callback stub tests and Linux patch checks pass; the baseline rebuild
-matches the installed module. The Rust gate passes 890 tests/one ignored, formatting,
-strict Clippy and release build. **The candidate has not been loaded or hardware-qualified.**
-No acquisition improvement or physical scan is claimed.
+Latest experiment: the [bounded completion-copy hardware comparison](docs/RAPTOR_INLINE_COPY_TRIAL.md)
+saved and replayed 3,720 genuine frames across two short and three 600-frame/camera
+trials. Cancellation and checked-state restoration pass. Ongoing rejects per
+camera are **2 → 9 → 3** with the same candidate disabled → enabled → disabled;
+all total rejection proxies fail. Enabled capture has no copy-worker dispatch but
+still truncates frames. Two early-EOF cases explain a finite 20,664-byte discrepancy;
+strict framing failures remain reported. **No acquisition fix or calibrated object
+scan is established.** The installed baseline was restored after every trial.
+Fresh Rust gate: 890 passed/one ignored, formatting, strict Clippy and release pass.
+PR33 remains an experimental draft; no permanent module installation or main merge.
 
 Earlier host-service investigation: a complete 4,014,236-event trace distinguishes
 three paired truncations overlapping 3.869–5.318 ms without selected events across
