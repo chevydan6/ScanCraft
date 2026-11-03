@@ -4237,3 +4237,40 @@ CodeRabbit quota remains unavailable; no completed new/paid review or independen
 approval is claimed. Physical scale, coverage, device binding, measured object
 trials and full GUI qualification remain outstanding. Reviewer-owned files were
 read only. Implementation commit: `29e3769da87fea02cbfaec5eafff91ca24d988aa`.
+
+
+## DEV-CALIBRATION-GUI — native fitting and explicit reconstruction selection
+
+Developer integration, not a new independent finding. Extended BoardUi with a
+separate candidate view using the existing workflow on a joined/cancellable worker.
+Failures and panics retain previous results; error text distinguishes no previous
+candidate. The child participates in BoardUi tick, busy state, cancellation and
+root close confirmation. Startup accepts --fit-calibration-candidate with explicit
+request/output paths. An explicit Use action fills calibration paths in image,
+recorded-pair, recorded-sequence and live controls, opening the recorded-pair panel.
+It preserves the loaded model, dirty state and other inputs and starts no acquisition.
+Relevant busy/closing states block selection. Workflow algorithms/formats unchanged.
+
+Sources: app board_ui.rs and new board_ui/candidate.rs/tests.rs, main.rs,
+cloud_ui.rs, live_ui.rs; tools/check_workbench_render.py adds a matching startup
+mode. Four new regressions cover previous-result retention on error/panic,
+cancellation/duplicate start, startup/root close/busy selection and preservation
+of dirty-document/input state. Full 882 tests plus one existing ignored, formatting,
+strict Clippy and release builds pass. Prior handoff b92df8a CI41663583357/run233
+also passed. No new independent reviewer closure is claimed.
+
+Actual final release GUI on isolated authenticated X: synthetic fitting publishes
+four files byte-identical to the prior CLI output; an actual Use click populates
+recorded reconstruction, then Live scan shows the calibration with capture idle.
+Camera/USB descriptors are absent at recorded checks. Real retained QR observations
+with unverified units display rejection and create no candidate directory. Exact
+screenshots, source/binary binding and reproducible harness remain private in
+calibration-gui-20261104. Initial missing-Xvfb-path preflight and the earlier
+ambiguous no-previous-result error label are retained; final gate and screenshots
+cover corrections. No user desktop or hardware state change.
+
+This is advanced explicit-request GUI integration, not an automatic multi-pose
+wizard or calibrated Raptor reconstruction. Physical units/coverage, actual device
+binding, measured object trials and full GUI geometry qualification remain open.
+CodeRabbit quota lookup failed; no completed new or paid review claimed. Reviewer
+records were read only. Implementation commit: `bb0e3702ac75d494cd542241fdd9d333648a048b`.

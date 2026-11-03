@@ -16,8 +16,7 @@ scancraft-cli fit-calibration-candidate REQUEST_JSON NEW_OUTPUT_DIRECTORY
 
 The command opens no camera and makes no device or firmware changes. It writes an
 experimental candidate, not an installed or physically qualified calibration.
-Selecting that file for reconstruction is a separate explicit action. There is
-no dedicated candidate-export GUI control in this milestone.
+Selecting that file for reconstruction is a separate explicit action. The native Calibration panel now offers explicit fitting and selection.
 
 ## Request and provenance
 
@@ -105,3 +104,62 @@ Independent unit/scale measurements, broader calibration/holdout coverage, actua
 device binding, a measured object in three trials and native GUI qualification
 remain outstanding. CodeRabbit quota lookup is unavailable; no completed new or
 paid review is claimed. Independent review of this handoff remains pending.
+
+
+## Native application fitting and selection
+
+GUI implementation commit: `bb0e3702ac75d494cd542241fdd9d333648a048b`.
+
+Open **Calibration → Fit calibration**, choose the candidate request and a new
+folder, then select **Fit and save candidate**. The same workflow runs on a joined,
+cancellable background thread. Saved candidate identity and provenance are shown;
+errors retain the previous successful candidate and distinguish the absence of a
+previous result. A worker panic reports uncertain publication status so partial or
+published outputs are not silently described as absent.
+
+Fitting does not select the result or start acquisition. **Use for reconstruction**
+is a separate action: it fills the calibration fields for image, recorded-pair,
+recorded-sequence and live reconstruction, and opens the recorded-pair controls.
+Other input fields, the loaded model and its dirty state remain unchanged. Selection
+is disabled during relevant capture/reconstruction/fitting work and closing. The
+existing reconstruction validators still read and validate the selected file when
+processing starts. Choosing a synthetic candidate does not make it usable for
+physical capture.
+
+The recorded-board observation view remains separate and retains its previous
+images/results while fitting. Both tasks participate in the root window's close
+confirmation and cancellation; worker destruction joins rather than detaches.
+The application also accepts an explicit startup request:
+
+```sh
+scancraft --fit-calibration-candidate REQUEST_JSON NEW_OUTPUT_DIRECTORY
+```
+
+This is an advanced explicit-request workflow. It does not yet collect a complete
+multi-pose calibration session, infer a device identity, confirm physical scale,
+or provide an automatic calibration wizard.
+
+Four additional app regressions verify failure/panic retention, cancellation and
+duplicate-start protection, startup/busy/close integration, and preservation of
+dirty-document state and unrelated input paths. The final full gate passes
+**882 tests**, one existing ignored test, formatting, strict all-target Clippy and
+optimized builds. The underlying fitting/storage workflow is unchanged.
+
+The exact release GUI was inspected on an isolated authenticated X display. It
+fit the synthetic request; all four candidate artifacts equal the earlier CLI
+output byte-for-byte. An actual **Use for reconstruction** click opened the
+recorded-pair panel with its calibration populated, and a subsequent **Live scan**
+click showed that field populated with acquisition still idle. Camera/USB file
+descriptors were absent at the recorded checks. A separate run using the genuine
+retained QR observations with unverified units showed the rejection and created
+no candidate directory. Final screenshots and exact binary/source bindings are
+retained privately in `calibration-gui-20261104`.
+
+The first render preflight failed before launching because Xvfb remained in the
+legacy tool-cache directory; supplying its existing path corrected the harness.
+An initial error label incorrectly mentioned a previous candidate when none
+existed; the final label, regression, full gate and GUI checks cover that state.
+These are device-free UI and integration checks, not a real calibrated scan or
+complete object-edit/export qualification. No user desktop, scanner firmware,
+factory calibration or installed driver was changed. Independent review remains
+pending and CodeRabbit quota lookup remains unavailable.

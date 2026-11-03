@@ -1,5 +1,15 @@
 # Project status
 
+Latest native-app integration: **Calibration → Fit calibration** now runs the
+candidate workflow in a cancellable background job. Explicit **Use for
+reconstruction** fills offline/live calibration inputs while preserving the loaded
+model. Full 882-test/fmt/Clippy/release gate passes. Exact release GUI checks verify
+synthetic fitting, actual selection clicks and refusal of real unverified QR units;
+all candidate artifacts match the CLI output. No acquisition starts automatically.
+See [native workflow and limits](docs/CALIBRATION_CANDIDATE.md#native-application-fitting-and-selection).
+Physical scale, broader calibration coverage and the first measured object scan
+remain incomplete; no new hardware capture occurred in this milestone.
+
 Latest integration: `fit-calibration-candidate` connects existing fixed-lens stereo
 fitting to reconstruction-readable RAPCAL01 records. Exact observations and explicit
 unit/binding declarations are retained; synthetic provenance cannot become physical,
