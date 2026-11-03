@@ -275,3 +275,41 @@ fn invalid_frame_admission_poison_and_worker_ordering_validation_are_preserved()
         assert!(QueuedWriter::new(Writer::new(Vec::new(), profile()).unwrap(), capacity).is_err());
     }
 }
+
+#[test]
+fn borrowed_admission_preserves_input_and_poisoning_matches_owned_admission() {
+    let input = frame(1);
+    let before = input.clone();
+    let mut copied = QueuedWriter::new(Writer::new(Vec::new(), profile()).unwrap(), 2).unwrap();
+    let mut owned = QueuedWriter::new(Writer::new(Vec::new(), profile()).unwrap(), 2).unwrap();
+    copied.push_copy(&input).unwrap();
+    owned.push(input.clone()).unwrap();
+    assert_eq!(input, before);
+    assert_eq!(copied.finish().unwrap(), owned.finish().unwrap());
+
+    for invalid in [
+        Frame {
+            metadata: vec![0; 4097],
+            ..input.clone()
+        },
+        Frame {
+            data: vec![0; 5],
+            ..input.clone()
+        },
+    ] {
+        let mut copied = QueuedWriter::new(Writer::new(Vec::new(), profile()).unwrap(), 2).unwrap();
+        let mut owned = QueuedWriter::new(Writer::new(Vec::new(), profile()).unwrap(), 2).unwrap();
+        let borrowed_error = copied.push_copy(&invalid).unwrap_err();
+        let owned_error = owned.push(invalid.clone()).unwrap_err();
+        assert_eq!(borrowed_error.kind(), owned_error.kind());
+        assert_eq!(borrowed_error.to_string(), owned_error.to_string());
+        assert_eq!(
+            copied.push_copy(&input).unwrap_err().to_string(),
+            borrowed_error.to_string()
+        );
+        assert_eq!(
+            copied.finish().unwrap_err().to_string(),
+            borrowed_error.to_string()
+        );
+    }
+}

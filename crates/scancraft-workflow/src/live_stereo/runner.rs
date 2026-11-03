@@ -8,7 +8,7 @@ use super::{
 use crate::output::{publish, staging};
 use scancraft_core::{Frame, StreamProfile, uvc_pts};
 use scancraft_geometry::{Editor, formats::save_project, work::WorkControl, write_ply};
-use scancraft_recording::{CaptureContext, Reader, Writer};
+use scancraft_recording::{CaptureContext, Reader};
 use serde::Serialize;
 use serde_json::{Value, json};
 use std::{
@@ -20,11 +20,13 @@ use std::{
     sync::{
         Arc,
         atomic::{AtomicBool, Ordering},
-        mpsc::{self, SyncSender, TrySendError},
+        mpsc,
     },
     thread,
     time::Duration,
 };
+mod recording;
+use recording::record_controlled;
 type Result<T> = std::result::Result<T, String>;
 /// Source is constructed inside its owning acquisition thread. `close` must
 /// complete cleanup; errors are retained alongside processing failures.
@@ -59,7 +61,7 @@ fn record<S: Source>(
     path: &Path,
     maximum: usize,
     stop: &AtomicBool,
-    sender: SyncSender<Event>,
+    sender: mpsc::SyncSender<Event>,
     side: Side,
     open: impl FnOnce() -> Result<S>,
 ) -> Result<SourceReport> {
@@ -72,69 +74,6 @@ fn record<S: Source>(
         side,
         open,
     )
-}
-fn record_controlled<S: Source>(
-    profile: StreamProfile,
-    path: &Path,
-    maximum: usize,
-    signals: (&AtomicBool, &Control),
-    sender: SyncSender<Event>,
-    side: Side,
-    open: impl FnOnce() -> Result<S>,
-) -> Result<SourceReport> {
-    let (stop, control) = signals;
-    let mut source = open()?;
-    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-        let file = OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .open(path)
-            .map_err(|e| e.to_string())?;
-        let mut writer =
-            Writer::with_context(BufWriter::new(file), profile.clone(), source.context()?)
-                .map_err(|e| e.to_string())?;
-        let mut report = SourceReport {
-            interface: profile.interface,
-            recorded_frames: 0,
-            queued_frames: 0,
-            processing_queue_drops: 0,
-            statistics: Value::Null,
-        };
-        for index in 0..maximum {
-            if stop.load(Ordering::Relaxed) || control.stop_requested() {
-                break;
-            }
-            let Some(frame) = source.next()? else {
-                break;
-            };
-            writer.push(&frame).map_err(|e| e.to_string())?;
-            report.recorded_frames += 1;
-            control.recorded[side.index()].fetch_add(1, Ordering::Relaxed);
-            match sender.try_send(Event {
-                side,
-                sample: Sample { index, frame },
-            }) {
-                Ok(()) => report.queued_frames += 1,
-                Err(TrySendError::Full(_)) => {
-                    report.processing_queue_drops += 1;
-                    control.queue_drops[side.index()].fetch_add(1, Ordering::Relaxed);
-                }
-                Err(TrySendError::Disconnected(_)) => {
-                    report.processing_queue_drops += 1;
-                    control.queue_drops[side.index()].fetch_add(1, Ordering::Relaxed);
-                    break;
-                }
-            }
-        }
-        let out = writer.finish().map_err(|e| e.to_string())?;
-        out.get_ref().sync_all().map_err(|e| e.to_string())?;
-        report.statistics = source.statistics();
-        Ok(report)
-    }))
-    .unwrap_or_else(|_| Err("source acquisition or recording panicked".into()));
-    let cleanup = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| source.close()))
-        .unwrap_or_else(|_| Err("source cleanup panicked".into()));
-    combine(result, cleanup)
 }
 fn file(path: &Path, write: impl FnOnce(&mut BufWriter<File>) -> Result<()>) -> Result<()> {
     let f = OpenOptions::new()
@@ -418,14 +357,14 @@ fn execute<S: Source + 'static>(
         json!({"schema_version":1,"kind":if matches!(processor.source(),scancraft_depth::MatchSource::SyntheticFixture){"synthetic_live_stereo_pipeline"}else{"native_live_stereo_candidate_scan"},"declared_source":processor.source(),"session_id":processor.config().session_id,
         "source_binding_verified":false,"synchronization_verified":false,"physical_accuracy_qualified":false,
         "pair_policy":"unique equal raw PTS and explicit host window; not verified exposures",
-        "graceful_stop_requested":control.stop_requested(),"pause_requested_at_end":control.pause_requested(),"skipped_display_previews":control.skipped_previews(),"pending_capacity_per_side":2,"processing_channel_capacity":4,"association":association.counts,"unmatched_pending":association.remaining(),
+        "graceful_stop_requested":control.stop_requested(),"pause_requested_at_end":control.pause_requested(),"skipped_display_previews":control.skipped_previews(),"pending_capacity_per_side":2,"processing_channel_capacity":4,"recording_queue_capacity_per_camera":recording::QUEUE_CAPACITY,"recording_completion_verified":true,"association":association.counts,"unmatched_pending":association.remaining(),
         "sources":sources,"pairs":reports,"fused_points":count,"geometry_exported":count>0,
         "project_scope":"derived editable cloud with initial live-session references; external raw recordings and reports required for verification; not resumable fusion"}),
         editor,
     ))
 }
 
-/// Append raw frames before bounded processing delivery; restore all sources
+/// Admit raw frames before bounded processing delivery; finish recordings and restore all sources
 /// before atomic no-overwrite publication. Failures retain the staging folder.
 /// Cancellation checks are cooperative; device calls are not interrupted here.
 pub fn bundle<S: Source + 'static>(
@@ -1136,11 +1075,11 @@ mod tests {
         let t = Temp::new();
         let closed = Arc::new(AtomicUsize::new(0));
         let (sender, _receiver) = mpsc::sync_channel(1);
-        let frames = (0..9)
+        let frames = (0..5)
             .map(|i| {
                 let mut f = frame(i, Side::Left);
                 f.metadata[12..16]
-                    .copy_from_slice(&(i as u32).wrapping_mul(0x60000000).to_le_bytes());
+                    .copy_from_slice(&(i as u32).wrapping_mul(0x40000000).to_le_bytes());
                 f
             })
             .collect();
@@ -1148,7 +1087,7 @@ mod tests {
         let report = record(
             profile(),
             &path,
-            9,
+            5,
             &AtomicBool::new(false),
             sender,
             Side::Left,
@@ -1162,9 +1101,9 @@ mod tests {
             },
         )
         .unwrap();
-        assert_eq!(report.recorded_frames, 9);
-        assert_eq!(report.processing_queue_drops, 8);
-        let error = verify_recording(&path, 9, &WorkControl::default()).unwrap_err();
+        assert_eq!(report.recorded_frames, 5);
+        assert_eq!(report.processing_queue_drops, 4);
+        let error = verify_recording(&path, 5, &WorkControl::default()).unwrap_err();
         assert!(error.contains("repeated raw PTS"));
     }
     #[test]

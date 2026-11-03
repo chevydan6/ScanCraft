@@ -6,6 +6,7 @@
 use crate::{MAX_FRAME, Writer, invalid};
 use scancraft_core::{Frame, StreamProfile, validate_frame};
 use std::{
+    borrow::Cow,
     io::{self, Write},
     sync::mpsc::{self, SyncSender, TrySendError},
     thread::{self, JoinHandle},
@@ -47,6 +48,18 @@ impl<W: Write + Send + 'static> QueuedWriter<W> {
     /// callers must stop acquisition and must not publish a successful capture.
     /// Writer ordering, CRC and I/O errors are also checked before `finish` succeeds.
     pub fn push(&mut self, frame: Frame) -> io::Result<()> {
+        self.admit(Cow::Owned(frame))
+    }
+
+    /// Validate the existing frame/size limits before allocating an owned copy.
+    /// For callers that also retain pixels for processing. Admission has the same
+    /// poisoning/overflow behavior as `push`; only admitted frames are required
+    /// to appear in a successful recording. The caller's bytes remain unchanged.
+    pub fn push_copy(&mut self, frame: &Frame) -> io::Result<()> {
+        self.admit(Cow::Borrowed(frame))
+    }
+
+    fn admit(&mut self, frame: Cow<'_, Frame>) -> io::Result<()> {
         if let Some((kind, message)) = &self.failure {
             return Err(io::Error::new(*kind, message.clone()));
         }
@@ -62,7 +75,7 @@ impl<W: Write + Send + 'static> QueuedWriter<W> {
                 return Err(invalid("frame exceeds size limits"));
             }
             validate_frame(&self.profile, &frame).map_err(invalid)?;
-            match self.sender.as_ref().unwrap().try_send(frame) {
+            match self.sender.as_ref().unwrap().try_send(frame.into_owned()) {
                 Ok(()) => Ok(()),
                 Err(TrySendError::Full(_)) => Err(io::Error::new(
                     io::ErrorKind::WouldBlock,
