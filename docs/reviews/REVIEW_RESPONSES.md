@@ -3892,3 +3892,40 @@ integration is finite CLIrecording, not alllive/GUIpaths. No independentfinding
 status/severity/closure changed and no reviewer-owned file modified or staged.
 CodeRabbitusage fromrepo again lookup_failed; no completednewreview, approval or
 paidrequest claimed. Prior23d36d7 CI41628369876 passed, not newsource CI coverage.
+
+## Sustained combined hardware evidence — 2026-11-03
+
+SCAN-REV-006 accepted: physical qualification remains unproven. This milestone
+tests finite acquisition, not calibrated surface reconstruction or a release.
+SCAN-REV-005 cleanup bounds and SCAN-REV-021 live-stereo capacity remain accepted
+and unresolved; no independent finding status, severity or conclusion is changed.
+
+Exact unchanged implementation 2e3e2d8639b091a0001f803c64d1384dd1df2a15 at audited
+HEAD 2bdb9348bf93af2c6671ace1230a75f82d0565de combined the eight-frame recording
+worker with the temporary 32-URB candidate. A 300-frame/camera smoke passed without
+rejects. The following 18,000-frame/camera run spanned 600.242/600.208 seconds,
+with startup rejects 1/0, ongoing rejects 6/5 and sequence gaps 6/5. All 36,600
+accepted frames across four recordings passed complete native replay. Sustained
+all-rejection proxy 12/36012 = 0.033322%; ongoing 11/36011 = 0.030546%.
+This meets the numerical proxy for one run only, not repeatable qualification.
+
+Five paired truncations remain, plus a distinct left full-size video buffer with
+zero-byte metadata at sequence 17575. The latter was rejected for missing PTS;
+accepted-frame missing-metadata counters do not erase this failure. Causes remain
+unproven. Native filtering/counters were unchanged. The tracer reported no errors.
+Whole-CLI max RSS 55,824 KiB; partial 485.102-second capture CPU sample 8.726% of
+one core. Resource scopes and all limitations are detailed in the report.
+
+The original installed module, parameters and active WirePlumber were restored.
+Saved format/interval structures for all five idle capture nodes compared equal
+after restoration; native IR/color/illumination readbacks also matched. Six
+beginning/middle/end images were inspected; the right board edge remains clipped.
+No firmware write, permanent driver install, application source change or merge.
+
+Changed documents: PROJECT_STATUS.md, docs/RAPTOR_QUEUE_DEPTH_TRIAL.md,
+docs/RAPTOR_SUSTAINED_QUEUED_CAPTURE.md and this developer-owned response.
+Private source-bound evidence: sustained-queued-hln5i2yy. Unchanged source's prior
+858-test gate and exact 2bdb934 CI run41632695649 passed; no redundant Rust suite
+was run for this evidence-only milestone. CodeRabbit quota again lookup_failed;
+no new completed review or paid request claimed. PR32 remains draft/unmerged;
+an empty thread snapshot is not approval. Reviewer-owned files are untouched.

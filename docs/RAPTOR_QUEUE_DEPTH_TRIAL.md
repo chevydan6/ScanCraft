@@ -1,5 +1,9 @@
 # Raptor USB queue-depth trials — 2026-11-03
 
+Follow-up: [ten-minute capture with the queued recorder](RAPTOR_SUSTAINED_QUEUED_CAPTURE.md)
+extends the short-trial evidence below. It retains nonzero truncation/metadata
+failures and does not replace this ABBA comparison or establish release readiness.
+
 **Confirmed:** two controlled ABBA comparisons produced 37 ongoing rejected
 buffers with five USB URBs and zero with 32 URBs, for 8,400 accepted buffers in
 each arm. All 16 recordings passed native integrity replay. **Not qualified:**

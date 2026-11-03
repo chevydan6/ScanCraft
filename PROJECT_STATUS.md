@@ -1,5 +1,21 @@
 # Project status
 
+[Sustained combined capture](docs/RAPTOR_SUSTAINED_QUEUED_CAPTURE.md) completed
+18,000 valid frames per camera over ten minutes using the existing queued recorder
+and temporary 32-URB candidate. All 36,000 frames replayed. Eleven ongoing rejects
+plus one startup reject give **0.033322% including startup** for this run; sequence
+gaps match ongoing rejects. Five paired truncations and one separate empty left
+metadata buffer remain defects. This single result does not establish repeatable
+reliability, 30-minute live scanning, exposure synchronization or physical accuracy.
+Whole-CLI maximum RSS was 55,824 KiB; a 485-second partial capture sample averaged
+8.726% of one core. Original driver, parameters, service, all five saved idle camera
+format/interval structures and native Raptor stream/illumination readbacks restored.
+Beginning/middle/end images show the board, still clipped at the right camera edge.
+Next: targeted metadata/truncation investigation and repeated reliability tests;
+physical scale and the independently measured first object remain prerequisites
+for dimensional qualification. Source 2e3e2d8 is unchanged; prior 858-test gate and
+exact 2bdb934 CI passed. No new independent-review approval or release is claimed.
+
 [Bounded finite recording](docs/BOUNDED_RECORDING.md) now separates camera
 servicing from recording writes using eight owned frames per camera and explicit
 failure on overflow. In controlled Raptor trials, a 200 ms write delay caused
@@ -9,9 +25,9 @@ explicitly, stops cameras before draining, preserves replayable prefixes and
 publishes no successful capture. SIGINT cleanup also passes. Full858-test gate,
 formatting, strict Clippy and optimized builds pass. Ordinary USB rejects remain;
 this is finite CLI recording, not a fix for every live runner or a qualified scan.
-Exact source2e3e2d8; private inputs remain outside Git. Next: combine this measured
-recording improvement with longer queue-depth trials, preserving startup and
-sequence-gap accounting. Physical scale and the first measured object remain open.
+Exact source2e3e2d8; private inputs remain outside Git. The longer combined trial
+above now extends this evidence, preserving startup and sequence-gap accounting.
+Physical scale and the first measured object remain open.
 
 [Controlled queue-depth trials](docs/RAPTOR_QUEUE_DEPTH_TRIAL.md) now provide
 actual hardware evidence for the existing experimental kernel candidate.
@@ -22,8 +38,8 @@ are 5.660377% and 2.109311%. One depth-32 sequence/PTS gap follows a long
 application-service pause, so zero rejects is not losslessness. The candidate
 rebuilt byte-identically and passed 79 policy checks. Original driver, parameters,
 service and saved IR/illumination readbacks are restored; no persistent install.
-Longest individual capture is about one minute, not sustained qualification.
-Next: longer/stress trials and explicit recording/queue timing, while keeping
+That comparison's longest individual capture was about one minute; see the newer
+combined trial above. Further repeated/stress trials must keep
 startup framing and physical reconstruction requirements separate. Existing
 850-test source gate is unchanged; exact preceding head23d075c public CI passed.
 
