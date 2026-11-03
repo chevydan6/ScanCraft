@@ -4554,3 +4554,226 @@ independent review; no status/severity change or completed automated review clai
 
 Fresh repository-level CodeRabbit usage exits1 with every included/billing/credit
 field reporting lookup_failed. No new review, paid request or upload follows.
+
+## DEV-BOUNDED-COPY — prepared opt-in completion-copy experiment
+
+Developer implementation proposal grounded in DEV-HOST-SERVICE's measured
+software request starvation, not an independent finding closure or qualified fix.
+The GPL-2.0-only patch in experiments/kernel-inline-copy defaults off and selects
+only original Raptor IR bulk-input capture, positive/consistent transfer lengths
+at most12288bytes, one copy operation and copy length no greater than actual bytes.
+It copies, releases the decoder-acquired reference once, clears completed work
+and reuses the original atomic resubmit/error path. Ineligible cases preserve
+the original zero-operation immediate submit or remaining-operation worker;
+cancellation/error handling precedes the new call. Load-time
+parameter freeze and read-only sysfs permissions prevent runtime mode changes.
+
+The baseline rebuild is byte-identical to installed579c7633…127e5. Candidate
+bcce45bd…76bbbf compiles with matching kernel vermagic/srcversion12034367675945449357638.
+Public patch application reproduces the candidate source.54 tests extract the
+actual completion/worker/helper/setter functions into strictC11stubs and verify
+boundary dispatch, guarded bytes, reference release, fallback, cancellation,
+frozen/error paths, submission flags/errors and parameter freeze. The first
+test expectation incorrectly omitted unexpected-error fallthrough when frozen;
+it was corrected to preserve existing behavior, with the initial failure retained.
+Linux patch-check indentation/header issues were corrected; final check has
+zeroerrors/warnings. No validation or error-reporting rule was weakened.
+
+Full Rust gate:890passed,1existingignored,formatting/strictClippy/releasePASS.
+These stubs do not establish real kernel concurrency, USB/parser semantics,
+IRQ latency or hardware improvement. No candidate module has been loaded.
+The new copy-byte cap is not a deadline. Longer host-event gaps, startup framing,
+the exceptional-byte case and physical reconstruction remain unresolved.
+
+Changed files: experiments/kernel-inline-copy patch/test/license/README,
+THIRD_PARTY_NOTICES.md, PROJECT_STATUS.md and this response. No Rust runtime or
+installed driver changes. Private inline-copy-20261104 retains initial/final
+tests, builds, source bindings and reproduction. Publication hash is recorded
+in Git history/private metadata. The proposal awaits independent review;
+reviewer-owned records and statuses remain untouched. Fresh CodeRabbit quota
+lookup again reports all fields unavailable; no paid or completed review claimed.
+
+Clean patch application and a separate full rebuild reproduce the candidate
+module byte for byte. Assignment458 independently verifies the preceding
+host-service observations, including the shorter incident's worker/task identity
+and queue-starvation accounting, and confirms both e178af3 CI runs passed. That
+supports the experiment's motivation, not this candidate's runtime correctness.
+
+
+## DEV-INLINE-HARDWARE — runtime comparison and framing exceptions
+
+Developer investigation; not a new independent finding or status change.
+Accepted assignments461/464's limits: offline source/stub verification and CI do
+not qualify kernel concurrency, cancellation bounds or acquisition improvement.
+At source08adf1be077be172538131d3accf42f317bb7421, two30-frame/camera smoke trials
+and a600-frame/camera off/on/off comparison save/replay3,720 genuine frames.
+Four SIGTERM/SIGINT cases restore state and reopen. Installed baseline, service,
+five formats per arm and tracing restore;119native state-field comparisons match.
+
+Ongoing rejects per camera2/9/3; startup0/86,1/1,1/0 in the long trials. All total
+proxies FAIL. Enabled trace has zero copy-worker cycles but paired truncations
+remain. No permanent install, fix, isolated speedup or qualified scan is claimed.
+Strict B1header checks retain3semantic exceptions and2length mismatches. Separate
+firstEOF/FID accounting explains native lengths, including20,664trailing bytes
+in each sequence147buffer. Original analyzers remain unchanged; recycling refuses
+B1. Their earlier exit0despite JSON failures allowed A2before semantic inspection;
+this diagnostic orchestration mistake is recorded, not reclassified as a pass.
+No further hardware trial followed discovery. All saved accepted frames replay.
+
+Changed public files: docs/RAPTOR_INLINE_COPY_TRIAL.md, PROJECT_STATUS.md,
+experiments/kernel-inline-copy/README.md and this response. No application/kernel
+source or reviewer-record changes. Acquisition revision08adf1b; publication commit
+is recorded in Git history and private publication metadata. Freshfullgate:
+890passed0failed1ignored,fmt/strictClippy/releasePASS. Exact08adf1b push/PR CI passed,
+independently confirmed464; evidence publication CI is separate. CodeRabbit usage
+lookup again unavailable; no completed/paid review claimed. PR33threads currently
+empty; draft skip is not substantive review. Independent runtime review pending.
+
+Private inline-smoke-20261104/inline-aba-20261104 bind all raw data, restoration,
+trace counters, input hashes, initial diagnostic failures and framing follow-up.
+Keep005hardcleanup bounds/006physical qualification and prior open limitations.
+Remaining: host-wide gaps and observer effects, malformed headers/startup, exact
+cause of earlier exception, disconnect safety, physical scale and measured object
+reconstruction. Recommend keeping candidate disabled and investigating observed
+boundaries with explicit semantic gates; do not weaken frame validation.
+
+
+## SCAN-REV-029 — accepted: correct IRQ affinity comparison
+
+Accepted. The constant-CPU8 sentence in docs/RAPTOR_INLINE_COPY_TRIAL.md was
+incorrect. Independent465 identified B1readbacks8→14 and A2readbacks14→14.
+Development reread all ten saved readbacks and independently counted IRQ39entry
+CPU fields in all five complete traces, agreeing with saved irq-analysis.json:
+smokeoff CPU8:12104, smokeon CPU8:12042, A1CPU8:226539, B1CPU8:228157,
+A2CPU14:226565. No exact migration time or reason is established.
+
+The report now provides each arm's readbacks and observed distribution and names
+affinity drift as an uncontrolled variable. Measurements, raw evidence, failed
+qualification results, application/kernel code and affinity settings are unchanged.
+No hardware trial was repeated for this correction. Source publication8a97cb2;
+correction commit is recorded in history/private metadata. Changed files are the
+report and this response. Private irq-affinity-correction-20261104/verification.json
+retains readback/report hashes and fresh raw-trace counts. Markdown whitespace
+check passes; unchanged source retains890-test/fmt/Clippy/release evidence and both
+8a97cb2CI successes. No claim of independent closure: only reviewer may verify029.
+
+
+## DEV-OBSERVER-TIMING — baseline capture comparison, not a complete fix
+
+Developer investigation; no new independent finding or closure. Following465's
+finite runtime evidence, saved task correlation identifies the local session
+logger around14preceding paired incidents. Eight timed readonly snapshots show
+lid-state reads taking1.382848–5.122096ms; local ACPI source evaluates_LID.
+This is an operation-level lead, not firmware cause or resident-source attestation.
+
+Unchangedbaseline-driver600-frame/camera observer-running/stopped/restored-running
+trials produce ongoing rejects per camera4/0/3 and startup96/0,92/95,1/0. All3,600
+saved frames replay and3,614accepted/ongoing-rejected header associations match.
+CompleteUSB/ftrace accounting and42native state-field comparisons pass. Observer
+restoresactive with unchanged source;camera formats/service/tracing restore.
+ActualIRQCPUs4/11/9 and readbacks4→4,11→11,9→10 are explicitly uncontrolled.
+Separate A2worker starvation remains; zeroB1ongoing loss is finite, not qualification.
+
+Privateadmit.py now refuses the preceding inlineB1semantic/byte failures despite
+original analyzer exit0, and accepts precedingA1. Each currentarm passes the
+explicit gate before the next starts. No original artifact/analyzer or native
+validation rule is changed. No new app/kernel code, monitor patch, firmware/affinity
+write or permanentservicechange. Newdocs: RAPTOR_OBSERVER_TIMING.md,PROJECT_STATUS
+andthisresponse. Acquisitionhead8a97cb2;publicationhashinhistory/private metadata.
+Existing890-test/fmt/Clippy/releasegate applies to unchangedcode;8a97cb2bothCIpass.
+Prior029correctionf92cf09remainsforreviewerverification. Newobserverevidenceawaits
+independentreview; no completedCodeRabbit/paidrevieworownermergeclaimed.
+
+Nextisolateindividualdirectlidreadsagainstcachedreadcontrols withinonecapture,
+with timedcallrecords andrestoreobserver. Physicalscale/measuredobjectandcomplete
+native3Dqualificationstillpending; don'tsubstitutethisdiagnosticforagenuine scan.
+
+## SCAN-REV-030 — accepted: distinguish file reads from all operations
+
+Accepted. The observer report incorrectly called the lid read the slowest
+operation in every snapshot. Independent assignment472 establishes that it is
+the slowest file read, while a timed command takes longer in seven of eight
+snapshots. Corrected `docs/RAPTOR_OBSERVER_TIMING.md` to state both facts without
+changing measured durations or causal limitations. No application, collector,
+raw evidence or reviewer record changed. The correction is based on the saved
+operation-ranking evidence cited by the reviewer; no new hardware trial is
+necessary for this wording correction.
+
+Affected publication: c907ae55e4f16f1074d813e43ea2e37a809c2a2b. Correction commit
+is separately identifiable in Git history. Validation: whitespace/diff inspection;
+both exact c907ae5 push41699629965 and PR41699643105 CI runs now pass. Existing
+890-test/fmt/Clippy/release evidence applies to unchanged code. This response
+accepts the finding; only the independent reviewer may verify or close it.
+
+
+## DEV-LID-READ-CONTROL — specific host-read lead, strict denial retained
+
+Developer investigation, not a new independent finding or closure. Capture at
+c907ae55e4f16f1074d813e43ea2e37a809c2a2b uses the unchanged installed baseline.
+All16 predeclared read windows are reported in docs/RAPTOR_LID_READ_CONTROL.md.
+Three longest lid reads coincide with all three ongoing rejected pairs; no cached
+control read is associated. Actual226,937 IRQ39 entries remain CPU15, readbacks15→15.
+This narrows the timing lead but does not prove firmware cause or general reliability.
+
+All1,200 saved frames replay; startup94/0, ongoing3/3 and total100/1300 rejection
+proxy FAIL. Left378/right286 retain strict early-EOF/length failures. Separate
+first-EOF accounting matches all1,206 native lengths and explains20,664-byte tails
+without accepting malformed frames. Admission exits1; no further hardware follows.
+All18 input hashes,16read records,14native state comparisons, fullUSB/ftrace counts,
+observer/module/trace restoration and unchanged kernel logs are checked. Seven
+probe-verifier cases pass. Complete freshRust gate:890passed0failed1ignored,fmt,
+strictClippy,releasePASS. Raw evidence and private helper code remain private.
+
+Public changes: new report, PROJECT_STATUS.md and this response; application and
+kernel code unchanged. Correction053527d separately accepts SCAN-REV-030, without
+claiming reviewer closure. c907ae5 bothCI pass; new publication hash is recorded in
+Git history/private publication metadata. New evidence awaits independent review;
+no completedCodeRabbit review is claimed. Physical calibration is authorized, but
+independent scale, measured object reconstruction and repeatability remain absent.
+
+## SCAN-REV-031 — accepted; correction remains outstanding
+
+Accepted. `tests/live_capacity.rs::Paced::next_until` acknowledges a consumed
+processing preview; it does not wait for either independent recording consumer.
+The documented eight-frame queue can correctly fail closed before the synthetic
+success fixture reaches its1,001-pair assertions. Push41702132020 at a4d2de1 fails
+with that error; PR41702142669 passes. The original failure log is retained.
+One unchanged local run of all four capacity tests on CPU0 with four test threads
+passes in4.34s. That does not correct the missing synchronization or supersede CI.
+
+No production/test source changed for this response. Proposed correction is a
+bounded test seam that acknowledges both recording consumers before advancing the
+synthetic source, plus a deliberately delayed-writer regression. Preserve the
+actual nonblocking eight-frame admission, poisoning, overflow, cancellation and
+retained-prefix contracts. Do not replace synchronization with longer sleeps,
+larger queues, skipped tests or retries until green. Implementation, a fresh full
+gate and new-head CI remain outstanding. Only the reviewer may verify/close031.
+
+## DEV-NO-LID-SUSTAINED — remaining losses and diagnostic correction
+
+Two declared1,800-frame/camera trials at a4d2de17f77fb3cb0d4baef9af467f00fd779d06
+save/replay7,200 frames with unchanged baseline driver and temporarily paused
+optional logger. First startup107/102,ongoing2/2; corrected startup84/0,ongoing4/4.
+Every complete and ongoing-only proxy fails. IRQ trace placement is CPU15 then
+CPU10, so no isolated between-trial performance comparison is claimed.
+
+The first USB monitor incorrectly retains its old60-second deadline and exits2;
+collector exits1, strict parser refuses, admission remains denied. Manual replay
+passes. Separate explicitly incomplete-prefix analysis accounts for observed
+rejections but retains47 missing native associations and two partial tails. No
+full USB qualification or first-trial kernel-log comparison is claimed.
+
+The private corrected helper uses an explicit bounded monotonic deadline (180s
+in the corrected trial). Strictcompile,19deadlinecases,6invalidCLIcases and2PCAP
+checks pass. Corrected USB/host traces are complete and all3,600 accepted headers
+match, but left321/right239 lack EOF. FID-toggle accounting matches all3,608 native
+lengths without accepting malformed frames; strict admission exits1. All four
+incident pairs overlap zero software-pending intervals and copy-worker waits.
+Complete byte/trace-based software queue diagnostics do not override EOF failure.
+
+All28 native state comparisons across both trials and saved formats/services/
+observer/tracing restore; corrected kernel logs are unchanged. Source/driver and
+original logger remain unchanged. Public report docs/RAPTOR_NO_LID_SUSTAINED.md,
+PROJECT_STATUS.md and this response retain methods, failures, exact counts,
+resource scope and CI031. Publication commit is recorded in history/private metadata.
+No completedCodeRabbit review or physical reconstruction qualification is claimed.

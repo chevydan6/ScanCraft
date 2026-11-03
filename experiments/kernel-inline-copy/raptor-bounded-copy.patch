@@ -1,0 +1,116 @@
+Subject: [EXPERIMENT] Bound original Raptor IR completion-context copying
+
+Opt-in load-time experiment for observed camera-copy scheduling delay.
+Keep the existing deferred path outside one at-most-12-KiB copy operation.
+Preserve error reporting, reference release and the atomic resubmit path.
+Not a production fix or a claim of bounded interrupt latency.
+
+---
+diff --git a/uvcvideo.h b/uvcvideo.h
+--- a/uvcvideo.h
++++ b/uvcvideo.h
+@@ -49,6 +49,9 @@
+  */
+ 
+ #define DRIVER_VERSION		"1.1.1"
++
++/* Opt-in, load-time-only bounded Raptor copy experiment. */
++extern bool uvc_scancraft_inline_copy;
+ 
+ /* Number of isochronous URBs. */
+ #define UVC_URBS		5
+diff --git a/uvc_driver.c b/uvc_driver.c
+--- a/uvc_driver.c
++++ b/uvc_driver.c
+@@ -37,6 +37,28 @@
+ unsigned int uvc_dbg_param;
+ unsigned int uvc_timeout_param = UVC_CTRL_STREAMING_TIMEOUT;
+ bool uvc_allow_privacy_override_param;
++
++/* Diagnostic only: disabled unless explicitly selected at module load. */
++bool uvc_scancraft_inline_copy;
++static bool uvc_scancraft_inline_copy_frozen;
++
++static int uvc_scancraft_inline_copy_set(const char *val,
++				       const struct kernel_param *kp)
++{
++	if (uvc_scancraft_inline_copy_frozen)
++		return -EPERM;
++	return param_set_bool(val, kp);
++}
++
++static const struct kernel_param_ops uvc_scancraft_inline_copy_ops = {
++	.set = uvc_scancraft_inline_copy_set,
++	.get = param_get_bool,
++};
++module_param_cb(scancraft_inline_copy, &uvc_scancraft_inline_copy_ops,
++		&uvc_scancraft_inline_copy, 0444);
++MODULE_PARM_DESC(scancraft_inline_copy,
++	"Experimental original Raptor IR bounded inline copy, load-time only");
++
+ 
+ static struct usb_driver uvc_driver;
+ 
+@@ -3311,6 +3333,8 @@
+ {
+ 	int ret;
+ 
++	uvc_scancraft_inline_copy_frozen = true;
++
+ 	uvc_debugfs_init();
+ 
+ 	ret = usb_register(&uvc_driver);
+diff --git a/uvc_video.c b/uvc_video.c
+--- a/uvc_video.c
++++ b/uvc_video.c
+@@ -1740,6 +1740,41 @@
+ 	urb->transfer_buffer_length = stream->urb_size - len;
+ }
+ 
++/*
++ * Experimental bounded copy in the completion context. Preserve the reference
++ * acquired by decode_data, release it exactly once after copying, and reuse the
++ * existing atomic resubmit path. Everything outside this narrow gate stays on
++ * the original workqueue. This bounds copied bytes, not elapsed IRQ time.
++ */
++static void uvc_video_try_inline_copy(struct uvc_urb *uvc_urb)
++{
++	struct uvc_streaming *stream = uvc_urb->stream;
++	const struct usb_device *udev = stream->dev->udev;
++	struct urb *urb = uvc_urb->urb;
++	struct uvc_copy_op *op;
++	u8 interface = stream->intf->cur_altsetting->desc.bInterfaceNumber;
++
++	if (!uvc_scancraft_inline_copy ||
++	    le16_to_cpu(udev->descriptor.idVendor) != 0x2bc5 ||
++	    le16_to_cpu(udev->descriptor.idProduct) != 0x06a8 ||
++	    (interface != 1 && interface != 3) ||
++	    stream->type != V4L2_BUF_TYPE_VIDEO_CAPTURE ||
++	    !usb_pipebulk(urb->pipe) || !usb_pipein(urb->pipe) ||
++	    urb->actual_length <= 0 ||
++	    urb->actual_length > urb->transfer_buffer_length ||
++	    urb->transfer_buffer_length > 12288 ||
++	    uvc_urb->async_operations != 1)
++		return;
++
++	op = &uvc_urb->copy_operations[0];
++	if (op->len > urb->actual_length)
++		return;
++
++	memcpy(op->dst, op->src, op->len);
++	uvc_queue_buffer_release(op->buf);
++	uvc_urb->async_operations = 0;
++}
++
+ static void uvc_video_complete(struct urb *urb)
+ {
+ 	struct uvc_urb *uvc_urb = urb->context;
+@@ -1785,6 +1820,8 @@
+ 	 * to be deferred to a work queue.
+ 	 */
+ 	stream->decode(uvc_urb, buf, buf_meta);
++
++	uvc_video_try_inline_copy(uvc_urb);
+ 
+ 	/* If no async work is needed, resubmit the URB immediately. */
+ 	if (!uvc_urb->async_operations) {

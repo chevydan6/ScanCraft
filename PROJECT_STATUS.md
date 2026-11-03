@@ -1,6 +1,48 @@
 # Project status
 
-Latest host-service investigation: a complete 4,014,236-event trace distinguishes
+Latest one-minute mitigation trials: [capture without diagnostic lid polling](docs/RAPTOR_NO_LID_SUSTAINED.md)
+saves/replays7,200 real frames, but ongoing rejects per camera remain2 then4.
+The first monitor's60-second deadline expired; corrected instrumentation retains
+complete USB/host traces. One pair lacks EOF, so strict admission still fails.
+All four corrected-trial incidents include zero software-pending request intervals
+and delayed copy workers. Both trials restore the original observer and checked
+state; no permanent change or calibrated object scan. Acquisition-head CI is mixed:
+PR41702142669 passes; push41702132020 fails a synthetic recording-queue overflow.
+Independent SCAN-REV-031 is accepted; a local four-test pass is not a fix. Next:
+deterministic fixture synchronization with recording consumers, then remaining
+real request-recycling delays and physical reconstruction.
+
+Latest controlled observation: [timed lid reads versus cached controls](docs/RAPTOR_LID_READ_CONTROL.md)
+associates all three ongoing rejected camera pairs with the three longest direct
+laptop lid-state reads; none with eight cached reads. IRQ placement stays CPU15.
+All 1,200 saved frames replay, but startup94/0 and ongoing3/3 still fail acquisition
+targets. One pair has early EOF plus a20,664-byte tail; strict admission correctly
+denies the next arm. Original observer and checked state restore; no permanent
+change or calibrated object scan. Fresh890 tests pass, one ignored; fmt/Clippy/
+release pass. Next: review the preserved framing failure and design a distinct
+mitigation test without diagnostic lid polling.
+
+Latest investigation: [host observer timing](docs/RAPTOR_OBSERVER_TIMING.md) gives
+ongoing rejects per camera **4 → 0 → 3** with a local logging observer running,
+briefly stopped and restored, using the unchanged installed driver. All 3,600
+saved frames replay and checked state restores. A direct laptop lid-state read
+is a timing lead; CPU affinity differs between arms and a separate worker-delay
+incident remains. Startup failures persist and every total rejection proxy fails.
+No permanent observer change or calibrated object scan is claimed. Next: isolate
+the individual read against a cached-read control within one capture.
+
+Latest experiment: the [bounded completion-copy hardware comparison](docs/RAPTOR_INLINE_COPY_TRIAL.md)
+saved and replayed 3,720 genuine frames across two short and three 600-frame/camera
+trials. Cancellation and checked-state restoration pass. Ongoing rejects per
+camera are **2 → 9 → 3** with the same candidate disabled → enabled → disabled;
+all total rejection proxies fail. Enabled capture has no copy-worker dispatch but
+still truncates frames. Two early-EOF cases explain a finite 20,664-byte discrepancy;
+strict framing failures remain reported. **No acquisition fix or calibrated object
+scan is established.** The installed baseline was restored after every trial.
+Fresh Rust gate: 890 passed/one ignored, formatting, strict Clippy and release pass.
+PR33 remains an experimental draft; no permanent module installation or main merge.
+
+Earlier host-service investigation: a complete 4,014,236-event trace distinguishes
 three paired truncations overlapping 3.869–5.318 ms without selected events across
 all CPUs from a fourth with camera-work scheduling delays and 923/895 µs of zero
 software-pending requests. All 1,200 saved frames replay; acquisition still fails
