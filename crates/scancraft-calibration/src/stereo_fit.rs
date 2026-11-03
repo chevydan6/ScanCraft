@@ -272,7 +272,7 @@ pub fn fit_stereo_extrinsics(
 }
 
 /// Estimate target pose from already validated known-lens observations.
-fn pose_seed(
+pub(crate) fn pose_seed(
     camera: &CameraModel,
     view: &PlanarView,
     cancel: &dyn Fn() -> bool,

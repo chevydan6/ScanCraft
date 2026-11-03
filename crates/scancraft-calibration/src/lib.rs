@@ -15,6 +15,7 @@ pub mod laser_trace;
 mod normal_blocks;
 pub mod orientation;
 pub mod planar;
+pub mod planar_pose;
 mod projection_differential;
 pub mod rectification;
 pub mod refinement;

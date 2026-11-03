@@ -12,6 +12,7 @@ pub mod mesh_trim;
 pub mod meshing;
 pub mod output;
 pub mod planar_calibration;
+pub mod planar_pose;
 pub mod recorded_traces;
 pub mod scan_project;
 pub mod scan_project_load;
