@@ -1,6 +1,9 @@
 # Protocol findings
 
-Verified Raptor identity: USB 2bc5:06a8, firmware observed 1.5.7. Three UVC
+Verified Raptor identity: USB 2bc5:06a8, firmware observed 1.5.7. The native
+[device-version command](docs/DEVICE_VERSION.md) re-observed 1.5.7 on 2026-11-03
+through fixed GET_STRUCTURE_DATA property1000; this is a reported version, not
+authenticated identity. Three UVC
 control interfaces 0/2/4 and a HID interface 6. Video node minor numbers
 change after reboot; identify by USB parent, interface and QUERYCAP, never
 adjacent numbers. Image and metadata sequences pair exactly on this kernel.

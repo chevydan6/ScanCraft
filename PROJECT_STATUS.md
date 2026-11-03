@@ -1,5 +1,12 @@
 # Project status
 
+[Native device-version query](docs/DEVICE_VERSION.md) now reports the connected
+Raptor firmware as 1.5.7. Three native reads match the retained reference; a
+subsequent 20-frame stereo capture passes replay and state restoration. The
+835-test gate passes. The official downloaded V1.4.8 package is older; no firmware
+change occurred. Calibration binding remains unverified. Public CI passed for
+integration PR32 head f7a9a02; that result does not yet cover this follow-up.
+
 First genuine scan mission: [all 30 PRs audited](docs/FIRST_SCAN_INTEGRATION_AUDIT.md).
 Local `dev/first-genuine-scan-integration` preserves all 29 developer heads; reviewer
 PR2 remains separate. No merge into main or protection change. Known current-head

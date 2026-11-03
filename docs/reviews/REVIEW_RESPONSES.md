@@ -3601,3 +3601,29 @@ CodeRabbit usage check returned exit1 lookup_failed; no review or paid request
 performed. Independent review of source commit remains outstanding. No reviewer
 record changed; no new finding severity/status asserted. Prior PR28 documentation
 propagation remains separate from this integration branch's local correction.
+
+## Native firmware identity observation — 2026-11-03
+
+Developer integration work supporting SCAN-REV-006's calibration provenance gap;
+that finding remains accepted and physically unqualified. Source commit
+f81353b6ace324396f0b2edc80875060553ebc44 adds fixed GET_STRUCTURE_DATA property1000
+in crates/scancraft-device/src/control/device_version.rs, exposes its module in
+control.rs and adds the device-version CLI dispatch/help in main.rs. No generic
+setter, firmware update, automatic acquisition query or calibration binding is
+introduced. Device-reported strings and possibly placeholder serials do not prove
+identity or optical accuracy. Provenance/notice retained in docs/DEVICE_VERSION.md
+and THIRD_PARTY_LICENSES/OrbbecSDK_v2-protocol-reference/LICENSE-MIT.
+
+Three native queries agree exactly with every decoded field of the retained raw
+reference and report firmware1.5.7. The downloaded official1.4.8 package is older;
+no update/downgrade performed. Following ten-frame-per-camera native acquisition
+passes both replays; startup rejectsL/R0/1, ongoing0/0, missing metadata0/0. Full
+reported stream/illumination snapshots before/after equal. No duration/accuracy
+claim follows. Three new synthetic decoder/envelope tests pass. Full gate:
+835passed,1existingignored,fmt/strictClippy/optimized build PASS.
+
+CodeRabbit usage again returns exit1 lookup_failed; no paid request or review
+approval. PR32's earlier f7a9a02 GitHub Rust offline run41609776225 completed
+successfully; that result does not cover this new source commit. No PR32 reviews
+or review threads were present at the checked snapshot. Source remains available
+for independent review; developer has not modified or closed reviewer findings.
