@@ -177,6 +177,24 @@ pub fn run(
     work: &WorkControl,
     cancel: &dyn Fn() -> bool,
 ) -> Result<Value, Error> {
+    Ok(run_with_frames(input, target, work, cancel)?.manifest)
+}
+
+/// Published observations and their exact in-memory source frames. A UI can
+/// prepare previews without rereading potentially changed files after publication.
+/// Frames remain bounded by the existing recording/image limits.
+pub struct Completed {
+    pub manifest: Value,
+    pub measurements: Value,
+    pub frames: [SelectedFrame; 2],
+}
+
+pub fn run_with_frames(
+    input: &Path,
+    target: &Path,
+    work: &WorkControl,
+    cancel: &dyn Fn() -> bool,
+) -> Result<Completed, Error> {
     check(work, cancel)?;
     ensure_new(target)?;
     let bytes = bounded(input, 1024 * 1024, work)?;
@@ -306,7 +324,11 @@ pub fn run(
             target.display()
         )
     })?;
-    Ok(result)
+    Ok(Completed {
+        manifest: result,
+        measurements: report,
+        frames: selected,
+    })
 }
 
 #[cfg(test)]

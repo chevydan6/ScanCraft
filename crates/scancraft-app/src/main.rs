@@ -1,4 +1,5 @@
 mod archive_ui;
+mod board_ui;
 mod candidate_ui;
 mod capture_close;
 mod capture_ipc;
@@ -71,6 +72,8 @@ struct Running {
     worker: capture_worker::Worker,
 }
 struct App {
+    board: board_ui::BoardUi,
+    board_active: bool,
     recovery: recovery_ui::RecoveryUi,
     archive: archive_ui::ArchiveUi,
     playback: playback_ui::PlaybackUi,
@@ -103,6 +106,8 @@ struct App {
 impl Default for App {
     fn default() -> Self {
         Self {
+            board: Default::default(),
+            board_active: false,
             recovery: Default::default(),
             archive: Default::default(),
             playback: Default::default(),
@@ -153,6 +158,7 @@ impl App {
                 || self.recovery.is_busy()
                 || self.playback.is_busy()
                 || self.archive.is_busy()
+                || self.board.is_busy()
                 || self.candidates.is_busy())
     }
     fn request_window_close(&mut self, ctx: &egui::Context) {
@@ -350,6 +356,7 @@ impl App {
 impl eframe::App for App {
     fn update(&mut self, ctx: &egui::Context, _: &mut eframe::Frame) {
         self.cloud.tick();
+        self.board.tick();
         let laser_failed = self.candidates.tick();
         let live_failed = self.live.tick(ctx) || laser_failed;
         self.mesh.tick();
@@ -359,6 +366,7 @@ impl eframe::App for App {
         if self.recovery.is_busy()
             || self.playback.is_busy()
             || self.archive.is_busy()
+            || self.board.is_busy()
             || self.candidates.is_busy()
         {
             ctx.request_repaint_after(Duration::from_millis(50));
@@ -396,6 +404,7 @@ impl eframe::App for App {
                         || self.recovery.is_busy()
                         || self.playback.is_busy()
                         || self.archive.is_busy()
+                        || self.board.is_busy()
                         || self.candidates.is_busy()
                     {
                         if ui.button("Cancel operation and keep open").clicked() {
@@ -404,6 +413,7 @@ impl eframe::App for App {
                             self.playback.cancel();
                             self.archive.cancel();
                             self.candidates.cancel();
+                            self.board.cancel();
                             self.confirm_close = false;
                         }
                     } else if ui.button("Save project and keep open").clicked() {
@@ -416,6 +426,7 @@ impl eframe::App for App {
                         self.playback.cancel();
                         self.archive.cancel();
                         self.candidates.cancel();
+                        self.board.cancel();
                         self.close_allowed = true;
                         self.confirm_close = false;
                         self.request_window_close(ctx);
@@ -435,6 +446,7 @@ impl eframe::App for App {
             || self.recovery.is_busy()
             || self.playback.is_busy()
             || self.archive.is_busy()
+            || self.board.is_busy()
             || self.candidates.is_busy()
             || self.smoke.is_some()
         {
@@ -479,12 +491,14 @@ impl eframe::App for App {
         }
         egui::CentralPanel::default().show(ctx,|ui|{
             ui.horizontal(|ui|{
-                if ui.selectable_label(!self.candidates_active&&!self.mesh_active&&!self.editing&&!self.live_active,"Cameras").clicked(){self.candidates_active=false;self.mesh_active=false;self.editing=false;self.live_active=false;}
-                if ui.selectable_label(!self.candidates_active&&!self.mesh_active&&self.editing&&!self.live_active,"Point clouds").clicked(){self.candidates_active=false;self.mesh_active=false;self.editing=true;self.live_active=false;}
-                if ui.selectable_label(!self.candidates_active&&self.live_active,"Live scan").clicked(){self.candidates_active=false;self.mesh_active=false;self.editing=false;self.live_active=true;}
-                if ui.selectable_label(!self.candidates_active&&self.mesh_active,"Meshes").clicked(){self.candidates_active=false;self.mesh_active=true;self.live_active=false;}
-                if ui.selectable_label(self.candidates_active,"Laser candidates").clicked(){self.candidates_active=true;}
+                if ui.selectable_label(!self.board_active&&!self.candidates_active&&!self.mesh_active&&!self.editing&&!self.live_active,"Cameras").clicked(){self.board_active=false;self.candidates_active=false;self.mesh_active=false;self.editing=false;self.live_active=false;}
+                if ui.selectable_label(!self.board_active&&!self.candidates_active&&!self.mesh_active&&self.editing&&!self.live_active,"Point clouds").clicked(){self.board_active=false;self.candidates_active=false;self.mesh_active=false;self.editing=true;self.live_active=false;}
+                if ui.selectable_label(!self.board_active&&!self.candidates_active&&self.live_active,"Live scan").clicked(){self.board_active=false;self.candidates_active=false;self.mesh_active=false;self.editing=false;self.live_active=true;}
+                if ui.selectable_label(!self.board_active&&!self.candidates_active&&self.mesh_active,"Meshes").clicked(){self.board_active=false;self.candidates_active=false;self.mesh_active=true;self.live_active=false;}
+                if ui.selectable_label(!self.board_active&&self.candidates_active,"Laser candidates").clicked(){self.board_active=false;self.candidates_active=true;}
+                if ui.selectable_label(self.board_active,"Calibration").clicked(){self.board_active=true;}
             });
+            if self.board_active {self.board.ui(ui,!self.confirm_close&&!self.capture_close.is_waiting());return;}
             if self.candidates_active {let can=self.discovery.is_none()&&self.running.is_none()&&!self.live.is_busy()&&!self.capture_close.is_waiting()&&!self.closing_window&&!self.confirm_close;self.candidates.ui(ui,can);return;}
             if self.live_active {
                 let can_start=self.discovery.is_none()&&self.running.is_none()&&!self.candidates.capture_busy()&&!self.capture_close.is_waiting()&&!self.closing_window;
@@ -494,7 +508,7 @@ impl eframe::App for App {
             if self.mesh_active {self.mesh.ui(ui);return;}
             if self.editing {self.cloud.ui(ui,&mut self.folder);return;}
             ui.heading("ScanCraft");ui.label("ArtCraft Ecosystem Candidate · Experimental 0.1");
-            ui.label("Calibration deferred. Genuine Raptor reconstruction and accuracy qualification remain unvalidated.");ui.separator();
+            ui.label("Calibration candidates are experimental; genuine object reconstruction and dimensional accuracy remain unqualified.");ui.separator();
             let active=self.capture_active_or_closing();
             let previous_interface=self.interface;
             ui.horizontal(|ui|{
@@ -547,6 +561,10 @@ impl Drop for App {
 }
 #[derive(Debug, PartialEq)]
 enum Startup {
+    ObserveBoard {
+        request: PathBuf,
+        output: PathBuf,
+    },
     CaptureLaser {
         paths: Vec<PathBuf>,
         origin: laser_display::Origin,
@@ -653,6 +671,7 @@ enum Startup {
 fn startup_args(args: Vec<std::ffi::OsString>) -> Result<Startup, String> {
     match args.as_slice() {
         [] => Ok(Startup::Empty),
+        [flag,request,output] if flag=="--observe-calibration-pair" => Ok(Startup::ObserveBoard{request:request.into(),output:output.into()}),
         [flag] if flag == "--help" || flag == "-h" => Ok(Startup::Help),
         [flag] if flag == "--smoke-test" => Ok(Startup::Smoke),
         [flag] if flag == "--smoke-test-ir" => Ok(Startup::SmokeIr),
@@ -718,7 +737,7 @@ fn startup_args(args: Vec<std::ffi::OsString>) -> Result<Startup, String> {
         [path] if !path.to_string_lossy().starts_with('-') => {
             Ok(Startup::File(PathBuf::from(path)))
         }
-        _ => Err("Usage: scancraft [PROJECT_OR_PLY_FILE] | --synthetic-live-scan NEW_SYNTHETIC_OUTPUT | --reconstruct CALIBRATION LEFT.PNG RIGHT.PNG SETTINGS NEW_RESULT_FOLDER | --reconstruct-recorded-sequence CAL LEFT_RECORDING RIGHT_RECORDING RECON_SETTINGS SEQUENCE_SETTINGS NEW_FOLDER | --fuse-sequence SETTINGS NEW_RESULT_FOLDER | --mesh MESH_JSON | --mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM | --mesh-boundaries MESH_OR_PROJECT | --fit-cylinder PROJECT_OR_PLY_FILE MAX_RMS_MM | --frame-document FRAME_FILE | --coordinate-frame PROJECT_OR_PLY_FILE | --measurement-outlines PROJECT_OR_PLY_FILE | --cloud-normals PROJECT_OR_PLY_FILE | --mesh-normals MESH_OR_PROJECT | --reconstruct-recordings CALIBRATION LEFT_RECORDING LEFT_INDEX RIGHT_RECORDING RIGHT_INDEX SETTINGS NEW_FOLDER | --statistical-preview PROJECT_OR_PLY K SIGMA_MULTIPLIER | --export-scan-project PROJECT SOURCE_BUNDLE LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --archive-recordings LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --export-project-bundle PROJECT SOURCE_BUNDLE NEW_DIRECTORY | --verify-source-bundle PROJECT DIRECTORY | --capture-laser GEOMETRY_JSON STREAM_REQUEST_JSON NEW_DIRECTORY | --replay-laser GEOMETRY_JSON STREAM_REQUEST_JSON FIRST_RECORDING SECOND_RECORDING NEW_DIRECTORY | --laser-candidates BUNDLE_DIRECTORY [PAIR_INDEX] | --match-recorded-laser-traces GEOMETRY FIRST_RECORDING FIRST_INDEX SECOND_RECORDING SECOND_INDEX REQUEST NEW_FOLDER | --play-recording RECORDING | --recover-recording INPUT MAX_FRAMES NEW_FOLDER | --import-mesh FILE obj|stl mm|in|m separate|weld-exact NEW_FOLDER | --mesh-smooth-preview MESH_OR_PROJECT ITERATIONS RELAXATION MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG | --mesh-simplify-preview MESH_OR_PROJECT TARGET MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG MAX_COLLAPSES | --mesh-plane-preview MESH_JSON NX NY NZ OFFSET | --help | --smoke-test | --smoke-test-ir".into()),
+        _ => Err("Usage: scancraft [PROJECT_OR_PLY_FILE] | --synthetic-live-scan NEW_SYNTHETIC_OUTPUT | --reconstruct CALIBRATION LEFT.PNG RIGHT.PNG SETTINGS NEW_RESULT_FOLDER | --reconstruct-recorded-sequence CAL LEFT_RECORDING RIGHT_RECORDING RECON_SETTINGS SEQUENCE_SETTINGS NEW_FOLDER | --fuse-sequence SETTINGS NEW_RESULT_FOLDER | --mesh MESH_JSON | --mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM | --mesh-boundaries MESH_OR_PROJECT | --fit-cylinder PROJECT_OR_PLY_FILE MAX_RMS_MM | --frame-document FRAME_FILE | --coordinate-frame PROJECT_OR_PLY_FILE | --measurement-outlines PROJECT_OR_PLY_FILE | --cloud-normals PROJECT_OR_PLY_FILE | --mesh-normals MESH_OR_PROJECT | --reconstruct-recordings CALIBRATION LEFT_RECORDING LEFT_INDEX RIGHT_RECORDING RIGHT_INDEX SETTINGS NEW_FOLDER | --statistical-preview PROJECT_OR_PLY K SIGMA_MULTIPLIER | --export-scan-project PROJECT SOURCE_BUNDLE LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --archive-recordings LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --export-project-bundle PROJECT SOURCE_BUNDLE NEW_DIRECTORY | --verify-source-bundle PROJECT DIRECTORY | --capture-laser GEOMETRY_JSON STREAM_REQUEST_JSON NEW_DIRECTORY | --replay-laser GEOMETRY_JSON STREAM_REQUEST_JSON FIRST_RECORDING SECOND_RECORDING NEW_DIRECTORY | --laser-candidates BUNDLE_DIRECTORY [PAIR_INDEX] | --match-recorded-laser-traces GEOMETRY FIRST_RECORDING FIRST_INDEX SECOND_RECORDING SECOND_INDEX REQUEST NEW_FOLDER | --observe-calibration-pair REQUEST_JSON NEW_FOLDER | --play-recording RECORDING | --recover-recording INPUT MAX_FRAMES NEW_FOLDER | --import-mesh FILE obj|stl mm|in|m separate|weld-exact NEW_FOLDER | --mesh-smooth-preview MESH_OR_PROJECT ITERATIONS RELAXATION MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG | --mesh-simplify-preview MESH_OR_PROJECT TARGET MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG MAX_COLLAPSES | --mesh-plane-preview MESH_JSON NX NY NZ OFFSET | --help | --smoke-test | --smoke-test-ir".into()),
     }
 }
 fn main() -> eframe::Result {
@@ -738,7 +757,7 @@ fn main() -> eframe::Result {
     let startup = match startup_args(std::env::args_os().skip(1).collect()) {
         Ok(Startup::Help) => {
             println!(
-                "Usage: scancraft [PROJECT_OR_PLY_FILE]\n       scancraft --synthetic-live-scan NEW_SYNTHETIC_OUTPUT\n       scancraft --reconstruct CALIBRATION LEFT.PNG RIGHT.PNG SETTINGS NEW_RESULT_FOLDER\n       scancraft --reconstruct-recorded-sequence CAL LEFT_RECORDING RIGHT_RECORDING RECON_SETTINGS SEQUENCE_SETTINGS NEW_FOLDER\n       scancraft --fuse-sequence SETTINGS NEW_RESULT_FOLDER\n       scancraft --mesh MESH_JSON\n       scancraft --mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM | --mesh-boundaries MESH_OR_PROJECT\n       scancraft --fit-cylinder PROJECT_OR_PLY_FILE MAX_RMS_MM | --frame-document FRAME_FILE | --coordinate-frame PROJECT_OR_PLY_FILE | --measurement-outlines PROJECT_OR_PLY_FILE | --cloud-normals PROJECT_OR_PLY_FILE\n       scancraft --mesh-normals MESH_OR_PROJECT\n       scancraft --reconstruct-recordings CALIBRATION LEFT_RECORDING LEFT_INDEX RIGHT_RECORDING RIGHT_INDEX SETTINGS NEW_FOLDER | --statistical-preview PROJECT_OR_PLY K SIGMA_MULTIPLIER | --export-scan-project PROJECT SOURCE_BUNDLE LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --archive-recordings LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --export-project-bundle PROJECT SOURCE_BUNDLE NEW_DIRECTORY | --verify-source-bundle PROJECT DIRECTORY | --capture-laser GEOMETRY_JSON STREAM_REQUEST_JSON NEW_DIRECTORY | --replay-laser GEOMETRY_JSON STREAM_REQUEST_JSON FIRST_RECORDING SECOND_RECORDING NEW_DIRECTORY | --laser-candidates BUNDLE_DIRECTORY [PAIR_INDEX] | --match-recorded-laser-traces GEOMETRY FIRST_RECORDING FIRST_INDEX SECOND_RECORDING SECOND_INDEX REQUEST NEW_FOLDER | --play-recording RECORDING | --recover-recording INPUT MAX_FRAMES NEW_FOLDER | --import-mesh FILE obj|stl mm|in|m separate|weld-exact NEW_FOLDER | --mesh-smooth-preview MESH_OR_PROJECT ITERATIONS RELAXATION MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG | --mesh-simplify-preview MESH_OR_PROJECT TARGET MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG MAX_COLLAPSES | --mesh-plane-preview MESH_JSON NX NY NZ OFFSET\nOpening geometry never starts camera acquisition. The synthetic-live diagnostic opens no scanner. Files without units require an explicit choice in the import panel."
+                "Usage: scancraft [PROJECT_OR_PLY_FILE]\n       scancraft --synthetic-live-scan NEW_SYNTHETIC_OUTPUT\n       scancraft --reconstruct CALIBRATION LEFT.PNG RIGHT.PNG SETTINGS NEW_RESULT_FOLDER\n       scancraft --reconstruct-recorded-sequence CAL LEFT_RECORDING RIGHT_RECORDING RECON_SETTINGS SEQUENCE_SETTINGS NEW_FOLDER\n       scancraft --fuse-sequence SETTINGS NEW_RESULT_FOLDER\n       scancraft --mesh MESH_JSON\n       scancraft --mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM | --mesh-boundaries MESH_OR_PROJECT\n       scancraft --fit-cylinder PROJECT_OR_PLY_FILE MAX_RMS_MM | --frame-document FRAME_FILE | --coordinate-frame PROJECT_OR_PLY_FILE | --measurement-outlines PROJECT_OR_PLY_FILE | --cloud-normals PROJECT_OR_PLY_FILE\n       scancraft --mesh-normals MESH_OR_PROJECT\n       scancraft --reconstruct-recordings CALIBRATION LEFT_RECORDING LEFT_INDEX RIGHT_RECORDING RIGHT_INDEX SETTINGS NEW_FOLDER | --statistical-preview PROJECT_OR_PLY K SIGMA_MULTIPLIER | --export-scan-project PROJECT SOURCE_BUNDLE LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --archive-recordings LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --export-project-bundle PROJECT SOURCE_BUNDLE NEW_DIRECTORY | --verify-source-bundle PROJECT DIRECTORY | --capture-laser GEOMETRY_JSON STREAM_REQUEST_JSON NEW_DIRECTORY | --replay-laser GEOMETRY_JSON STREAM_REQUEST_JSON FIRST_RECORDING SECOND_RECORDING NEW_DIRECTORY | --laser-candidates BUNDLE_DIRECTORY [PAIR_INDEX] | --match-recorded-laser-traces GEOMETRY FIRST_RECORDING FIRST_INDEX SECOND_RECORDING SECOND_INDEX REQUEST NEW_FOLDER | --observe-calibration-pair REQUEST_JSON NEW_FOLDER | --play-recording RECORDING | --recover-recording INPUT MAX_FRAMES NEW_FOLDER | --import-mesh FILE obj|stl mm|in|m separate|weld-exact NEW_FOLDER | --mesh-smooth-preview MESH_OR_PROJECT ITERATIONS RELAXATION MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG | --mesh-simplify-preview MESH_OR_PROJECT TARGET MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG MAX_COLLAPSES | --mesh-plane-preview MESH_JSON NX NY NZ OFFSET\nOpening geometry never starts camera acquisition. The synthetic-live diagnostic opens no scanner. Files without units require an explicit choice in the import panel."
             );
             return Ok(());
         }
@@ -757,6 +776,10 @@ fn main() -> eframe::Result {
         Box::new(move |_| {
             let mut app = App::default();
             match startup {
+                Startup::ObserveBoard { request, output } => {
+                    app.board_active = true;
+                    app.board.start(request, output);
+                }
                 Startup::CaptureLaser { paths, origin } => {
                     app.candidates_active = true;
                     app.candidates.start_capture(paths, origin);
@@ -937,6 +960,22 @@ mod startup_tests {
     use super::*;
     fn args(values: &[&str]) -> Vec<std::ffi::OsString> {
         values.iter().map(std::ffi::OsString::from).collect()
+    }
+    #[test]
+    fn board_startup_preserves_paths_and_requires_both_arguments() {
+        let args = |items: &[&str]| items.iter().map(std::ffi::OsString::from).collect();
+        assert!(
+            matches!(startup_args(args(&["--observe-calibration-pair", "board request.json", "new result"])), Ok(Startup::ObserveBoard {request,output}) if request == std::path::Path::new("board request.json") && output == std::path::Path::new("new result"))
+        );
+        assert!(startup_args(args(&["--observe-calibration-pair", "request"])).is_err());
+    }
+    #[test]
+    fn board_job_participates_in_root_close_confirmation() {
+        let mut app = App::default();
+        app.board
+            .start("missing-request.json".into(), "unused-output".into());
+        assert!(app.needs_close_confirmation());
+        app.board.cancel();
     }
     #[test]
     fn recorded_sequence_startup_requires_all_explicit_files() {

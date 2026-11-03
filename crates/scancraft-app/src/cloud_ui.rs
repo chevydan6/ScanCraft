@@ -497,7 +497,7 @@ impl CloudUi {
             });
         });
         egui::CollapsingHeader::new("Reconstruct recorded stereo frames").default_open(self.recording_open).show(ui,|ui| {
-            ui.label("Explicit left/right frame selection with supplied calibration and settings. Exposure synchronization and physical calibration binding are not independently verified. Calibration remains deferred unless you supply a verified record.");
+            ui.label("Explicit left/right frame selection with supplied calibration and settings. Exposure synchronization and physical calibration binding are not independently verified. Supply an appropriate calibration record and verify its physical scale.");
             ui.add_enabled_ui(idle,|ui| {
                 for (label,value) in ["Calibration file","Left recording (interface 0)","Right recording (interface 2)","Reconstruction settings","New result folder"].into_iter().zip(self.recording_files.iter_mut()) {
                     ui.horizontal(|ui|{ui.label(label);ui.add(egui::TextEdit::singleline(value).desired_width(450.));});

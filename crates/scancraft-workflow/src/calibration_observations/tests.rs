@@ -117,10 +117,24 @@ fn read(path: PathBuf) -> Value {
 #[test]
 fn explicit_pair_retains_observations_raw_frames_and_unit_boundary() {
     let mut f = Fixture::new();
-    let manifest = f.run("unverified").unwrap();
+    let completed = run_with_frames(
+        &f.save(),
+        &f.root.join("unverified"),
+        &WorkControl::default(),
+        &|| false,
+    )
+    .unwrap();
+    assert_eq!(completed.frames[0].frame_index, 1);
+    assert_eq!(completed.frames[1].frame_index, 0);
+    let manifest = completed.manifest;
     assert_eq!(manifest["fit_views_exported"], false);
     assert!(!f.root.join("unverified/left-view.json").exists());
     let report = read(f.root.join("unverified/measurements.json"));
+    assert_eq!(
+        report,
+        serde_json::from_slice::<Value>(&serde_json::to_vec(&completed.measurements).unwrap())
+            .unwrap()
+    );
     assert_eq!(report["sensor_pts"], 123);
     assert_eq!(report["host_delta_us"], 2);
     assert_eq!(report["stereo_observations"].as_array().unwrap().len(), 6);
@@ -147,6 +161,10 @@ fn explicit_pair_retains_observations_raw_frames_and_unit_boundary() {
         .select_raw(0, &work)
         .unwrap();
         assert_eq!(original.frame, copy.frame);
+        assert_eq!(
+            original.frame,
+            completed.frames[usize::from(side == "right")].frame
+        );
         assert_eq!(original.profile, copy.profile);
         assert_eq!(
             serde_json::to_value(original.context).unwrap(),
