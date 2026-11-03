@@ -71,9 +71,12 @@ keep camera destruction ahead of recording-worker joining during unwinding.
 Successful captures still require normal recording completion, file sync, full
 CRC/footer replay, control restoration and no-overwrite publication.
 
-This integration applies to finite CLI recording, not every live runner or GUI
-capture path. The reusable recording worker is available for later integrations
-with their own capacity, cancellation, storage-budget and publication checks.
+The original integration above applies to finite CLI recording. The subsequent
+[live IR integration](LIVE_RECORDING_QUEUE.md) reuses this worker for the native
+live-stereo path. The laser runner and other paths require their own capacity,
+cancellation, storage-budget and publication checks; coverage is not universal.
+`push_copy` now offers the same validated admission for callers retaining a frame
+for processing, checking limits before making the owned copy.
 
 ## Controlled real-camera comparison
 

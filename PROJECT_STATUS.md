@@ -1,5 +1,13 @@
 # Project status
 
+Latest implementation: live IR recording now reuses the bounded eight-frame writer,
+with validation before pixel copies, explicit overflow, and source close before
+storage drain. Full869-test/fmt/Clippy/release gate passes. Real-worker200msstall
+allows6dequeues;600msstall explicitlyfails and preserves208/210-frame prefixes.
+All1,618savedframesreplay. Ordinary capture exposes the separate live peer-close
+defect (95leftrejects afterrightSTREAMOFF); lifecyclecoordination is next.
+See [live recording evidence and limitations](docs/LIVE_RECORDING_QUEUE.md).
+
 Latest vendor-stop investigation: SDK properties39/38 acknowledge all eight fixed
 requests, yet every stop arm in an eight-test ABBA BAAB comparison retains a
 startup burst. All1,440 accepted frames/32recordings replay,568,622USB monitor

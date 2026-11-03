@@ -64,15 +64,33 @@ not verify that optical assignment. No image reflection is selected implicitly.
 
 ## Concurrency and association
 
-Each camera opens, reads, writes its own recording and closes in its owning
-thread. Raw recording append precedes `try_send` into one four-event processing
-channel. Disk buffering is flushed and synced at normal recording completion,
-not after each frame; crash recovery is not a per-frame durability guarantee.
-A full processing queue drops only that processing delivery; the raw frame was
-already appended. `recorded_frames`, `queued_frames` and
-`processing_queue_drops` account separately for those outcomes. Driver rejection,
-missing metadata and sequence-gap counters remain separate buffer diagnostics;
-they are not counts of lost physical exposures.
+Each camera opens, reads and closes in its owning thread. Required raw recording
+uses `scancraft_recording::queued::QueuedWriter` with an eight-frame queue per
+camera and a separate storage worker. `push_copy` validates size and frame
+constraints before copying pixels/metadata, because processing also needs its
+own frame. Required recording admission precedes `try_send` into the unchanged
+four-event processing channel. Full or disconnected recording admission aborts
+capture; it never becomes an optional processing drop.
+
+A full processing channel drops only that processing delivery; raw bytes have
+already been admitted to recording. Live `recorded_frames` progress therefore
+counts admission, not durable disk writes. A successful source report requires
+recording drain, footer, flush and file sync, and publication additionally requires
+full replay. Raw recording layout, validation and checksums remain unchanged.
+`recorded_frames`, `queued_frames`, `processing_queue_drops` and device rejection
+statistics remain separate; none counts lost physical exposures exactly.
+
+Acquisition errors and panics cancel the peer before source cleanup. Source
+cleanup runs before recording drain/sync, with acquisition, cleanup and storage
+errors retained. A writer error or failed sync cannot publish success. The
+storage worker retains at most eight queued frames plus its current frame and
+serialization buffer, in addition to processing/association/preview ownership.
+The new copy adds allocation and bandwidth costs; no measured speedup follows.
+File opening/header creation, driver operations, storage joins and sync remain
+synchronous where invoked and have no hard deadline. The separate normal-peer
+completion coordination and 1,000-frame live capacity are still unresolved.
+
+See [live recording integration evidence](LIVE_RECORDING_QUEUE.md).
 
 Association retains at most two pending frames per side. Candidate pairs require
 identical raw sensor PTS and an absolute host-timestamp difference no greater

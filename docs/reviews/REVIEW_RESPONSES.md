@@ -4113,3 +4113,45 @@ and exclusively reviewer-controlled. A successful command reply does not prove
 internal sensor mapping, FIFO flushing or firmware cause. This sequence is not a
 reliable recovery; physical units, measured object and three complete native scan
 trials remain outstanding. No firmware write, persistent driver install or merge.
+
+
+## DEV-LIVE-RECORDING — integrate bounded storage into live IR — 2026-11-03
+
+Developer finding/implementation; no independent finding closure. The live runner
+still used synchronous recording on camera threads despite the finite CLI fix.
+Accept the need to propagate the validated recorder: runner/recording.rs now uses
+QueuedWriter8, source cleanup before storage join/fsync, early peer cancellation
+on acquisition/cleanup errors, and aggregation of acquisition/close/storage
+failures. QueuedWriter::push_copy validates before cloning, sharing owned-admission
+logic. Public Source/bundle API and recording formats remain unchanged. Successful
+reports add explicit recording queue/completion metadata.
+
+Changed source: scancraft-recording/src/queued.rs and queued/tests.rs; workflow
+live_stereo/runner.rs plus runner/recording.rs and recording/tests.rs. Six new
+regressions cover blocked storage, overflow prefix/cancellation, panic cleanup,
+combined errors, failed sync and borrowed/owned validation/equality. Full869tests
+plusoneexistingignored,fmt,strictClippy,releasePASS. Existing repeatedPTS test uses
+five quarter-cycle steps instead ofnine three-eighth-cycle steps; still rejects
+a full-wrap duplicate hidden by processing drops without relying on writer speed.
+
+Private live-queued-recording-s9me7fm3 binds finalgate/source/probe. Exact worker
+with nativeCapture and explicit fixed-no-command control shim:300/camera normal
+and200msstall bothcomplete;600msstall fails withqueuefull and208/210savedprefixes.
+All1,618savedframes/sixrecordingsreplay. Six/nineleftdequeues complete during the
+injected200/600mswrites respectively; allfourSTREAMOFFs precede600mswriteend.
+Seven snapshot groups/fiveformats/service/baselinemodule restore. Preflightbuild
+failures and firstroot-owned-directory/EACCES harnessfailure retained, corrected
+before finaltrial; application source unchanged during finalgate/hardware.
+
+Ordinaryrun stillhasongoing96/1rejects,95leftafterrightvideoSTREAMOFF; overflow
+has89rightrejects afterleftSTREAMOFF. These failures are explicitly retained and
+make live peer completion/cancellation the next task. Not a lossless scan, full
+GUI validation or physical reconstruction. Progress counters mean queueadmission,
+not durability; copying adds memory/bandwidth cost. File setup,drivercalls,joins
+and sync retain no hard deadline. SCAN-REV-005 and021 remain accepted/unresolved;
+006physicalqualification remains open, solely reviewer-controlled. CodeRabbit
+quota remainslookup_failed, no completed/paidreview. No firmware/driver/mergechange.
+See LIVE_RECORDING_QUEUE.md and updated LIVE_STEREO_SCAN.md/BOUNDED_RECORDING.md.
+
+Implementation commit for DEV-LIVE-RECORDING: `e3db8f9e16ac349e29560757d124a68a7b8182e7`.
+Independent verification/closure remains pending.
