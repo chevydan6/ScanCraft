@@ -1,5 +1,15 @@
 # Project status
 
+Latest controlled observation: [timed lid reads versus cached controls](docs/RAPTOR_LID_READ_CONTROL.md)
+associates all three ongoing rejected camera pairs with the three longest direct
+laptop lid-state reads; none with eight cached reads. IRQ placement stays CPU15.
+All 1,200 saved frames replay, but startup94/0 and ongoing3/3 still fail acquisition
+targets. One pair has early EOF plus a20,664-byte tail; strict admission correctly
+denies the next arm. Original observer and checked state restore; no permanent
+change or calibrated object scan. Fresh890 tests pass, one ignored; fmt/Clippy/
+release pass. Next: review the preserved framing failure and design a distinct
+mitigation test without diagnostic lid polling.
+
 Latest investigation: [host observer timing](docs/RAPTOR_OBSERVER_TIMING.md) gives
 ongoing rejects per camera **4 → 0 → 3** with a local logging observer running,
 briefly stopped and restored, using the unchanged installed driver. All 3,600

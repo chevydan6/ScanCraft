@@ -4704,3 +4704,29 @@ is separately identifiable in Git history. Validation: whitespace/diff inspectio
 both exact c907ae5 push41699629965 and PR41699643105 CI runs now pass. Existing
 890-test/fmt/Clippy/release evidence applies to unchanged code. This response
 accepts the finding; only the independent reviewer may verify or close it.
+
+
+## DEV-LID-READ-CONTROL — specific host-read lead, strict denial retained
+
+Developer investigation, not a new independent finding or closure. Capture at
+c907ae55e4f16f1074d813e43ea2e37a809c2a2b uses the unchanged installed baseline.
+All16 predeclared read windows are reported in docs/RAPTOR_LID_READ_CONTROL.md.
+Three longest lid reads coincide with all three ongoing rejected pairs; no cached
+control read is associated. Actual226,937 IRQ39 entries remain CPU15, readbacks15→15.
+This narrows the timing lead but does not prove firmware cause or general reliability.
+
+All1,200 saved frames replay; startup94/0, ongoing3/3 and total100/1300 rejection
+proxy FAIL. Left378/right286 retain strict early-EOF/length failures. Separate
+first-EOF accounting matches all1,206 native lengths and explains20,664-byte tails
+without accepting malformed frames. Admission exits1; no further hardware follows.
+All18 input hashes,16read records,14native state comparisons, fullUSB/ftrace counts,
+observer/module/trace restoration and unchanged kernel logs are checked. Seven
+probe-verifier cases pass. Complete freshRust gate:890passed0failed1ignored,fmt,
+strictClippy,releasePASS. Raw evidence and private helper code remain private.
+
+Public changes: new report, PROJECT_STATUS.md and this response; application and
+kernel code unchanged. Correction053527d separately accepts SCAN-REV-030, without
+claiming reviewer closure. c907ae5 bothCI pass; new publication hash is recorded in
+Git history/private publication metadata. New evidence awaits independent review;
+no completedCodeRabbit review is claimed. Physical calibration is authorized, but
+independent scale, measured object reconstruction and repeatability remain absent.
