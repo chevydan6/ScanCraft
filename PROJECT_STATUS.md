@@ -1,5 +1,14 @@
 # Project status
 
+Latest sustained result: [610-second combined capture](docs/RAPTOR_SUSTAINED_COMBINED.md)
+saves/replays18,300frames per camera with ZEROstartup/ongoing rejects and sequence
+gaps. All36,600accepted USB header associations pass; original module/services,
+fiveformats and21native-state comparisons restore. This USB/native trial meets
+its declared duration and rejection-proxy checks. No private host trace, isolated
+performance comparison, repeatability, physical accuracy or production fix is claimed.
+First measured object reconstruction and full native scanning qualification remain
+incomplete; candidate stays experimental/default-off pending broader validation.
+
 Latest hardware result: [combined temporary mitigations](docs/RAPTOR_COMBINED_ACQUISITION.md)
 save/replay1,800frames per camera with zero ongoing rejects/gaps and one startup
 rejection per camera. Complete USB/host traces and strict accepted-frame headers

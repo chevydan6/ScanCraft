@@ -4838,3 +4838,30 @@ PASS. Complete host analysis counts0copy-workers/350653timerpairs; recycling mod
 self-tests pass and actual338590cycles/side account. Initial missing-directory
 analyzer invocations retained and corrected, no raw-data change. CodeRabbit usage
 lookup_failed again; no upload or paid review. All report claims are finite.
+
+
+## DEV-SUSTAINED-COMBINED — developer hardware evidence, not finding closure
+
+Separate declared18300frame/camera capture using the reviewed temporary bounded-copy
+candidate and paused optional logger, acquisitionHEAD7947954e3ee81709a0b9ea03565a882207269c7b.
+No production implementation changed. All36600savedframes pass native internal and
+two external CRC/footer replays; spans610.042251/610.042255s, startup/ongoing rejects
+and gaps0/0. Complete13761774USB events and strict36600header associations pass;
+21nativefields/fiveformats/originalbaseline+params/logger/WirePlumber/globaltrace
+restore. New explicitUSB/native-duration/proxy assessment returns true. No private
+host trace or physical-exposure/accuracy claim. Candidate remains experimental.
+
+Private inputs15boundbeforeexecution;54offlineadmissioncases pass, genuine prior
+good and missingEOF parser outputs match exactly. Initialnoop fault-injection test
+failure retained/corrected without assessment-code change. New public sources:
+docs/RAPTOR_SUSTAINED_COMBINED.md,PROJECT_STATUS.md,this response only. No finding
+status/severity changed; independent verification of this evidence remains pending.
+Prior892-test/fmt/Clippy/release gate covers unchanged implementation; both7947954
+CI runs pass, independently confirmed495. CodeRabbit completion remains absent.
+Physicalscale/objectreconstruction/threeaccuracytrials/nativeGUI qualification remain
+unfinished. Exact evidence-publication commit is retained in Git history.
+
+Native final-frame extraction65910 passes for both full recordings; images viewed,
+right-board-edge clipping persists. Fresh CodeRabbit usage85256 exits1 with all
+lookup_failed; no review upload or paid usage. No new Rust gate repeated because
+application/source/manifests are unchanged from the verified892-test implementation.
