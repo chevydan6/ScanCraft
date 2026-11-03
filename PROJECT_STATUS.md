@@ -1,5 +1,14 @@
 # Project status
 
+Latest hardware investigation: complete IRQ/USB tracing correlates six paired
+short-frame incidents with1.423–4.452ms completion gaps; one overlaps a1.678ms
+interrupt-handler interval. This is a timing lead, not an established root cause
+or fix. One rejected frame has an unexplained20,664-byte discrepancy. A follow-up
+USB monitor lost packets and is explicitly incomplete. All3,600 saved frames
+across three trials replay, checked state restores, and acquisition still fails
+the rejection target. [Methods, failures and limits](docs/RAPTOR_IRQ_COMPLETION_TRACE.md).
+Source2ce5903 passes both push/PR CI runs41675798228/41675808266.
+
 Latest validation correction: `fb7214f` fixes an archive-test completion/deadline
 ordering defect and adds pending-worker timeout diagnostics without extending its
 ten-second limit. Production export is unchanged. Local formatting, strict Clippy,

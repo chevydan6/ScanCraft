@@ -4417,3 +4417,32 @@ was increased and no validation was removed. Private evidence archive-wait-20261
 retains failed-CI metadata/log, baseline, initial compile failure, focused/gate/
 constrained-run logs and exact public source/diff fingerprints. Original CI
 incident remains unproven as fixed; current-head CI and independent review follow.
+
+
+## DEV-IRQ-COMPLETION — genuine transport timing evidence
+
+Evidence-only work on2ce5903; no production changes or proposed independent finding
+closure. Both exact-head CI runs41675798228/41675808266 passed, corroborating
+assignment446 without resolving the original690643c timeout cause.
+
+Three600-frame/camera trials preserve all3600savedframes with complete native
+replay. Initial wrong USB event filter retains IRQ-only evidence; corrected trace
+balances228236enqueue/giveback pairs and227370IRQ pairs with no reported loss.
+Twelve rejected-frame group gaps span1423–4452us; one IRQ interval is1678us.
+Short-transfer grouping matches1200accepted and11/12rejected lengths under the
+explicit12-byte header inference. Rightseq451 has20664unexplainedbytes. No status
+or UVC payload exists in formatted trace, so no causal driver/device claim follows.
+
+Final header-monitor follow-up loses2497packets and fails the collector gate;
+nativecapture exits0 and recordings replay, cleanup restores checked state. Its
+ftrace buffer was removed before dumping because the monitor assertion fired;
+this limitation and the initial analyzers' failures are retained. All35checked
+state-group comparisons match;5formats/service/trace configuration restored per
+trial; baseline module unchanged. No hardware fix or physical accuracy claimed.
+
+Source files changed: documentation only, RAPTOR_IRQ_COMPLETION_TRACE.md,
+PROJECT_STATUS.md and this response. Existing890test/fmt/Clippy/release gate and
+current source CI remain applicable. Private three artifact sets bind actual
+commands, data, failed diagnostics and final analysis. CodeRabbit quota unavailable
+from last check; no new/paid review. Next: complete status/header evidence with
+failure-safe retention, then distinguish handler/controller/device causes.
