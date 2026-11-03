@@ -180,3 +180,14 @@ outputs/recordings/readbacks, full `restarts.pcap`, monitor counters,
 `analyze_restarts.py`, `analyze_queue_gaps.py`, their JSON results and SHA-256
 inventory. Exact source is `c3ba2fd7486a260658ad733f26a6e5660c4ce94b`; no application,
 module, kernel or firmware changes were made in these reproduction trials.
+
+
+## Idle connection reset follow-up
+
+A later [counterbalanced reset experiment](RAPTOR_USB_RESET_TRIAL.md) retains
+large startup bursts in two of four successful USB connection-reset trials.
+All captures/rejections are retained and checked state restores. This rules out
+assuming that a successful reset reliably fixes startup. The new native counters
+do not independently establish the shifted-header layout; a complete trace across
+reset/negotiation/startup is the next diagnostic. Source 907484e preserves strict
+validation and corrects metadata return order, a separate reproduced defect.

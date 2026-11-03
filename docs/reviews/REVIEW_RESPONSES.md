@@ -4025,3 +4025,30 @@ no paid/completed review. The independent reviewer retains exclusive authority;
 005/006/021 qualifications remain open. Physical units, a measured object and
 repeated native end-to-end scans remain unproven. Reviewer-owned findings and
 agent instructions were not modified or staged.
+
+
+## DEV-STARTUP-RESET — negative controlled recovery evidence — 2026-11-03
+
+Developer investigation, not a new independent finding or closure. No application
+source change. The installed baseline driver and corrected source 907484e are
+held fixed. Eight ABBA BAAB tests compare idle USBDEVFS_RESET with control; each
+has a retained 30-frame/camera seed followed by a 60-frame/camera test. Two of four
+successful reset trials still reject 96 and 190 startup buffers. All four controls
+also have bursts. A routine production reset is not justified by these results.
+
+All 1,440 accepted frames in 32 recordings replay CRC/order/footer; sequence gaps
+match ongoing rejects. Traces retain 20,252 rows with zero errors and 2,770 matching
+metadata returns before video reuse. Seven native snapshot groups match after
+each intervention and at final restoration; all five idle formats restore, service
+is active, module/parameters unchanged. No firmware write or permanent install.
+
+Private startup-reset-b7itq90j binds plan, helper, guard test, all seeds/tests,
+analysis and state snapshots. Public RAPTOR_USB_RESET_TRIAL.md, startup-framing
+crosslink, PROJECT_STATUS and ACCEPTANCE_RESULTS document failures and limitations.
+Source 863-test gate is unchanged; efabf9b CI41646883074 passed. No new independent
+approval, physical accuracy or sustained-live qualification is inferred. Next is
+complete USB tracing across reset/negotiation/startup; native counters alone do not
+prove the earlier shifted-header mechanism in these post-reset failures.
+
+The repository-scoped CodeRabbit quota retry again returns lookup_failed; no paid
+request or completed new review is claimed. Independent findings remain unchanged.

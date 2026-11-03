@@ -4,6 +4,7 @@ PASS means the stated narrow experiment passed, not the full release gate.
 
 | Experiment | Result | Evidence |
 | --- | --- | --- |
+| Idle USB reset as a startup remedy | FAIL reliability: two of four reset tests retain large startup bursts; four controls also fail. All 1,440 seed/test frames replay and checked state restores | [Counterbalanced method and retained failures](docs/RAPTOR_USB_RESET_TRIAL.md); no production reset or physical qualification |
 | Corrected metadata-order sustained acquisition | PASS duration/integrity scope: 18,000 accepted/camera over 600.275 s, all 36,000 replay; FAIL all-rejection proxy 110/36,110 = 0.304625%; ongoing 14/36,014 = 0.038874% | [Source-bound method, overhead and restoration](docs/RAPTOR_SUSTAINED_METADATA_ORDER.md); startup and seven paired truncations remain; no physical/live qualification |
 | Finite stereo peer completion | PASS narrow lifecycle evidence: 831-test gate; controlled new/old/old/new comparison and three fresh recorded line trials with complete replay/restoration | [Methods](docs/FINITE_STEREO_COMPLETION.md); continuing rejects still FAIL <0.1%; no calibrated object reconstruction |
 | Sequential completed-capture reader | PASS narrow integrity scope: 828-test gate; 222 saved pairs / 391,481 points and raw FrameViews exact; callback failure/cancellation/mutation and CLI partial-output checks | [Methods and limits](docs/LASER_CAPTURE_SEQUENCE.md); diagnostic tracking observations are not calibrated pose or fusion qualification |

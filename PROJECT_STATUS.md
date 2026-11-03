@@ -1,5 +1,13 @@
 # Project status
 
+[Idle USB reset comparison](docs/RAPTOR_USB_RESET_TRIAL.md) rules out treating a
+connection reset as a reliable startup fix: two of four reset trials still have
+large startup bursts. Four control tests also fail. All seed/test captures are
+retained: 1,440 accepted frames in 32 recordings replay, settings and all five idle
+formats restore, and the installed driver remains unchanged. No production reset
+path was added. Next: trace post-reset negotiation/payload framing while preserving
+error accounting; measured physical reconstruction remains the primary deliverable.
+
 [Corrected sustained capture](docs/RAPTOR_SUSTAINED_METADATA_ORDER.md) now records
 18,000 accepted frames per camera over 600.275 seconds using source 907484e and
 the temporary 32-URB candidate. All 36,000 frames replay, every traced matching
