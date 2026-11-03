@@ -3789,3 +3789,24 @@ The current board is clipped at the right edge; an owner reposition request is
 pending, not assumed fulfilled. Physical scale/object/trials remain missing.
 Existing850-test source gate retained; no redundant source gate for docs-only
 change. No new completed CodeRabbit review or reviewer-owned record change.
+
+## Consecutive restart and ongoing truncation evidence — 2026-11-03
+
+SCAN-REV-006 remains accepted and unqualified. Unchanged source
+c3ba2fd7486a260658ad733f26a6e5660c4ce94b captured three30-frame/camera trials,
+180acceptedframes/sixrecordings; replay and reported state restoration pass.
+ContinuousUSBmonitor72342packets,zero reported drops,balancedIDs,full successful
+bulkpayloads. StartupL/R0/1,0/106,0/98;ongoing0/0,1/1,0/0. Lasttrial followed an
+extra3second pause. Rightstartup prefix18432bytes in trials2/3 shifts headers6144
+mod12288. ItsPTS equals priorcapturelastLEFT headerPTS after successful endpoint
+clear-halt requests. Carry-over is supported; physical storage/rootcause and fix
+remain unproven. Waiting3seconds did not prevent the failure.
+
+The paired ongoing rejection has1997100bytes each,exactly matchingUSBpayload sums;
+25full payload blocks missing with4.539/4.656ms completiongaps. No zero-outstanding
+URB interval within these frames, so no simple queue-exhaustion proof. Separate
+queue-depth candidate remains unloaded; no speculative kernel/application fix.
+See updated docs/RAPTOR_USB_STARTUP_FRAMING.md and private restart-usb-qitbu8ek.
+No validators/counters weakened, no rejected data relabeled accepted. Existing
+850-test sourcegate retained; documentation-only publication. No new CodeRabbit
+review or independent finding closure. Reviewer-owned records remain untouched.

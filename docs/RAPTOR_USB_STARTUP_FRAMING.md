@@ -119,3 +119,64 @@ Continuing-frame rejection, reliable startup, physical units, calibration covera
 first measured object surface and end-to-end scanning remain unqualified. See
 [start-order experiments](RAPTOR_STARTUP_INVESTIGATION.md) for the preceding
 negative serialization result.
+
+## Consecutive restart reproduction
+
+A continuous second monitor covered three consecutive30-frame-per-camera captures
+with the same application and installed driver. The third started after an extra
+three-second pause. All180 accepted frames in six recordings passed native replay;
+all reported stream/illumination readbacks restored. The monitor retained72,342
+packets with zero reported kernel drops, balanced IDs and no truncated successful
+bulk payloads. These are short instrumented observations, not duration qualification.
+
+| Capture | Startup rejected buffers L/R | Ongoing rejected buffers L/R |
+| --- | ---: | ---: |
+|1 |0 /1 |0 /0 |
+|2 |0 /106 |1 /1 |
+|3, after extra3-second pause |0 /98 |0 /0 |
+
+Capture1's right startup has24,576 leading bytes before a full frame; this is an
+integer multiple of the maximum transfer size, and transfer/header alignment is
+retained. Captures2 and3 each have18,432 leading bytes before a full frame, again
+leaving headers displaced6,144bytes modulo12,288. All six first-prefix frame
+analyses identify188 consistent headers and2,304,000 image bytes, with EOF only on
+the final header. This does not convert the rejected native buffers into passes.
+
+For captures2 and3, the first right header's PTS exactly equals the preceding
+capture's **last observed left** header PTS, and is33,337 ticks after the preceding
+last observed right header. Successful stop-time CLEAR_FEATURE(HALT) requests for
+both video endpoints appear in the continuous trace between captures. The right
+completion-to-next-start intervals were about0.64 and3.89seconds. **Engineering
+inference:** the repeated timestamp relationship supports carry-over from the
+preceding stereo stream. The three-second wait does not prevent this incident.
+This still does not locate the retained bytes physically or demonstrate that an
+extra clear-halt, reset or firmware change would fix the problem.
+
+## Separate continuing-frame truncation
+
+Capture2 also retained one rejected ongoing frame per camera at the same sensor
+PTS. Each had1,997,100 pixel bytes instead of2,304,000. Summing its successful
+USB payloads, after their12-byte headers, equals the native rejected length
+exactly:163 payloads including one EOF, rather than188 for a complete frame.
+The missing306,900bytes equal25 full12,276-byte image-payload blocks.
+
+The longest within-frame completion gap was4,539microseconds left and
+4,656microseconds right. Complete frames in this capture had maximum gaps of305
+and284microseconds respectively. There were **no observed zero-outstanding-URB
+intervals within either truncated frame**. Thus a simple absence of submitted work
+is not established. Pending requests in a software trace do not prove the HCD had
+usable buffers throughout a delayed completion callback; larger queues, host
+scheduling, controller behavior and device production remain hypotheses.
+
+This correlation separates an ongoing short frame from the stale-prefix startup
+mechanism. Neither frame is repaired, accepted or excluded from error accounting.
+A deeper queue experiment must compare actual integrity and rejection evidence,
+not infer improvement from compilation or these timings. The existing separately
+licensed [queue candidate](../experiments/kernel-queue/README.md) remains unloaded
+and unqualified at this milestone.
+
+Private evidence `restart-usb-qitbu8ek` retains `capture.py`, `runs.json`, all native
+outputs/recordings/readbacks, full `restarts.pcap`, monitor counters,
+`analyze_restarts.py`, `analyze_queue_gaps.py`, their JSON results and SHA-256
+inventory. Exact source is `c3ba2fd7486a260658ad733f26a6e5660c4ce94b`; no application,
+module, kernel or firmware changes were made in these reproduction trials.

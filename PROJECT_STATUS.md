@@ -1,5 +1,13 @@
 # Project status
 
+[Consecutive USB restart traces](docs/RAPTOR_USB_STARTUP_FRAMING.md#consecutive-restart-reproduction)
+reproduce the shifted framing twice, including after a three-second pause and
+successful stop-time clear-halt requests. A separate ongoing truncated stereo
+frame loses25 payload blocks per camera across a roughly4.5ms completion gap;
+no zero-outstanding-URB interval was observed. All180acceptedframes replayed.
+These are diagnostic findings; production source and the installed driver remain
+unchanged, and no acquisition or geometry qualification target is newly passed.
+
 [USB startup trace](docs/RAPTOR_USB_STARTUP_FRAMING.md) now identifies a concrete
 6,144-byte header-boundary shift in one failed startup. Zero reported monitor
 drops, balanced transfers and full payloads support the analysis. A finite
