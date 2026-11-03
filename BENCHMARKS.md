@@ -1,5 +1,12 @@
 # Benchmarks
 
+[Concurrent camera detection](docs/PARALLEL_LASER_DETECTION.md): same-executable
+old/new numerical medians are 40.1–40.9 / 32.3–33.2 ms on five saved native pairs;
+130 complete executions match. Alternating short native trials process 41–42/64
+serial and 47–50/64 concurrent, still below 90%, with startup/ongoing rejects
+retained. Neither the component timings nor finite trials establish preview
+FPS/p95, sustained throughput, physical accuracy or whole-app memory qualification.
+
 [Segmented journal capacity](docs/SEGMENTED_LASER_JOURNAL.md): a direct release test
 writes/verifies 9000 synthetic records / 1,182,790,236 bytes / 71 segments in one
 3.62 s observation, with 5740 KiB maximum RSS for that test process. It includes

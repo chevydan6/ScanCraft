@@ -171,3 +171,12 @@ finalization at maximum supported segment counts, practical disk-budget UI,
 calibrated geometry/coverage, tracking/fusion and editable model retention. The old
 IR session-capacity issue SCAN-REV-021 is separate and unchanged. No new dependency,
 copied upstream algorithm, firmware update or physical calibration is introduced.
+
+Independent reviewer Assignment354 subsequently verifies implementation234c2b6
+and documentation fcd8be8, passes 370 focused frozen tests plus the explicit
+9000-record capacity test, compares controlled eight-pair legacy/segmented bundles
+and read-only crash recovery, and verifies a constructed 256-segment reader-boundary
+fixture. The reviewer marks SCAN-REV-024 Resolved for the unavoidable 1 GiB defect
+via schema 2. This is not maximum-count end-to-end capture or duration/accuracy
+qualification; the reviewer's debug test makes no release timing/RSS claim. The
+current developer response acknowledges this independently owned disposition.

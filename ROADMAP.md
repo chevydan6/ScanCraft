@@ -1,9 +1,20 @@
 # Roadmap
 
+Large-pair concurrent detection now reduces measured numerical work while preserving
+complete results. New finite GUI trials reach 47–50/64 processed pairs, still below
+90%; next profile remaining serial matching/dispatch, transport rejects and early
+helper-exit diagnostics. Preserve all failed attempts and raw observations. The
+private test display now verifies an X connection before launch; `/tmp` quota
+recovery is an environment measure, not a production reliability fix. See
+docs/PARALLEL_LASER_DETECTION.md. Storage finding024 is independently resolved in
+Assignment354 for opt-in schema2; sustained storage/resource qualification remains.
+
 Native laser Start/Stop and camera/candidate previews now use the supervised GUI
 helper. Next investigate renderer-load/startup transport failures and measure
 complete-pair dispatch/compute scheduling: the GUI finite trial processes only
-22 pairs from 32 raw frames per camera after buffering/preview handoff, below 90%. Saved-data profiling still measures 43–46 ms of engine work alone; profile/validate
+22 pairs from 32 raw frames per camera in the earlier buffering/preview-handoff
+trial, below 90%. Earlier saved-data profiling measured 43–46 ms of engine work
+alone; current concurrent-detection measurements are above. Profile/validate
 computational scheduling before increasing buffers. Preserve raw journals independently
 of optional previews and retain failed-run evidence. See docs/LIVE_LASER_GUI.md.
 

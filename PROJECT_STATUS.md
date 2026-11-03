@@ -1,5 +1,12 @@
 # Project status
 
+[Concurrent camera detection](docs/PARALLEL_LASER_DETECTION.md) reuses the existing
+Rust detectors with one bounded scoped worker for large pairs. The 794-test gate
+passes. Same-binary numerical processing is 32.3–33.2 ms versus 40.1–40.9 ms serial;
+short native concurrent trials process 47–50/64 versus 41–42/64 serial, still below
+90%. Transport rejects, an unresolved early helper exit, geometry and sustained
+qualification remain incomplete. Failed attempts and environment issues are retained.
+
 [Segmented laser journals](docs/SEGMENTED_LASER_JOURNAL.md) add opt-in schema 2
 storage admission, bounded segments, streaming verification and read-only recovery.
 The 791-test Rust gate and separate 1.18 GB synthetic capacity test pass. Native

@@ -14,6 +14,7 @@ use scancraft_image::{
     laser_continuity::{self, Traces},
 };
 use serde::{Deserialize, Serialize};
+mod detection;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -226,6 +227,7 @@ pub struct Processor<'a> {
     geometry: &'a StereoCalibration,
     settings: &'a Settings,
     matcher: PreparedMatcher<'a>,
+    parallel_detection: bool,
 }
 impl<'a> Processor<'a> {
     pub fn new(geometry: &'a StereoCalibration, settings: &'a Settings) -> Result<Self, String> {
@@ -234,6 +236,7 @@ impl<'a> Processor<'a> {
             geometry,
             settings,
             matcher: PreparedMatcher::new(geometry, settings.triangulation)?,
+            parallel_detection: std::thread::available_parallelism().is_ok_and(|n| n.get() > 1),
         })
     }
     /// Validate both raw GREY frames, PTS equality and host window; compute all
@@ -274,20 +277,7 @@ impl<'a> Processor<'a> {
         {
             return Err("selected frames fail raw-PTS/host-window pairing requirements".into());
         }
-        let sides = [
-            detect(
-                images[0],
-                &self.settings.detection,
-                &self.settings.continuity,
-                work,
-            )?,
-            detect(
-                images[1],
-                &self.settings.detection,
-                &self.settings.continuity,
-                work,
-            )?,
-        ];
+        let sides = detection::pair(images, self.settings, work, self.parallel_detection)?;
         let map_pixel = |side: usize, pixel: [f64; 2]| -> Result<[f64; 2], String> {
             if self.settings.reflect_x[side] {
                 reflect_pixel_x(

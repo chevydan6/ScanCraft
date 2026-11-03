@@ -2977,3 +2977,110 @@ CodeRabbit skill/workflow consulted. Official CLI0.9.2 fresh usage lookup exits1
 all included quota/billing fields lookup_failed. No review request/upload, paid
 usage, review-pass claim, push/PR, merge or protection change. Work remains local
 and independently reviewable; reviewer-owned findings/charter are untouched.
+
+SCAN-REV-024 — Acknowledgement of independently owned resolution, Assignment354.
+Read the current reviewer-owned finding while developing the next milestone. The
+reviewer verifies exact234c2b6af2309c0bce0bc6e87813276a509b1230 / fcd8be8ecf4bcd508ba75037fa79fcdf3375d035,
+370 focused frozen tests, the separately run 9000-record capacity test, controlled
+legacy/segmented bundle equivalence, crash-prefix inspection and a constructed
+256-segment reader-boundary fixture. The reviewer marks the specific unavoidable
+1 GiB defect Resolved for schema2. Development acknowledges that disposition;
+no reviewer file/status/severity/conclusion was changed by development. This does
+not qualify sustained hardware, maximum-count capture finalization, power-loss
+storage durability, physical accuracy or whole-app memory. Historical responses
+and the reviewer's original problem/evidence remain intact.
+
+DEV-PARALLEL-LASER-DETECTION — Developer-identified performance opportunity,
+implemented for independent review; not an invented independent finding.
+
+Source: `crates/scancraft-depth/src/laser_pair.rs`, new `laser_pair/detection.rs`,
+and `laser_pair/tests.rs`. Base `fcd8be8ecf4bcd508ba75037fa79fcdf3375d035`.
+The verified implementation commit will be bound after committing these changes.
+One scoped standard-library worker detects the first large image while the caller
+detects the second, then rejoins in first-camera order. CPU availability >1 is
+cached at Processor construction; unknown/single CPU, either image <256*1024 pixels,
+or spawn failure selects serial processing. Panic propagation and first-camera
+error precedence are retained; no detached borrowed work. Existing detector,
+continuity, matching, calibration, raw/pair formats, query limits and raw-before-
+preview policy remain unchanged. Progress may interleave approximately, and two
+detectors' scratch memory can overlap. No new dependency or upstream algorithm.
+Detailed method/tradeoffs: docs/PARALLEL_LASER_DETECTION.md.
+
+Tests and measurements:
+
+- Full frozen formatting/strict all-target Clippy/workspace tests/release gate
+  passes 794 tests, with the existing explicit storage-capacity test ignored in
+  this ordinary gate (its preceding separate evidence is unchanged). Nine focused
+  laser-pair tests pass. Three new regressions check full 480-candidate report
+  byte-equivalence/raw preservation, distinct first-camera error precedence in
+  both image orders, and pre-cancellation before starting borrowed work. Actual
+  thread-creation exhaustion is not forced; fallback is statically inspected.
+- Private same-executable detector comparison: five native pairs plus five
+  synthetic sizes, 15 alternating iterations each, first excluded from timing;
+  every observation, counter, trace and membership entry matches. Native serial
+  medians16.463–16.531ms versus concurrent8.598–8.783ms. Tiny64x48 is slower with
+  concurrency, supporting a small-image serial path; threshold remains heuristic.
+- Exact old depth source at the base is compiled beside new processing against
+  identical dependencies in one private release executable. Five actual saved
+  pairs x13 alternating iterations x2 implementations =130 complete numerical
+  executions equal the saved reports. First iterations excluded: serial medians
+  40.090–40.941ms, concurrent32.346–33.165ms; paired median ratios1.231–1.246.
+  Raw input loading/JSON output are outside timers; scoped startup/join are inside.
+  CPU availability observed16. This is component latency, not a live FPS claim.
+- Native finite A/B order serial/concurrent, concurrent/serial, serial/concurrent;
+  preserved old App executable and exact tested new App under the same private
+  LP_NUM_THREADS=2 software-renderer condition. All runs retain64raw/camera.
+  Serial41/41/42pairs(64.0625/64.0625/65.625%); concurrent50/47/49pairs
+  (78.125/73.4375/76.5625%). Processing drops serial23/23,23/22,22/22 versus
+  concurrent14/14,16/17,15/15; unmatched0/0,0/1,0/0 versus0/0,1/0,0/0.
+  Startup rejects serial1/1,1/0,103/92 versus concurrent1/1,1/87,1/0;
+  ongoing rejects serial1/1 each versus concurrent1/1,0/1,2/2. These V4L2 buffer
+  counts are not physical exposure counts. All six captures pass integrity,
+  publication/restoration and full before/after stream/illumination GET equality.
+  Helpers own camera descriptors; GUI owns none. Short trials still fail90% and
+  retain startup/ongoing rejection issues; do not infer a universal speedup.
+- Separate close attempt fails: helper IPC ends before final result, no staging,
+  advertised diagnostic log absent. Helper already absent at inspection; after
+  the failed harness ends, app/server also absent with exit cause unestablished.
+  Full before/after stream/illumination readbacks remain identical. Failure is
+  retained as DEV-LASER-HELPER-EARLYEXIT, cause unverified, not marked corrected.
+- Environment follow-up: Xvfb cannot write its /tmp PID lock; a direct private
+  small write verifies EDQUOT122 while home write/fsync passes. This mission's
+  cached Gitleaks executable moves to home cache, identical SHA/mode and original
+  path preserved by compatibility symlink; /tmp small write/fsync then passes.
+  No unrelated files deleted. A nonroot -nolock attempt is unsupported and is
+  retained as a failed private test, not used to weaken authentication. Subsequent
+  early XOpenDisplay failure is resolved in the private harness by waiting for
+  successful xdpyinfo, rather than only a socket pathname (19 retries observed).
+  No production renderer fix or original-helper-exit cause is established.
+- Final ordinary authenticated-display close test, with home temporary diagnostics:
+  10/9raw,8pairs/8segments,processingdrops1/1,unmatched1/0,startup1/96,ongoing0/0,
+  one stopped incomplete buffer/camera. Publication/raw integrity/restoration and
+  complete stream/illumination GET equality pass; original property151 restored.
+  Close-to-exit0.293s is one observation, not a bound. All observed successful
+  apps/helpers exit; accessible camera/USB FD inventory subsequently finds0holders.
+  Screenshots inspected: both raw views,1842diagnostic candidates in one finite
+  view, explicit unverified-unit warning. No firmware or physical calibration.
+- Seven new successful native bundles plus three preceding bundles:310 complete
+  records/580698candidate values match the original serializer, all numerical
+  results and every raw CRC/seq/flags/time/PTS reference. Additional actual unpaced
+  helper replay retains64raw/camera,processes4pairs/7707values,reports59processing
+  drops and1unmatched per camera,emits4previews+completion/zero helper omissions.
+  It also matches, giving314records/588405values total. All eight new successful
+  native/replay manifests pass length/CRC verification. These checks establish
+  saved-data integrity, not independent calibrated geometric truth.
+
+Private evidence: developer state artifacts/parallel-laser-detection-8bo89lpy,
+including raw profiles/binary/source hashes, initial/retry failures, readiness and
+cache migration evidence, actual native/compatibility/replay results. Failed
+attempts remain failures. Production Rust is unchanged since the passing gate.
+Full selected diff and complete tracked source context require secret checks before
+commit; raw/models/screenshots/probes and reviewer-owned files stay excluded.
+
+Official CodeRabbit0.9.2 usage6236 exits1 with every included-quota/billing field
+lookup_failed. A diagnostic recheck10446 using writable home TMPDIR still exits1
+with the same fields unavailable; fixing /tmp is not a billing-readiness fix.
+No review request/upload/paid usage/review-pass claim/push/PR/merge/protection change.
+Independent review of this performance change remains pending. Geometry/coverage,
+tracking/fusion, reliable helpers/rendering,90%yield/20FPS/p95,30minscan/60minmemory
+and full editable scan-to-mesh release remain incomplete;005/006/007/021 unchanged.

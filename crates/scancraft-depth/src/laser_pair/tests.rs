@@ -370,3 +370,93 @@ fn sink_failure_and_cancellation_return_no_complete_report_and_do_not_cancel_dev
     );
     assert!(!journal.began);
 }
+
+#[test]
+fn concurrent_large_pair_detection_preserves_complete_reports_and_raw_frames() {
+    let (mut geometry, mut settings, mut profiles, mut frames) = fixture();
+    for camera in [&mut geometry.left, &mut geometry.right] {
+        camera.width = 640;
+        camera.height = 480;
+        camera.fx = 640.;
+        camera.fy = 640.;
+        camera.cx = 320.;
+        camera.cy = 240.;
+    }
+    settings.detection.maximum_observations = 2000;
+    settings.maximum_queries = 1000;
+    settings.matching.maximum_work = 10000;
+    settings.maximum_total_work = 1_000_000;
+    for i in 0..2 {
+        profiles[i].width = 640;
+        profiles[i].height = 480;
+        frames[i].data = vec![0; 640 * 480];
+        for row in 0..480 {
+            frames[i].data[row * 640 + if i == 0 { 416 } else { 352 }] = 80;
+        }
+    }
+    let original = frames.clone();
+    let work = WorkControl::default();
+    let mut processor = Processor::new(&geometry, &settings).unwrap();
+    processor.parallel_detection = false;
+    let serial = processor
+        .process(inputs(&profiles, &frames), &work, &mut ())
+        .unwrap();
+    processor.parallel_detection = true;
+    let parallel = processor
+        .process(inputs(&profiles, &frames), &work, &mut ())
+        .unwrap();
+    assert_eq!(serial.candidates.len(), 480);
+    assert_eq!(
+        serde_json::to_vec(&serial).unwrap(),
+        serde_json::to_vec(&parallel).unwrap()
+    );
+    for i in 0..2 {
+        assert_eq!(frames[i].data, original[i].data);
+        assert_eq!(frames[i].metadata, original[i].metadata);
+    }
+}
+
+#[test]
+fn concurrent_detection_joins_and_retains_first_camera_error_precedence() {
+    let (_, mut settings, _, _) = fixture();
+    settings.detection.maximum_width = 600;
+    settings.continuity.minimum_span_rows = 500;
+    let narrow = vec![0; 512 * 512];
+    let short = vec![0; 640 * 480];
+    let images = [
+        GrayImage::new(512, 512, &narrow).unwrap(),
+        GrayImage::new(640, 480, &short).unwrap(),
+    ];
+    let work = WorkControl::default();
+    let first_error = detect(images[0], &settings.detection, &settings.continuity, &work)
+        .err()
+        .unwrap();
+    let second_error = detect(images[1], &settings.detection, &settings.continuity, &work)
+        .err()
+        .unwrap();
+    assert_ne!(first_error, second_error);
+    for images in [images, [images[1], images[0]]] {
+        let serial = detection::pair(images, &settings, &work, false)
+            .err()
+            .unwrap();
+        let parallel = detection::pair(images, &settings, &work, true)
+            .err()
+            .unwrap();
+        assert_eq!(serial, parallel);
+    }
+}
+
+#[test]
+fn concurrent_detection_observes_cancellation_before_starting_borrowed_work() {
+    let (_, settings, _, _) = fixture();
+    let data = vec![0; 640 * 480];
+    let images = [GrayImage::new(640, 480, &data).unwrap(); 2];
+    let work = WorkControl::default();
+    work.cancel();
+    assert!(
+        detection::pair(images, &settings, &work, true)
+            .err()
+            .unwrap()
+            .contains("cancelled")
+    );
+}

@@ -1,5 +1,11 @@
 # Architecture
 
+Large eligible camera pairs detect concurrently using one scoped worker and the
+caller. Thread creation failure/single CPU/small images retain serial execution;
+results rejoin before ordered matching, journaling or previews. Source frames remain
+borrowed, scratch buffers can overlap, and progress is approximate. No algorithm,
+format or queue-limit change. See [execution and evidence](docs/PARALLEL_LASER_DETECTION.md).
+
 Schema-2 laser capture uses explicit raw/pair/record/segment/bundle quotas and a
 pre-device available-space snapshot. Whole pair records roll into bounded segments
 with durable checkpoints, versioned index/footer, streaming readback and read-only
