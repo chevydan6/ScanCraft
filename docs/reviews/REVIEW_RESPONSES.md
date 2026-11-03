@@ -4446,3 +4446,39 @@ current source CI remain applicable. Private three artifact sets bind actual
 commands, data, failed diagnostics and final analysis. CodeRabbit quota unavailable
 from last check; no new/paid review. Next: complete status/header evidence with
 failure-safe retention, then distinguish handler/controller/device causes.
+
+
+## DEV-USBMON-RING — complete transfer-header observation
+
+Developer investigation, not independent finding closure. Runtime probe confirms
+8192byte tcpdump USB mapping with96bytesnap/-B16384; original private monitor
+sets/readbacks64MiB through documented usbmon ABI, drops privileges, retains only
+32payloadbytes and preserves complete status/length fields. StrictC11build, framing
+and no-overwrite checks pass. No application dependency or production change.
+
+First new600/camera run hascompleteUSB headers but603982ftrace drops because IRQ
+affinitywasCPU12 and oldbufferallocationassumed14/15. Collector failure now retains
+trace/native output beforecleanup. All-CPU64MiB bufferscorrectobservabilitywithout
+affinitywrites: secondrunzeroUSB/ftraceloss,226688bulk completionscorrelatebyidentity/
+length/order. ActualUVCheadersmatchall1206accepted/rejectedframes, including6short
+frameswith5–15missingimageblocks, status0 andnormalfinalEOF. Gaps2026–3011us;one
+IRQspan1915us. Missingbytesoccurbeforeapplicationrecording inthissample, butdevice
+versusHCDcauseandprevious20664byte discrepancyremainunresolved.
+
+2400newstoredframesreplay;28state-groupcomparisonsmatch;5formats/service/tracing
+restoredpertrial,baseline moduleunchanged. Firstcollector exits1 ontrace-lossgate;
+secondexits0. No weakenedvalidation or improvedperformanceclaim. Detailsin
+RAPTOR_IRQ_COMPLETION_TRACE.md follow-up;private usbmon-ring-20261104 and
+usbmon-ring-allcpu-20261104 bindsource,failures,completeobservations andanalysis.
+Unchangednativecode21e85d2passesbothCI41680530781/41680549123 andexisting890-test
+localgate. CodeRabbitquotaunavailable;no new/paidreview. Physicalboard-scale question
+pending; no inferredmeasurement or physicalqualification. Documentationonlychanges.
+
+Assignment447 recommendation accepted: retain diagnostics when collection fails.
+The first new failed-ftrace run preserves its data before cleanup, and both new
+paths save native output before monitor checks. The requested missing transfer
+status is now retained with UVC headers through the documented USB monitor ABI;
+raw ftrace is an alternative, not required to validate these paired observations.
+Independent closure remains the reviewer's responsibility. Assignment449's exact
+21e85d2 CI completion is acknowledged. A fresh CodeRabbit quota check exits1 with
+lookup_failed in every billing/quota field; no new review or paid request follows.

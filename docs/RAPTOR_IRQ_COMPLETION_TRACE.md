@@ -136,3 +136,97 @@ The unchanged source passes the890-test local gate and both exact-head CI runs
 test delay. No new CodeRabbit or paid review was run for this evidence-only change;
 the latest quota lookup remains unavailable. Independent reviewer records remain
 read-only and their existing qualification scopes are unchanged.
+
+## Follow-up: explicit monitor ring and complete header correlation
+
+The earlier96-byte tcpdump capture did not have the presumed16MiB effective USB
+ring. A read-only startup probe of installed tcpdump4.99.6/libpcap1.10.7 with
+`-s96 -B16384` observes an **8,192-byte `/dev/usbmon4` mapping**. The inspected
+[libpcap1.10.6 USB backend reference](https://github.com/the-tcpdump-group/libpcap/blob/libpcap-1.10.6/pcap-usb-linux.c)
+calculates its ring from snapshot length and clamps it to8KiB minimum; that
+reference is not asserted to be the installed package's exact source. Runtime
+mapping evidence confirms the small allocation on this machine. Increasing a
+command-line buffer value alone is therefore not evidence of a larger USB ring.
+
+An original private diagnostic reader now uses the documented
+[usbmon binary ABI](https://www.kernel.org/doc/html/latest/usb/usbmon.html): it opens
+only the selected bus monitor, sets a64MiB ring, requires an exact size readback,
+and drops privileges before collecting. It retrieves the64-byte event header and
+at most32 payload bytes with GETX, writes96-byte maximum pcap records while
+preserving original lengths, and drains on termination. Final queued/dropped
+counters and I/O errors remain mandatory checks. It sends no scanner commands.
+A strict C11 warnings-as-errors build, two-record framing check and existing-file
+refusal check pass. This is a private measurement utility, not a replacement
+scanner backend or new application dependency.
+
+The collector also retains native output and dumps tracing before evaluating
+monitor failures, with a finally-path dump before instance removal. Its first
+new trial demonstrates failure retention: USB monitoring loses zero events, but
+ftrace loses603,982 events on CPU12. The previous allocation incorrectly assumed
+that the controller would still use CPUs14/15; before/after affinity is12. That
+incomplete trace remains retained and the orchestrator exits1. No affinity is
+changed. The corrected trial allocates64MiB on each of16 CPUs (1GiB requested
+kernel ring capacity), and reports zero loss in **both** collectors.
+
+| New trial | Startup rejects L/R | Ongoing rejects L/R | Accepted frames L/R | Monitor result |
+| --- | ---: | ---: | ---: | --- |
+| Explicit USB ring, old ftrace allocation | 0 / 1 | 1 / 1 | 600 / 600 | USB complete; ftrace incomplete |
+| Explicit USB ring, all-CPU ftrace allocation | 0 / 1 | 3 / 3 | 600 / 600 | Both complete |
+
+All2,400 newly saved frames in four recordings replay. Neither trial passes the
+less-than0.1% rejection target. The different counts are not a controlled
+performance comparison or evidence that changing the observer improved capture.
+
+The first complete USB monitor retains452,120 selected-device events from452,127
+bus events, zero queued/dropped at completion, and balanced submission/completion
+identities. All1,202 accepted/ongoing-rejected frame associations match actual UVC
+PTS, one FID, a single final EOF, and native image lengths after12-byte header
+removal. Both rejected frames contain183 payloads instead of188: five missing
+12,276-byte image blocks, with successful bulk statuses and normal UVC flags.
+
+The final monitor retains453,530 selected-device events from453,537 bus events,
+again with zero queued/dropped and balanced identities. Ftrace retains226,765
+paired enqueue/giveback events and226,037 paired IRQ events, with zero reported
+loss. All226,688 bulk completions match by order, actual length and a stable
+bijection between ten request identities in the two traces. All1,206 accepted or
+ongoing-rejected frames match UVC PTS/FID/EOF and native image lengths. There is
+no extra unexplained native-byte discrepancy in this new sample.
+
+| Rejected sequence L/R | Native and USB image bytes L/R | Missing image blocks L/R | Maximum completion gap L/R, us |
+| --- | ---: | ---: | ---: |
+| 158 / 159 | 2,242,620 / 2,242,620 | 5 / 5 | 2,047 / 2,026 |
+| 219 / 220 | 2,181,240 / 2,181,240 | 10 / 10 | 2,895 / 2,872 |
+| 279 / 280 | 2,119,860 / 2,181,240 | 15 / 10 | 3,011 / 2,989 |
+
+All observed non-cancellation bulk completions have status0. Each short frame
+retains a consistent PTS/FID and normal final EOF. The first incident overlaps
+a1,915us IRQ entry/exit span; all six gaps end with five pending requests before
+the next completion. The maximum accepted-frame internal gap is1,436us in this
+sample. These facts place the observed missing image bytes **before application
+recording**, at the host-controller observation boundary; they do not distinguish
+what the device emitted from what the controller delivered. Software-pending
+requests are not proof of requests still available to hardware during a stall.
+The earlier20,664-byte discrepancy is not explained retrospectively by this run.
+
+Both trials retain14 matching state-group comparisons each, five restored idle
+formats, restored service/global tracing state and removed private instances.
+The installed module, firmware settings and frame validation remain unchanged.
+The final images were viewed: calibration board, right edge clipped, no measured
+printed object. Final accepted spans are20.069107/20.069096s; whole native CLI
+wall24.99s/user1.42s/system3.72s excludes monitor and kernel tracing costs.
+No memory, synchronization or accuracy qualification follows.
+
+Private `usbmon-ring-20261104` retains the original collector source, build and
+framing/no-overwrite checks, actual tcpdump mapping probe, failed ftrace data,
+complete USB data and header analysis. `usbmon-ring-allcpu-20261104` binds the
+same reader plus the corrected orchestrator, all-buffer readbacks, complete
+traces, `analyze_headers.py`, `correlate.py`, associations, raw recordings and
+state/resource evidence. Collection uses unchanged application source21e85d2;
+its push and PR workflows41680530781/41680549123 both pass. Raw evidence remains
+private, and no paid or new completed CodeRabbit review is claimed.
+
+**Next:** use this complete observation path to evaluate the known queue-depth
+mitigation and distinguish interrupt/controller/device causes. Keep the prior
+startup-framing and exceptional-byte cases separate. Physical reconstruction
+also needs measured board scale and object dimensions; a board-spacing request
+is pending, and no value is assumed from silence or nominal print dimensions.

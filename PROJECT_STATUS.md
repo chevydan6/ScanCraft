@@ -1,5 +1,14 @@
 # Project status
 
+Latest transport evidence: an explicit64MiB USB monitor ring fixes the diagnostic
+packet-loss problem; runtime tcpdump mapping had been only8KiB. A corrected
+all-CPU trace and USB monitor both report zero loss, matching226,688bulk completions
+and all1,206accepted/rejected frames. Short frames already contain5–15fewer image
+payload blocks at the host-controller observation boundary, with successful
+statuses and normal EOF. Device/controller cause remains unresolved; acquisition
+still fails its target. [Complete header correlation](docs/RAPTOR_IRQ_COMPLETION_TRACE.md#follow-up-explicit-monitor-ring-and-complete-header-correlation).
+No application/firmware/driver changes. Board-scale measurement is pending.
+
 Latest hardware investigation: complete IRQ/USB tracing correlates six paired
 short-frame incidents with1.423–4.452ms completion gaps; one overlaps a1.678ms
 interrupt-handler interval. This is a timing lead, not an established root cause
