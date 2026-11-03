@@ -57,8 +57,27 @@ struct Header {
     #[serde(default)]
     acquisition: Option<crate::laser_stream::ProgressSnapshot>,
 }
-#[derive(Default)]
+#[derive(Clone, Copy)]
+enum Kind {
+    Laser,
+    LiveStereo,
+}
+impl Kind {
+    fn roles(self) -> [&'static str; 2] {
+        match self {
+            Self::Laser => ["first.raptor", "second.raptor"],
+            Self::LiveStereo => ["left.raptor", "right.raptor"],
+        }
+    }
+    fn extra_files(self) -> usize {
+        match self {
+            Self::Laser => 8,
+            Self::LiveStereo => 12,
+        }
+    }
+}
 struct Order {
+    kind: Kind,
     last: Option<[(u64, u32, u64); 2]>,
 }
 impl Order {
@@ -68,14 +87,7 @@ impl Order {
             return Err(invalid("unknown pair-record version"));
         }
         for (i, f) in h.frames.iter().enumerate() {
-            if f.recording_role
-                != if i == 0 {
-                    "first.raptor"
-                } else {
-                    "second.raptor"
-                }
-                || f.flags & 0x40 != 0
-            {
+            if f.recording_role != self.kind.roles()[i] || f.flags & 0x40 != 0 {
                 return Err(invalid("invalid pair frame reference"));
             }
             if let Some(old) = self.last {
@@ -119,6 +131,7 @@ fn line(input: &mut impl BufRead, maximum: u64, bytes: &mut Vec<u8>) -> io::Resu
     Ok(n != 0)
 }
 fn manifest_digest(
+    kind: Kind,
     root: &Path,
     role: &str,
     guard: &mut Guard,
@@ -132,20 +145,36 @@ fn manifest_digest(
         .read(&path, INDEX_LIMIT, true, work)
         .map_err(|e| invalid(&e.to_string()))?;
     let value: serde_json::Value = serde_json::from_slice(&bytes)?;
-    if !matches!(value["schema_version"].as_u64(), Some(1 | 2))
-        || value["kind"] != "laser_candidate_capture_artifacts"
-    {
-        return Err(invalid("unknown laser artifact manifest"));
+    let (valid, field) = match kind {
+        Kind::Laser => (
+            matches!(value["schema_version"].as_u64(), Some(1 | 2))
+                && value["kind"] == "laser_candidate_capture_artifacts",
+            "role",
+        ),
+        Kind::LiveStereo
+            if value["schema_version"] == 1
+                && value["scope"]
+                    == "live-session project bundle with complete referenced raw recordings" =>
+        {
+            (true, "role")
+        }
+        Kind::LiveStereo => (
+            value["schema_version"] == 2 && value["kind"] == "live_stereo_artifacts",
+            "name",
+        ),
+    };
+    if !valid {
+        return Err(invalid("unknown pair artifact manifest"));
     }
     let artifacts = value["artifacts"]
         .as_array()
         .ok_or_else(|| invalid("missing artifact list"))?;
-    if artifacts.len() > MAX_SEGMENTS + 8 {
+    if artifacts.len() > MAX_SEGMENTS + kind.extra_files() {
         return Err(invalid("artifact list exceeds bound"));
     }
     let entries = artifacts
         .iter()
-        .filter(|a| a["role"] == role)
+        .filter(|a| a[field] == role)
         .collect::<Vec<_>>();
     if entries.len() != 1 {
         return Err(invalid("missing or duplicate journal artifact"));
@@ -241,9 +270,18 @@ pub fn visit(
     work: &WorkControl,
     mut visitor: impl FnMut(u64, &[u8], RecordOrigin) -> Result<(), String>,
 ) -> Result<ReadReport, String> {
-    inspect(root, mode, work, &mut visitor).map_err(|e| e.to_string())
+    inspect(Kind::Laser, root, mode, work, &mut visitor).map_err(|e| e.to_string())
+}
+pub(crate) fn visit_live(
+    root: &Path,
+    mode: Mode,
+    work: &WorkControl,
+    mut visitor: impl FnMut(u64, &[u8], RecordOrigin) -> Result<(), String>,
+) -> Result<ReadReport, String> {
+    inspect(Kind::LiveStereo, root, mode, work, &mut visitor).map_err(|e| e.to_string())
 }
 fn inspect(
+    kind: Kind,
     root: &Path,
     mode: Mode,
     work: &WorkControl,
@@ -256,7 +294,7 @@ fn inspect(
         .map_err(|e| invalid(&e.to_string()))?;
     let mut names = Vec::new();
     for entry in fs::read_dir(root)? {
-        if names.len() == MAX_SEGMENTS + 8 {
+        if names.len() == MAX_SEGMENTS + kind.extra_files() {
             return Err(invalid("journal folder entry limit exceeded"));
         }
         names.push(
@@ -268,7 +306,7 @@ fn inspect(
     }
     let segmented = names.iter().any(|n| n == INDEX_NAME);
     let legacy = names.iter().any(|n| n == "pairs.ndjson");
-    if segmented == legacy {
+    if segmented == legacy || (matches!(kind, Kind::LiveStereo) && legacy) {
         return Err(invalid("missing or ambiguous pair journal layout"));
     }
     let mut report = ReadReport {
@@ -289,10 +327,10 @@ fn inspect(
         physical_accuracy_qualified: false,
         source_restoration_verified: false,
     };
-    let mut order = Order::default();
+    let mut order = Order { kind, last: None };
     if legacy {
         let expected = if mode == Mode::Complete {
-            manifest_digest(root, "pairs.ndjson", &mut guard, work)?
+            manifest_digest(kind, root, "pairs.ndjson", &mut guard, work)?
         } else {
             None
         };
@@ -338,7 +376,7 @@ fn inspect(
             .read(&root.join(INDEX_NAME), INDEX_LIMIT, true, work)
             .map_err(|e| invalid(&e.to_string()))?;
         if mode == Mode::Complete
-            && let Some(expected) = manifest_digest(root, INDEX_NAME, &mut guard, work)?
+            && let Some(expected) = manifest_digest(kind, root, INDEX_NAME, &mut guard, work)?
             && expected != (index.len() as u64, crc32fast::hash(&index))
         {
             return Err(invalid("journal index digest differs"));
@@ -406,7 +444,8 @@ fn inspect(
                         return Err(invalid("segment record count/bytes/CRC differ"));
                     }
                     if mode == Mode::Complete
-                        && let Some(expected) = manifest_digest(root, &name, &mut guard, work)?
+                        && let Some(expected) =
+                            manifest_digest(kind, root, &name, &mut guard, work)?
                         && expected != (bytes, crc32)
                     {
                         return Err(invalid("segment artifact digest differs"));

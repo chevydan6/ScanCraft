@@ -1,6 +1,7 @@
 //! Versioned bounded pair segments. CRC is integrity, not authenticity or geometry proof.
 mod read;
 mod write;
+pub(crate) use read::visit_live;
 pub use read::{Mode, ReadReport, RecordOrigin, visit};
 use serde::{Deserialize, Serialize};
 use std::io;

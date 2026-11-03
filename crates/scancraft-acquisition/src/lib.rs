@@ -70,6 +70,7 @@ pub fn scan(
         work,
     )
     .map_err(|e| e.to_string())?;
+    processor.admit_storage(target)?;
     work.check()?;
     let _lock = SessionLock::acquire().map_err(|e| e.to_string())?;
     let mut lease = SettingsLease::capture(&[0, 2]).map_err(|e| e.to_string())?;

@@ -1,9 +1,11 @@
 //! Bounded candidate association and incremental reconstruction, independent of USB/UI.
 //! Equal raw PTS plus a host-window policy never attests simultaneous exposures.
 pub mod control;
+pub mod pair_journal;
 pub mod runner;
+pub mod storage;
 use crate::{Error, Request, bounded};
-use scancraft_calibration::storage;
+use scancraft_calibration::storage as calibration_storage;
 use scancraft_core::{Frame, StreamProfile, uvc_pts, validate_frame};
 use scancraft_depth::{
     MatchSource,
@@ -23,6 +25,8 @@ use std::{
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Config {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub storage: Option<storage::Storage>,
     pub schema_version: u32,
     pub session_id: String,
     pub fps: u32,
@@ -74,8 +78,20 @@ pub struct Association {
     pub counts: AssociationCounts,
 }
 impl Association {
+    /// Legacy admission remains capped at 1000 frames.
     pub fn new(profiles: [StreamProfile; 2], maximum: usize, limit: u64) -> Result<Self, String> {
-        if !(1..=1000).contains(&maximum)
+        if maximum > 1000 {
+            return Err("legacy association exceeds 1000 frames".into());
+        }
+        Self::with_extended_capacity(profiles, maximum, limit)
+    }
+    /// Explicit extended admission; the complete runner also requires schema2 storage budgets.
+    pub fn with_extended_capacity(
+        profiles: [StreamProfile; 2],
+        maximum: usize,
+        limit: u64,
+    ) -> Result<Self, String> {
+        if !(1..=storage::MAXIMUM_FRAMES).contains(&maximum)
             || limit > 1_000_000
             || profiles[0].interface != 0
             || profiles[1].interface != 2
@@ -87,7 +103,7 @@ impl Association {
             })
         {
             return Err(
-                "association requires GREY, 1..1000 frames and host limit <=1000000us".into(),
+                "association requires GREY, 1..100000 frames and host limit <=1000000us".into(),
             );
         }
         Ok(Self {
@@ -196,25 +212,24 @@ impl Processor {
         work: &WorkControl,
     ) -> Result<Self, Error> {
         let calibration_bytes = bounded(calibration, 1024 * 1024 + 16, work)?;
-        let calibration = storage::read(calibration_bytes.as_slice())?;
+        let calibration = calibration_storage::read(calibration_bytes.as_slice())?;
         let request_bytes = bounded(request, 1024 * 1024, work)?;
         let request: Request = serde_json::from_slice(&request_bytes)?;
         let config_bytes = bounded(config, 1024 * 1024, work)?;
         let config: Config = serde_json::from_slice(&config_bytes)?;
+        config.validate_capacity()?;
         if request.schema_version != 1
-            || config.schema_version != 1
             || request.meshing.is_some()
             || request.surface_normals.is_some()
-            || !(1..=1000).contains(&config.maximum_frames_per_camera)
             || config.maximum_host_delta_us > 1_000_000
             || !(3..=512).contains(&config.tracking_samples)
             || ![5, 10, 15, 20, 25, 30, 40, 50].contains(&config.fps)
         {
-            return Err("live request requires schema1, bounded GREY frame policy, 3..512 tracking samples, enumerated IR FPS and no meshing".into());
+            return Err("live reconstruction requires schema1 settings, bounded GREY frame policy, 3..512 tracking samples, enumerated IR FPS and no meshing".into());
         }
         match (&request.source, mode) {
             (MatchSource::Observations(binding), InputMode::PhysicalCapture) => calibration.validate_for_capture(binding)?,
-            (MatchSource::SyntheticFixture, InputMode::SyntheticFixture) if calibration.provenance == storage::Provenance::SyntheticFixture => {},
+            (MatchSource::SyntheticFixture, InputMode::SyntheticFixture) if calibration.provenance == calibration_storage::Provenance::SyntheticFixture => {},
             _ => return Err("physical capture requires declared observations and a nonsynthetic matching calibration; fixtures require explicit synthetic mode".into()),
         }
         let profiles = [
@@ -228,6 +243,7 @@ impl Processor {
             fourcc: *b"GREY",
             fps: config.fps,
         });
+        config.validate_raw_budget(&profiles)?;
         let mut session = ScanSession::new(
             config.session_id.clone(),
             config.tracking,
@@ -254,6 +270,10 @@ impl Processor {
             attempts: 0,
             last_pair: None,
         })
+    }
+    /// Call before acquiring native locks/settings or starting any source.
+    pub fn admit_storage(&self, target: &Path) -> Result<(), String> {
+        storage::admit(self.config.storage.as_ref(), target)
     }
     pub fn source(&self) -> &MatchSource {
         &self.request.source

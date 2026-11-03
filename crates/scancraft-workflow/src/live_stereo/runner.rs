@@ -26,6 +26,7 @@ use std::{
     time::Duration,
 };
 mod completion;
+mod pair_log;
 mod recording;
 use recording::record_controlled;
 type Result<T> = std::result::Result<T, String>;
@@ -138,7 +139,7 @@ fn verify_recording(path: &Path, expected: usize, work: &WorkControl) -> Result<
             );
         }
         count += 1;
-        if count > 1000 {
+        if count > super::storage::MAXIMUM_FRAMES {
             return Err("raw recording exceeds live frame cap".into());
         }
     }
@@ -190,19 +191,26 @@ fn process_pair(
     sync_requested_pause(processor, control)?;
     processor.process(pair, work).map_err(|e| e.to_string())
 }
+struct Execution {
+    report: Value,
+    editor: Option<Editor>,
+    pairs: Vec<scancraft_geometry::sequence_references::Frame>,
+    pair_artifacts: Vec<String>,
+}
 fn execute<S: Source + 'static>(
     processor: &mut Processor,
     partial: &Path,
     work: &WorkControl,
     open: impl Fn(Side, StreamProfile) -> Result<S> + Send + Sync + 'static,
     control: &Arc<Control>,
-) -> Result<(Value, Option<Editor>)> {
+) -> Result<Execution> {
     work.check()?;
-    let mut association = Association::new(
+    let mut association = Association::with_extended_capacity(
         processor.profiles().clone(),
         processor.config().maximum_frames_per_camera,
         processor.config().maximum_host_delta_us,
     )?;
+    let mut pair_log = pair_log::PairLog::new(processor, partial)?;
     let stop = Arc::new(AtomicBool::new(false));
     let (sender, receiver) = mpsc::sync_channel(4);
     let open = Arc::new(open);
@@ -223,7 +231,14 @@ fn execute<S: Source + 'static>(
         } else {
             "right.raptor"
         });
-        let maximum = processor.config().maximum_frames_per_camera;
+        let maximum = (
+            processor.config().maximum_frames_per_camera,
+            processor
+                .config()
+                .storage
+                .as_ref()
+                .map(|s| s.maximum_recording_bytes_per_camera),
+        );
         match thread::Builder::new()
             .name(format!("scancraft-live-{}", side.index()))
             .spawn(move || {
@@ -259,7 +274,6 @@ fn execute<S: Source + 'static>(
         if let Some(error) = spawn_error {
             return Err(error);
         }
-        let mut reports = Vec::new();
         loop {
             work.check()?;
             sync_requested_pause(processor, control)?;
@@ -276,22 +290,19 @@ fn execute<S: Source + 'static>(
                             control.offer(control::snapshot(
                                 &pair,
                                 processor.profiles(),
-                                reports.len(),
+                                pair_log.len(),
                                 cloud,
                                 total,
                                 result["tracking"].clone(),
                             ));
                         }
-                        let name = format!("pair-{:04}.json", reports.len());
-                        json_file(&partial.join(&name), &result)?;
-                        reports.push(json!({"pair_id":result["pair_id"],"left_index":result["left_index"],"right_index":result["right_index"],
-                        "raw_pts":result["raw_pts"],"tracking":result["tracking"],"report":name}));
+                        pair_log.push(partial, &pair, &result, work)?;
                         if control.preview_enabled() {
                             latest_pair = Some(pair);
                         }
                         scancraft_core::diagnostics::note(format_args!(
                             "{}",
-                            json!({"event":"live_stereo_pair","pairs":reports.len(),"tracking":result["tracking"]})
+                            json!({"event":"live_stereo_pair","pairs":pair_log.len(),"tracking":result["tracking"]})
                         ));
                     }
                 }
@@ -299,7 +310,7 @@ fn execute<S: Source + 'static>(
                 Err(mpsc::RecvTimeoutError::Disconnected) => break,
             }
         }
-        Ok(reports)
+        Ok(())
     })();
     stop.store(true, Ordering::Relaxed);
     drop(receiver);
@@ -314,7 +325,7 @@ fn execute<S: Source + 'static>(
             Err(_) => errors.push("capture thread join failed".into()),
         }
     }
-    let reports = combine(
+    combine(
         processing,
         if errors.is_empty() {
             Ok(())
@@ -323,6 +334,7 @@ fn execute<S: Source + 'static>(
         },
     )?;
     control.set_phase(Phase::Finishing);
+    let log = pair_log.finish(partial, work)?;
     for source in &sources {
         verify_recording(
             &partial.join(if source.interface == 0 {
@@ -336,14 +348,11 @@ fn execute<S: Source + 'static>(
     }
     if let Some(pair) = latest_pair {
         let (total, cloud) = processor.preview_cloud(work).map_err(|e| e.to_string())?;
-        let tracking = reports
-            .last()
-            .map(|r| r["tracking"].clone())
-            .unwrap_or(Value::Null);
+        let tracking = log.last_tracking.clone();
         control.offer(control::snapshot(
             &pair,
             processor.profiles(),
-            reports.len() - 1,
+            log.frames.len() - 1,
             cloud,
             total,
             tracking,
@@ -351,9 +360,20 @@ fn execute<S: Source + 'static>(
     }
     let cloud = processor.finish(work).map_err(|e| e.to_string())?;
     if !cloud.points.is_empty() {
-        file(&partial.join("points.ply"), |out| {
-            write_ply(&cloud, out).map_err(|e| e.to_string())
-        })?;
+        if processor.config().storage.is_some() {
+            let mut out = crate::laser_stream::bundle::io::CappedFile::new(
+                partial,
+                "points.ply",
+                128 * 1024 * 1024,
+            )
+            .map_err(|e| e.to_string())?;
+            write_ply(&cloud, &mut out).map_err(|e| e.to_string())?;
+            out.finish().map_err(|e| e.to_string())?;
+        } else {
+            file(&partial.join("points.ply"), |out| {
+                write_ply(&cloud, out).map_err(|e| e.to_string())
+            })?;
+        }
     }
     let count = cloud.points.len();
     let editor = if count > 0 {
@@ -361,15 +381,24 @@ fn execute<S: Source + 'static>(
     } else {
         None
     };
-    Ok((
-        json!({"schema_version":1,"kind":if matches!(processor.source(),scancraft_depth::MatchSource::SyntheticFixture){"synthetic_live_stereo_pipeline"}else{"native_live_stereo_candidate_scan"},"declared_source":processor.source(),"session_id":processor.config().session_id,
+    let mut report = json!({"schema_version":1,"kind":if matches!(processor.source(),scancraft_depth::MatchSource::SyntheticFixture){"synthetic_live_stereo_pipeline"}else{"native_live_stereo_candidate_scan"},"declared_source":processor.source(),"session_id":processor.config().session_id,
         "source_binding_verified":false,"synchronization_verified":false,"physical_accuracy_qualified":false,
         "pair_policy":"unique equal raw PTS and explicit host window; not verified exposures",
         "graceful_stop_requested":control.stop_requested(),"pause_requested_at_end":control.pause_requested(),"skipped_display_previews":control.skipped_previews(),"pending_capacity_per_side":2,"processing_channel_capacity":4,"recording_queue_capacity_per_camera":recording::QUEUE_CAPACITY,"recording_completion_verified":true,"association":association.counts,"unmatched_pending":association.remaining(),
-        "sources":sources,"pairs":reports,"fused_points":count,"geometry_exported":count>0,
-        "project_scope":"derived editable cloud with initial live-session references; external raw recordings and reports required for verification; not resumable fusion"}),
+        "sources":sources,"pairs":log.summaries,"fused_points":count,"geometry_exported":count>0,
+        "project_scope":"derived editable cloud with initial live-session references; external raw recordings and reports required for verification; not resumable fusion"});
+    if let Some(details) = log.details {
+        report["schema_version"] = json!(2);
+        report.as_object_mut().unwrap().remove("pairs");
+        report["pair_count"] = json!(log.frames.len());
+        report["pair_journal"] = details;
+    }
+    Ok(Execution {
+        report,
         editor,
-    ))
+        pairs: log.frames,
+        pair_artifacts: log.names,
+    })
 }
 
 /// Admit raw frames before bounded processing delivery; finish recordings and restore all sources
@@ -443,6 +472,7 @@ fn bundle_inner<S: Source + 'static>(
     control: &Arc<Control>,
 ) -> Result<Value> {
     require_new_target(target)?;
+    processor.admit_storage(target)?;
     let partial = staging(target).map_err(|e| e.to_string())?;
     let mut published = false;
     let result = (|| {
@@ -457,9 +487,25 @@ fn bundle_inner<S: Source + 'static>(
         .unwrap_or_else(|_| Err("live reconstruction coordinator panicked".into()));
         // Restore and verify group settings before publishing a successful scan.
         let result = combine(outcome, restore());
-        let (mut report, editor) = result?;
+        let Execution {
+            mut report,
+            editor,
+            pairs,
+            pair_artifacts,
+        } = result?;
         report["reported_stream_settings_restoration"] = json!("PASS");
-        json_file(&partial.join("report.json"), &report)?;
+        if processor.config().storage.is_some() {
+            let mut out = crate::laser_stream::bundle::io::CappedFile::new(
+                &partial,
+                "report.json",
+                4 * 1024 * 1024,
+            )
+            .map_err(|e| e.to_string())?;
+            serde_json::to_writer_pretty(&mut out, &report).map_err(|e| e.to_string())?;
+            out.finish().map_err(|e| e.to_string())?;
+        } else {
+            json_file(&partial.join("report.json"), &report)?;
+        }
         let mut artifacts = Vec::new();
         let mut names: Vec<String> = [
             "calibration.rapcal",
@@ -471,13 +517,7 @@ fn bundle_inner<S: Source + 'static>(
         ]
         .map(String::from)
         .to_vec();
-        for index in 0..report["pairs"]
-            .as_array()
-            .ok_or("missing pair reports")?
-            .len()
-        {
-            names.push(format!("pair-{index:04}.json"));
-        }
+        names.extend(pair_artifacts);
         if report["geometry_exported"] == true {
             names.push("points.ply".into());
         }
@@ -502,31 +542,7 @@ fn bundle_inner<S: Source + 'static>(
             artifacts.push(fingerprint(&partial.join(name), work)?);
         }
         if let Some(mut editor) = editor {
-            use scancraft_geometry::{
-                live_references::LiveSession,
-                sequence_references::{Artifact, Frame},
-            };
-            let pairs = report["pairs"]
-                .as_array()
-                .ok_or("missing live pairs")?
-                .iter()
-                .map(|pair| -> Result<Frame> {
-                    Ok(Frame {
-                        id: pair["pair_id"].as_u64().ok_or("invalid pair id")?,
-                        left_index: usize::try_from(
-                            pair["left_index"].as_u64().ok_or("invalid left index")?,
-                        )
-                        .map_err(|e| e.to_string())?,
-                        right_index: usize::try_from(
-                            pair["right_index"].as_u64().ok_or("invalid right index")?,
-                        )
-                        .map_err(|e| e.to_string())?,
-                        integrated: pair["tracking"]["integrated"]
-                            .as_bool()
-                            .ok_or("missing pair integration decision")?,
-                    })
-                })
-                .collect::<Result<Vec<_>>>()?;
+            use scancraft_geometry::{live_references::LiveSession, sequence_references::Artifact};
             let mut recorded_frames = [0; 2];
             for source in report["sources"].as_array().ok_or("missing live sources")? {
                 let index = match source["interface"].as_u64() {
@@ -547,7 +563,7 @@ fn bundle_inner<S: Source + 'static>(
                 .map(|v| serde_json::from_value(v).map_err(|e| e.to_string()))
                 .collect::<Result<_>>()?;
             editor.attach_live_session(LiveSession {
-                schema_version: 1,
+                schema_version: processor.config().schema_version,
                 directory_display: std::path::absolute(target)
                     .map_err(|e| e.to_string())?
                     .display()
@@ -572,7 +588,11 @@ fn bundle_inner<S: Source + 'static>(
         artifacts.sort_by(|a, b| a["name"].as_str().cmp(&b["name"].as_str()));
         json_file(
             &partial.join("manifest.json"),
-            &json!({"schema_version":1,"artifacts":artifacts}),
+            &if processor.config().schema_version == 1 {
+                json!({"schema_version":1,"artifacts":artifacts})
+            } else {
+                json!({"schema_version":2,"kind":"live_stereo_artifacts","artifacts":artifacts})
+            },
         )?;
         File::open(&partial)
             .and_then(|f| f.sync_all())

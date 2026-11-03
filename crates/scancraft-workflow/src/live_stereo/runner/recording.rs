@@ -1,6 +1,7 @@
 //! Camera ownership is independent of bounded recording writes. Close the source
 //! before draining storage, including acquisition failure and unwinding paths.
 use super::{Control, Event, Result, Sample, Side, Source, SourceReport, completion::Participant};
+use crate::laser_stream::bundle::io::CappedFile;
 use scancraft_core::StreamProfile;
 use scancraft_recording::{Writer, queued::QueuedWriter};
 use serde_json::Value;
@@ -18,32 +19,87 @@ use std::{
 /// it never becomes an unreported loss or a wait for storage on the camera thread.
 pub(super) const QUEUE_CAPACITY: usize = 8;
 
+pub(super) struct RecordingLimits {
+    frames: usize,
+    bytes: Option<u64>,
+}
+impl From<usize> for RecordingLimits {
+    fn from(frames: usize) -> Self {
+        Self {
+            frames,
+            bytes: None,
+        }
+    }
+}
+impl From<(usize, Option<u64>)> for RecordingLimits {
+    fn from((frames, bytes): (usize, Option<u64>)) -> Self {
+        Self { frames, bytes }
+    }
+}
+enum Sink {
+    Legacy(BufWriter<std::fs::File>),
+    Budgeted(CappedFile),
+}
+impl Write for Sink {
+    fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+        match self {
+            Self::Legacy(out) => out.write(bytes),
+            Self::Budgeted(out) => out.write(bytes),
+        }
+    }
+    fn flush(&mut self) -> std::io::Result<()> {
+        match self {
+            Self::Legacy(out) => out.flush(),
+            Self::Budgeted(out) => out.flush(),
+        }
+    }
+}
+impl Sink {
+    fn finish(self) -> Result<()> {
+        match self {
+            Self::Legacy(out) => out.get_ref().sync_all().map_err(|e| e.to_string()),
+            Self::Budgeted(out) => out.finish().map(|_| ()).map_err(|e| e.to_string()),
+        }
+    }
+}
+
 pub(super) fn record_controlled<S: Source>(
     profile: StreamProfile,
     path: &Path,
-    maximum: usize,
+    maximum: impl Into<RecordingLimits>,
     signals: (&AtomicBool, &Control, Option<&mut Participant>),
     sender: SyncSender<Event>,
     side: Side,
     open: impl FnOnce() -> Result<S>,
 ) -> Result<SourceReport> {
+    let maximum = maximum.into();
     record_with_sink(
         profile,
-        maximum,
+        maximum.frames,
         signals,
         sender,
         side,
         open,
         (
             || {
+                if let Some(limit) = maximum.bytes {
+                    let root = path.parent().ok_or("recording lacks parent")?;
+                    let role = path
+                        .file_name()
+                        .and_then(|s| s.to_str())
+                        .ok_or("invalid recording name")?;
+                    return CappedFile::new(root, role, limit)
+                        .map(Sink::Budgeted)
+                        .map_err(|e| e.to_string());
+                }
                 OpenOptions::new()
                     .write(true)
                     .create_new(true)
                     .open(path)
-                    .map(BufWriter::new)
+                    .map(|f| Sink::Legacy(BufWriter::new(f)))
                     .map_err(|e| e.to_string())
             },
-            |out| out.get_ref().sync_all().map_err(|e| e.to_string()),
+            Sink::finish,
         ),
     )
 }

@@ -195,8 +195,8 @@ pub fn save_project(editor: &Editor, mut out: impl Write) -> io::Result<()> {
         editor: &'a Editor,
     }
     let view = View {
-        version: if editor.live_session().is_some() {
-            8
+        version: if let Some(live) = editor.live_session() {
+            if live.schema_version == 2 { 9 } else { 8 }
         } else if editor.sequence().is_some() {
             7
         } else if editor.recordings().is_some() {
@@ -230,8 +230,10 @@ pub fn save_project(editor: &Editor, mut out: impl Write) -> io::Result<()> {
         b"ORPROJ06"
     } else if view.version == 7 {
         b"ORPROJ07"
-    } else {
+    } else if view.version == 8 {
         b"ORPROJ08"
+    } else {
+        b"ORPROJ09"
     })?;
     out.write_all(&(count.length as u32).to_le_bytes())?;
     out.write_all(&count.hash.finalize().to_le_bytes())?;
@@ -295,6 +297,7 @@ pub fn load_project(input: impl Read) -> io::Result<Editor> {
                 | b"ORPROJ06"
                 | b"ORPROJ07"
                 | b"ORPROJ08"
+                | b"ORPROJ09"
         )
     {
         return Err(invalid("unsupported or oversized project file"));
@@ -312,7 +315,8 @@ pub fn load_project(input: impl Read) -> io::Result<Editor> {
         b"ORPROJ05" => 5,
         b"ORPROJ06" => 6,
         b"ORPROJ07" => 7,
-        _ => 8,
+        b"ORPROJ08" => 8,
+        _ => 9,
     };
     if p.version != version
         || p.units != "millimeters"
@@ -323,7 +327,14 @@ pub fn load_project(input: impl Read) -> io::Result<Editor> {
         || (version < 6 && p.editor.recordings().is_some())
         || (version == 6 && p.editor.recordings().is_none())
         || (version < 8 && p.editor.live_session().is_some())
-        || (version == 8 && p.editor.live_session().is_none())
+        || (version == 8
+            && p.editor
+                .live_session()
+                .is_none_or(|s| s.schema_version != 1))
+        || (version == 9
+            && p.editor
+                .live_session()
+                .is_none_or(|s| s.schema_version != 2))
         || (version < 7 && p.editor.sequence().is_some())
         || (version == 7
             && (p.editor.sequence().is_none()

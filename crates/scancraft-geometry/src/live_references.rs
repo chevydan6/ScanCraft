@@ -18,8 +18,12 @@ pub struct LiveSession {
 }
 impl LiveSession {
     pub fn validate(&self) -> Result<(), String> {
-        if self.schema_version != 1
-            || self.directory_display.is_empty()
+        let (maximum, metadata_limit) = match self.schema_version {
+            1 => (1000, 1024 * 1024),
+            2 => (100_000, 16 * 1024 * 1024),
+            _ => return Err("unsupported live-session reference schema".into()),
+        };
+        if self.directory_display.is_empty()
             || self.directory_display.len() > 4096
             || self.session_id.is_empty()
             || self.session_id.len() > 128
@@ -27,8 +31,11 @@ impl LiveSession {
                 .session_id
                 .bytes()
                 .all(|b| b.is_ascii_alphanumeric() || b"-_ .".contains(&b))
-            || self.recorded_frames.iter().any(|n| !(1..=1000).contains(n))
-            || !(1..=1000).contains(&self.pairs.len())
+            || self
+                .recorded_frames
+                .iter()
+                .any(|n| !(1..=maximum).contains(n))
+            || !(1..=maximum).contains(&self.pairs.len())
             || !self.pairs.iter().any(|p| p.integrated)
             || self.source_device_binding_verified
             || self.synchronization_verified
@@ -60,8 +67,21 @@ impl LiveSession {
         .into_iter()
         .map(str::to_owned)
         .collect();
-        for index in 0..self.pairs.len() {
-            expected.insert(format!("pair-{index:04}.json"));
+        if self.schema_version == 1 {
+            for index in 0..self.pairs.len() {
+                expected.insert(format!("pair-{index:04}.json"));
+            }
+        } else {
+            let segments = self
+                .artifacts
+                .len()
+                .checked_sub(expected.len() + 1)
+                .filter(|n| (1..=256).contains(n) && *n <= self.pairs.len())
+                .ok_or("invalid live segment reference count")?;
+            expected.insert("pairs.index.ndjson".into());
+            for index in 0..segments {
+                expected.insert(format!("pairs-{index:06}.ndjson"));
+            }
         }
         if self.artifacts.len() != expected.len() {
             return Err("incomplete live-session artifact references".into());
@@ -74,8 +94,8 @@ impl LiveSession {
                 return Err("invalid, unsafe or duplicate live-session artifact".into());
             }
         }
-        if serde_json::to_vec(self).map_err(|e| e.to_string())?.len() > 1024 * 1024 {
-            return Err("live-session references exceed 1 MiB".into());
+        if serde_json::to_vec(self).map_err(|e| e.to_string())?.len() > metadata_limit {
+            return Err("live-session references exceed schema metadata budget".into());
         }
         Ok(())
     }
@@ -157,6 +177,52 @@ mod tests {
         let mut bad = good;
         bad.recorded_frames[1] = 1001;
         assert!(bad.validate().is_err());
+    }
+    #[test]
+    fn version9_handles_maximum_compact_lineage_and_rejects_downgrade_or_oversized_count() {
+        let mut live = fixture();
+        live.schema_version = 2;
+        live.recorded_frames = [100_000; 2];
+        live.pairs = (0..100_000)
+            .map(|i| Frame {
+                id: i as u64,
+                left_index: i,
+                right_index: i,
+                integrated: true,
+            })
+            .collect();
+        live.artifacts.retain(|a| !a.name.starts_with("pair-"));
+        for name in ["pairs.index.ndjson", "pairs-000000.ndjson"] {
+            live.artifacts.push(Artifact {
+                name: name.into(),
+                bytes: 10,
+                crc32: 0,
+            });
+        }
+        live.validate().unwrap();
+        let mut editor = crate::Editor::new(crate::Cloud { points: vec![] }, 8).unwrap();
+        editor.attach_live_session(live.clone()).unwrap();
+        let mut encoded = Vec::new();
+        crate::formats::save_project(&editor, &mut encoded).unwrap();
+        assert_eq!(&encoded[..8], b"ORPROJ09");
+        let decoded = crate::formats::load_project(encoded.as_slice()).unwrap();
+        assert_eq!(decoded.live_session(), Some(&live));
+        let mut value: serde_json::Value = serde_json::from_slice(&encoded[16..]).unwrap();
+        value["version"] = 8.into();
+        let payload = serde_json::to_vec(&value).unwrap();
+        let mut downgraded = b"ORPROJ08".to_vec();
+        downgraded.extend_from_slice(&(payload.len() as u32).to_le_bytes());
+        downgraded.extend_from_slice(&crc32fast::hash(&payload).to_le_bytes());
+        downgraded.extend_from_slice(&payload);
+        assert!(crate::formats::load_project(downgraded.as_slice()).is_err());
+        live.recorded_frames[0] = 100_001;
+        assert!(live.validate().is_err());
+        live.recorded_frames[0] = 100_000;
+        live.schema_version = 1;
+        assert!(live.validate().is_err());
+        live.schema_version = 2;
+        live.artifacts.last_mut().unwrap().name = "pairs-000001.ndjson".into();
+        assert!(live.validate().is_err());
     }
     #[test]
     fn version8_retains_lineage_through_edits_and_reopen_without_opening_sources() {
