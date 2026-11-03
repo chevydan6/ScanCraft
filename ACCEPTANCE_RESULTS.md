@@ -4,6 +4,7 @@ PASS means the stated narrow experiment passed, not the full release gate.
 
 | Experiment | Result | Evidence |
 | --- | --- | --- |
+| Schema-2 segmented laser storage | PASS narrow scope: 791-test gate; explicit 9000-record / 1,182,790,236-byte / 71-segment synthetic test; real GUI rollover and close/restoration; 65 legacy/new pair records exact | [Limits and evidence](docs/SEGMENTED_LASER_JOURNAL.md); 21/32 native processing remains below 90%; no duration/accuracy qualification |
 | Bounded asynchronous preview preparation | PASS narrow scope: 779-test gate, 65 old/new snapshot comparisons exact, 33 saved reports and three actual IPC previews verified; native 32 raw/camera and 22 pairs, below 90% | [Ownership, measurements and limitations](docs/ASYNC_LASER_PREVIEW.md); no sustained/physical qualification |
 | Buffered laser pair journals | PASS narrow scope: 774-test gate, same-byte/checksum serializer comparison; new native GUI saves 32 raw/camera and processes 21 pairs, still below 90%; verified root-close publication/restoration | [Profile and limits](docs/LASER_STREAM_PROFILE.md); default-renderer failures and physical qualification unchanged |
 | Native laser GUI diagnostic integration | PASS narrow renderer-limited scope: 32 raw/camera, 19 pairs, raw/candidate previews, verified recording and restoration; actual close during acquisition saves 7/7 raw and 6 pairs | [GUI contracts and evidence](docs/LIVE_LASER_GUI.md); default-renderer starts fail; no calibrated scanning qualification |

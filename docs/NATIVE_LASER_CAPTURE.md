@@ -5,6 +5,11 @@ and processes genuine Raptor frames without Wine or a Creality runtime. It saves
 diagnostic candidate coordinates; calibrated dimensional accuracy, tracking,
 fusion, meshing and live GUI controls remain incomplete.
 
+Schema 2 adds optional [segmented journals](SEGMENTED_LASER_JOURNAL.md) with explicit
+record/segment/total/bundle quotas and pre-device storage admission. Schema 1
+retains the legacy request, single-file layout and successful numerical bytes.
+Read-only CLI inspection supports both; see the format and recovery limitations.
+
 ## Running
 
 Build with the pinned toolchain and use:

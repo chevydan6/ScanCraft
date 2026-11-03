@@ -71,6 +71,7 @@ pub fn scan(
         return Err("native laser capture requires an enumerated IR frame rate".into());
     }
     let illumination = illumination(plan.source_options())?;
+    plan.admit_target(target, work)?;
     work.check()?;
     if stop.load(Ordering::Relaxed) {
         return Err("laser capture stopped before acquiring device ownership".into());

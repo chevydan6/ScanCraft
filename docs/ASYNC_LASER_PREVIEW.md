@@ -141,14 +141,16 @@ not independent physical geometry or sustained acquisition qualification.
 ## Remaining duration and reconstruction work
 
 An additional capacity gap is confirmed in `laser_stream/bundle.rs::Plan::open`:
-the required full-report pair log is capped at 1 GiB. This finite trial averages
+schema 1's required full-report pair log is capped at 1 GiB. This finite trial averages
 1,110,905 bytes per record. If that size persisted at 27 processed pairs/s (90% of
 30-FPS input), the maximum cap would hold approximately 966 records or 35.8 seconds.
 This is conditional arithmetic, not a soak measurement. Dense 30-minute scans
 therefore require a deliberate long-session journal/storage/recovery policy;
 preview decoupling alone cannot satisfy that requirement. The independent reviewer
 subsequently confirms this gap as SCAN-REV-024; the developer response accepts it
-and records coordinated follow-up work. No capacity fix is implemented here.
+and records coordinated follow-up work. That preview milestone implements no capacity fix. Subsequent opt-in schema 2
+adds [bounded segments and recovery](SEGMENTED_LASER_JOURNAL.md); sustained
+qualification remains outstanding.
 Do not blindly remove
 caps or hide observations. The older IR 1000-frame limit (SCAN-REV-021) is unchanged.
 

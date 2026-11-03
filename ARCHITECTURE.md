@@ -1,5 +1,12 @@
 # Architecture
 
+Schema-2 laser capture uses explicit raw/pair/record/segment/bundle quotas and a
+pre-device available-space snapshot. Whole pair records roll into bounded segments
+with durable checkpoints, versioned index/footer, streaming readback and read-only
+prefix inspection. Schema 1 retains its single-file layout. No reconstruction or
+raw-format change; structural completeness never proves durable capture/restoration.
+See [formats, boundaries and failure semantics](docs/SEGMENTED_LASER_JOURNAL.md).
+
 Laser preview handoff now copies bounded raw inputs/compact results into one
 Pending slot. The existing publisher owns full-frame statistics, thumbnails and
 wire encoding outside the mailbox lock. The parent still receives validated

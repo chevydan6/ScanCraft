@@ -7,10 +7,12 @@ complete-pair dispatch/compute scheduling: the GUI finite trial processes only
 computational scheduling before increasing buffers. Preserve raw journals independently
 of optional previews and retain failed-run evidence. See docs/LIVE_LASER_GUI.md.
 
-Before a dense 30-minute laser trial, design bounded long-session journals and
-recovery: the current 1 GiB full-report log cap holds only about 966 records at
-an observed 1.11 MB/record (conditional capacity arithmetic, not a duration test).
-Keep explicit storage quotas and truthful cleanup; do not merely remove limits.
+Opt-in schema 2 now provides bounded long-session pair segments, storage admission,
+indexing and read-only recovery; schema 1 retains its 1 GiB pair-log limit. Validate
+maximum-count finalization, sustained resource usage, failure recovery and practical
+disk budgets before a dense 30-minute hardware trial. The separate >1 GiB synthetic
+test and short native rollover are capacity evidence, not duration qualification.
+See docs/SEGMENTED_LASER_JOURNAL.md. Keep explicit quotas and truthful cleanup.
 
 Calibrated dimensions, optical coverage, actual tracking/fusion and long-session
 project retention remain required, with physical calibration deferred. The old

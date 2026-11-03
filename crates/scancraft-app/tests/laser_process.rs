@@ -175,3 +175,49 @@ fn actual_replay_helper_preserves_raw_data_preview_candidates_and_no_overwrite()
     assert!(packets[0].1["Err"].is_string());
     assert_eq!(fs::read(result.join("report.json")).unwrap(), before);
 }
+
+#[test]
+fn actual_replay_helper_accepts_schema_two_segmented_journals_and_preserves_wire_contract() {
+    let stamp = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_nanos();
+    let root = Temp(std::env::temp_dir().join(format!(
+        "scancraft-segmented-helper-{}-{stamp}",
+        std::process::id()
+    )));
+    fs::create_dir(&root.0).unwrap();
+    fixture(&root.0);
+    let path = root.0.join("request.json");
+    let mut request: Value = serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
+    request["schema_version"] = json!(2);
+    request["maximum_pair_log_bytes"] = json!(100000);
+    request["pair_log_segment_bytes"] = json!(8192);
+    request["maximum_pair_record_bytes"] = json!(4096);
+    request["maximum_bundle_bytes"] = json!(16 * 1024 * 1024);
+    fs::write(path, serde_json::to_vec(&request).unwrap()).unwrap();
+    let (ok, packets) = helper(&root.0);
+    assert!(ok, "{packets:?}");
+    assert_eq!(packets.len(), 2);
+    assert_eq!(packets[0].0, 5);
+    assert_eq!(packets[1].0, 6);
+    assert_eq!(packets[0].1["positions"].as_array().unwrap().len(), 4);
+    assert_eq!(packets[1].1["Ok"]["origin"], "recording_replay");
+    let target = root.0.join("result");
+    assert!(!target.join("pairs.ndjson").exists());
+    let report: Value =
+        serde_json::from_slice(&fs::read(target.join("report.json")).unwrap()).unwrap();
+    assert_eq!(report["schema_version"], 2);
+    assert_eq!(report["pair_journal"]["segments"], 1);
+    assert_eq!(report["raw_replay_integrity"], "PASS");
+    assert_eq!(report["physical_accuracy_qualified"], false);
+    let checked = scancraft_workflow::laser_stream::pair_journal::visit(
+        &target,
+        scancraft_workflow::laser_stream::pair_journal::Mode::Complete,
+        &scancraft_geometry::work::WorkControl::default(),
+        |_, _, _| Ok(()),
+    )
+    .unwrap();
+    assert_eq!(checked.pairs, 1);
+    assert!(checked.journal_complete);
+}

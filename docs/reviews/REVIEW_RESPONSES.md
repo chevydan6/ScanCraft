@@ -2892,3 +2892,87 @@ fix and does not alter finding status; only the independent reviewer can verify
 and close it. Existing 779-test and finite native evidence remain narrow in scope.
 Relevant current implementation: 89089708cefcce6e45ce98e7965c741f5673a7b4; response
 follows Assignment350's concurrent append, which development preserves read-only.
+
+SCAN-REV-024 — Accepted; segmented storage implementation submitted for independent
+verification (finding status remains exclusively reviewer-owned).
+
+Schema 1 keeps its single-file layout, successful record bytes and 1 GiB quota.
+Opt-in schema 2 adds explicit segment/record/total-pair/bundle budgets, at most
+256 segments, conservative fragmentation admission, raw frame-count admission and
+an available-space snapshot before native ownership/control changes. Complete
+records are retained; oversize/quota/I/O failures abort successful publication.
+The writer checkpoints segment bytes/CRC/count/span before opening the next segment;
+read-only complete/recovery visitors validate bounded structure/order/CRC and
+identity. Recovery handles a torn manifest, indexed and one unindexed prefix, and
+torn final bytes without repair/publication. Source close/settings restoration,
+raw validation and no-overwrite finalization remain mandatory. No reconstruction,
+association, raw format, exposure, calibration or optional-display policy change.
+
+Changed Rust: workflow `laser_stream.rs`, `laser_stream/bundle.rs`,
+`bundle/{io,log,tests}.rs`, `pair_journal.rs`, `pair_journal/{write,read,tests}.rs`;
+acquisition `laser.rs` admission ordering; CLI `main.rs` read-only inspection;
+app `tests/laser_process.rs` actual schema-2 helper regression. Format/ownership/
+limits are in `docs/SEGMENTED_LASER_JOURNAL.md`; root architecture/status/acceptance/
+benchmarks/roadmap and native/preview guides link current versus historical scope.
+Base commit: `4fa7e6e5b619d55ff2a75951790411cbc1ccf04d`; exact implementation
+commit binding follows once these verified changes are committed.
+
+Verification:
+
+- Frozen full gate: formatting, strict all-target Clippy, 791 passing workspace
+  tests, one explicitly ignored capacity test, successful workspace release build.
+  Initial visibility/Clippy/test-assumption defects were corrected; no suppression
+  or weakened acceptance threshold. Final authoritative log `verified-gate.log`.
+- Separate ignored release capacity test: 9000 synthetic records, 1,182,790,236
+  bytes, 71 segments, full streaming readback. Direct final release test executable
+  observation: 3.62 s, 5740 KiB max RSS, no compiler included. Initial time wrapper
+  included compilation and is not used for journal-only memory claims. This is
+  neither a 30-minute hardware scan nor a 60-minute application memory soak.
+- Regressions cover quota/record/slot/cancel/create/write/sync failure, poisoned
+  finish, rollover prefixes, corruption, symlinks, order, torn manifest and
+  mutation. Final-index fsync failure deliberately leaves a visible footer while
+  finish returns failure: reader `journal_complete` is observed structure, never
+  proof of durability/capture success/restoration/accuracy. Callback data remain
+  provisional until final visitor success; numerical results/raw links are not
+  established by structural inspection alone.
+- Native GUI finite: 32 raw frames/camera, 21 processed pairs / 21 segments,
+  22,530,100 pair bytes / 38,616 candidate values; 11 processing drops/camera,
+  unmatched 0/0, startup rejects 1/1, ongoing rejects 0/0. Fraction 65.625%, below
+  90%. Existing private software-renderer condition LP_NUM_THREADS=2 retained;
+  default-renderer/startup failures remain unresolved. No throughput gain inferred.
+- Native root close: 9 raw/camera, 7 pairs / 7 segments / 13,238 values, drops 2/2,
+  unmatched 0/0, startup rejects 1/0, ongoing 0/0; one stopped incomplete buffer per
+  camera. One close-to-exit observation 0.280 s is not a hard bound. Both native
+  trials pass raw integrity/publication/restoration and exact full before/after
+  stream/illumination GET readbacks, including original scoped property151 restored.
+  Helpers own camera descriptors; GUI owns none; all observed processes exit.
+  Saved screenshot inspected: both raw views, unverified-unit label and candidates.
+- Actual unpaced helper replay: 32 raw/camera, 4 pairs / 4 segments / 7500 values,
+  28 processing drops/camera; 4 preview packets plus completion, zero omissions.
+  Three prior legacy plus three new bundles: 65 reports / 123,278 candidate values,
+  every raw reference CRC/sequence/flags/time/PTS and complete old serializer bytes
+  match the unchanged engine. New manifest lengths/CRCs all pass. Same-engine
+  equivalence is not independent calibrated ground truth.
+- A real-data crash-prefix copy recovers one indexed and one unindexed complete
+  record plus 128 torn bytes despite a torn manifest; complete mode rejects;
+  all input hashes remain identical after inspection. No raw files repaired.
+
+Private evidence directory: developer state `artifacts/segmented-laser-journal-gd1ijwlc`;
+source/binary maps, native readbacks/results, compatibility JSON, capacity logs,
+recovery checks and final secret/commit bindings remain outside the repository.
+No private raw/model/screenshots/probes are staged or uploaded. New implementation
+is independent project code reusing existing Rust processing/CRC/guard primitives;
+no new dependency or imported upstream algorithm/license.
+
+Limitations: storage snapshot is not reservation or user-quota enforcement; runtime
+record/total quotas can still fail; legacy inspector refuses >8 MiB individual
+records; finalization rereads segments and holds O(segment count) descriptors;
+maximum-count latency/resource pressure and crash/power-loss durability remain
+unqualified. Physical accuracy/units/coverage, tracking/fusion, editable models,
+long duration and live processing targets remain incomplete. 005/006/007/021 are
+not closed by this work. Only independent review can verify/close 024.
+
+CodeRabbit skill/workflow consulted. Official CLI0.9.2 fresh usage lookup exits1,
+all included quota/billing fields lookup_failed. No review request/upload, paid
+usage, review-pass claim, push/PR, merge or protection change. Work remains local
+and independently reviewable; reviewer-owned findings/charter are untouched.

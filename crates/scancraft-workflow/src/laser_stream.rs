@@ -2,6 +2,7 @@
 //! Equal raw PTS and inferred modular progression are not verified exposures.
 mod association;
 pub mod bundle;
+pub mod pair_journal;
 mod runner;
 pub use association::{Association, AssociationCounts, Camera, Pair, Sample};
 pub use runner::{Failure, Journal, ProgressSnapshot, SourceReport, StopToken, Summary};

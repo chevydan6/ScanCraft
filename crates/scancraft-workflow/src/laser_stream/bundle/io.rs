@@ -11,7 +11,15 @@ use std::{
     sync::{Arc, Mutex},
 };
 pub(super) type RawDigests = Arc<Mutex<[Option<Digest>; 2]>>;
-pub(super) struct CappedFile {
+#[cfg(test)]
+#[derive(Clone, Copy, PartialEq)]
+pub(crate) enum Fault {
+    Write,
+    Sync,
+}
+pub(crate) struct CappedFile {
+    #[cfg(test)]
+    fault: Option<Fault>,
     out: BufWriter<File>,
     role: String,
     maximum: u64,
@@ -19,7 +27,7 @@ pub(super) struct CappedFile {
     hash: crc32fast::Hasher,
 }
 impl CappedFile {
-    pub(super) fn new(directory: &Path, role: &str, maximum: u64) -> io::Result<Self> {
+    pub(crate) fn new(directory: &Path, role: &str, maximum: u64) -> io::Result<Self> {
         let file = OpenOptions::new()
             .write(true)
             .create_new(true)
@@ -27,24 +35,52 @@ impl CappedFile {
             .open(directory.join(role))?;
         Ok(Self {
             out: BufWriter::new(file),
+            #[cfg(test)]
+            fault: None,
             role: role.into(),
             maximum,
             bytes: 0,
             hash: crc32fast::Hasher::new(),
         })
     }
-    pub(super) fn finish(mut self) -> io::Result<Digest> {
+    #[cfg(test)]
+    pub(crate) fn inject(&mut self, fault: Fault) {
+        self.fault = Some(fault);
+    }
+    pub(crate) fn sync(&mut self) -> io::Result<()> {
         self.out.flush()?;
-        self.out.get_ref().sync_all()?;
-        Ok(Digest {
-            role: self.role,
+        #[cfg(test)]
+        if self.fault == Some(Fault::Sync) {
+            self.fault = None;
+            return Err(io::Error::other("injected sync failure"));
+        }
+        self.out.get_ref().sync_all()
+    }
+    pub(crate) fn snapshot(&self) -> Digest {
+        Digest {
+            role: self.role.clone(),
             bytes: self.bytes,
-            crc32: self.hash.finalize(),
-        })
+            crc32: self.hash.clone().finalize(),
+        }
+    }
+    pub(crate) fn discard(self) {
+        let (_file, _pending) = self.out.into_parts();
+    }
+    pub(crate) fn finish(mut self) -> io::Result<Digest> {
+        if let Err(e) = self.sync() {
+            self.discard();
+            return Err(e);
+        }
+        Ok(self.snapshot())
     }
 }
 impl Write for CappedFile {
     fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
+        #[cfg(test)]
+        if self.fault == Some(Fault::Write) {
+            self.fault = None;
+            return Err(io::Error::other("injected write failure"));
+        }
         if self
             .bytes
             .checked_add(bytes.len() as u64)
@@ -66,7 +102,7 @@ impl Write for CappedFile {
 /// Batch small serializer writes before CappedFile's checksum/write path. The
 /// fixed buffer is discarded explicitly on error: Drop must not retry rejected
 /// bytes. A successful complete record is flushed before optional preview.
-pub(super) fn pair_record(out: &mut impl Write, value: &impl Serialize) -> io::Result<()> {
+pub(crate) fn pair_record(out: &mut impl Write, value: &impl Serialize) -> io::Result<()> {
     let mut buffered = BufWriter::with_capacity(64 * 1024, out);
     let result = (|| {
         serde_json::to_writer(&mut buffered, value)?;

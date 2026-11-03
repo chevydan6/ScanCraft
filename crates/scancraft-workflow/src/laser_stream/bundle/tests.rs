@@ -520,3 +520,210 @@ fn serialization_failure_discards_unwritten_tail_and_success_is_visible_before_p
         .unwrap();
     assert_eq!(previews, 1);
 }
+
+fn segmented(files: &Files, frames: u64) {
+    files.change(|r| {
+        r["schema_version"] = json!(2);
+        r["maximum_frames_per_camera"] = json!(frames);
+        r["maximum_pair_log_bytes"] = json!(100000);
+        r["pair_log_segment_bytes"] = json!(8192);
+        r["maximum_pair_record_bytes"] = json!(4096);
+        r["maximum_bundle_bytes"] = json!(16 * 1024 * 1024);
+    });
+}
+#[test]
+fn segmented_capture_publishes_all_pairs_raw_data_index_and_compatible_report() {
+    use crate::live_stereo::runner::Source;
+    use std::sync::mpsc;
+    struct Paced {
+        inner: Fake,
+        permit: mpsc::Receiver<()>,
+    }
+    impl Source for Paced {
+        fn context(&self) -> Result<scancraft_recording::CaptureContext> {
+            self.inner.context()
+        }
+        fn next(&mut self) -> Result<Option<scancraft_core::Frame>> {
+            if self.inner.next > 0 && self.inner.next < self.inner.count {
+                loop {
+                    if self.inner.token.stop_requested() {
+                        return Ok(None);
+                    }
+                    match self
+                        .permit
+                        .recv_timeout(std::time::Duration::from_millis(10))
+                    {
+                        Ok(()) => break,
+                        Err(mpsc::RecvTimeoutError::Timeout) => continue,
+                        Err(_) => return Err("test permit disconnected".into()),
+                    }
+                }
+            }
+            self.inner.next()
+        }
+        fn statistics(&self) -> Value {
+            self.inner.statistics()
+        }
+        fn close(self) -> Result<()> {
+            self.inner.close()
+        }
+    }
+    let f = Files::new();
+    segmented(&f, 8);
+    let plan = f.plan();
+    let target = f.root.join("capture");
+    let channels = [mpsc::channel(), mpsc::channel()];
+    let (senders, receivers): (Vec<_>, Vec<_>) = channels.into_iter().unzip();
+    let receivers = Arc::new(
+        receivers
+            .into_iter()
+            .map(|r| Mutex::new(Some(r)))
+            .collect::<Vec<_>>(),
+    );
+    let closed = Arc::new(AtomicUsize::new(0));
+    let close = closed.clone();
+    let frames = f.frames.clone();
+    let mut offered = 0;
+    let report = plan
+        .capture(
+            &target,
+            &Arc::new(WorkControl::default()),
+            &Arc::new(AtomicBool::new(false)),
+            move |c, _, token| {
+                Ok(Paced {
+                    inner: Fake {
+                        template: frames[c.index()].clone(),
+                        next: 0,
+                        count: 8,
+                        gate: None,
+                        gate_once: false,
+                        token,
+                        closed: close.clone(),
+                        fail_close: false,
+                        fail_next: false,
+                    },
+                    permit: receivers[c.index()].lock().unwrap().take().unwrap(),
+                })
+            },
+            || {
+                assert_eq!(closed.load(Ordering::Relaxed), 2);
+                Ok(())
+            },
+            |_| {
+                offered += 1;
+                if offered < 8 {
+                    for s in &senders {
+                        s.send(()).unwrap();
+                    }
+                }
+                PreviewStatus::Accepted
+            },
+        )
+        .unwrap();
+    assert_eq!(offered, 8);
+    assert_eq!(report["schema_version"], 2);
+    assert_eq!(report["summary"]["processed_pairs"], 8);
+    assert!(report["pair_journal"]["segments"].as_u64().unwrap() > 1);
+    assert!(!target.join("pairs.ndjson").exists());
+    let checked = super::super::pair_journal::visit(
+        &target,
+        super::super::pair_journal::Mode::Complete,
+        &WorkControl::default(),
+        |_, _, _| Ok(()),
+    )
+    .unwrap();
+    assert_eq!(checked.pairs, 8);
+    for name in ["first.raptor", "second.raptor"] {
+        let mut reader =
+            scancraft_recording::Reader::new(fs::File::open(target.join(name)).unwrap()).unwrap();
+        let mut n = 0;
+        while reader.read_frame().unwrap().is_some() {
+            n += 1;
+        }
+        assert_eq!(n, 8);
+    }
+}
+#[test]
+fn segmented_policy_rejects_ambiguous_options_and_insufficient_raw_bundle_admission() {
+    for bad in [
+        "null",
+        "legacy_extra",
+        "segment",
+        "record",
+        "slots",
+        "bundle",
+        "raw",
+    ] {
+        let f = Files::new();
+        segmented(&f, 8);
+        f.change(|r| match bad {
+            "null" => r["maximum_pair_record_bytes"] = Value::Null,
+            "legacy_extra" => r["schema_version"] = json!(1),
+            "segment" => r["pair_log_segment_bytes"] = json!(1),
+            "record" => r["maximum_pair_record_bytes"] = json!(9 * 1024 * 1024),
+            "slots" => r["maximum_pair_log_bytes"] = json!(1u64 << 38),
+            "bundle" => r["maximum_bundle_bytes"] = json!(100),
+            _ => r["maximum_frames_per_camera"] = json!(u64::MAX),
+        });
+        assert!(
+            Plan::open(&f.geometry, &f.request, &WorkControl::default()).is_err(),
+            "{bad}"
+        );
+    }
+    let f = Files::new();
+    segmented(&f, 8);
+    let plan = f.plan();
+    let target = f.root.join("missing-parent/capture");
+    let mut restored = false;
+    assert!(
+        plan.capture::<Fake, _, _>(
+            &target,
+            &Arc::new(WorkControl::default()),
+            &Arc::new(AtomicBool::new(false)),
+            |_, _, _| panic!("must reject admission before source"),
+            || {
+                restored = true;
+                Ok(())
+            },
+            |_| PreviewStatus::NotRequested
+        )
+        .is_err()
+    );
+    assert!(restored);
+    assert!(!target.exists());
+}
+#[test]
+fn segmented_required_record_failure_retains_raw_cleanup_and_recoverable_journal_prefix() {
+    let f = Files::new();
+    segmented(&f, 1);
+    f.change(|r| r["maximum_pair_record_bytes"] = json!(1024));
+    let target = f.root.join("out");
+    let closed = Arc::new(AtomicUsize::new(0));
+    let error = f
+        .plan()
+        .capture(
+            &target,
+            &Arc::new(WorkControl::default()),
+            &Arc::new(AtomicBool::new(false)),
+            source(&f, closed.clone()),
+            || Ok(()),
+            |_| panic!("failed journal must not preview"),
+        )
+        .unwrap_err();
+    assert!(error.contains("record exceeds"));
+    assert_eq!(closed.load(Ordering::Relaxed), 2);
+    assert!(!target.exists());
+    let partial = f.partial();
+    let fail: Value =
+        serde_json::from_slice(&fs::read(partial.join("failure.json")).unwrap()).unwrap();
+    assert_eq!(fail["settings_restoration"]["Ok"], Value::Null);
+    let journal = super::super::pair_journal::visit(
+        &partial,
+        super::super::pair_journal::Mode::Recovery,
+        &WorkControl::default(),
+        |_, _, _| Ok(()),
+    )
+    .unwrap();
+    assert!(!journal.journal_complete);
+    assert_eq!(journal.pairs, 0);
+}

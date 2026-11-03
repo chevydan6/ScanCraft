@@ -1,5 +1,12 @@
 # Project status
 
+[Segmented laser journals](docs/SEGMENTED_LASER_JOURNAL.md) add opt-in schema 2
+storage admission, bounded segments, streaming verification and read-only recovery.
+The 791-test Rust gate and separate 1.18 GB synthetic capacity test pass. Native
+GUI rollover/close and 65 saved pair records pass integrity checks; finite native
+processing remains 21/32 (65.625%), below 90%. Long-duration qualification,
+calibrated geometry and tracking/fusion remain incomplete. Schema 1 is preserved.
+
 [Asynchronous laser previews](docs/ASYNC_LASER_PREVIEW.md) move full raw statistics
 and thumbnails to the existing bounded publisher. The 779-test gate passes; a
 native trial saves 32 raw frames/camera and processes 22 pairs (68.75%, below 90%).

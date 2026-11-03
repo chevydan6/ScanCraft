@@ -1,5 +1,13 @@
 # Benchmarks
 
+[Segmented journal capacity](docs/SEGMENTED_LASER_JOURNAL.md): a direct release test
+writes/verifies 9000 synthetic records / 1,182,790,236 bytes / 71 segments in one
+3.62 s observation, with 5740 KiB maximum RSS for that test process. It includes
+synthetic serialization, disk/cache I/O and reader validation, excludes compilation,
+and is neither whole-app memory nor sustained hardware throughput qualification.
+Native short rollover saves 32 raw frames/camera and processes 21 pairs (65.625%,
+below 90%); no controlled throughput gain or accuracy claim is made.
+
 [Bounded preview handoff](docs/ASYNC_LASER_PREVIEW.md): same-binary old/new complete
 Snapshot bytes match in 65 comparisons. Producer work changes from 6.665–6.710 ms
 to 0.186–0.224 ms by copying raw inputs; worker preparation still costs about

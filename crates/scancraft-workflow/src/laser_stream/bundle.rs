@@ -1,5 +1,6 @@
 //! Capped, verified, no-overwrite capture bundles. Supplied geometry is unqualified.
-mod io;
+pub(crate) mod io;
+mod log;
 use self::io::{CappedFile, RawDigests, RawJournal};
 use super::{Association, Camera, Pair, Pipeline, Result, StopToken};
 use crate::{
@@ -53,8 +54,19 @@ struct Request {
     maximum_recording_bytes_per_camera: u64,
     maximum_pair_log_bytes: u64,
     processing: Settings,
+    #[serde(default, deserialize_with = "optional_quota")]
+    pair_log_segment_bytes: Option<u64>,
+    #[serde(default, deserialize_with = "optional_quota")]
+    maximum_pair_record_bytes: Option<u64>,
+    #[serde(default, deserialize_with = "optional_quota")]
+    maximum_bundle_bytes: Option<u64>,
     #[serde(default)]
     source_options: Value,
+}
+fn optional_quota<'de, D: serde::Deserializer<'de>>(
+    d: D,
+) -> std::result::Result<Option<u64>, D::Error> {
+    u64::deserialize(d).map(Some)
 }
 pub struct Plan {
     geometry: StereoCalibration,
@@ -130,13 +142,12 @@ impl Plan {
             .map_err(|e| e.to_string())?;
         let geometry: StereoCalibration = serde_json::from_slice(&g).map_err(|e| e.to_string())?;
         let request: Request = serde_json::from_slice(&r).map_err(|e| e.to_string())?;
-        if request.schema_version != 1
-            || request.maximum_frames_per_camera == 0
+        if request.maximum_frames_per_camera == 0
             || request.maximum_recording_bytes_per_camera > 1 << 40
-            || !(4096..=1 << 30).contains(&request.maximum_pair_log_bytes)
         {
             return Err("invalid laser capture schema/frame/byte limits".into());
         }
+        let segmented = log::limits(&request).map_err(|e| e.to_string())?.is_some();
         let pipeline = Pipeline::new(&geometry, &request.processing, request.fps)?;
         Association::new(
             pipeline.profiles().clone(),
@@ -149,6 +160,18 @@ impl Plan {
                 return Err(
                     "raw byte budget must accommodate one maximum header/frame/footer".into(),
                 );
+            }
+            if segmented {
+                let required = (pixels + 4096 + 32)
+                    .checked_mul(request.maximum_frames_per_camera)
+                    .and_then(|n| n.checked_add(MAX_INPUT + 32))
+                    .ok_or("raw frame admission overflow")?;
+                if required > request.maximum_recording_bytes_per_camera {
+                    return Err(
+                        "schema2 raw quota cannot admit configured frame count and metadata bound"
+                            .into(),
+                    );
+                }
             }
             // Calls the existing validators/math; no duplicate detector rules or
             // synthetic image is represented as physical calibration evidence.
@@ -167,6 +190,17 @@ impl Plan {
             bytes: [g, r],
             guard,
         })
+    }
+    /// Schema2 checks an available-space snapshot before native ownership is acquired.
+    /// This is not physical disk reservation; later I/O errors still fail safely.
+    pub fn admit_target(&self, target: &Path, work: &WorkControl) -> Result<()> {
+        work.check()?;
+        require_new_target(target)?;
+        let parent = target
+            .parent()
+            .filter(|p| !p.as_os_str().is_empty())
+            .unwrap_or(Path::new("."));
+        log::admit(&self.request, parent).map_err(|e| e.to_string())
     }
     pub fn fps(&self) -> u32 {
         self.request.fps
@@ -200,7 +234,7 @@ impl Plan {
         let mut preview_counts = PreviewCounts::default();
         let outcome = caught(|| {
             work.check()?;
-            require_new_target(target)?;
+            self.admit_target(target, work)?;
             self.guard.check().map_err(|e| e.to_string())?;
             if stop.load(Ordering::Relaxed) {
                 return Err("laser capture stopped before opening sources".into());
@@ -215,12 +249,7 @@ impl Plan {
             ];
             let pipeline =
                 Pipeline::new(&self.geometry, &self.request.processing, self.request.fps)?;
-            let mut pairs = CappedFile::new(
-                &directory,
-                "pairs.ndjson",
-                self.request.maximum_pair_log_bytes,
-            )
-            .map_err(|e| e.to_string())?;
+            let mut pairs = log::Log::open(&directory, &self.request).map_err(|e| e.to_string())?;
             let raw_digests: RawDigests = Arc::new(Mutex::new([None, None]));
             let slots = raw_digests.clone();
             let raw_dir = directory.clone();
@@ -249,7 +278,8 @@ impl Plan {
                     })
                 },
                 |pair, result, progress| {
-                    io::pair_record(&mut pairs, &record(pair, &result, progress))
+                    pairs
+                        .push(&record(pair, &result, progress), work)
                         .map_err(|e| e.to_string())?;
                     let offered = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                         preview(PreviewInput {
@@ -277,19 +307,26 @@ impl Plan {
                 result.map_err(|e| e.reason),
                 pair_digest.as_ref().map(|_| ()).map_err(Clone::clone),
             )?;
-            artifacts.push(pair_digest?);
+            let pair_log = pair_digest?;
+            artifacts.extend(pair_log.artifacts);
             let mut slots = raw_digests
                 .lock()
                 .map_err(|_| "raw digest state poisoned")?;
             for slot in slots.iter_mut() {
                 artifacts.push(slot.take().ok_or("missing complete raw artifact")?);
             }
-            Ok((directory, artifacts, summary, pipeline.profiles().clone()))
+            Ok((
+                directory,
+                artifacts,
+                summary,
+                pipeline.profiles().clone(),
+                pair_log.details,
+            ))
         });
         let restoration = caught(restore);
         let restoration_value = restoration.clone();
         let captured = combine(outcome, restoration);
-        let result=captured.and_then(|(directory,mut artifacts,summary,profiles)| {
+        let result=captured.and_then(|(directory,mut artifacts,summary,profiles,pair_log)| {
             work.check()?;let mut guard=Guard::default();
             for digest in &artifacts {
                 if digest.role=="first.raptor" || digest.role=="second.raptor" {
@@ -299,10 +336,15 @@ impl Plan {
                     io::verify_raw(&directory,digest,&profiles[side],source.journaled_frames,&mut guard,work)?;
                 }else {io::verify(&directory,digest,&mut guard,work)?;}
             }
-            let report=json!({"schema_version":1,"kind":"laser_candidate_stream_diagnostics","geometry_binding_verified":false,"units_verified":false,"projector_line_identity_verified":false,"synchronization_verified":false,"physical_accuracy_qualified":false,"geometry_exported":false,"reported_stream_settings_restoration":"PASS","reported_source_restoration":"PASS","raw_replay_integrity":"PASS","optional_previews":preview_counts,"summary":summary});
+            if pair_log.is_some() {
+                let checked=super::pair_journal::visit(&directory,super::pair_journal::Mode::Complete,work,|_,_,_|Ok(()))?;
+                if checked.pairs!=summary.processed_pairs {return Err("segmented journal pair count differs from processing summary".into());}
+            }
+            let mut report=json!({"schema_version":self.request.schema_version,"kind":"laser_candidate_stream_diagnostics","geometry_binding_verified":false,"units_verified":false,"projector_line_identity_verified":false,"synchronization_verified":false,"physical_accuracy_qualified":false,"geometry_exported":false,"reported_stream_settings_restoration":"PASS","reported_source_restoration":"PASS","raw_replay_integrity":"PASS","optional_previews":preview_counts,"summary":summary});
+            if let Some(pair_log)=pair_log {report["pair_journal"]=pair_log;}
             let digest=io::json(&directory,"report.json",&report,MAX_TERMINAL).map_err(|e|e.to_string())?;io::verify(&directory,&digest,&mut guard,work)?;artifacts.push(digest);
             artifacts.sort_by(|a,b|a.role.cmp(&b.role));
-            let manifest=io::json(&directory,"manifest.json",&json!({"schema_version":1,"kind":"laser_candidate_capture_artifacts","artifacts":artifacts}),MAX_TERMINAL).map_err(|e|e.to_string())?;
+            let manifest=io::json(&directory,"manifest.json",&json!({"schema_version":self.request.schema_version,"kind":"laser_candidate_capture_artifacts","artifacts":artifacts}),MAX_TERMINAL).map_err(|e|e.to_string())?;
             io::verify(&directory,&manifest,&mut guard,work)?;
             let mut expected=artifacts.iter().map(|d|d.role.clone()).collect::<Vec<_>>();expected.push("manifest.json".into());expected.sort();
             let mut actual=fs::read_dir(&directory).map_err(|e|e.to_string())?.map(|e|e.map(|v|v.file_name().to_string_lossy().into_owned()).map_err(|e|e.to_string())).collect::<Result<Vec<_>>>()?;actual.sort();if actual!=expected {return Err("unexpected laser capture artifacts".into());}
