@@ -5,7 +5,7 @@ use crate::{
 };
 use scancraft_core::{StreamProfile, uvc_pts};
 use scancraft_device::{Capture, SessionLock};
-use scancraft_recording::{Reader, Writer};
+use scancraft_recording::{Reader, Writer, queued::QueuedWriter};
 use serde_json::{Value, json};
 use std::{
     fs::{self, File, OpenOptions},
@@ -13,6 +13,7 @@ use std::{
     path::{Path, PathBuf},
 };
 mod completion;
+mod recording;
 use completion::Completion;
 use std::{
     sync::{
@@ -74,6 +75,9 @@ fn capture(
         fourcc: *b"GREY",
         fps: requested_fps,
     };
+    // Declaration order also closes the camera before joining recording on unwind.
+    #[allow(clippy::needless_late_init)]
+    let mut writer;
     let mut camera = if output.is_some() {
         Capture::open_recording(profile.clone())
     } else {
@@ -103,7 +107,7 @@ fn capture(
             .add_capture_observations(observations)
             .map_err(|e| e.to_string())?;
     }
-    let mut writer = output
+    writer = output
         .map(|path| -> Result<_, String> {
             let file = OpenOptions::new()
                 .write(true)
@@ -111,59 +115,70 @@ fn capture(
                 .open(path)
                 .map_err(|e| e.to_string())?;
             Writer::with_context(BufWriter::new(file), profile.clone(), context)
+                .and_then(|writer| QueuedWriter::new(writer, recording::QUEUE_CAPACITY))
                 .map_err(|e| e.to_string())
         })
         .transpose()?;
     let mut samples = Vec::with_capacity(count);
     let capture_start = Instant::now();
-    for _ in 0..count {
-        termination::check()?;
-        if cancel.load(Ordering::Relaxed) {
-            return Err("stereo probe cancelled because another worker failed".into());
+    let acquired = (|| {
+        for _ in 0..count {
+            termination::check()?;
+            if cancel.load(Ordering::Relaxed) {
+                return Err("stereo probe cancelled because another worker failed".into());
+            }
+            let acquired = camera.next_frame();
+            termination::check()?;
+            let frame = acquired.map_err(|e| e.to_string())?;
+            let pts = uvc_pts(&frame.metadata)
+                .map_err(str::to_string)?
+                .ok_or("missing sensor PTS")?;
+            let sample = Sample {
+                sequence: frame.sequence,
+                host_us: frame.host_timestamp_us,
+                pts,
+            };
+            if let Some(writer) = writer.as_mut() {
+                writer.push(frame).map_err(|e| e.to_string())?;
+            }
+            samples.push(sample);
+            if samples.len().is_multiple_of(500) {
+                eprintln!(
+                    "{}",
+                    json!({"event":"stereo_progress","interface":interface,"accepted_buffers":samples.len(),"target_buffers":count,"rejected_buffers":camera.rejected,"rejected_before_first_valid":camera.rejected_before_first_valid,"rejected_after_first_valid":camera.rejected_after_first_valid,"sequence_gaps":camera.sequence_drops,"elapsed_seconds":capture_start.elapsed().as_secs_f64()})
+                );
+            }
         }
-        let acquired = camera.next_frame();
-        termination::check()?;
-        let frame = acquired.map_err(|e| e.to_string())?;
-        let pts = uvc_pts(&frame.metadata)
-            .map_err(str::to_string)?
-            .ok_or("missing sensor PTS")?;
-        if let Some(writer) = writer.as_mut() {
-            writer.push(&frame).map_err(|e| e.to_string())?;
-        }
-        samples.push(Sample {
-            sequence: frame.sequence,
-            host_us: frame.host_timestamp_us,
-            pts,
-        });
-        if samples.len().is_multiple_of(500) {
-            eprintln!(
-                "{}",
-                json!({"event":"stereo_progress","interface":interface,"accepted_buffers":samples.len(),"target_buffers":count,"rejected_buffers":camera.rejected,"rejected_before_first_valid":camera.rejected_before_first_valid,"rejected_after_first_valid":camera.rejected_after_first_valid,"sequence_gaps":camera.sequence_drops,"elapsed_seconds":capture_start.elapsed().as_secs_f64()})
-            );
-        }
-    }
-    let report = Report {
-        interface,
-        requested_fps,
-        samples,
-        rejected: camera.rejected,
-        rejected_before_first_valid: camera.rejected_before_first_valid,
-        rejected_after_first_valid: camera.rejected_after_first_valid,
-        missing: camera.metadata_missing,
-        gaps: camera.sequence_drops,
-        duplicate_pts: camera.duplicate_sensor_pts,
-        rejection_samples: camera.rejection_samples.clone(),
-        ongoing_rejection_samples: camera.ongoing_rejection_samples.clone(),
-    };
-    // Stopping/restoring one interface can disturb its still-acquiring peer.
-    // Keep camera ownership in this worker until both finite acquisitions finish.
-    completion.wait(cancel, termination::check)?;
-    camera.close().map_err(|e| e.to_string())?;
-    if let Some(writer) = writer {
-        let out = writer.finish().map_err(|e| e.to_string())?;
-        out.get_ref().sync_all().map_err(|e| e.to_string())?;
-    }
-    Ok(report)
+        let report = Report {
+            interface,
+            requested_fps,
+            samples,
+            rejected: camera.rejected,
+            rejected_before_first_valid: camera.rejected_before_first_valid,
+            rejected_after_first_valid: camera.rejected_after_first_valid,
+            missing: camera.metadata_missing,
+            gaps: camera.sequence_drops,
+            duplicate_pts: camera.duplicate_sensor_pts,
+            rejection_samples: camera.rejection_samples.clone(),
+            ongoing_rejection_samples: camera.ongoing_rejection_samples.clone(),
+        };
+        // Stopping/restoring one interface can disturb its still-acquiring peer.
+        // Keep camera ownership in this worker until both finite acquisitions finish.
+        completion.wait(cancel, termination::check)?;
+        Ok(report)
+    })();
+    recording::complete(
+        acquired,
+        cancel,
+        || camera.close().map_err(|e| e.to_string()),
+        || {
+            if let Some(writer) = writer.take() {
+                let out = writer.finish().map_err(|e| e.to_string())?;
+                out.get_ref().sync_all().map_err(|e| e.to_string())?;
+            }
+            Ok(())
+        },
+    )
 }
 fn summary(r: &Report) -> Value {
     let first = r.samples.first().unwrap();
@@ -443,6 +458,8 @@ fn record_trial(
         }
         report["schema_version"] = json!(1);
         report["raw_recordings"] = json!({"left":"left.raptor","right":"right.raptor","saved_frames_each":count,"full_crc_footer_replay":"PASS","capture_context":"GET-only setup observations recorded; binding, per-frame settings and calibration remain unverified","setup_observations_recorded":true});
+        report["raw_recordings"]["recording_queue_capacity_per_camera"] =
+            json!(recording::QUEUE_CAPACITY);
         if matches!(illumination, IlluminationTrial::Line) {
             report["raw_recordings"]["capture_context"] = json!(
                 "SDK line-laser boolean reported enabled before stream setup and verified after capture; physical emission, wavelength and calibration binding unverified"

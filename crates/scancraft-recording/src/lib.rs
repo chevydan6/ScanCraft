@@ -1,5 +1,6 @@
 //! Streaming recording v2. CRC covers the session header and every frame.
 pub mod indexed;
+pub mod queued;
 pub mod selection;
 use scancraft_core::{Frame, StreamProfile, uvc_pts, validate_frame};
 use std::io::{self, Read, Write};
