@@ -3810,3 +3810,44 @@ See updated docs/RAPTOR_USB_STARTUP_FRAMING.md and private restart-usb-qitbu8ek.
 No validators/counters weakened, no rejected data relabeled accepted. Existing
 850-test sourcegate retained; documentation-only publication. No new CodeRabbit
 review or independent finding closure. Reviewer-owned records remain untouched.
+
+## Controlled USB queue-depth hardware comparison — 2026-11-03
+
+SCAN-REV-006 remains accepted and unqualified. Source
+23d075c30244b489c612b622291142e85b48b5f3 and the unchanged native CLI ran two
+ABBA comparisons with the existing GPL-2.0-only experimental kernel candidate.
+No application, kernel-patch or validation implementation was changed here.
+The local pre-rebrand parameter is raptor_urbs, versus published scancraft_urbs;
+explicit name mapping reproduces the candidate sources. A clean-copy rebuild
+is byte-identical and the existing policy cases pass79/79.
+
+Depth5:8400accepted/37ongoing rejects (0.438545% proxy); depth32:8400accepted/
+0ongoing rejects. All16800acceptedbuffers/16recordings pass full native replay.
+Startup rejects467/181 remain counted; all-rejection proxies5.660377%/2.109311%.
+Allpertrial IRformat/rate/illumination readbacks pass. One depth32 stream has a
+reported sequence gap and doubledPTS step without a rejectedbuffer, after a
+153.1ms gap between dequeue calls. This supports investigating application
+servicing/backpressure separately; it does not establish the pause's cause.
+Selected equalPTS images remain recognizable; the right board edge is clipped.
+
+Original module/parameters and the idle WirePlumber service are restored.
+Re-enumeration changed IRformats, explicitly corrected under scannerlocks and
+verified against saved native readbacks. Initial unload refusal and the first
+smoke harness's empty-trace failure are preserved, not silently discarded.
+No forced unload, persistent install, firmware write or main-branch merge.
+SCAN-REV-005 hard cleanup deadlines and021 live IRcapacity remain separate/open;
+finite1800frame CLI recordings do not resolve those findings.
+
+Changed publication files: docs/RAPTOR_QUEUE_DEPTH_TRIAL.md,
+experiments/kernel-queue/README.md, PROJECT_STATUS.md and this developer response.
+Private evidence: queue-preflight-v7m5pshf. Full method, resource limits and exact
+source/binary bindings are in the trial report. Existing850-test Rust sourcegate
+and exact23d075c publicCI passed; no redundant Rustgate for evidence-only docs.
+No new independent review closure or qualified geometry claim. Reviewer-owned
+files, severities, statuses and conclusions remain untouched.
+CodeRabbit usage was rechecked from the repository and returned lookup_failed
+for included reviews, billing period and credits; no paid request or completed
+CLI review claimed. An initial usage invocation from outside the repository
+returned not_git_repository for included reviews and is retained separately.
+PR32's current inline-thread list was empty at the checked snapshot, not review
+approval; its existing draft review behavior remains unchanged.

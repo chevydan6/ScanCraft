@@ -1,5 +1,19 @@
 # Project status
 
+[Controlled queue-depth trials](docs/RAPTOR_QUEUE_DEPTH_TRIAL.md) now provide
+actual hardware evidence for the existing experimental kernel candidate.
+Two ABBA comparisons retained and replayed 16,800 accepted buffers: depth 5
+had 37 ongoing rejects over 8,400 accepted buffers (0.438545% ongoing proxy),
+depth 32 had zero over 8,400. Startup still fails; the all-rejection proxies
+are 5.660377% and 2.109311%. One depth-32 sequence/PTS gap follows a long
+application-service pause, so zero rejects is not losslessness. The candidate
+rebuilt byte-identically and passed 79 policy checks. Original driver, parameters,
+service and saved IR/illumination readbacks are restored; no persistent install.
+Longest individual capture is about one minute, not sustained qualification.
+Next: longer/stress trials and explicit recording/queue timing, while keeping
+startup framing and physical reconstruction requirements separate. Existing
+850-test source gate is unchanged; exact preceding head23d075c public CI passed.
+
 [Consecutive USB restart traces](docs/RAPTOR_USB_STARTUP_FRAMING.md#consecutive-restart-reproduction)
 reproduce the shifted framing twice, including after a three-second pause and
 successful stop-time clear-halt requests. A separate ongoing truncated stereo
