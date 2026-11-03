@@ -187,7 +187,7 @@ module, kernel or firmware changes were made in these reproduction trials.
 A later [counterbalanced reset experiment](RAPTOR_USB_RESET_TRIAL.md) retains
 large startup bursts in two of four successful USB connection-reset trials.
 All captures/rejections are retained and checked state restores. This rules out
-assuming that a successful reset reliably fixes startup. The new native counters
-do not independently establish the shifted-header layout; a complete trace across
-reset/negotiation/startup is the next diagnostic. Source 907484e preserves strict
+assuming that a successful reset reliably fixes startup. The initial native counters did not establish the shifted-header layout. A
+subsequent complete trace in that report now verifies the same 6,144-byte shift
+after acknowledged reset/configuration and UVC negotiation in both cameras. Source 907484e preserves strict
 validation and corrects metadata return order, a separate reproduced defect.

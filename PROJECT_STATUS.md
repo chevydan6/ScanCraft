@@ -1,5 +1,14 @@
 # Project status
 
+[Post-reset USB trace](docs/RAPTOR_USB_RESET_TRIAL.md#complete-trace-across-one-reset-and-startup)
+confirms that acknowledged USB reconfiguration does not prevent the previously
+observed header shift: both cameras retain an 18,432-byte prefix and headers
+shifted by 6,144 bytes. All 120 accepted frames replay; 49,890 monitor packets have
+no reported drops/truncations or unmatched requests. Four accepted sample images
+match USB pixels exactly. Checked state restores. A higher-level SDK vendor stop
+command is a new lead, but Raptor GET queries return 0x2 and write support remains
+unverified. No production reset, decoder or relaxed validation was added.
+
 [Idle USB reset comparison](docs/RAPTOR_USB_RESET_TRIAL.md) rules out treating a
 connection reset as a reliable startup fix: two of four reset trials still have
 large startup bursts. Four control tests also fail. All seed/test captures are

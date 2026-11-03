@@ -4052,3 +4052,34 @@ prove the earlier shifted-header mechanism in these post-reset failures.
 
 The repository-scoped CodeRabbit quota retry again returns lookup_failed; no paid
 request or completed new review is claimed. Independent findings remain unchanged.
+
+
+## DEV-POST-RESET-FRAMING — traced persistence and SDK lead — 2026-11-03
+
+Developer evidence, not an independent finding or closure. Source 907484e remains
+unchanged. A predeclared first-burst/max-four-reset diagnostic stops after one seed
+and post-reset test; this is not a rate comparison. Seed startup L/R 106/0, post-
+reset 102/94; post-reset ongoing/gaps 1/1. All 120 accepted frames/four recordings
+replay. The 49,890-packet USB monitor has zero reported drops, balanced IDs and
+complete captured payloads. Reset succeeds; configuration/interface controls fall
+inside its call interval, followed by successful UVC commits. Both post-reset
+streams retain an 18,432-byte prefix and the 6,144-byte header displacement.
+
+Offline header-chain checks yield complete diagnostic board images without
+changing native acceptance. Four accepted sample images equal USB payload removal
+byte-for-byte. All seven native snapshot groups, five idle formats, service and
+module state restore. Private reset-usb-gixqz92r retains reproducible analysis,
+raw traces, recordings and readbacks. Public reset-trial/startup-framing reports,
+PROJECT_STATUS and this response record the evidence; no production code changes.
+
+MIT SDK VideoSensor::stop at 85e94c4 has a conditional higher-level vendor stop;
+38/39/139 are defined stop property IDs. Raptor read-only probes return status0x2
+for all three. Write-only SDK registrations prevent treating that as proof about
+setter support. No stop setter is sent. Device-specific operational evidence is
+still needed before adopting this lead. Source 863-test gate is unchanged and
+6c44cd2 CI41649077142 passes. No independent closure, physical accuracy or release
+qualification is claimed.
+
+The current repository-scoped CodeRabbit quota lookup again reports `lookup_failed`
+for included reviews, billing period and credits. No paid request, completed new
+review or independent approval is claimed.

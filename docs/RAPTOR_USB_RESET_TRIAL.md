@@ -93,14 +93,105 @@ not additional synthetic algorithm tests or independent review approval. The new
 CodeRabbit quota check again returns `lookup_failed`; no new completed or paid
 review is claimed.
 
-**Next diagnostic:** correlate a successful connection reset, UVC negotiation and
-initial payload headers in one complete USB trace to determine whether post-reset
-bursts share the previously demonstrated shifted-header mechanism. Existing
-[startup framing evidence](RAPTOR_USB_STARTUP_FRAMING.md) establishes that mechanism
-for earlier non-reset captures; these native counters alone do not prove it for
-this new intervention. Any future bounded framing recovery must preserve rejected
-bytes/errors and reject false headers in image data. An arbitrary production reset
-or relaxed frame validation is not supported by these results.
+The post-reset trace below completes the next diagnostic from this comparison.
+The native counter failure is now linked to the same displaced-header layout in
+one newly traced reset incident. No production reset or relaxed validation follows.
 
 The first independently measured object scan, full board coverage/physical units,
 ongoing transport reliability and end-to-end native GUI qualification remain open.
+
+
+## Complete trace across one reset and startup
+
+A separate observation uses unchanged application source 907484e and repository
+HEAD `6c44cd252a1f0fe4731337640f779953fd9a21de`. Its predeclared stopping rule is
+the first post-reset test with at least ten startup rejects, or four reset/seed
+pairs, retaining every attempt. The first pair meets the rule. This selected
+failure observation is **not** a new reset success-rate estimate.
+
+The seed and post-reset test each save 30 accepted frames/camera:
+
+| Capture | Startup rejects L/R | Ongoing rejects L/R | Sequence gaps L/R |
+| --- | ---: | ---: | ---: |
+| Seed | 106 / 0 | 0 / 0 | 0 / 0 |
+| After reset | 102 / 94 | 1 / 1 | 1 / 1 |
+
+All **120 accepted frames in four recordings** pass complete native replay.
+Their native ioctl traces have 2,878 rows including footers, zero lost/error rows
+and 424 matching metadata returns before video reuse. All original rejects remain.
+
+Tcpdump 4.99.6/libpcap 1.10.7 opens only the Raptor's discovered USB bus monitor,
+filters its verified device address and explicitly drops to the owner account
+before acquisition. Snapshot size is 245,824 bytes; monitor buffer is 65,536 KiB.
+It records **49,890 packets**, with the same received count and zero reported
+kernel drops. Every request ID balances; there are no pending/unmatched requests,
+truncated capture packets or truncated successful bulk payloads. Twenty terminal
+bulk completions have -ENOENT; 24,411 succeed. These are HCD/driver observations
+for the selected address, not physical wire proof or root-hub reset packets.
+The device address remains unchanged across the reset.
+
+The reset ioctl succeeds in **148.869898 ms**. Successful SET_CONFIGURATION(1)
+and alternate-setting-zero requests for interfaces 1, 3 and 5 occur within the
+recorded reset call interval. Subsequent successful video COMMIT requests for
+interfaces 1/3 specify 2,304,000-byte frames and 12,288-byte maximum payloads at
+333,333 units of 100 ns per frame. Thus this observed failure follows acknowledged
+configuration and stream negotiation, not merely a failed reset request.
+
+Both post-reset streams begin with an **18,432-byte leading prefix**. The next
+complete frame's headers are displaced **6,144 bytes modulo 12,288**. Each prefix
+through its first short completion is 2,324,688 bytes. Offline analysis identifies
+188 equally spaced, consistent headers: same PTS and FID, no error bit, EOF only
+on the last 8,400-byte block. Removing those headers yields exactly 2,304,000
+image bytes per camera. Both diagnostic images were inspected and show the real
+board, with its right edge still clipped in the right view. These pixels are not
+inserted into accepted recordings or counted as recovered qualified frames.
+
+The leading prefix PTS in each camera is 33,337 ticks after that camera's last
+observed seed header. The subsequent complete frame is 4,607,370 PTS ticks newer
+than the prefix. **Engineering inference:** this supports persistence of old
+stream material through the USB connection reset. It still does not locate that
+material in a specific device FIFO, host-controller buffer or other component.
+The seed itself has the same shift on the left, while its right stream is aligned.
+
+For accepted frame index 10 in each of the four recordings, independent removal
+of USB headers produces pixels byte-identical to the native exported PNG. This
+checks stream/data association for accepted samples; it does not turn the offline
+startup diagnostic into a production decoder or prove every image geometrically
+accurate. The two continuing truncations remain separate errors.
+
+Private `reset-usb-gixqz92r` retains the complete pcap, plan/stop rule, reset-call
+and capture intervals, native recordings/replays, buffered ioctl traces,
+`analyze_usb.py`, `analyze.py`, accepted-byte comparisons, diagnostic images and
+state evidence, bound by SHA-256 manifests. All seven native snapshot groups and
+five idle camera format/interval structures restore; service and installed module
+are unchanged. Exact preceding head 6c44cd2 passed CI41649077142. No firmware,
+application or driver implementation change is made in this observation.
+
+## Higher-level SDK stop command: a lead, not confirmed Raptor support
+
+The inspected MIT OrbbecSDK_v2 checkout is commit
+`85e94c4ee4032817df2e33228dbd7f51517d3d4e`.
+[VideoSensor::stop and trySendStopStreamVendorCmd](https://github.com/orbbec/OrbbecSDK_v2/blob/85e94c4ee4032817df2e33228dbd7f51517d3d4e/src/device/component/sensor/video/VideoSensor.cpp)
+show a higher-level vendor stop after the backend stream closes, conditional on
+that model's registered internal write support.
+[InternalProperty.hpp](https://github.com/orbbec/OrbbecSDK_v2/blob/85e94c4ee4032817df2e33228dbd7f51517d3d4e/src/device/component/property/InternalProperty.hpp)
+defines depth/left-IR/right-IR stop properties 38/39/139. These SDK definitions
+are not evidence that the Raptor implements those commands or uses that mapping.
+No upstream source is copied into ScanCraft by this investigation.
+
+A fixed, read-only GET_PROPERTY probe returns status **0x2**, with no payload,
+for all three IDs. No stop setter is sent. Some SDK models register these
+properties as write-only, so failed reads do not establish failed write support.
+The parseable records of an existing private vendor-bridge control log contain
+no matching stop writes;
+that limited log is not proof that CrealityScan never sends them. Native snapshots
+still match after the read-only probes. Source hashes and query evidence are
+retained privately in `sdk-stop-reference.json` and `stop-property-reads.json`.
+
+**Next:** establish the device-specific stop/start command behavior from the
+vendor path or a carefully bounded operational experiment, preserving failures
+and state restoration. Evaluate framing recovery against complete retained bytes
+and adversarial header patterns if needed. Do not equate GET failure with setter
+support, add an arbitrary reset, or accept malformed V4L2 buffers to improve rates.
+Physical units, the measured object and native end-to-end reconstruction remain
+the qualification priority.
