@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "source_commit": "9e72156970e75df96be9f57f0bff791edd8a5222",
+  "cli_sha256": "5fa6c93c2a25d2bae0af0e821af500e81226930b98f32a48fcf27cfc71e3914c",
+  "command": "scancraft-cli stereo-probe 18010 --fps 30",
+  "start_utc": "2026-11-02T12:04:33.348620+00:00",
+  "end_utc": "2026-11-02T12:14:37.816730+00:00",
+  "kernel": "7.2.11-6900hs-lto",
+  "exit_code": 0,
+  "binary_unchanged": true,
+  "raw_recording_saved": false,
+  "resources": {
+    "elapsed_wall_seconds": 604.4680847080308,
+    "user_cpu_seconds": 10.145954,
+    "system_cpu_seconds": 0.7168899999999999,
+    "peak_resident_kib_linux": 51204
+  },
+  "result": {
+    "elapsed_seconds": 604.336347928,
+    "exact_sensor_pts_matches": 18007,
+    "reported_stream_settings_restoration": "PASS",
+    "synchronization_verified": false,
+    "exposure_timing_verified": false,
+    "left": {
+      "valid_frames": 18010,
+      "rejected_before_first_valid": 1,
+      "rejected_after_first_valid": 98,
+      "sequence_gaps": 98,
+      "metadata_missing": 0,
+      "duplicate_sensor_pts": 0,
+      "accepted_host_span_seconds": 603.642198,
+      "accepted_buffer_rate_hz": 29.83389839157666,
+      "ongoing_rejected_buffer_proxy_percent": 0.5411972608791694,
+      "rejected_buffers_including_startup": 99,
+      "all_rejected_buffer_proxy_percent": 0.5466894914131095
+    },
+    "right": {
+      "valid_frames": 18010,
+      "rejected_before_first_valid": 87,
+      "rejected_after_first_valid": 102,
+      "sequence_gaps": 102,
+      "metadata_missing": 0,
+      "duplicate_sensor_pts": 0,
+      "accepted_host_span_seconds": 603.775574,
+      "accepted_buffer_rate_hz": 29.827307985798047,
+      "ongoing_rejected_buffer_proxy_percent": 0.5631625441696113,
+      "rejected_buffers_including_startup": 189,
+      "all_rejected_buffer_proxy_percent": 1.0385185999230726
+    }
+  },
+  "interpretation": "Single native acquisition run; V4L2 rejection proxy is not a physical exposure count. No exposure timing, geometry, end-to-end scanning or memory-growth qualification."
+}

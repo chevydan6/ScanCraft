@@ -1,5 +1,11 @@
 # Benchmarks
 
+Current acquisition-only repeatability evidence (2026-11-02): a source/binary-bound
+ten-minute stereo probe accepted 18,010 frames per camera at about 29.83 Hz,
+but ongoing rejected-buffer proxies were 0.54–0.56%. Resource accounting and
+limits are documented in [NATIVE_CAPTURE_REPEATABILITY.md](docs/NATIVE_CAPTURE_REPEATABILITY.md).
+This is not a full scanning throughput or accuracy benchmark.
+
 Initial experiments: AMD Ryzen 9 6900HS / Radeon 680M, Linux
 7.2.11-6900hs-lto, Raptor USB 3 (5000 Mbps), firmware 1.5.7.
 
@@ -8,8 +14,10 @@ left IR 100 frames / 2.161 s; right IR 100 frames / 2.157 s. Startup is
 included. These short experiments are not sustained throughput benchmarks.
 Raw sensor setting is 1920x1200 GREY at 50 fps. See evidence JSON for counters.
 
-Pending: release builds; ten-minute acquisition; thirty-minute live pipeline;
-sixty-minute memory stability; timing distribution and p95 latency; comparison
+Release compilation and ten-minute structural acquisition duration are now
+verified in the stated experiments; the buffer-rejection reliability gate still
+fails. Pending: thirty-minute live pipeline; sixty-minute memory stability;
+timing distribution and p95 latency; comparison
 against matched Creality Scan modes; calibrated geometry ground truth. No
 manufacturer accuracy or processing-throughput claims are made.
 

@@ -21,6 +21,8 @@ PASS means the stated narrow experiment passed, not the full release gate.
 | Dual-IR buffer rejection proxy | FAIL, 92 / 18,192 per camera = 0.505717% | Same trial; no warmup exclusion; not physical exposure counts |
 | Post-soak warm reopen quality | INCOMPLETE / ISSUE OBSERVED, valid buffers but 111 left / 1 right rejects | evidence/stereo-ir-soak-20261026/after-soak-probe.json |
 | Full device reliability gate | INCOMPLETE / FAIL | Cold reconnection unqualified; corruption threshold fails |
+| Dual-IR duration repeat, 2026-11-02 | PASS, one run; 18,010 accepted per camera over >603 s | [Bound source/binary and results](docs/NATIVE_CAPTURE_REPEATABILITY.md) |
+| Ongoing buffer rejection proxy, 2026-11-02 | FAIL, left 0.5412%, right 0.5632%; startup separately retained | Same run; V4L2 buffers, not physical exposure counts |
 | Calibration and geometry accuracy | DEFERRED | User request; no calibrated ground truth |
 | Full native live-scan-to-qualified-mesh release | INCOMPLETE | Offline mesh tools exist; calibrated live pipeline and release qualification remain open |
 | Editing full mission gate | INCOMPLETE | Basic offline tools implemented; advanced operations pending |
