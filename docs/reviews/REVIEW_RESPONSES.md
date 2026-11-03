@@ -4155,3 +4155,45 @@ See LIVE_RECORDING_QUEUE.md and updated LIVE_STEREO_SCAN.md/BOUNDED_RECORDING.md
 
 Implementation commit for DEV-LIVE-RECORDING: `e3db8f9e16ac349e29560757d124a68a7b8182e7`.
 Independent verification/closure remains pending.
+
+
+## SCAN-REV-027 — coordinated live completion and cooperative cancellation
+
+Accepted. Two unique pre-spawn participant slots now coordinate acquisition
+completion before explicit source close. Failed-open, unstarted and unwinding
+slots cancel and retire, avoiding an absent-peer wait. Acquisition errors still
+cancel before completion; a stop flag does not prematurely release an in-flight
+peer. Source cleanup remains before recording drain/sync, and all errors are
+retained. Additive Source::next_until preserves existing adapters through a default
+method; the native adapter forwards internal failure and public GUI stop to
+Capture's existing cooperative boundaries. No forced close or driver preemption.
+
+Changed source: workflow live_stereo/runner.rs, runner/completion.rs and its two
+test modules, runner/recording.rs and its tests, and acquisition/src/lib.rs. Six new
+regressions cover EOF, maximum frames, GUI stop, read error/panic, missing/unwinding
+slots, actual open errors/panics, and both cancellation signals during a read.
+Existing bundle/writer regressions remain. The full gate passes 875 tests, one
+existing ignored test, formatting, strict Clippy and optimized workspace builds.
+Initial test Debug-format and malformed synthetic metadata fixture failures are
+retained and corrected; production validation is unchanged.
+
+Private live-completion-20261104 binds exact source, libraries and probes. Fixed
+corrected/old/old/corrected hardware trials request 300 frames per camera, holding
+the right final read until after left reaches 300. Post-peer-STREAMOFF right
+dequeues are 0/1/1/0; the old worker's returned last frames remain valid. This proves
+ordering, not rejection-rate improvement. Startup rejects are 4/0, 1/1, 1/0, 2/0;
+ongoing rejects are 2/2, 2/2, 3/3, 2/2. Corrected 600 ms write overflow fails with
+208/209 saved from 209/209 captured, one stopped incomplete right video buffer,
+and zero ongoing rejects. Nine left dequeues complete during the write; all four
+STREAMOFFs finish before it ends, with no dequeue during/after peer close. All
+2,817 saved frames in ten recordings replay. All seven native groups, five idle
+formats, service and baseline module restore. No firmware write, reset or installed
+driver change. LIVE_SOURCE_COMPLETION.md documents methods, checks and limits.
+
+Only the independent reviewer may verify/close 027. Findings 005 (cleanup deadlines),
+006 (physical qualification) and 021 (capacity) remain unresolved. Cooperative
+polling cannot bound synchronous driver calls/joins; partial source construction
+remains adapter-owned. No complete GUI, reconstruction or physical-scale claim.
+CodeRabbit quota lookup failed; no new completed or paid review is claimed.
+
+Implementation commit: `01b183aa9c7d33563e11d7726b892bc0357f6e48`.

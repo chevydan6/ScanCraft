@@ -1,12 +1,18 @@
 # Project status
 
-Latest implementation: live IR recording now reuses the bounded eight-frame writer,
-with validation before pixel copies, explicit overflow, and source close before
-storage drain. Full869-test/fmt/Clippy/release gate passes. Real-worker200msstall
-allows6dequeues;600msstall explicitlyfails and preserves208/210-frame prefixes.
-All1,618savedframesreplay. Ordinary capture exposes the separate live peer-close
-defect (95leftrejects afterrightSTREAMOFF); lifecyclecoordination is next.
-See [live recording evidence and limitations](docs/LIVE_RECORDING_QUEUE.md).
+Latest implementation: live IR source owners now coordinate acquisition completion
+before either closes. An additive cancellation callback reaches native read
+boundaries on peer failure and GUI stop. The full gate passes 875 tests, formatting,
+strict Clippy and release builds. Controlled corrected/old/old/corrected Raptor
+trials show 0/1/1/0 right video dequeues after peer shutdown; ongoing rejection
+counts remain nonzero. Corrected 600 ms write overflow preserves 208/209-frame
+prefixes and explicitly fails. All 2,817 saved frames in ten recordings replay;
+state, formats and service restore. Independent SCAN-REV-027 verification is
+pending. Hard cleanup deadlines, live capacity and the first measured object
+reconstruction remain incomplete. See [source completion](docs/LIVE_SOURCE_COMPLETION.md).
+
+Earlier [bounded live recording](docs/LIVE_RECORDING_QUEUE.md) integrated the
+eight-frame writer and exposed the now-addressed shutdown ordering defect.
 
 Latest vendor-stop investigation: SDK properties39/38 acknowledge all eight fixed
 requests, yet every stop arm in an eight-test ABBA BAAB comparison retains a

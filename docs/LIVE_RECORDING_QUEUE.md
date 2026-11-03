@@ -1,5 +1,9 @@
 # Bounded recording in the live stereo worker
 
+This report preserves the initial bounded-writer milestone. Its disclosed peer
+shutdown defect is addressed by the subsequent [completion correction](LIVE_SOURCE_COMPLETION.md);
+the original measurements below are unchanged.
+
 Implementation commit: `e3db8f9e16ac349e29560757d124a68a7b8182e7`.
 
 ## Problem and correction

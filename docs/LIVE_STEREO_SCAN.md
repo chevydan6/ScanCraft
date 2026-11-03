@@ -3,8 +3,8 @@
 `scancraft-cli scan-live-stereo CALIBRATION RECONSTRUCTION_SETTINGS SCAN_SETTINGS NEW_DIRECTORY`
 connects native Raptor acquisition directly to the existing Rust stereo processor,
 point-to-point tracking, voxel fusion, recording and editable-cloud export. This
-is a finite CLI scanning path, not a qualified live GUI mode. The scanner is
-currently unavailable for this implementation's hardware validation. Do not use
+is a finite CLI scanning path, not a qualified live GUI mode. Initial implementation validation was device-free; subsequent native worker
+trials are documented in [source completion](LIVE_SOURCE_COMPLETION.md). Do not use
 synthetic tests to infer optical accuracy, exposure synchronization, sustained
 throughput, reliable reconnection or bounded driver shutdown.
 
@@ -14,7 +14,8 @@ binding; synthetic calibrations are rejected before device opening. Matching
 serial/firmware/mode declarations are **not hardware attestation**. Factory-field
 mapping, active image orientation and physical qualification remain unresolved;
 the command never guesses those values or promotes a record to qualified status.
-Physical calibration remains deferred. There is no illumination, gain, mirror,
+Physical calibration is authorized; independently measured reconstruction remains
+unqualified. There is no illumination, gain, mirror,
 projector, firmware or physical calibration operation in this command. It does
 configure and restore V4L2 format/rate through the existing native device API.
 
@@ -80,15 +81,20 @@ full replay. Raw recording layout, validation and checksums remain unchanged.
 `recorded_frames`, `queued_frames`, `processing_queue_drops` and device rejection
 statistics remain separate; none counts lost physical exposures exactly.
 
-Acquisition errors and panics cancel the peer before source cleanup. Source
-cleanup runs before recording drain/sync, with acquisition, cleanup and storage
+Acquisition errors and panics cancel the peer before source cleanup. Unique
+pre-spawn completion slots keep both sources open until both acquisitions finish.
+Missing/open-failed/unwinding slots retire and cancel. The additive Source::next_until
+callback reaches native cooperative reads for internal failure and GUI stop;
+legacy sources retain their existing next method through the default adapter.
+Source cleanup runs before recording drain/sync, with acquisition, cleanup and storage
 errors retained. A writer error or failed sync cannot publish success. The
 storage worker retains at most eight queued frames plus its current frame and
 serialization buffer, in addition to processing/association/preview ownership.
 The new copy adds allocation and bandwidth costs; no measured speedup follows.
 File opening/header creation, driver operations, storage joins and sync remain
-synchronous where invoked and have no hard deadline. The separate normal-peer
-completion coordination and 1,000-frame live capacity are still unresolved.
+synchronous where invoked and have no hard deadline. Completion coordination
+waits for in-flight reads; it does not preempt them. The 1,000-frame live capacity
+is still unresolved. See [completion evidence and limits](LIVE_SOURCE_COMPLETION.md).
 
 See [live recording integration evidence](LIVE_RECORDING_QUEUE.md).
 
