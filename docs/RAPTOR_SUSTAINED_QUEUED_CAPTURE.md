@@ -82,6 +82,24 @@ was returned by the ioctl; this is not just a report-formatting omission.
 The accepted-frame missing-metadata counter being zero does **not** erase this
 rejected frame. Its underlying cause remains unknown.
 
+Follow-up timing inspection finds about 106 ms between returning left video buffer
+index 3 for sequence 17571 and returning its matching metadata buffer. Metadata
+poll itself then takes only about 5 µs; the delay precedes that poll. The metadata
+buffer is returned after the driver's recorded timestamp for sequence 17575,
+which reuses index 3 and has empty metadata. In the bound candidate's
+`uvc_video_decode_start`, metadata becomes ACTIVE only when the video buffer does;
+`uvc_video_decode_meta` skips metadata that is not ACTIVE. **Hypothesis:** delayed
+metadata requeue can leave a later video frame without timestamp metadata.
+This requires a controlled reproduction before a correction is justified.
+
+The pause overlaps the longest right recording write. Scheduling, faults and
+diagnostic overhead are not distinguished: the tracer itself synchronously writes
+its rows, and those trace-file writes are not separately timed. Therefore neither
+the recording writer nor ordinary uninstrumented application execution is proven
+to cause the pause. `missing-pts-queue-context.json` and
+`missing-pts-thread-context.json` preserve the relevant calls; no validation was
+relaxed and no speculative queue-order change was made.
+
 There are 17,998 exact raw PTS matches. The diagnostic nearest-host sample reports
 2–162 µs deltas, median 19 µs, with equal raw PTS for those candidates. Both
 `synchronization_verified` and exposure qualification remain false. Shared raw

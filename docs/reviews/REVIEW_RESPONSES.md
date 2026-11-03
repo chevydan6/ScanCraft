@@ -3929,3 +3929,11 @@ Private source-bound evidence: sustained-queued-hln5i2yy. Unchanged source's pri
 was run for this evidence-only milestone. CodeRabbit quota again lookup_failed;
 no new completed review or paid request claimed. PR32 remains draft/unmerged;
 an empty thread snapshot is not approval. Reviewer-owned files are untouched.
+
+Sustained-evidence follow-up: timing around sequence17575 shows approximately106ms
+between video and metadata requeue for index3 at sequence17571, while metadata
+poll itself takes about5us. Kernel ACTIVE-state handling suggests a late-metadata
+queue hypothesis. This is not a confirmed root cause: synchronous tracer writes
+are not independently timed and scheduling/faults remain possible. Queue/thread
+trace contexts are retained privately and the report now states this observer
+limitation. No acquisition change or independent-review closure is claimed.
