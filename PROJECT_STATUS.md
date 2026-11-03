@@ -1,5 +1,16 @@
 # Project status
 
+Latest hardware validation: the budgeted native recording worker saves **1,200
+frames per camera**, with every saved payload/metadata CRC matching pre-recording
+data. A deliberately insufficient left quota fails explicitly, retains a
+200-frame prefix and a complete 202-frame right recording, and restores checked
+state. All 2,802 complete original records verify. Normal-trial ongoing rejects
+are 12/11 (0.949237% combined), so reliability still fails the 0.1% target. The
+probe omits calibrated processing; this is not a complete scan. See
+[native worker evidence and limits](docs/LIVE_EXTENDED_SESSIONS.md#native-worker-validation).
+The source gate remains 888 tests; 690643c CI41671761778/run239 passed.
+
+
 Latest capacity integration: opt-in IR schema 2 admits up to **100,000 frames per
 camera** with explicit raw/journal/bundle budgets, segmented full observations and
 ORPROJ09 project lineage. Legacy schema 1 remains supported. Full 888-test/fmt/Clippy/

@@ -148,3 +148,60 @@ Sustained Raptor acquisition, processing at least 90% of valid incoming frames,
 30-minute reliability, whole-app memory/latency, physical calibration and repeated
 measured object reconstruction remain unqualified. SCAN-REV-021 awaits independent
 assessment of this implementation; only the reviewer may close it.
+
+## Native worker validation
+
+A subsequent genuine Raptor trial at implementation `2cbd5e04d790d17efee9cb16cdb90938e799d38c`
+records **1,200 accepted frames per camera** through the budgeted raw sink. Both
+original recordings replay completely. An independent streaming parser checks all
+frame/header CRCs and compares every saved frame's image/metadata CRC, sequence,
+host timestamp, flags and byte lengths with samples taken before recording. The
+files contain 2,764,868,061 / 2,764,868,111 bytes, below their admitted worker quotas.
+
+The installed baseline driver is unchanged. Startup rejects are 0/0, ongoing
+rejects and sequence gaps are 12/11. The combined rejected-buffer proxy is
+`23 / (2400 + 23) = 0.949237%`, above the `<0.1%` target. No validation threshold or
+counter is relaxed, and there is no controlled comparison establishing a rate
+change caused by the budgeted sink. First-to-last accepted host timestamps span
+40.371684 / 40.338363 seconds. Whole-probe `time -v` reports 41.36 s elapsed,
+3.10 s user CPU, 3.37 s system CPU and peak RSS 58,932 KiB.
+
+Independent timestamp comparison and the release CLI find 1,199 unique equal-PTS
+candidates within 1,000 microseconds. Their absolute host deltas are 2–159 us,
+median 19 us and p95 80 us. Equal PTS and nearby host callbacks do not prove exposure
+synchronization. The final left/right images show usable calibration-board markers;
+the right board edge remains clipped, and no measured printed object is in view.
+
+A second private worker trial intentionally gives the left sink a 200-frame raw
+budget while requesting up to 300 frames. This bypasses configuration admission
+**only in the private fault-injection harness**; normal schema 2 admission rejects
+such an insufficient budget. The worker reports the required byte-budget failure
+and the probe exits 2. Both cameras return 202 accepted frames before cleanup.
+The left file retains 200 complete frames plus eight bytes of an incomplete record
+and no footer; the right file retains 202 frames and a valid footer. Neither file
+exceeds its configured budget. Recovery creates separately validated 200/202-frame
+recordings, preserving the originals. The two returned but unsaved left frames are
+not represented as successful storage. All 2,802 distinct complete original frame
+records across both trials match their pre-recording data.
+
+Seven scanner state groups compare equal after each trial and at final restoration
+(21 comparisons). All five idle camera formats and the prior WirePlumber service
+state restore. Installed module bytes and parameters match the baseline. No firmware,
+calibration, permanent driver change or application-source edit is involved.
+
+Scope: the private probe compiles exact `runner/recording.rs` and `completion.rs`,
+plus the exact `CappedFile` code block with import/module scaffolding, against the
+current release dependencies. It uses a fixed-no-command Control shim and leaves
+optional processing queues deliberately undrained. Thus processing drops are
+expected; this does **not** exercise calibrated reconstruction, full runner journal
+publication, GUI scanning or the 90% processing target. It measures the native
+camera/recording path, with additional pre-recording CRC sampling. The deliberate
+quota failure is not a physical disk-full/power-loss test or a hard cleanup bound.
+
+Private `live-capacity-hardware-20261104` retains reproducible build/run/parser
+scripts, exact source and binary bindings, original/recovered recordings, native
+counter reports, timing/resource logs, snapshots and original final-frame exports.
+Production source and its passing 888-test gate remain unchanged; publication
+690643c CI41671761778/run239 subsequently passed. Physical scale, broader target
+coverage, genuine object reconstruction and sustained hardware qualification remain
+outstanding. SCAN-REV-021 remains subject to independent assessment.

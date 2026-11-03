@@ -4346,3 +4346,36 @@ Only the independent reviewer may resolve021. Sustained Raptor throughput/reject
 90% processing, 60-minute memory, bounded driver cleanup, physical calibration and
 three measured object trials remain unqualified. Reviewer-owned records untouched.
 Implementation commit: `2cbd5e04d790d17efee9cb16cdb90938e799d38c`.
+
+
+## DEV-EXTENDED-IR-HARDWARE — genuine budgeted worker validation
+
+Developer evidence supplement to SCAN-REV-021, not an independent closure. No
+application source change. Exact recording/completion modules and CappedFile code
+block from 2cbd5e04 / 690643c are compiled with a private fixed-no-command Control
+shim and native Capture adapter. Optional processing queues are undrained; this
+explicitly excludes the full calibrated runner, journal publication and GUI path.
+
+The ordinary trial saves/replays 1,200 frames per camera. Independent streaming
+validation compares every saved frame with pre-recording image/metadata CRCs,
+sequence, host, flags and lengths. Startup rejects 0/0, ongoing rejects/gaps 12/11;
+combined rejected-buffer proxy 0.949237% fails the target. Host spans are
+40.371684/40.338363 s; whole-probe wall41.36s, user3.10s, system3.37s, peakRSS58,932KiB.
+Equal-PTS candidates: 1,199, host deltas2–159us/median19/p95 80; synchronization remains
+unverified. Images show the board with its right edge still clipped.
+
+A deliberate private insufficient-left-budget trial exits2 with a required storage
+error, preserves 200 left complete frames +8 torn bytes and 202 complete right
+frames, from202/202returned. Normal schema2 admission would reject that configuration.
+Separate recovery preserves original bytes and produces valid 200/202-frame files.
+All2,802complete original records match the sampled input; no unsaved frame is counted
+as successfully stored. Both trials restore seven state groups; final checks restore
+five idle formats, service, module bytes/parameters. No firmware/permanent setup change.
+
+Reproducible private live-capacity-hardware-20261104 binds sources, scripts, binaries,
+raw/recovered recordings, state and resources. Public methods/results are in
+LIVE_EXTENDED_SESSIONS.md#native-worker-validation. Existing full888-test/fmt/Clippy/
+release gate is unchanged; exact690643c CI41671761778/run239 passed. Same-session
+CodeRabbit quota remains unavailable; no new/paid review. Physical qualification,
+sustained reliability, 90% processing, independent assessment and hard cleanup bounds
+remain outstanding. Reviewer files were read only.
