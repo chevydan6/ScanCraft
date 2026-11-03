@@ -160,3 +160,9 @@ SCAN-REV-006 remains under independent review; this software progress does not c
 When cost cannot decrease at machine precision, the current state may proceed
 under the unchanged final 1e-6 stationarity gate. All final residual, information,
 domain and rig checks still apply; a highly damped step alone is insufficient.
+
+
+For an explicit reconstruction-readable candidate derived from the same observation
+request and fitting gates, use the [calibration handoff](CALIBRATION_CANDIDATE.md).
+The existing diagnostic command remains unchanged; unknown coordinate units are
+not promoted to millimeters and no calibration is automatically activated.

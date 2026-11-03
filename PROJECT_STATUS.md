@@ -1,5 +1,14 @@
 # Project status
 
+Latest integration: `fit-calibration-candidate` connects existing fixed-lens stereo
+fitting to reconstruction-readable RAPCAL01 records. Exact observations and explicit
+unit/binding declarations are retained; synthetic provenance cannot become physical,
+and unknown units are rejected. Full 878-test/fmt/Clippy/release gate passes. The
+release CLI fits and reconstructs the three-point synthetic fixture; real retained
+QR inputs with unverified units correctly refuse publication. No camera operation
+or calibration activation. See [handoff and limits](docs/CALIBRATION_CANDIDATE.md).
+The first independently measured object scan remains unfinished.
+
 Latest implementation: live IR source owners now coordinate acquisition completion
 before either closes. An additive cancellation callback reaches native read
 boundaries on peer failure and GUI stop. The full gate passes 875 tests, formatting,
@@ -7,8 +16,8 @@ strict Clippy and release builds. Controlled corrected/old/old/corrected Raptor
 trials show 0/1/1/0 right video dequeues after peer shutdown; ongoing rejection
 counts remain nonzero. Corrected 600 ms write overflow preserves 208/209-frame
 prefixes and explicitly fails. All 2,817 saved frames in ten recordings replay;
-state, formats and service restore. Independent SCAN-REV-027 verification is
-pending. Hard cleanup deadlines, live capacity and the first measured object
+state, formats and service restore. The independent reviewer resolved SCAN-REV-027 at 01b183aa/447d960
+(assignment427). Hard cleanup deadlines, live capacity and the first measured object
 reconstruction remain incomplete. See [source completion](docs/LIVE_SOURCE_COMPLETION.md).
 
 Earlier [bounded live recording](docs/LIVE_RECORDING_QUEUE.md) integrated the

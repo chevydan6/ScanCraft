@@ -127,3 +127,10 @@ SCAN-REV-021 live capacity remain unresolved. This fix does not extend the
 1,000-frame live limit, establish camera synchronization, provide physical scale,
 or deliver the first independently measured object scan. Next priorities remain
 real calibrated reconstruction and the remaining acquisition/capacity defects.
+
+
+Independent follow-up: assignment427 verified implementation01b183aa and publication
+447d960, reran the875-test gate and audited all2817savedframes/tenrecordings and
+22942trace rows. The reviewer resolved SCAN-REV-027 for completion/cancellation.
+This does not close005/006/021 or qualify physical scanning. Exact447d960 GitHub
+Rust CI41661430467/run231 subsequently completed successfully.

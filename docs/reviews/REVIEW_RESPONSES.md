@@ -4197,3 +4197,43 @@ remains adapter-owned. No complete GUI, reconstruction or physical-scale claim.
 CodeRabbit quota lookup failed; no new completed or paid review is claimed.
 
 Implementation commit: `01b183aa9c7d33563e11d7726b892bc0357f6e48`.
+
+
+Independent follow-up to SCAN-REV-027: assignment427 verified 01b183aa/447d960,
+reran the full 875-test gate and independently checked the ten recordings and
+trace/restoration evidence. The reviewer, not development, resolved 027. The
+exact publication CI41661430467/run231 has now completed successfully. Existing
+005/006/021 findings remain unresolved; no broader qualification is inferred.
+
+## DEV-CALIBRATION-HANDOFF — connect fitted observations to reconstruction
+
+Developer integration finding, not a new independent-review finding. Native
+stereo fitting produced diagnostic JSON, while reconstruction required RAPCAL01.
+Added workflow calibration_candidate.rs and its tests, module registration and
+CLI fit-calibration-candidate dispatch/help. The existing fitter operates on
+retained supplied observations; the workflow creates and readbacks the candidate
+record using fitted geometry. No algorithm, dependency or format rewrite.
+
+Explicit declared millimeters and a unit reference are required; unknown units
+are rejected without a scale conversion. Synthetic input always remains synthetic
+and cannot pass physical-capture validation. Binding remains declared/unverified,
+with existing image-size validation. Exact requests, fit diagnostics and record
+fingerprints are retained. All verification/activation/accuracy flags remain false.
+No hardware is opened or calibration automatically selected or installed.
+
+Three new tests cover fit-to-image reconstruction, provenance, integrity, invalid
+unit/binding/observation refusal, existing-output preservation and cancellation.
+Full 878 tests, one existing ignored, formatting, strict all-target Clippy and
+release build pass. The actual release CLI fits a synthetic candidate and passes
+it through existing reconstruction to three points. The real retained Raptor QR
+observations with unverified units are rejected before candidate publication;
+original source bytes remain unchanged. This is integration and refusal evidence,
+not a real calibrated reconstruction or measured accuracy trial.
+
+Private calibration-handoff-20261104 retains the reproducible CLI script, exact
+source/executable hashes and all outputs. Public CALIBRATION_CANDIDATE.md explains
+scope and downstream use. No candidate-export GUI control is added in this step.
+CodeRabbit quota remains unavailable; no completed new/paid review or independent
+approval is claimed. Physical scale, coverage, device binding, measured object
+trials and full GUI qualification remain outstanding. Reviewer-owned files were
+read only. Implementation commit: `29e3769da87fea02cbfaec5eafff91ca24d988aa`.
