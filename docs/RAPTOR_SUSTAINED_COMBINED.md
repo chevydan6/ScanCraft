@@ -51,7 +51,7 @@ have equal sensor PTS; physical exposure synchronization remains unverified.
 
 The native CLI performs complete CRC/footer replay before publication; two further
 native replays of the complete files also succeed. The existing recording queue
-remains eight frames per camera. USB monitoring exits0 after signal, before its
+remains eight frames per camera. USB monitoring exits 0 after signal, before its
 watchdog, saving 13,761,774 selected events with zero queued/dropped events and no
 I/O failure. Submission/completion identities balance with no unmatched or pending
 identity. Ten terminal cancellations retain their negative status.
@@ -64,14 +64,19 @@ supply the separately integrity-checked image payloads.
 
 ## Explicit assessment and offline validation
 
-The new private `admit_sustained.py` assesses the declared USB/native scope. It
-requires recorded collector success, exact candidate/baseline parameters, all three
-seven-field native comparisons, format/service/observer restoration, unchanged global
-trace configuration, complete USB identities/counts, strict headers, complete native
-association, successful replays and unchanged queue capacity. It checks both actual
-sample timestamp spans and their reported values, frame counts, metadata counters,
-and strictly-below-0.1% total/ongoing rejection proxies. It returns **admitted:true**
-with no reasons for rejection on this capture. This is not a full mission gate.
+The original private `admit_sustained.py` returned **admitted:true** on this capture,
+but independent finding **SCAN-REV-032 (Medium/Open)** showed that its summary checks
+could accept a missing capture command, duplicated left-camera replay in place of
+the right replay, inconsistent command output, or duplicate actual sample PTS hidden
+by a zero counter. Its result alone is insufficient evidence of complete validation.
+The actual raw recordings and USB associations were separately verified by the
+independent reviewer in assignment 496; this is an assessment defect, not evidence
+that this particular capture was corrupted.
+
+The developer correction and its explicit limits are documented in
+[RAPTOR_ADMISSION_RECONCILIATION.md](RAPTOR_ADMISSION_RECONCILIATION.md). Original
+collector logs, assessment, raw data, thresholds and previous failures remain
+unchanged. Only the independent reviewer may verify and close SCAN-REV-032.
 
 Before hardware execution, 54 copied-evidence fault-injection cases pass, including
 missing/duplicate state records, USB loss, malformed headers, incomplete recordings,
@@ -116,7 +121,9 @@ No application, kernel implementation, Cargo manifest or recording format change
 in this milestone. The same implementation passed the preceding 892-test,
 formatting, strict Clippy and release gate; both exact7947954 CI runs also pass.
 Independent assignment489 verified the preceding one-minute finite evidence, and
-495 verified its CI completion. The new sustained evidence awaits independent review.
+495 verified its CI completion. Assignment 496 independently verified the sustained
+raw/USB/restoration evidence and opened SCAN-REV-032; assignment 500 confirmed both
+exact 36e4adb CI runs passed. The developer correction awaits independent review.
 A fresh CodeRabbit usage lookup again returns unavailable/lookup_failed; no review
 upload or paid usage occurs. Completed substantive review remains absent; no merge
 approval follows from CI or these hardware results.

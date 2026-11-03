@@ -4865,3 +4865,53 @@ Native final-frame extraction65910 passes for both full recordings; images viewe
 right-board-edge clipping persists. Fresh CodeRabbit usage85256 exits1 with all
 lookup_failed; no review upload or paid usage. No new Rust gate repeated because
 application/source/manifests are unchanged from the verified892-test implementation.
+
+
+## SCAN-REV-032 — accepted; developer evidence correction supplied
+
+Accepted. The original private sustained assessment trusted present command successes
+and summary counters without requiring an exact capture, distinct per-camera replay
+outputs or reconciliation with actual samples. The independent five counterexamples
+are legitimate. Actual capture verification in assignment 496 remains distinct from
+assessment completeness; assignment 500 independently confirms both 36e4adb CI passes.
+
+Correction: private sustained-admission-fix-20261104/admit_complete.py requires exact
+capture argv/output and one replay per declared path, matching saved/fresh raw
+profile/context/count/payload/integrity. raw-check/src/main.rs uses production
+IndexedRecording::build for complete CRC/footer/sample validation and guarded source
+identity; both paths are rechecked after both reads. Fresh unchanged strict USB
+analysis runs in a NEW directory; summaries/rows, actual samples, sequence/metadata
+and derived timing/association metrics must reconcile. Original assessment thresholds,
+state/restore/collector checks remain mandatory. Original evidence is immutable.
+Normal CLI never admits solely from cached receipts; pure functions are test seams.
+
+Tests: fresh validation 84719 exits 0; 36,600 complete raw frames and 13,761,774 USB events
+reconcile, input stamps unchanged. Regression 86725 exits 0: 95 new cases (including
+all five independent counterexamples, coupled sample/header faults and three
+JSON-type regressions),54 original
+summary cases unchanged, plus5 actual CLI refusal cases. Private helper fmt/strict
+Clippy 54446/release and Python compilation pass. Sixteen correction-source bindings
+remain unchanged; they were recorded during validation, not pre-execution attestation.
+No application change; prior 892-test/fmt/Clippy/release gate remains the implementation
+baseline. No new hardware, physical accuracy or malicious-writer attestation claim.
+
+Public source files changed: docs/RAPTOR_ADMISSION_RECONCILIATION.md,
+docs/RAPTOR_SUSTAINED_COMBINED.md,PROJECT_STATUS.md and this response only. The private
+helper is not shipped in the application. Exact documentation commit follows in Git
+history/publication metadata. Previous capture commit 36e4adbeef88adbaba0a7b7ab3ab5e6b2b02443e
+and raw evidence remain retained. SCAN-REV-032 stays Medium/Open until the reviewer
+independently verifies it; development does not close or alter the finding.
+
+Limits: finite 30 Hz/GREY/v2 diagnostic, complete ongoing rejection samples required,
+no fresh host trace, calibration/units/object accuracy/repeatability still unqualified.
+The header analyzer retains its finite in-memory grouping. Source guards do not
+establish authenticity against malicious writers. CodeRabbit substantive review is
+still unavailable; no paid usage or review/merge approval follows.
+
+Final developer inspection found Python equality could equate False with 0 and
+integer with floating-point counts. The first correction and 92-case results are
+retained in first-correction-version; a three-case negative control confirms that
+gap. Final same() comparison preserves JSON types. Full raw/USB validation-2 and
+95-case regressions pass after that correction. Initial CodeRabbit usage was run
+outside Git and failed; the corrected repository-scoped lookup also exits 1 with
+all quota/billing fields lookup_failed. Neither invocation uploads a review.

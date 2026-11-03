@@ -1,5 +1,14 @@
 # Project status
 
+Latest review correction: [sustained evidence reconciliation](docs/RAPTOR_ADMISSION_RECONCILIATION.md)
+addresses accepted SCAN-REV-032 in private diagnostic tooling. Fresh full raw/USB
+revalidation passes, with 95 new mutation cases, 54 retained cases and 5 fail-closed
+CLI checks. Exact capture/per-camera replay outputs and actual samples now reconcile.
+The independent reviewer retains Medium/Open pending verification; original data
+and production source are unchanged. Assignment 496 verified the actual sustained
+capture and 500 confirmed both 36e4adb CI runs passed. First measured object remains
+incomplete; no review closure or hardware qualification is inferred.
+
 Latest sustained result: [610-second combined capture](docs/RAPTOR_SUSTAINED_COMBINED.md)
 saves/replays18,300frames per camera with ZEROstartup/ongoing rejects and sequence
 gaps. All36,600accepted USB header associations pass; original module/services,
