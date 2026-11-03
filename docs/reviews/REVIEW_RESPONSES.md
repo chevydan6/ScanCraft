@@ -4656,3 +4656,34 @@ report and this response. Private irq-affinity-correction-20261104/verification.
 retains readback/report hashes and fresh raw-trace counts. Markdown whitespace
 check passes; unchanged source retains890-test/fmt/Clippy/release evidence and both
 8a97cb2CI successes. No claim of independent closure: only reviewer may verify029.
+
+
+## DEV-OBSERVER-TIMING — baseline capture comparison, not a complete fix
+
+Developer investigation; no new independent finding or closure. Following465's
+finite runtime evidence, saved task correlation identifies the local session
+logger around14preceding paired incidents. Eight timed readonly snapshots show
+lid-state reads taking1.382848–5.122096ms; local ACPI source evaluates_LID.
+This is an operation-level lead, not firmware cause or resident-source attestation.
+
+Unchangedbaseline-driver600-frame/camera observer-running/stopped/restored-running
+trials produce ongoing rejects per camera4/0/3 and startup96/0,92/95,1/0. All3,600
+saved frames replay and3,614accepted/ongoing-rejected header associations match.
+CompleteUSB/ftrace accounting and42native state-field comparisons pass. Observer
+restoresactive with unchanged source;camera formats/service/tracing restore.
+ActualIRQCPUs4/11/9 and readbacks4→4,11→11,9→10 are explicitly uncontrolled.
+Separate A2worker starvation remains; zeroB1ongoing loss is finite, not qualification.
+
+Privateadmit.py now refuses the preceding inlineB1semantic/byte failures despite
+original analyzer exit0, and accepts precedingA1. Each currentarm passes the
+explicit gate before the next starts. No original artifact/analyzer or native
+validation rule is changed. No new app/kernel code, monitor patch, firmware/affinity
+write or permanentservicechange. Newdocs: RAPTOR_OBSERVER_TIMING.md,PROJECT_STATUS
+andthisresponse. Acquisitionhead8a97cb2;publicationhashinhistory/private metadata.
+Existing890-test/fmt/Clippy/releasegate applies to unchangedcode;8a97cb2bothCIpass.
+Prior029correctionf92cf09remainsforreviewerverification. Newobserverevidenceawaits
+independentreview; no completedCodeRabbit/paidrevieworownermergeclaimed.
+
+Nextisolateindividualdirectlidreadsagainstcachedreadcontrols withinonecapture,
+with timedcallrecords andrestoreobserver. Physicalscale/measuredobjectandcomplete
+native3Dqualificationstillpending; don'tsubstitutethisdiagnosticforagenuine scan.

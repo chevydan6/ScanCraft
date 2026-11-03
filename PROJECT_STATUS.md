@@ -1,5 +1,14 @@
 # Project status
 
+Latest investigation: [host observer timing](docs/RAPTOR_OBSERVER_TIMING.md) gives
+ongoing rejects per camera **4 → 0 → 3** with a local logging observer running,
+briefly stopped and restored, using the unchanged installed driver. All 3,600
+saved frames replay and checked state restores. A direct laptop lid-state read
+is a timing lead; CPU affinity differs between arms and a separate worker-delay
+incident remains. Startup failures persist and every total rejection proxy fails.
+No permanent observer change or calibrated object scan is claimed. Next: isolate
+the individual read against a cached-read control within one capture.
+
 Latest experiment: the [bounded completion-copy hardware comparison](docs/RAPTOR_INLINE_COPY_TRIAL.md)
 saved and replayed 3,720 genuine frames across two short and three 600-frame/camera
 trials. Cancellation and checked-state restoration pass. Ongoing rejects per
