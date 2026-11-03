@@ -3653,3 +3653,35 @@ CodeRabbit0.9.2 usage returned lookup_failed; no review or paid request performe
 PR32 had no reviews or review threads at the checked snapshot; its prior c292711
 CI passed, which does not cover this source commit. Independent review remains
 outstanding; no reviewer findings file, status, severity or closure modified.
+
+## Native board preparation panel — 2026-11-03
+
+SCAN-REV-006 remains accepted and unqualified. Source commit
+e7679be6384e720cd686b207a4b00279725bfa44 integrates recorded-board observation
+preparation into the native app; it does not close physical-accuracy findings.
+Files: new app board_ui.rs, main.rs tab/startup/lifecycle wiring, cloud_ui.rs stale
+deferral text, workflow calibration_observations.rs/tests.rs, and the existing
+private-display rendering tool. No dependency or numerical algorithm change.
+
+A cancellable worker receives published measurements plus exact retained source
+frames; display never rereads mutable output files. Saved-directory reporting
+survives postpublication preview failure, with prior display identity retained.
+Root close/cancel handling includes the worker. Existing CLI artifact bytes are
+unchanged on four real saved-board cases. The actual native app produces the same
+held-out bundle byte-for-byte. Initial visual inspection exposed the justified
+column response-rectangle overlay error; explicit image/overlay allocation fixes
+it and the final screenshot was inspected. Missing-source GUI publishes nothing.
+
+Final gate842passed/1existingignored,fmt/strictClippy/releasePASS. Three app tests
+cover startup, close confirmation and failure/saved-state handling; strengthened
+workflow test checks returned original frames/measurements. Final success/error
+private-display runs bind to the final binary; initial and final logs are retained.
+No GPU/FPS/live qualification inferred from software-rendered startup checks.
+Native GUI multipose fitting/reopening, independent units/accuracy and first real
+object surface remain open. Details: docs/NATIVE_BOARD_PREPARATION.md.
+
+CodeRabbit0.9.2 usage returned lookup_failed; no new review or paid request. Prior
+b516f27 publicCI41614080917 completed success, not coverage of this new commit.
+Independent reviewer files remain untouched; no severity, conclusion or closure
+was changed. Existing cleanup005 and broader architectural007 findings remain
+separate from this bounded offline worker; no hard cleanup deadline is claimed.

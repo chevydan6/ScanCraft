@@ -1,5 +1,11 @@
 # Architecture
 
+`board_ui` adds a standalone offline preparation worker and camera/marker display.
+`calibration_observations::run_with_frames` transfers the exact selected frames and
+published measurements to that worker; existing manifest-only callers retain their
+output. Root close/cancel handling includes the worker. See
+[native board preparation](docs/NATIVE_BOARD_PREPARATION.md).
+
 `calibration_observations` composes guarded recording playback, native component
 shape measurement and target association, then publishes original-frame snapshots
 and explicit per-view fit inputs. Unit declarations and source lineage stay with

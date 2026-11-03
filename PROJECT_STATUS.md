@@ -1,5 +1,13 @@
 # Project status
 
+[Native calibration preparation](docs/NATIVE_BOARD_PREPARATION.md) now runs the
+recorded-board workflow in the desktop app and displays both source images with
+aligned marker decisions. Final 842-test gate passes; the held-out board GUI
+bundle equals the preceding CLI output byte-for-byte. Error rendering and saved
+result preservation are checked. Live FPS, physical scale and the first real
+object scan remain unqualified. Prior b516f27 GitHub CI completed successfully;
+this panel needs its own published-head CI and independent review.
+
 [Recorded board observations](docs/RECORDED_TARGET_OBSERVATIONS.md) now connect
 explicit Raptor frame pairs to source-bound calibration inputs. Four saved real
 poses reproduce prior component/shape/association results exactly; all eight

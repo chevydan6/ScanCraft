@@ -71,7 +71,9 @@ Publication uses existing no-overwrite staging/rename/fsync helpers. Errors afte
 staging name the retained partial directory. Cancellation is checked through
 WorkControl in image/indexing operations and through the external callback between
 stages and during association; this does not establish a hard cancellation deadline.
-No GUI calibration wizard or automatic multi-pose fit assembly is added here.
+The [native preparation panel](NATIVE_BOARD_PREPARATION.md) can run this request
+and inspect its camera views/marker decisions. Guided target setup, a calibration
+wizard and automatic multi-pose fit assembly remain unfinished.
 
 ## Verification and scope
 
