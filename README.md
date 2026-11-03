@@ -22,6 +22,7 @@ are not yet qualified. This is not currently a professional CrealityScan replace
 - [Offline planar calibration fitting](docs/BROWN_CALIBRATION_REFINEMENT.md) (experimental; supplied observations only)
 - [Fixed-intrinsic stereo fitting](docs/STEREO_EXTRINSIC_CALIBRATION.md) (experimental; no hardware calibration)
 - [Native recorded laser processing](docs/NATIVE_RECORDED_LASER_PROCESSING.md) and [candidate viewer](docs/CANDIDATE_VIEWER.md) (unqualified diagnostic geometry)
+- [Reopen saved laser captures and select pairs](docs/SAVED_LASER_CAPTURES.md) (read-only diagnostic view)
 - [Contribution guide](CONTRIBUTING.md), [security reporting](SECURITY.md)
 - [Rebranding verification](docs/publication/VERIFICATION.md)
 - [Publication review](docs/publication/PUBLICATION_AUDIT.md)
@@ -141,7 +142,7 @@ conversion choice. See docs/WORKBENCH_PROJECT_OPEN.md for verified behavior.
 
 The Point clouds tab now offers **Reconstruct from stereo images**, with a
 background worker, progress/cancellation and saved diagnostics/PLY/project.
-The explicit input-file workflow can also start with `scancraft-app --reconstruct
+The explicit input-file workflow can also start with `scancraft --reconstruct
 CALIBRATION LEFT.PNG RIGHT.PNG SETTINGS NEW_RESULT_FOLDER`. See
 [GUI reconstruction](docs/GUI_RECONSTRUCTION.md). Current validation is synthetic;
 actual Raptor calibration and live scanning remain unfinished.
@@ -149,5 +150,7 @@ actual Raptor calibration and live scanning remain unfinished.
 Experimental native laser candidate capture is available through
 `scancraft-cli scan-live-laser`; see [configuration, data integrity and current
 limitations](docs/NATIVE_LASER_CAPTURE.md). It saves raw frames and unqualified
-candidate coordinates. Live GUI capture controls, calibrated accuracy and
-continuous tracking/fusion remain under development.
+candidate coordinates. [Native GUI capture controls](docs/LIVE_LASER_GUI.md) and
+[reopening saved captures](docs/SAVED_LASER_CAPTURES.md) provide diagnostic camera
+and single-pair views. Calibrated accuracy, continuous tracking/fusion and the
+complete editable scanning workflow remain unfinished.

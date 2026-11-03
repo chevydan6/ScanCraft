@@ -16,6 +16,7 @@ enum Action {
 
 pub struct CandidateUi {
     path: String,
+    pair_number: u64,
     loaded_path: String,
     job: Option<Job>,
     preview: Preview,
@@ -33,6 +34,7 @@ impl Default for CandidateUi {
     fn default() -> Self {
         Self {
             path: String::new(),
+            pair_number: 1,
             loaded_path: String::new(),
             job: None,
             preview: Preview::default(),
@@ -42,7 +44,7 @@ impl Default for CandidateUi {
                 zoom: 1.,
                 pan: egui::Vec2::ZERO,
             },
-            message: "Open a recorded laser-matching result folder.".into(),
+            message: "Open a saved laser capture or recorded-pair result folder.".into(),
             frames: None,
             cameras: Default::default(),
             stretch_display: false,
@@ -152,6 +154,8 @@ impl CandidateUi {
         if let Some(result) = update.completion {
             match result {
                 Ok(c) => {
+                    self.path = update.target.display().to_string();
+                    self.pair_number = c.processed.max(1);
                     self.message = format!(
                         "Saved capture at {}. Raw frames {:?}; {} pairs processed, {} pair failures, processing drops {:?}, unmatched {:?}. Preview omissions helper/GUI {}/{}. Source cleanup and recording verification passed. View is a single diagnostic pair; tracking and fusion remain unavailable.",
                         update.target.display(),
@@ -182,15 +186,19 @@ impl CandidateUi {
         }
     }
     pub fn open(&mut self, path: PathBuf) {
+        self.open_pair(path, 0);
+    }
+    pub fn open_pair(&mut self, path: PathBuf, index: u64) {
         if self.is_busy() {
             return;
         }
         self.path = path.display().to_string();
+        self.pair_number = index.saturating_add(1);
         self.action = Action::Open;
         self.message = "Checking candidate artifacts and retained frames…".into();
         self.job = Some(Job::start(
             Document::default(),
-            Operation::ViewCandidates(path),
+            Operation::ViewCandidates { path, index },
         ));
     }
     pub fn process(
@@ -231,7 +239,10 @@ impl CandidateUi {
                     pan: egui::Vec2::ZERO,
                 };
                 self.message = report.message;
-                self.loaded_path = self.path.clone();
+                self.loaded_path = match self.action {
+                    Action::Open => format!("{} · pair {}", self.path, self.pair_number),
+                    Action::Process => self.path.clone(),
+                };
             }
             Err(error) => {
                 self.message = format!(
@@ -254,11 +265,17 @@ impl CandidateUi {
                 !self.is_busy(),
                 egui::TextEdit::singleline(&mut self.path).desired_width(520.),
             );
+            ui.label("Pair:");
+            let enabled = !self.is_busy();
+            ui.add_enabled(
+                enabled,
+                egui::DragValue::new(&mut self.pair_number).range(1..=1_000_000),
+            );
             if ui
                 .add_enabled(!self.is_busy(), egui::Button::new("Open candidates"))
                 .clicked()
             {
-                self.open(self.path.clone().into());
+                self.open_pair(self.path.clone().into(), self.pair_number.saturating_sub(1));
             }
             if ui
                 .add_enabled(self.job.is_some(), egui::Button::new("Cancel operation"))
@@ -381,7 +398,7 @@ mod tests {
     #[test]
     fn failed_open_preserves_the_prior_view_and_its_source_label() {
         let mut ui = CandidateUi {
-            loaded_path: "prior bundle".into(),
+            loaded_path: "prior bundle · pair 3".into(),
             preview: Preview {
                 total: 1,
                 bounds: Some(([1., 2., 3.], [1., 2., 3.])),
@@ -390,19 +407,23 @@ mod tests {
             frames: Some([frame(0), frame(2)]),
             ..CandidateUi::default()
         };
-        ui.open(std::env::temp_dir().join(format!(
-            "scancraft-missing-candidate-{}",
-            std::process::id()
-        )));
+        ui.open_pair(
+            std::env::temp_dir().join(format!(
+                "scancraft-missing-candidate-{}",
+                std::process::id()
+            )),
+            7,
+        );
         let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
         while ui.is_busy() && std::time::Instant::now() < deadline {
             ui.tick();
             std::thread::sleep(std::time::Duration::from_millis(1));
         }
         assert!(!ui.is_busy());
+        assert_eq!(ui.pair_number, 8);
         assert!(ui.message.contains("Could not open candidates"));
         assert_eq!(ui.preview.total, 1);
-        assert_eq!(ui.loaded_path, "prior bundle");
+        assert_eq!(ui.loaded_path, "prior bundle · pair 3");
         assert_eq!(ui.frames.as_ref().unwrap()[1].interface, 2);
         assert_eq!(ui.frames.as_ref().unwrap()[0].pixels, [0, 30, 60, 255]);
     }
@@ -584,5 +605,30 @@ mod tests {
             assert!(view.cameras.iter().all(Option::is_some));
             assert_eq!(view.frames.as_ref().unwrap()[0].pixels, [0, 30, 60, 255]);
         }
+    }
+    #[test]
+    fn completed_capture_presets_saved_folder_and_last_display_pair() {
+        let mut view = CandidateUi::default();
+        view.test_capture(|_| {
+            Ok(crate::laser_process::Completion {
+                schema_version: 1,
+                origin: crate::laser_display::Origin::RecordingReplay,
+                recorded: [10; 2],
+                drops: [0; 2],
+                processed: 7,
+                failed: 0,
+                pending: [0; 2],
+                helper_omissions: 0,
+            })
+        });
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
+        while view.is_busy() {
+            view.tick();
+            assert!(std::time::Instant::now() < deadline);
+            std::thread::yield_now();
+        }
+        assert_eq!(view.path, "synthetic replay");
+        assert_eq!(view.pair_number, 7);
+        assert!(view.message.contains("Saved capture"));
     }
 }

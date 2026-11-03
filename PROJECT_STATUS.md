@@ -1,5 +1,11 @@
 # Project status
 
+[Saved laser captures reopen](docs/SAVED_LASER_CAPTURES.md) with pair selection,
+retained camera images and transactional error handling. The 824-test gate passes;
+nine older folders preserve 18 selected views exactly, and fresh native capture,
+close/restart/reopen and actual GUI pair switching pass. These remain unqualified
+diagnostic coordinates, separate from editable projects and tracking/fusion.
+
 [Buffered segmented encoding](docs/SEGMENTED_PAIR_ENCODING.md) reuses the existing
 serializer helper and preserves complete journals. The 814-test gate and explicit
 >1 GiB storage regression pass. Short native 2 MiB-segment trials process 57/64

@@ -1,5 +1,12 @@
 # Roadmap
 
+Completed native captures now reopen with stored-pair selection and retained images,
+including older files with explicitly unknown restoration metadata. Next connect
+verified capture lineage to genuine calibrated reconstruction and tracking/fusion
+workflows while preserving the diagnostic/metric boundary; physical calibration
+remains deferred. Longer processing/preview/resource trials and transport startup
+rejects still need evidence. See docs/SAVED_LASER_CAPTURES.md.
+
 Segmented encoding now reuses fixed-buffer serialization: complete output bytes
 remain identical and measured append cost decreases. Current short native trials
 reach 57–58/64 with 2 MiB segments, and one separate 16 MiB request reaches 61/64.
@@ -51,8 +58,8 @@ See docs/SEGMENTED_LASER_JOURNAL.md. Keep explicit quotas and truthful cleanup.
 Calibrated dimensions, optical coverage, actual tracking/fusion and long-session
 project retention remain required, with physical calibration deferred. The old
 IR 1000-frame/session limit is unchanged. Prioritize real reconstruction and
-reliability over additional editing features. Direct stream-bundle reopen and a
-complete usable model remain outstanding; diagnostic replay is not fusion.
+reliability over additional editing features. Direct stream-bundle diagnostic reopen
+is implemented; a complete usable model remains outstanding. Reopening is not fusion.
 
 1. Complete native acquisition: decoding, timestamps, controls, cold-start,
    reconnection, multiple cameras, explicit dropped-frame/error accounting.

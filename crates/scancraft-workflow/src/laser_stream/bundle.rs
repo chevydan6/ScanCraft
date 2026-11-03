@@ -1,4 +1,6 @@
 //! Capped, verified, no-overwrite capture bundles. Supplied geometry is unqualified.
+mod load;
+pub use load::load_pair;
 pub(crate) mod io;
 mod log;
 use self::io::{CappedFile, RawDigests, RawJournal};

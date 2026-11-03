@@ -1,5 +1,12 @@
 # Architecture
 
+The diagnostic viewer routes existing single-pair and complete capture folders
+through `candidate_bundle::load_at`. New `laser_stream::bundle::load_pair` reuses
+guarded inventory/CRC, complete journal validation and raw Playback indexing, then
+returns one bounded stored pair and FrameViews. The existing GUI worker/renderer
+applies successful results transactionally outside Editor; no acquisition is
+started by opening data. See docs/SAVED_LASER_CAPTURES.md.
+
 Segmented pair journaling reuses the existing fixed-buffer record serializer
 before its bounded in-memory encoder. Cancellation is checked per resulting sink
 write; successful encoding still precedes file/index mutation and required flush

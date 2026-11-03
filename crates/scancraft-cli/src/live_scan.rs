@@ -70,3 +70,14 @@ pub fn run_laser(geometry: &Path, request: &Path, target: &Path) -> Result<Value
         scancraft_workflow::laser_stream::bundle::PreviewStatus::NotRequested
     })
 }
+
+/// Read-only completed-capture inspection with the existing scoped signal monitor.
+pub fn inspect_laser_capture(directory: &Path, index: u64) -> Result<Value> {
+    let _termination = termination::Guard::install().map_err(|e| e.to_string())?;
+    let work = Arc::new(WorkControl::default());
+    let cancellation = work.clone();
+    let _monitor = monitor(move || cancellation.cancel())?;
+    let loaded = scancraft_workflow::laser_stream::bundle::load_pair(directory, index, &work)
+        .map_err(|e| e.to_string())?;
+    Ok(loaded.report)
+}

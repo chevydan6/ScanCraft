@@ -1,4 +1,5 @@
 //! Shared bounded, cancellable reconstruction/scanning and atomic bundle publication.
+mod bounded_json;
 mod calibration_bundle;
 pub mod candidate_bundle;
 pub mod frame_document;

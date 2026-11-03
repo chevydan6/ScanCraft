@@ -221,3 +221,13 @@ Native short trials process 57/64 and 58/64 versus 54/64 and 55/64 baseline;
 one separate 16 MiB trial reaches 61/64. No sustained-rate or physical pass follows.
 All 294 resulting pair records/558,364 candidate values reproduce old full bytes.
 See docs/SEGMENTED_PAIR_ENCODING.md for phase instrumentation, scope and limitations.
+
+
+## Saved capture reopening validation
+
+The new complete-capture loader is a correctness/usability milestone, not a speedup.
+It revalidates artifacts/journals and indexes full recordings for each selected view;
+I/O is linear in capture size. Nine older folders reproduce 18 selected views /
+26,750 positions and complete FrameViews; actual native close/restart/reopen and GUI
+pair/error handling pass. No large-capture latency, maximum-descriptor, RSS or live
+preview performance gate is advanced. See docs/SAVED_LASER_CAPTURES.md.

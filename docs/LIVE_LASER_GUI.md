@@ -84,9 +84,10 @@ long-recording proof. Native acquisition retains its bounded streaming path.
 
 The native stream bundle remains the format documented in
 [NATIVE_LASER_CAPTURE.md](NATIVE_LASER_CAPTURE.md). The existing **Open candidates**
-loader accepts older full recorded-matching bundles; it does not yet directly
-reopen a stream bundle. Replaying its retained recordings through the explicit
-command above restores diagnostic previews into a new bundle. No automatic metric
+loader now accepts both older recorded-matching folders and completed stream
+bundles, with stored-pair selection; see [saved capture reopening](SAVED_LASER_CAPTURES.md).
+The explicit replay command above instead recomputes diagnostic previews into a
+new bundle. No automatic metric
 export, last-pair file conversion, persistent fused model or editable scan project
 is implied.
 

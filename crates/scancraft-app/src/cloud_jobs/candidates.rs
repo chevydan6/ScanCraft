@@ -8,7 +8,10 @@ use scancraft_workflow::{
 use std::path::Path;
 
 pub(super) fn view(path: &Path, work: &WorkControl) -> Result<Report, String> {
-    let loaded = candidate_bundle::load(path, work).map_err(|e| e.to_string())?;
+    view_at(path, 0, work)
+}
+pub(super) fn view_at(path: &Path, index: u64, work: &WorkControl) -> Result<Report, String> {
+    let loaded = candidate_bundle::load_at(path, index, work).map_err(|e| e.to_string())?;
     let mut preview = Preview {
         total: loaded.positions.len(),
         ..Preview::default()
@@ -41,6 +44,32 @@ pub(super) fn view(path: &Path, work: &WorkControl) -> Result<Report, String> {
         ),
         Some(preview),
     );
+    if let Some(total) = loaded.report["pair_count"].as_u64() {
+        result.message = format!(
+            "Saved capture · pair {} of {total} · {}",
+            index.saturating_add(1),
+            result.message
+        );
+        if let Some(error) = loaded.report["stored_pair_error"].as_str() {
+            result.message = format!(
+                "Saved capture · pair {} of {total} · stored processing failed: {error}. Retained images loaded; no candidate geometry.",
+                index.saturating_add(1)
+            );
+        }
+        result
+            .message
+            .push_str(" Stored numerical results were not recomputed. ");
+        result
+            .message
+            .push_str(if loaded.report["source_restoration_reported"] == true {
+                "Source restoration is a recorded claim. "
+            } else {
+                "Source restoration was not recorded by this older capture. "
+            });
+        result
+            .message
+            .push_str("Tracking and fusion remain unavailable.");
+    }
     result.reset_view = true;
     result.candidate_frames = Some(loaded.frames);
     Ok(result)

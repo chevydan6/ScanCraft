@@ -3353,3 +3353,79 @@ not a review pass. Independent review of this optimization remains pending.
 capacity. Original native early-exit attribution, transport/startup reliability,
 physical geometry, tracking/fusion, preview latency/FPS, long sessions/memory,
 complete editable scan-to-mesh workflow and release remain incomplete.
+
+
+## Developer milestone — reopen completed laser captures
+
+Developer usability/integrity work, not an invented independent finding. Baseline:
+8ebaf26265cfc5ac83088b02d7b50209f088081c. Latest shared review read: Assignment 360;
+existing findings/statuses remain reviewer-owned and unchanged. Implementation
+commit and exact source/binary/evidence bindings are recorded in the recovery
+checkpoint after commit. No reviewer file was modified or staged.
+
+New `laser_stream/bundle/load.rs::load_pair` and `load/record.rs` reopen completed
+schema-1/2 captures as one bounded read-only diagnostic pair. Reuse Plan validation,
+Guard inventory/CRC/identity, complete streamed journal verification and full raw
+Playback indexing, with exact selected-frame references/PTS/host-window checks.
+Typed candidate/outcome limits and consistent references/counters precede display.
+`candidate_bundle::load_at` routes legacy single-pair and capture layouts; its old
+seven-artifact implementation remains. `bounded_json::Items` moves the existing
+bounded array reader for actual shared use without changing its behavior.
+
+App changes: CandidateUi one-based Pair selector and completed-capture folder/last
+pair presets; background ViewCandidates operation retains the previous view on
+failure and labels the actually displayed pair independently of an invalid request.
+CLI adds inspect-laser-capture with existing scoped termination monitoring. No
+scanner access occurs on opening data. No metric Editor/export, numerical matching,
+capture/helper IPC, format/quotas, dependency/unsafe, firmware or physical calibration
+change. Source rationale and limits: docs/SAVED_LASER_CAPTURES.md.
+
+Validation: final 824-test frozen workspace gate, formatting, strict all-target
+Clippy and release builds pass. Eight new workflow tests cover legacy/segmented
+selection/immutability, references/counters, false qualifications, corruption and
+layouts, incomplete raw data, early/late cancellation and final mutation, explicit
+stored processing failure, array bounds and old restoration metadata. App tests
+cover indices, completed-capture presets and preservation of a prior displayed pair.
+No Rust source edits follow the final passing label-final-gate.log.
+
+A final release-library probe checks nine older folders / 18 selected views /
+26,750 positions, exact observation indices and complete serialized FrameViews
+against saved results and raw frames. All 129 original input files retain SHA-256.
+A real historical report exposed missing reported_source_restoration: support only
+schema-1 absence as explicitly unknown; schema-2 absence or explicit FAIL still
+reject. Initial raw-reference failure is retained, not omitted. Initial synthetic
+array test hit its byte guard first; increased only that fixture's declared budget
+to exercise typed item admission. Corrected an OsString parse compile error and
+one strict Clippy comparison without suppressions; all failed logs retained.
+
+Final native finite: 32 raw/camera, 28 pairs, drops 3/4, pending 1/0, startup rejects
+82/102, ongoing 1/1. Active close: 9 raw/camera and 9 pairs, zero drops/pending,
+startup 81/2, ongoing 0/0, one stopped incomplete buffer/camera; close-to-exit
+0.326171 s is one observation. Both raw/publication and full stream/illumination
+GET restoration pass, helpers own devices and GUI none. These are functionality
+regressions; 87.5% finite processing remains below 90%, with no sustained/physical
+qualification. Preliminary native trials are retained separately.
+
+Actual final read-only application restarts open five cases including legacy,
+earliest missing-metadata capture and last pairs of both new captures. Real XTest
+input switches Pair 1 to Pair 2, then rejects Pair 999999 while retaining Pair 2's
+images, 1,945 points and actual source label. All five apps exit normally and have
+zero scanner FDs; inspected final images confirm the labels and views. One earlier
+harness coordination wait expired while the agent inspected evidence; it closed
+normally. Passing retry uses pre-supplied actions; timeout and images are retained.
+This is a test harness timeout, not a claimed production defect.
+
+Release CLI opens the last older 61-pair capture as 1,915 points / raw frames 63/63.
+SIGINT/SIGTERM tests observe installed handlers and return cancellation exit 1 with
+no partial summary. No wall-clock guarantee follows. Frozen earlier engine verifies
+all four preliminary/final native bundles: 74 records / 138,873 candidate values,
+exact raw references and whole old record bytes. All four manifests pass CRC/length;
+final accessible device-FD inventory is empty. Private X11 readiness / LP_NUM_THREADS=2
+condition is explicit. No raw/model/probe/screenshot data is committed or uploaded.
+
+CodeRabbit 0.9.2 fresh usage returns exit 1 with all quota/billing/credit fields
+lookup_failed. No review request/upload, paid usage, push/PR, merge or protection
+change; unavailable is not a pass. Independent review remains pending. 005/006/
+007/021 and other existing findings are unchanged. Complete editable scan projects,
+calibrated geometry/accuracy, optical binding, tracking/fusion, sustained preview/
+processing/resources, transport reliability and final release remain incomplete.

@@ -41,7 +41,10 @@ pub struct Preview {
 }
 #[derive(Clone)]
 pub enum Operation {
-    ViewCandidates(PathBuf),
+    ViewCandidates {
+        path: PathBuf,
+        index: u64,
+    },
     ProcessLaserCandidates {
         inputs: scancraft_workflow::recorded_traces::Inputs,
         target: PathBuf,
@@ -360,7 +363,9 @@ fn execute(
     work: &WorkControl,
 ) -> Result<Report, String> {
     match &operation {
-        Operation::ViewCandidates(path) => return candidates::view(path, work),
+        Operation::ViewCandidates { path, index } => {
+            return candidates::view_at(path, *index, work);
+        }
         Operation::ProcessLaserCandidates { inputs, target } => {
             return candidates::process(inputs, target, work);
         }

@@ -1,42 +1,15 @@
 //! Read-only candidate coordinates with artifact integrity and retained-frame checks.
 //! This does not recompute matching or qualify numerical/physical correctness.
 mod frame_view;
+use crate::bounded_json::Items;
 use crate::{Error, recording_playback::Playback, scan_project_load::Guard};
 pub use frame_view::FrameView;
 use scancraft_calibration::stereo::StereoCalibration;
 use scancraft_geometry::work::WorkControl;
-use serde::{
-    Deserialize,
-    de::{self, IgnoredAny, SeqAccess, Visitor},
-};
+use serde::{Deserialize, de::IgnoredAny};
 use serde_json::{Value, json};
 use std::{collections::HashSet, path::Path};
 
-// Typed summaries skip unused observation fields instead of allocating a full
-// Value tree. Item limits are enforced during deserialization, before growth.
-struct Items<T, const MAX: usize>(Vec<T>);
-impl<'de, T: Deserialize<'de>, const MAX: usize> Deserialize<'de> for Items<T, MAX> {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        struct ItemVisitor<T, const MAX: usize>(std::marker::PhantomData<T>);
-        impl<'de, T: Deserialize<'de>, const MAX: usize> Visitor<'de> for ItemVisitor<T, MAX> {
-            type Value = Items<T, MAX>;
-            fn expecting(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-                write!(f, "an array of at most {MAX} items")
-            }
-            fn visit_seq<A: SeqAccess<'de>>(self, mut seq: A) -> Result<Self::Value, A::Error> {
-                let mut items = Vec::new();
-                while let Some(value) = seq.next_element()? {
-                    if items.len() == MAX {
-                        return Err(de::Error::custom("candidate array item limit exceeded"));
-                    }
-                    items.push(value);
-                }
-                Ok(Items(items))
-            }
-        }
-        deserializer.deserialize_seq(ItemVisitor::<T, MAX>(std::marker::PhantomData))
-    }
-}
 #[derive(Deserialize)]
 enum ObservationKind {
     #[serde(rename = "recorded_sheet_supported_matching")]
@@ -107,14 +80,45 @@ fn false_flags(value: &Value, keys: &[&str]) -> Result<(), Error> {
     Ok(())
 }
 
-/// Validate the fixed seven-artifact layout, all lengths/CRCs and complete
-/// retained one-frame recordings, then return bounded finite diagnostic points.
-/// Original full recordings remain references, not opened or historically attested.
-/// Input identity is checked around loading; CRC is not authentication. Native
-/// matching is not re-executed. Filesystem operations have no hard time deadline.
+/// Open a single-pair result or the first pair of a complete saved capture.
+/// Both loaders check their own artifact/frame bindings and return bounded
+/// diagnostic points; neither recomputes matching or qualifies physical geometry.
+/// Input identity is checked around loading; CRC is not authentication. Filesystem
+/// operations have no hard time deadline. Use load_at to select another capture pair.
 pub fn load(directory: &Path, work: &WorkControl) -> Result<Loaded, Error> {
-    load_inner(directory, work, &|| Ok(()))
+    load_at(directory, 0, work)
 }
+/// Open either a single-pair result (index zero) or a completed capture pair.
+/// Routing does not confer trust: the selected loader validates its own layout.
+pub fn load_at(directory: &Path, pair_index: u64, work: &WorkControl) -> Result<Loaded, Error> {
+    work.check()?;
+    let mut guard = Guard::default();
+    guard.open(directory, true, 0)?;
+    let bytes = guard
+        .read(&directory.join("manifest.json"), 1_048_576, true, work)?
+        .0;
+    #[derive(Deserialize)]
+    struct Kind {
+        kind: String,
+    }
+    let kind: Kind = serde_json::from_slice(&bytes)?;
+    let loaded = match kind.kind.as_str() {
+        "recorded_sheet_supported_matching" if pair_index == 0 => {
+            load_inner(directory, work, &|| Ok(()))?
+        }
+        "recorded_sheet_supported_matching" => {
+            return Err("single-pair result only has pair zero".into());
+        }
+        "laser_candidate_capture_artifacts" => {
+            crate::laser_stream::bundle::load_pair(directory, pair_index, work)?
+        }
+        _ => return Err("unsupported candidate bundle schema/kind".into()),
+    };
+    guard.check()?;
+    work.check()?;
+    Ok(loaded)
+}
+
 fn load_inner(
     directory: &Path,
     work: &WorkControl,

@@ -1,5 +1,9 @@
 # Native recorded-candidate viewport
 
+Completed native/replay capture folders also open here with pair selection. See
+[SAVED_LASER_CAPTURES.md](SAVED_LASER_CAPTURES.md) for schema-1/2 checks and limits.
+The single-pair layout and its validation below remain supported.
+
 Open **Laser candidates** in the native app, enter the result folder from
 `match-recorded-laser-traces`, and choose **Open candidates**. Orbit by dragging,
 pan with Shift-drag and zoom with the scroll wheel. The loaded folder remains

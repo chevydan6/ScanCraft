@@ -1,14 +1,14 @@
 use super::*;
 use crate::laser_stream::tests::{Fake, fixture};
 use std::{io::Write, sync::atomic::AtomicUsize};
-struct Files {
-    root: PathBuf,
-    geometry: PathBuf,
-    request: PathBuf,
-    frames: [scancraft_core::Frame; 2],
+pub(super) struct Files {
+    pub(super) root: PathBuf,
+    pub(super) geometry: PathBuf,
+    pub(super) request: PathBuf,
+    pub(super) frames: [scancraft_core::Frame; 2],
 }
 impl Files {
-    fn new() -> Self {
+    pub(super) fn new() -> Self {
         static NEXT: AtomicUsize = AtomicUsize::new(0);
         let root = std::env::temp_dir().join(format!(
             "scancraft-laser-bundle-{}-{}",
@@ -28,10 +28,10 @@ impl Files {
             frames,
         }
     }
-    fn plan(&self) -> Plan {
+    pub(super) fn plan(&self) -> Plan {
         Plan::open(&self.geometry, &self.request, &WorkControl::default()).unwrap()
     }
-    fn change(&self, edit: impl FnOnce(&mut Value)) {
+    pub(super) fn change(&self, edit: impl FnOnce(&mut Value)) {
         let mut r: Value = serde_json::from_slice(&fs::read(&self.request).unwrap()).unwrap();
         edit(&mut r);
         fs::write(&self.request, serde_json::to_vec(&r).unwrap()).unwrap();
@@ -521,7 +521,7 @@ fn serialization_failure_discards_unwritten_tail_and_success_is_visible_before_p
     assert_eq!(previews, 1);
 }
 
-fn segmented(files: &Files, frames: u64) {
+pub(super) fn segmented(files: &Files, frames: u64) {
     files.change(|r| {
         r["schema_version"] = json!(2);
         r["maximum_frames_per_camera"] = json!(frames);
