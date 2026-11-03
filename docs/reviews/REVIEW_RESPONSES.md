@@ -4299,3 +4299,50 @@ CodeRabbit 0.9.2 quota lookup returned unavailable/lookup_failed for every categ
 no new review or paid usage was requested. This is a developer correction awaiting
 independent verification; only the reviewer may close the finding. Reviewer-owned
 records were read only. Implementation commit: `602b3fb0be1b3bdf3fd2985afa5500aa687e7f87`.
+
+
+## SCAN-REV-021 — accepted: opt-in coordinated extended IR sessions
+
+Accepted. Schema 1 remains compatible and capped at 1,000 frames. New explicit
+schema 2 admits at most 100,000 frames per camera with raw, segmented pair-journal
+and total bundle quotas. Admission checks maximum raw-frame/header metadata, segment
+slots and available filesystem space before native setup; actual raw/journal and
+auxiliary output limits remain enforced. Full reports stream to the existing
+segmented writer; only compact lineage and latest tracking remain in the runner.
+Existing 100,000-frame session history, bounded queues, PTS checks, error counters,
+source completion, restoration and failure publication behavior remain.
+
+Sources: workflow live_stereo.rs, new storage.rs / pair_journal.rs /
+runner/pair_log.rs, runner.rs and runner/recording.rs; shared laser journal reader
+policy and re-export; acquisition lib.rs; geometry live_references.rs / formats.rs;
+CLI main.rs. ORPROJ09 explicitly requires reference schema 2 (100,000 pairs, 16 MiB
+metadata, bounded contiguous segment references); ORPROJ08 retains schema 1.
+Existing verification, edits, history, reopening and project-bundle export operate
+on the complete referenced artifacts. CLI adds read-only inspect-live-journal.
+No external dependency, proprietary component or geometry algorithm was added.
+
+Validation: full tools/check.sh passes 888 tests, one existing ignored, formatting,
+strict all-target Clippy and optimized workspace builds. New tests exercise the
+actual runner beyond 1,000 pairs, rollover, every raw reference, trim/undo/redo,
+save/reopen/export, maximum 100,000-pair project metadata, downgrades, bad admission,
+required record-budget failure/cleanup, semantic and CRC errors, and interrupted
+read-only recovery. The initial exact-three-voxel fixture assumption failed because
+repeated alignment near voxel boundaries produces ten voxels; the retained corrected
+capacity test verifies reported geometry count and preservation, not accuracy.
+
+A private reproducible release-library trial records/processes 100,000 synthetic
+pairs with zero processing drops, nine segments / 603,827,864 journal bytes and a
+6,969,211-byte project. Every raw CRC/sequence/index/host link passes; project
+load/save is byte-identical. Capture/finalization35.992905s, totalincludingextra
+verification42.378556s; time-v peakRSS53,200KiB/user30.10s/system1.07s. These are
+64x32 synthetic inputs and ten voxels, not Raptor-resolution performance. Release
+CLI confirms complete journal inspection and two-record/three-torn-byte recovery;
+complete mode refuses the interrupted fixture. Release GUI opens the maximum-count
+project on isolated X with no camera descriptors at the recorded check.
+
+Evidence: private live-capacity-20261104 plus docs/LIVE_EXTENDED_SESSIONS.md.
+CodeRabbit quota64188 returns lookup_failed; no new/paid review was requested.
+Only the independent reviewer may resolve021. Sustained Raptor throughput/rejects,
+90% processing, 60-minute memory, bounded driver cleanup, physical calibration and
+three measured object trials remain unqualified. Reviewer-owned records untouched.
+Implementation commit: `2cbd5e04d790d17efee9cb16cdb90938e799d38c`.

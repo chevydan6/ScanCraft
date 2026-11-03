@@ -1,5 +1,9 @@
 # Finite native live stereo candidate scans
 
+This page describes legacy schema 1. Opt-in [schema 2 extended sessions](LIVE_EXTENDED_SESSIONS.md)
+add explicit storage budgets, segmented full pair reports and up to 100,000 frames
+per camera; sustained hardware qualification remains incomplete.
+
 `scancraft-cli scan-live-stereo CALIBRATION RECONSTRUCTION_SETTINGS SCAN_SETTINGS NEW_DIRECTORY`
 connects native Raptor acquisition directly to the existing Rust stereo processor,
 point-to-point tracking, voxel fusion, recording and editable-cloud export. This
@@ -93,8 +97,7 @@ serialization buffer, in addition to processing/association/preview ownership.
 The new copy adds allocation and bandwidth costs; no measured speedup follows.
 File opening/header creation, driver operations, storage joins and sync remain
 synchronous where invoked and have no hard deadline. Completion coordination
-waits for in-flight reads; it does not preempt them. The 1,000-frame live capacity
-is still unresolved. See [completion evidence and limits](LIVE_SOURCE_COMPLETION.md).
+waits for in-flight reads; it does not preempt them. Schema 1 retains its 1,000-frame limit; the opt-in extended path is documented above. See [completion evidence and limits](LIVE_SOURCE_COMPLETION.md).
 
 See [live recording integration evidence](LIVE_RECORDING_QUEUE.md).
 

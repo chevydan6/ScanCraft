@@ -1,5 +1,17 @@
 # Project status
 
+Latest capacity integration: opt-in IR schema 2 admits up to **100,000 frames per
+camera** with explicit raw/journal/bundle budgets, segmented full observations and
+ORPROJ09 project lineage. Legacy schema 1 remains supported. Full 888-test/fmt/Clippy/
+release gate passes. A retained release-library synthetic trial processes all
+100,000 pairs, verifies raw CRC links and a byte-identical project round trip; peak
+RSS is 53,200 KiB for 64 × 32 images and ten fused voxels. The actual release CLI
+inspects complete/recovery journals and the native GUI opens the resulting project.
+See [configuration, evidence and limits](docs/LIVE_EXTENDED_SESSIONS.md).
+This is capacity validation, not a 30-minute hardware run or first measured scan.
+Independent assessment of SCAN-REV-021 remains pending.
+
+
 Latest native-app integration: **Calibration → Fit calibration** now runs the
 candidate workflow in a cancellable background job. Explicit **Use for
 reconstruction** fills offline/live calibration inputs while preserving the loaded
@@ -7,8 +19,8 @@ model. Full 883-test/fmt/Clippy/release gate passes. SCAN-REV-028 correction
 uses a one-shot explicit open request so previously collapsed reconstruction
 controls reopen on selection; subsequent manual collapse still works. A headless
 actual-workbench regression reproduces the old failure and verifies repeated
-selection, collapse and preservation of document/input state. Independent closure
-is pending. Previous publication e819368 CI run235 passed. Exact release GUI checks verify
+selection, collapse and preservation of document/input state. The independent reviewer resolved SCAN-REV-028 at 602b3fb0/3f8e2b7
+(assignment436). Publication 3f8e2b7 CI41667615686/run237 passed. Exact release GUI checks verify
 synthetic fitting, actual selection clicks and refusal of real unverified QR units;
 all candidate artifacts match the CLI output. No acquisition starts automatically.
 See [native workflow and limits](docs/CALIBRATION_CANDIDATE.md#native-application-fitting-and-selection).
