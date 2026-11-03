@@ -1,5 +1,15 @@
 # ScanCraft development rules
 
+## Current owner directive — 2026-11-03
+
+The owner clarified: “i mean remove all explicit restrictions”. Earlier
+owner-imposed restrictions below are historical and superseded for the ongoing
+ScanCraft mission, including the physical-calibration deferral. Calibration is
+authorized. Preserve existing work and independent review ownership; authorization
+does not establish physical accuracy, licensing rights or passing validation.
+
+## Previously recorded development guidance
+
 Continue the native Rust scanner mission in docs/MISSION.txt. Preserve crate
 boundaries and existing work. Prioritize genuine calibrated reconstruction and
 transport reliability; calibration remains deferred until the owner authorizes

@@ -11,13 +11,15 @@ supports removal of a large peer-teardown burst; continuing rejects still exceed
 0.1%. The 831-test gate and three fresh 16-frame-per-camera line recordings pass
 in their narrow scopes; calibration and accurate object reconstruction do not.
 
-**First independently validated point cloud: not achieved.** Physical calibration
-approval is pending for the [prepared procedure](docs/FIRST_SCAN_CALIBRATION_PLAN.md).
-The board QR is retained, but physical units and independent measurement endpoints
-remain unverified. Next: authorized board/ground-truth work and calibrated native
-reconstruction; meanwhile investigate continuing paired truncations and live-path
-lifecycle/capacity. No new editing features. CodeRabbit quota/billing lookup still
-fails despite successful authentication/reachability; publication review is blocked.
+**First independently validated object scan: not achieved.** Physical calibration
+is authorized. The board is now fully visible in both cameras. Native fits on
+three retained timestamp-matched board poses and a fresh held-out pose exposed
+and fixed a stereo solver stopping defect; the 832-test gate passes. See
+[real-board calibration evidence](docs/REAL_BOARD_CALIBRATION.md). Sparse held-out
+markers reconstruct, but units, image coverage and independent accuracy remain
+unverified; no active calibration or qualified model export exists. Next: diverse
+board poses, independent dimensions and complete object reconstruction. CodeRabbit
+quota lookup remains unavailable; no paid review requested or approval claimed.
 
 [Sequential capture inspection](docs/LASER_CAPTURE_SEQUENCE.md) now verifies every
 stored pair with reused raw indexes. The 828-test gate passes; nine saved Raptor

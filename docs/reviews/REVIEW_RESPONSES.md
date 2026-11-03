@@ -3575,3 +3575,29 @@ First independently validated object scan remains NOT ACHIEVED. Calibration
 approval, physical scale/ground truth, model-bound reconstruction, tracking/fusion
 integration, live duration capacity, continuing transport loss and repeated native
 project/export qualification remain required. Stop unrelated feature expansion.
+
+
+## Real board calibration and DEV-STEREO-STATIONARY-ROUNDOFF — 2026-11-03
+
+Developer-identified defect, not a new independent finding. Accepted and corrected
+in b417ebd6903772fc1465be107d09c4e1a0522719. A real timestamp-matched stereo fit
+reached gradient5.09e-8 (existing final gate1e-6), then failed because rounded costs
+could not strictly decrease. `crates/scancraft-calibration/src/stereo_fit.rs` now
+lets that current stationary state undergo all unchanged final gates. No candidate
+with worse cost is accepted. A fully synthetic regression reproduces the original
+plateau and verifies residual/iteration rejection remains. Full tools/check.sh:
+832passed,1existingignored,fmt/strictClippy/release PASS. Real retained input now
+succeeds and agrees with independent OpenCV fixed-intrinsic fit. Details and exact
+scope are in docs/REAL_BOARD_CALIBRATION.md; raw/vendor data remain private.
+
+SCAN-REV-006: accepted qualification gap remains. Owner lifted calibration
+restrictions. Native fits and sparse held-out board reconstruction now exist;
+physical units, coverage, synchronization, actual object dimensions and three
+complete object trials remain unverified. No closure or stable-release claim.
+A full-domain fit failure and all excluded markers remain recorded. No relaxed
+error/domain gates, synthetic substitutes or fitted-to-ground-truth scale.
+
+CodeRabbit usage check returned exit1 lookup_failed; no review or paid request
+performed. Independent review of source commit remains outstanding. No reviewer
+record changed; no new finding severity/status asserted. Prior PR28 documentation
+propagation remains separate from this integration branch's local correction.

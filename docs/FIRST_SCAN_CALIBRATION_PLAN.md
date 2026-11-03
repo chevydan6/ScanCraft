@@ -1,10 +1,11 @@
-# First measurable Raptor scan: calibration authorization plan
+# First measurable Raptor scan: calibration procedure
 
-Status: prepared, **physical calibration not authorized or performed** by this
-mission. This procedure requires explicit owner approval before calibration data
-collection/fitting begins. Previously authorized read-only inspection and ordinary
-capture remain separate. No firmware, factory region, persistent scanner setting
-or kernel change is part of this procedure.
+Status: **physical calibration authorized on 2026-11-03**. The owner clarified
+“i mean remove all explicit restrictions”, superseding the previous deferral.
+Authorization is recorded in the developer mission and recovery checkpoint.
+No new calibration fit or independently validated physical scale is established
+by that authorization. This plan uses local observations and numerical fitting;
+firmware modification is not needed to execute it.
 
 ## Existing evidence and missing evidence
 
@@ -22,7 +23,7 @@ fit scale to force the displayed distance, or count the display itself as a 3D
 measurement. Occluded board circles also produced biased centroids with low
 reprojection residuals; preserve that failure evidence.
 
-## Authorized procedure, if approved
+## Calibration procedure
 
 1. Verify the physical board identity against its retained QR and obtain an
    independent measurement of two widely separated board distances, preferably
@@ -71,18 +72,19 @@ reprojection residuals; preserve that failure evidence.
    missing surfaces to create a recognizable model. Tracking/fusion must preserve
    rejected alignments and cannot turn unverified units into millimeters.
 
-## Approval and readiness are separate
+## Authorization and physical readiness are separate
 
-Requested authorization covers non-destructive physical calibration observations,
-local numerical fitting and private calibration records only. The owner must still
-confirm board/measurement-object placement before dependent captures. Approval
-does not authorize firmware writes, kernel modification, paid services, public
-scan-data upload, branch protection changes or merging into main.
+The authorization gate is lifted. The owner returned and repositioned the board;
+the complete pattern is now visible in both scanning cameras. Two new stereo
+captures passed native replay with reported stream/illumination states restored.
+Native fitting and held-out diagnostics are documented in
+[real-board calibration](REAL_BOARD_CALIBRATION.md). Diverse poses, independent
+dimensions and measurement uncertainty remain required.
 
-While approval/physical setup is pending, continue integration review, existing
-recording analysis, acquisition diagnostics and preparation of the native workflow.
-Do not claim a first independently validated scan until the physical measurements
-and all three trials exist.
+Continue existing-recording analysis and integration work while physical setup is
+pending. Do not claim a first independently validated scan until the physical
+measurements and all three trials exist. Raw capture evidence remains in the
+private developer artifact directory `authorized-calibration-2t4qng11`.
 
 Code references: `scancraft-calibration::{target, planar, refinement, stereo_fit}`
 (see the individual calibration documents for exact module interfaces),

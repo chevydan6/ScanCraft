@@ -4,7 +4,8 @@ Experimental, software-only fitting of supplied observations. This stage jointly
 optimizes `right_from_left` and all target poses while **holding both supplied
 lens models fixed**. It does not jointly refit lens parameters or establish Raptor
 optical binding, exposure synchronization, physical accuracy or calibration coverage.
-Physical calibration remains deferred; no camera is opened or configured.
+Physical calibration is now authorized; this numerical command itself opens no
+camera. See [real-board observations and solver correction](REAL_BOARD_CALIBRATION.md).
 
 ## Native interfaces and data flow
 
@@ -155,3 +156,7 @@ Simultaneous lens/rig optimization, target detection/subpixel localization,
 robust selection, coverage/uncertainty, actual Raptor source/mode/optical binding,
 synchronization, dimensional accuracy and hardware qualification remain incomplete.
 SCAN-REV-006 remains under independent review; this software progress does not close it.
+
+When cost cannot decrease at machine precision, the current state may proceed
+under the unchanged final 1e-6 stationarity gate. All final residual, information,
+domain and rig checks still apply; a highly damped step alone is insufficient.
