@@ -2914,8 +2914,9 @@ acquisition `laser.rs` admission ordering; CLI `main.rs` read-only inspection;
 app `tests/laser_process.rs` actual schema-2 helper regression. Format/ownership/
 limits are in `docs/SEGMENTED_LASER_JOURNAL.md`; root architecture/status/acceptance/
 benchmarks/roadmap and native/preview guides link current versus historical scope.
-Base commit: `4fa7e6e5b619d55ff2a75951790411cbc1ccf04d`; exact implementation
-commit binding follows once these verified changes are committed.
+Base commit: `4fa7e6e5b619d55ff2a75951790411cbc1ccf04d`.
+Implementation commit: `234c2b6af2309c0bce0bc6e87813276a509b1230`. This follow-up binds documentation only;
+tested Rust and executables remain byte-identical to the implementation commit.
 
 Verification:
 
