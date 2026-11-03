@@ -1,5 +1,12 @@
 # Project status
 
+[Fresh startup investigation](docs/RAPTOR_STARTUP_INVESTIGATION.md) retained580
+real frames across nine short stereo captures; all18 recordings replayed and
+reported settings restored. Startup rejection persists even with completed
+format/rate setup and serialized stream starts, so no speculative production
+change was made. The board view is effectively unchanged; diverse poses and
+independent scale/object measurements remain missing. Publishedcf59693 CI passed.
+
 [Native fixed-camera pose validation](docs/FIXED_CAMERA_POSE_VALIDATION.md) now
 checks held-out board pixels with lenses fixed. Real left38 RMS0.13503px matches
 OpenCV. Full right36 correctly fails lens coverage; a separately documented

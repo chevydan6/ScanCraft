@@ -3744,3 +3744,25 @@ usage returned lookup_failed; no CLI review, paid request or approval claimed.
 PR32 had no inline review threads at the checked snapshot. Prior15dd52b publicCI
 41618852246 completed success, not new-source coverage. Independent reviewer
 files/status/severity/conclusions remain exclusively unchanged.
+
+## Real startup sequencing experiments — 2026-11-03
+
+SCAN-REV-006 remains accepted and unqualified. No application-source change in
+this milestone. Sourcecf59693664e40507408ce44f10b91c565819ffd0 used for nine short
+stereo captures,580accepted rawframes/18recordings. All replayed and reported
+stream/illumination readbacks restored. First fresh board view retained38/38
+ordinarymarks but moved onlyabout5pixels from priorpose; no diverse calibration
+pose or independent physical scale inferred.
+
+Three traced startup runs reproduce errors even when setup finishes before video
+start. A controlled60-frame/camera ABBA experiment serializing onlySTREAMON has
+startup L/R0/0,0/1,1/104,0/91, ongoing1/1,1/1,0/0,0/0. Serialization does not fix
+startup corruption; no production ordering or validators changed. Initial shim
+compile/preload failure and its extra uninstrumentedcapture are retained and
+excluded from traced evidence. See docs/RAPTOR_STARTUP_INVESTIGATION.md.
+
+SCAN-REV-005 cleanup deadline remains open: restored short-trial readbacks do
+not prove hard deadlines. Existing850-test source gate and currentcf59693 CI
+41620572099 passed; no redundant fullsourcegate for evidence-only documentation.
+No new CodeRabbit review or independent closure claimed. Reviewer-owned files
+were not modified or staged. No firmware, kernel, main merge or protection change.
