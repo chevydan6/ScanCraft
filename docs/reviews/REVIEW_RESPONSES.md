@@ -3766,3 +3766,26 @@ not prove hard deadlines. Existing850-test source gate and currentcf59693 CI
 41620572099 passed; no redundant fullsourcegate for evidence-only documentation.
 No new CodeRabbit review or independent closure claimed. Reviewer-owned files
 were not modified or staged. No firmware, kernel, main merge or protection change.
+
+## USB startup framing evidence — 2026-11-03
+
+SCAN-REV-006 remains accepted/unqualified. Application source unchanged at
+68edb336e1e31b2fa053646a6179b23a96db15e8. One30-frame/camera native capture
+retained60acceptedframes; startup rejects1/96,ongoing0/0,metadata missing0/0.
+Both replays and reported format/rate/illumination restoration pass.
+
+Full USB monitor reports24420packets,zero kernel drops,balanced URB IDs and no
+truncated successful bulk payloads. Right startup headers are displaced6144bytes
+from12288byte transfer boundaries. Offline parsing finds188consistentheaders
+and exactly2304000genuine imagebytes. A private finite boundary/overflow model
+reproduces31/31left+126/126right dequeued buffer lengths,including97rejected.
+Two accepted native images equal USB-derived pixels byte-for-byte. This explains
+the observed framing mechanism, not device/HCD root cause or a production fix.
+Initial model's omitted overflow clamping is retained and corrected explicitly.
+
+Documentation: docs/RAPTOR_USB_STARTUP_FRAMING.md. No production parser,driver,
+kernel,firmware or acceptance-rule change; no rejected data relabeled accepted.
+The current board is clipped at the right edge; an owner reposition request is
+pending, not assumed fulfilled. Physical scale/object/trials remain missing.
+Existing850-test source gate retained; no redundant source gate for docs-only
+change. No new completed CodeRabbit review or reviewer-owned record change.

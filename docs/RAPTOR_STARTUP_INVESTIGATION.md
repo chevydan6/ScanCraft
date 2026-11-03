@@ -103,3 +103,8 @@ Production source remains at the previously verified850-test gate. Public CI
 41620572099 completed successfully for cf59693. Hardware experiments do not replace
 that source gate, independent review or the physical accuracy requirements. No
 new CodeRabbit review is claimed for this evidence-only documentation milestone.
+
+The subsequent [complete USB startup trace](RAPTOR_USB_STARTUP_FRAMING.md) obtained
+privileged monitor access using existing owner authorization and retained zero
+reported monitor drops. It identifies a concrete shifted-boundary incident without
+changing production acquisition or attributing the ultimate cause.

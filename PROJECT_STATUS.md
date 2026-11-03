@@ -1,5 +1,12 @@
 # Project status
 
+[USB startup trace](docs/RAPTOR_USB_STARTUP_FRAMING.md) now identifies a concrete
+6,144-byte header-boundary shift in one failed startup. Zero reported monitor
+drops, balanced transfers and full payloads support the analysis. A finite
+boundary model explains all157 dequeued buffer lengths; two accepted images match
+USB bytes exactly. Root cause and a safe correction remain open; no driver,
+firmware or application change, and no rejection counters were relaxed.
+
 [Fresh startup investigation](docs/RAPTOR_STARTUP_INVESTIGATION.md) retained580
 real frames across nine short stereo captures; all18 recordings replayed and
 reported settings restored. Startup rejection persists even with completed
