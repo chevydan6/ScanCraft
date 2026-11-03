@@ -22,9 +22,11 @@ reproduction invokes its existing snapshot function eight times with timed read
 wrappers, without starting another logging loop or modifying the original file.
 The original observer remains running during that reproduction.
 
-The slowest operation in all eight snapshots is
+The slowest file read in all eight snapshots is
 `/proc/acpi/button/lid/LID/state`: **1.382848–5.122096 ms** elapsed. Other file reads
-in this sample are at most 0.256019 ms. These durations include scheduling and are
+in this sample are at most 0.256019 ms. A timed command takes longer than the lid
+read in seven snapshots; this is not a ranking of all snapshot operations.
+These durations include scheduling and are
 not isolated firmware/driver CPU times. Local Linux reference
 `drivers/acpi/button.c::{acpi_button_state_seq_show,acpi_lid_evaluate_state}`
 shows that reading this proc file evaluates the ACPI `_LID` method. In contrast,

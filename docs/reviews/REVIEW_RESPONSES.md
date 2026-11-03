@@ -4687,3 +4687,20 @@ independentreview; no completedCodeRabbit/paidrevieworownermergeclaimed.
 Nextisolateindividualdirectlidreadsagainstcachedreadcontrols withinonecapture,
 with timedcallrecords andrestoreobserver. Physicalscale/measuredobjectandcomplete
 native3Dqualificationstillpending; don'tsubstitutethisdiagnosticforagenuine scan.
+
+## SCAN-REV-030 — accepted: distinguish file reads from all operations
+
+Accepted. The observer report incorrectly called the lid read the slowest
+operation in every snapshot. Independent assignment472 establishes that it is
+the slowest file read, while a timed command takes longer in seven of eight
+snapshots. Corrected `docs/RAPTOR_OBSERVER_TIMING.md` to state both facts without
+changing measured durations or causal limitations. No application, collector,
+raw evidence or reviewer record changed. The correction is based on the saved
+operation-ranking evidence cited by the reviewer; no new hardware trial is
+necessary for this wording correction.
+
+Affected publication: c907ae55e4f16f1074d813e43ea2e37a809c2a2b. Correction commit
+is separately identifiable in Git history. Validation: whitespace/diff inspection;
+both exact c907ae5 push41699629965 and PR41699643105 CI runs now pass. Existing
+890-test/fmt/Clippy/release evidence applies to unchanged code. This response
+accepts the finding; only the independent reviewer may verify or close it.
