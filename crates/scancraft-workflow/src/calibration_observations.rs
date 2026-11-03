@@ -25,7 +25,7 @@ pub enum TargetUnits {
     Unverified,
     DeclaredMillimeters,
 }
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub struct TargetPoint {
     pub pattern: [f64; 2],
@@ -184,6 +184,7 @@ pub fn run(
 /// prepare previews without rereading potentially changed files after publication.
 /// Frames remain bounded by the existing recording/image limits.
 pub struct Completed {
+    pub request: Request,
     pub manifest: Value,
     pub measurements: Value,
     pub frames: [SelectedFrame; 2],
@@ -325,6 +326,7 @@ pub fn run_with_frames(
         )
     })?;
     Ok(Completed {
+        request,
         manifest: result,
         measurements: report,
         frames: selected,
