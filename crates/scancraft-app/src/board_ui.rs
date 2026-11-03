@@ -8,6 +8,7 @@ use std::{
     sync::Arc,
     thread::{self, JoinHandle},
 };
+mod candidate;
 
 struct Processed {
     path: PathBuf,
@@ -47,6 +48,8 @@ struct Job {
 }
 #[derive(Default)]
 pub struct BoardUi {
+    candidate: candidate::CandidateUi,
+    candidate_active: bool,
     request: String,
     output: String,
     job: Option<Job>,
@@ -60,9 +63,10 @@ pub struct BoardUi {
 }
 impl BoardUi {
     pub fn is_busy(&self) -> bool {
-        self.job.is_some()
+        self.job.is_some() || self.candidate.is_busy()
     }
     pub fn cancel(&self) {
+        self.candidate.cancel();
         if let Some(job) = &self.job {
             job.work.cancel();
         }
@@ -71,10 +75,17 @@ impl BoardUi {
         if self.is_busy() {
             return;
         }
+        self.candidate_active = false;
         self.request = request.display().to_string();
         self.output = output.display().to_string();
         self.message = "Reading recordings and measuring target marks…".into();
         self.spawn(move |work| process(&request, &output, work));
+    }
+    pub fn start_candidate(&mut self, request: PathBuf, output: PathBuf) {
+        if !self.is_busy() {
+            self.candidate_active = true;
+            self.candidate.start(request, output);
+        }
     }
     fn spawn(
         &mut self,
@@ -91,6 +102,7 @@ impl BoardUi {
         }
     }
     pub fn tick(&mut self) {
+        self.candidate.tick();
         if !self.job.as_ref().is_some_and(|j| j.thread.is_finished()) {
             return;
         }
@@ -112,7 +124,20 @@ impl BoardUi {
             Err(error)=>self.message.push_str(&format!(" Preview unavailable: {error}. Previous view retained; saved files remain available.")),
         }
     }
-    pub fn ui(&mut self, ui: &mut egui::Ui, can_start: bool) {
+    pub fn ui(&mut self, ui: &mut egui::Ui, can_start: bool, can_use: bool) -> Option<PathBuf> {
+        ui.horizontal(|ui| {
+            ui.selectable_value(&mut self.candidate_active, false, "Recorded board");
+            ui.selectable_value(&mut self.candidate_active, true, "Fit calibration");
+        });
+        if self.candidate_active {
+            self.candidate
+                .ui(ui, can_start && self.job.is_none(), can_use)
+        } else {
+            self.observation_ui(ui, can_start);
+            None
+        }
+    }
+    fn observation_ui(&mut self, ui: &mut egui::Ui, can_start: bool) {
         ui.heading("Calibration preparation");
         ui.label("Measure markers in a recorded board pair. Supply the target layout, exact target coordinates and explicit frame selections in the request file.");
         ui.hyperlink_to("Request format and calibration steps", "https://github.com/chevydan6/ScanCraft/blob/dev/first-genuine-scan-integration/docs/RECORDED_TARGET_OBSERVATIONS.md");

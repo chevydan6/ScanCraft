@@ -120,6 +120,14 @@ impl Default for CloudUi {
     }
 }
 impl CloudUi {
+    pub fn select_calibration(&mut self, path: &std::path::Path) {
+        let path = path.display().to_string();
+        self.reconstruction_files[0] = path.clone();
+        self.recording_files[0] = path.clone();
+        self.recorded_sequence_files[0] = path;
+        self.recording_open = true;
+        self.message = "Calibration selected. Choose recordings and settings to reconstruct; the current model is unchanged.".into();
+    }
     pub fn open_cylinder_startup(&mut self, path: PathBuf, maximum_rms_mm: f64) {
         self.cylinder_rms_mm = maximum_rms_mm;
         self.cylinder_startup = Some(0);
@@ -1174,6 +1182,22 @@ fn normal_arrows(
 mod tests {
     use super::*;
     use crate::cloud_jobs::DisplayPoint;
+    #[test]
+    fn selecting_calibration_only_changes_future_reconstruction_inputs() {
+        let mut ui = CloudUi {
+            dirty: true,
+            path: "unsaved-model".into(),
+            ..Default::default()
+        };
+        ui.recording_files[1] = "left-recording".into();
+        ui.select_calibration(std::path::Path::new("candidate.rapcal"));
+        assert_eq!(ui.reconstruction_files[0], "candidate.rapcal");
+        assert_eq!(ui.recording_files[0], "candidate.rapcal");
+        assert_eq!(ui.recorded_sequence_files[0], "candidate.rapcal");
+        assert_eq!(ui.recording_files[1], "left-recording");
+        assert_eq!(ui.path, "unsaved-model");
+        assert!(ui.dirty && !ui.is_busy());
+    }
     #[test]
     fn expanded_source_and_measurements_leave_viewport_inside_default_window() {
         let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))

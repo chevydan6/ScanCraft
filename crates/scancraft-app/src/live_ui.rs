@@ -76,6 +76,9 @@ fn texture(
     }
 }
 impl LiveUi {
+    pub fn select_calibration(&mut self, path: &std::path::Path) {
+        self.files[0] = path.display().to_string();
+    }
     #[cfg(test)]
     pub(crate) fn test_job(
         &mut self,
