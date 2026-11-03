@@ -2,6 +2,7 @@
 pub mod board_session;
 mod bounded_json;
 mod calibration_bundle;
+pub mod calibration_candidate;
 pub mod calibration_observations;
 pub mod candidate_bundle;
 pub mod frame_document;
