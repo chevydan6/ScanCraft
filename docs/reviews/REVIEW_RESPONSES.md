@@ -4521,3 +4521,36 @@ CodeRabbit repository-level usage exits1 with all quota/billing fields reporting
 lookup_failed; no review or paid request was made. An initial lookup outside the
 repository also reported not_git_repository and was retained separately rather
 than interpreted as account capacity. The corrected lookup remains unavailable.
+
+## DEV-HOST-SERVICE — observed request starvation and broader event gaps
+
+Developer investigation; no independent finding closure. Assignment454's bounded
+acceptance of the preceding queue comparison and assignment457's confirmation of
+both 4102fd4 CI runs are acknowledged. Existing limitations/statuses remain intact.
+
+One baseline-driver600-frame/camera capture adds filtered camera-copy workqueue,
+scheduler and local-timer events. All4,014,236 trace events match retained per-CPU
+counts with zero reported loss; USB identities balance, and all1,208 accepted/
+ongoing-rejected frames match actual headers/lengths. All1,200 stored frames replay.
+Startup94/0 and ongoing4/4 remain reported:102/1302=7.834101%, FAIL.14 state-group
+checks and five formats/service/tracing restore; baseline module is unchanged.
+
+All227,666 work cycles,90,486 timer pairs and1,334,445 scheduler switches account
+consistently. Three paired short frames overlap3.869–5.318ms without selected events
+on any CPU, which is not proof of a platform/firmware cause. A fourth has ten copy
+jobs waiting909–1506us and zero software-pending requests for923/895us. One worker
+wakes towardCPU1 and first switches in onCPU0 1500us later. This localizes a
+software scheduling delay and request starvation in this instrumented sample; tracing
+overhead, scheduling cause and the other longer gaps are unqualified.
+
+Changed source files: documentation only, RAPTOR_HOST_SERVICE_TRACE.md,
+PROJECT_STATUS.md and this response. No application or kernel implementation edit.
+Existing890-test/fmt/Clippy/release evidence applies to unchanged code. Private
+host-service-trace-20261104 retains collector/bindings, complete raw evidence,
+analyzers and lifecycle self-tests, replay/restoration and viewed final images.
+The board is still clipped and no measured object/physical scale is established.
+Publication hash is bound in private metadata and Git history. New evidence awaits
+independent review; no status/severity change or completed automated review claimed.
+
+Fresh repository-level CodeRabbit usage exits1 with every included/billing/credit
+field reporting lookup_failed. No new review, paid request or upload follows.

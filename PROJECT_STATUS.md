@@ -1,6 +1,14 @@
 # Project status
 
-Latest queue-depth comparison: three fully observed 600-frame/camera trials at
+Latest host-service investigation: a complete 4,014,236-event trace distinguishes
+three paired truncations overlapping 3.869–5.318 ms without selected events across
+all CPUs from a fourth with camera-work scheduling delays and 923/895 µs of zero
+software-pending requests. All 1,200 saved frames replay; acquisition still fails
+its rejection target. No production, driver or firmware change. [Evidence and limits](docs/RAPTOR_HOST_SERVICE_TRACE.md).
+The scheduling mechanism is a concrete investigation target, not a qualified fix
+or proof of the cause of the longer gaps. Physical object reconstruction remains outstanding.
+
+Earlier queue-depth comparison: three fully observed 600-frame/camera trials at
 depths 5 → 32 → 5 saved and replayed 3,600 genuine frames. Depth 32 still produced
 a paired short frame during a roughly 6.1 ms completion gap; it is not a complete
 fix. All three trials fail the total rejection target. Complete USB/header traces
