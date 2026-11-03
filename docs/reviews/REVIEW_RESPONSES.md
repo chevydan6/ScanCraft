@@ -4274,3 +4274,28 @@ wizard or calibrated Raptor reconstruction. Physical units/coverage, actual devi
 binding, measured object trials and full GUI geometry qualification remain open.
 CodeRabbit quota lookup failed; no completed new or paid review claimed. Reviewer
 records were read only. Implementation commit: `bb0e3702ac75d494cd542241fdd9d333648a048b`.
+
+
+## SCAN-REV-028 — accepted: reopen existing collapsed reconstruction controls
+
+Accepted. `default_open` only initializes egui's header state and cannot override
+an existing collapsed panel. `CloudUi::select_calibration` now requests one explicit
+open; the actual recorded-pair header consumes that request with `open(Some(true))`
+and returns to normal user control on subsequent frames. The same request applies
+to recorded-pair startup. No forced permanent expansion, acquisition, document
+replacement, algorithm or persistence-format change is introduced.
+
+Changed source: `crates/scancraft-app/src/cloud_ui.rs`. The new headless
+`selecting_calibration_reopens_visited_controls_without_forcing_them_open` renders
+the actual workbench before selection, verifies the destination controls become
+visible, clicks the header to collapse it and repeats selection. It checks retained
+geometry, selection, dirty state, file path, other recording inputs and indices.
+The exact test failed with the old implementation and passes with the correction.
+Full `tools/check.sh`: 883 passed, one existing ignored, formatting, strict all-target
+Clippy and optimized workspace build passed. No new hardware or physical-accuracy
+measurement is implied. Evidence is retained privately in calibration-selection-20261104.
+
+CodeRabbit 0.9.2 quota lookup returned unavailable/lookup_failed for every category;
+no new review or paid usage was requested. This is a developer correction awaiting
+independent verification; only the reviewer may close the finding. Reviewer-owned
+records were read only. Implementation commit: `602b3fb0be1b3bdf3fd2985afa5500aa687e7f87`.

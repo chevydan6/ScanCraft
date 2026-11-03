@@ -3,7 +3,12 @@
 Latest native-app integration: **Calibration → Fit calibration** now runs the
 candidate workflow in a cancellable background job. Explicit **Use for
 reconstruction** fills offline/live calibration inputs while preserving the loaded
-model. Full 882-test/fmt/Clippy/release gate passes. Exact release GUI checks verify
+model. Full 883-test/fmt/Clippy/release gate passes. SCAN-REV-028 correction
+uses a one-shot explicit open request so previously collapsed reconstruction
+controls reopen on selection; subsequent manual collapse still works. A headless
+actual-workbench regression reproduces the old failure and verifies repeated
+selection, collapse and preservation of document/input state. Independent closure
+is pending. Previous publication e819368 CI run235 passed. Exact release GUI checks verify
 synthetic fitting, actual selection clicks and refusal of real unverified QR units;
 all candidate artifacts match the CLI output. No acquisition starts automatically.
 See [native workflow and limits](docs/CALIBRATION_CANDIDATE.md#native-application-fitting-and-selection).
