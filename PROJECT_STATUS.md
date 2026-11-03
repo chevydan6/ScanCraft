@@ -1,11 +1,19 @@
 # Project status
 
+Latest hardware result: [combined temporary mitigations](docs/RAPTOR_COMBINED_ACQUISITION.md)
+save/replay1,800frames per camera with zero ongoing rejects/gaps and one startup
+rejection per camera. Complete USB/host traces and strict accepted-frame headers
+pass; original module/services/state restore. The0.055525% total rejection proxy
+is below0.1% in this one-minute sample only. No permanent fix, repeatability,
+physical scale or measured object reconstruction is claimed. Next: longer bounded
+validation and physical reconstruction; keep the candidate experimental/default-off.
+
 Latest software correction: [synthetic capacity-test pacing](docs/CAPACITY_TEST_PACING.md)
 now waits for processing and bounded progress from both recording files. A controlled
 dual-writer stall verifies that either stopped consumer prevents further source
 advancement. Production eight-frame/nonblocking overflow behavior is unchanged.
-Full892-test/fmt/Clippy/release gate and six tests on one CPU pass; independent
-SCAN-REV-031 verification and new-head CI remain pending. This corrects a test
+Full892-test/fmt/Clippy/release gate and six tests on one CPU pass. Independent
+assignment485 resolves SCAN-REV-031 in this test scope; exact dbfc2fa push/PR CI pass. This corrects a test
 precondition, not the remaining hardware rejection or physical reconstruction gaps.
 
 Latest one-minute mitigation trials: [capture without diagnostic lid polling](docs/RAPTOR_NO_LID_SUSTAINED.md)

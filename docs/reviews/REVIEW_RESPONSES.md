@@ -4813,3 +4813,28 @@ queue overflow on both sides and exits101 after10.01s; live worktree unchanged.
 This checks sensitivity to preview-only admission, not the exact CI scheduling
 cause. CodeRabbit quota/billing lookup remains unavailable; no review upload,
 completed automated review or paid usage is claimed.
+
+
+## SCAN-REV-031 — verification follow-up and separate hardware evidence
+
+Accepted correction remains test-only at dbfc2fa4b966fa6a49cc7688dc8bb451521cebf9.
+Independent assignment485 reports it Resolved in the fixture scope; development
+has not altered the reviewer's findings. Exact-head push41706905583 and
+PR41706960114 both complete successfully. The review-readiness diagnostic still
+finds no known completed current-head CodeRabbit review; no merge approval follows.
+
+Separate developer experiment: docs/RAPTOR_COMBINED_ACQUISITION.md records a finite
+1800frame/camera candidate-plus-paused-logger diagnostic. All3600 saved frames
+replay, zero ongoing rejects/gaps, startup1/1, total2/3602. Complete USB/host and
+strict accepted headers pass, checked state/original module/services restore.
+Sixteen private inputs bound before capture; original prior failures retained.
+No production source change, generalized reliability or dimensional-accuracy claim.
+Source files changed in this milestone: this response, PROJECT_STATUS.md and the
+new report. Exact evidence publication commit is retained in Git history. Full
+physical qualification remains outstanding; independent hardware review pending.
+
+Fresh full tools/check.sh completes:892passed0failed1ignored,fmt/strictClippy/release
+PASS. Complete host analysis counts0copy-workers/350653timerpairs; recycling model
+self-tests pass and actual338590cycles/side account. Initial missing-directory
+analyzer invocations retained and corrected, no raw-data change. CodeRabbit usage
+lookup_failed again; no upload or paid review. All report claims are finite.
