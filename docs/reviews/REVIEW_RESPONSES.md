@@ -4083,3 +4083,33 @@ qualification is claimed.
 The current repository-scoped CodeRabbit quota lookup again reports `lookup_failed`
 for included reviews, billing period and credits. No paid request, completed new
 review or independent approval is claimed.
+
+
+## DEV-VENDOR-STOP — acknowledged commands do not clear framing — 2026-11-03
+
+Developer investigation, not a new independent finding or closure. Source907484e
+remains unchanged. At acquisition head351f53f, a fixed setter probe gets status0
+for39 and status2 for139; its next right stream still shifts. A separate eight-arm
+ABBA BAAB comparison tests the SDK G2 alias39+38 versus control. All eight setter
+requests/replies are byte-matched to USB and report success. All four stop arms
+still have startup bursts (100,207,101,190 rejected buffers); shifted headers
+remain in every stop arm. No speculative production setter path is added.
+
+All1,440 accepted frames/32recordings replay CRC/order/footer. Full568,622-packet
+USB trace has balanced requests, complete successful payloads and zero reported
+drops. All32acceptedindex10images equal USB-derived pixels byte-for-byte.
+21,062ioctlrows verify2,905metadata returns before video reuse, no unmatched/trace
+errors. Seven snapshot groups, five idle formats, service and baseline module
+restore. Initial private probe-script indentation failure was caught/fixed before
+hardware; the failed text is retained. Private vendor-stop-ou3_pbkp and
+vendor-stop-pair-p55hloh5 bind plans/results; public RAPTOR_VENDOR_STOP_TRIAL.md,
+reset crosslink and PROJECT_STATUS document scope and limits.
+
+The existing863-test/fmt/Clippy/release gate remains applicable; exact351f53f
+CI41652524927 passed. No application-source or dependency change. CodeRabbit
+quota remains unavailable from the preceding same-session check, so no completed
+new or paid review is claimed. Independent findings005/006/021 remain unqualified
+and exclusively reviewer-controlled. A successful command reply does not prove
+internal sensor mapping, FIFO flushing or firmware cause. This sequence is not a
+reliable recovery; physical units, measured object and three complete native scan
+trials remain outstanding. No firmware write, persistent driver install or merge.

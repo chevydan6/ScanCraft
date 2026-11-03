@@ -1,5 +1,12 @@
 # Project status
 
+Latest vendor-stop investigation: SDK properties39/38 acknowledge all eight fixed
+requests, yet every stop arm in an eight-test ABBA BAAB comparison retains a
+startup burst. All1,440 accepted frames/32recordings replay,568,622USB monitor
+packets have no reported drops, and state/formats/service/module restore. No
+production stop-command fix is added. See [methods and limits](docs/RAPTOR_VENDOR_STOP_TRIAL.md).
+Physical scale and a first independently measured object scan remain incomplete.
+
 [Post-reset USB trace](docs/RAPTOR_USB_RESET_TRIAL.md#complete-trace-across-one-reset-and-startup)
 confirms that acknowledged USB reconfiguration does not prevent the previously
 observed header shift: both cameras retain an 18,432-byte prefix and headers

@@ -195,3 +195,7 @@ and adversarial header patterns if needed. Do not equate GET failure with setter
 support, add an arbitrary reset, or accept malformed V4L2 buffers to improve rates.
 Physical units, the measured object and native end-to-end reconstruction remain
 the qualification priority.
+
+The subsequent [fixed vendor-stop experiment](RAPTOR_VENDOR_STOP_TRIAL.md) tests
+this lead: 39/38 are acknowledged, but all four paired-stop arms still have
+startup bursts. No production recovery change is justified by those results.
