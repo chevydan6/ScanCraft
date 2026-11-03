@@ -1,5 +1,24 @@
 # Project status
 
+First genuine scan mission: [all 30 PRs audited](docs/FIRST_SCAN_INTEGRATION_AUDIT.md).
+Local `dev/first-genuine-scan-integration` preserves all 29 developer heads; reviewer
+PR2 remains separate. No merge into main or protection change. Known current-head
+review/conversation readiness passes only PR10/13/22/23/26; other gaps remain.
+
+[Finite stereo completion](docs/FINITE_STEREO_COMPLETION.md) now waits for both
+cameras before either closes. A controlled new/old/old/new hardware comparison
+supports removal of a large peer-teardown burst; continuing rejects still exceed
+0.1%. The 831-test gate and three fresh 16-frame-per-camera line recordings pass
+in their narrow scopes; calibration and accurate object reconstruction do not.
+
+**First independently validated point cloud: not achieved.** Physical calibration
+approval is pending for the [prepared procedure](docs/FIRST_SCAN_CALIBRATION_PLAN.md).
+The board QR is retained, but physical units and independent measurement endpoints
+remain unverified. Next: authorized board/ground-truth work and calibrated native
+reconstruction; meanwhile investigate continuing paired truncations and live-path
+lifecycle/capacity. No new editing features. CodeRabbit quota/billing lookup still
+fails despite successful authentication/reachability; publication review is blocked.
+
 [Sequential capture inspection](docs/LASER_CAPTURE_SEQUENCE.md) now verifies every
 stored pair with reused raw indexes. The 828-test gate passes; nine saved Raptor
 captures preserve 222 pairs / 391,481 candidate points and camera views exactly.

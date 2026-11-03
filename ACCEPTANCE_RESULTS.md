@@ -4,6 +4,7 @@ PASS means the stated narrow experiment passed, not the full release gate.
 
 | Experiment | Result | Evidence |
 | --- | --- | --- |
+| Finite stereo peer completion | PASS narrow lifecycle evidence: 831-test gate; controlled new/old/old/new comparison and three fresh recorded line trials with complete replay/restoration | [Methods](docs/FINITE_STEREO_COMPLETION.md); continuing rejects still FAIL <0.1%; no calibrated object reconstruction |
 | Sequential completed-capture reader | PASS narrow integrity scope: 828-test gate; 222 saved pairs / 391,481 points and raw FrameViews exact; callback failure/cancellation/mutation and CLI partial-output checks | [Methods and limits](docs/LASER_CAPTURE_SEQUENCE.md); diagnostic tracking observations are not calibrated pose or fusion qualification |
 | Reopen completed laser captures | PASS narrow scope: 824-test gate; 18 older selected views / 26,750 points and full FrameViews exact; 129 input files unchanged; final native capture and close/restart/reopen; actual GUI pair switch and failed-selection preservation | [Methods and limits](docs/SAVED_LASER_CAPTURES.md); diagnostic views only, no calibrated/editable scan-project or tracking qualification |
 | Buffered schema-2 encoding | PASS narrow byte/storage/capture scope: 814-test gate plus explicit >1 GiB regression; native 57/64 and 58/64 with 2 MiB segments, separate 61/64 with 16 MiB segments; cleanup/readbacks pass | [Methods and limits](docs/SEGMENTED_PAIR_ENCODING.md); one small-segment trial below 90%, all sustained/physical gates remain open |

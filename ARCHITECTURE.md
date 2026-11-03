@@ -1,5 +1,11 @@
 # Architecture
 
+Finite CLI stereo acquisition now has a two-worker completion gate before either
+worker closes its camera. Ownership stays on the original threads; cancellation
+and termination remain explicit. Live IR/laser runners are separate and unchanged.
+See docs/FINITE_STEREO_COMPLETION.md. The first-scan integration branch preserves
+the existing architecture and all developer PR ancestry.
+
 `laser_stream::bundle::visit_pairs` adds sequential read-only access using the
 same pair-binding implementation as `load_pair`, with one Playback index per
 camera and two complete journal passes. Callbacks are provisional until final

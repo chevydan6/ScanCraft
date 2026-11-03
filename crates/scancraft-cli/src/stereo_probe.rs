@@ -12,6 +12,8 @@ use std::{
     io::{BufReader, BufWriter, Write},
     path::{Path, PathBuf},
 };
+mod completion;
+use completion::Completion;
 use std::{
     sync::{
         Arc,
@@ -59,10 +61,11 @@ fn capture(
     requested_fps: u32,
     count: usize,
     cancel: &AtomicBool,
+    completion: &Completion,
     output: Option<PathBuf>,
-    gain: Option<i32>,
-    illumination: IlluminationTrial,
+    trial: (Option<i32>, IlluminationTrial),
 ) -> Result<Report, String> {
+    let (gain, illumination) = trial;
     termination::check()?;
     let profile = StreamProfile {
         interface,
@@ -152,6 +155,9 @@ fn capture(
         rejection_samples: camera.rejection_samples.clone(),
         ongoing_rejection_samples: camera.ongoing_rejection_samples.clone(),
     };
+    // Stopping/restoring one interface can disturb its still-acquiring peer.
+    // Keep camera ownership in this worker until both finite acquisitions finish.
+    completion.wait(cancel, termination::check)?;
     camera.close().map_err(|e| e.to_string())?;
     if let Some(writer) = writer {
         let out = writer.finish().map_err(|e| e.to_string())?;
@@ -243,10 +249,12 @@ fn run_workers(
     illumination: IlluminationTrial,
 ) -> Result<Value, String> {
     let cancel = Arc::new(AtomicBool::new(false));
+    let completion = Arc::new(Completion::default());
     let mut handles = Vec::new();
     let start = Instant::now();
     for interface in [0, 2] {
         let stop = cancel.clone();
+        let done = completion.clone();
         let path = output.map(|p| {
             p.join(if interface == 0 {
                 "left.raptor"
@@ -258,7 +266,15 @@ fn run_workers(
             .name(format!("scancraft-probe-{interface}"))
             .spawn(move || {
                 let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                    capture(interface, fps, count, &stop, path, gain, illumination)
+                    capture(
+                        interface,
+                        fps,
+                        count,
+                        &stop,
+                        &done,
+                        path,
+                        (gain, illumination),
+                    )
                 }))
                 .unwrap_or_else(|_| Err(format!("stereo worker {interface} panicked")));
                 if result.is_err() {

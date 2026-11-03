@@ -1,5 +1,13 @@
 # Roadmap
 
+Immediate mission priority: one independently measured real object, three repeat
+scans and native project/export verification. All developer PR heads are preserved
+on the first-scan integration branch. Finite CLI completion now prevents peer close
+before both acquisitions finish; recurring transport truncations remain above the
+acceptance target. Physical calibration procedure is prepared and approval pending.
+See docs/FIRST_SCAN_INTEGRATION_AUDIT.md, docs/FINITE_STEREO_COMPLETION.md and
+docs/FIRST_SCAN_CALIBRATION_PLAN.md. Do not expand unrelated features.
+
 Sequential recorded-pair access now avoids repeated whole-recording indexing and
 checks every pair's raw lineage. Exploratory existing-Tracker runs are recorded,
 without claiming physical accuracy. Next validate model/units and pose truth,

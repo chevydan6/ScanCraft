@@ -1,5 +1,10 @@
 # Benchmarks
 
+[Finite stereo completion trials](docs/FINITE_STEREO_COMPLETION.md): counterbalanced
+new/old/old/new runs preserve 1,200 accepted frames per camera; new ongoing rejects
+7/8 and8/8, old9/8 and5/95. This isolates a finite teardown interaction, not a pass
+for <0.1% rejection, startup, sustained performance or physical reconstruction.
+
 [Sequential capture reader](docs/LASER_CAPTURE_SEQUENCE.md): exact reference checks
 cover 222 saved pairs / 391,481 points. Two single-observation comparisons with
 reference work included show less elapsed time than repeatedly opening individual

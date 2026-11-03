@@ -3494,3 +3494,84 @@ unavailable: no review request/upload, paid service, push/PR or merge. No protec
 review file or main branch changed. Full mission remains incomplete; next work is
 verified reconstruction/model binding and staged tracking/fusion with independent
 pose truth, not promotion of diagnostic coordinates into millimeter projects.
+
+
+## Developer mission — first genuine scan integration and finite stereo completion
+
+Accepted the owner's priority: one independently measured Raptor scan and three
+repeat trials, not additional editing features. Physical calibration remains
+explicitly deferred; docs/FIRST_SCAN_CALIBRATION_PLAN.md is prepared and explicit
+owner authorization has been requested, with no reply at this milestone.
+
+Integration baseline1d7380a733e56a988e493279931f1df10eaf0bd6. Audited all30public PR
+heads/dependencies/discussion/threads/current-head readiness. All29developer heads
+are retained by local dev/first-genuine-scan-integration at
+c5c8ed77bdcd5cfc54b49c8cd8506efc34f9aab4 after two history-only merges; the tree is
+identical to baselinef3be5e6595fea22595cd0f3b401d2b70d89ec651. PR2 reviewer records
+are excluded. Five unresolved GitHub threads on9/12/27/28 remain unchanged, even
+where legitimate corrections already exist locally. No finding is closed by this
+response. Reviewer statuses002/003/005/006/007/021 remain as published; latest shared
+review read360. Current-head readiness passes only10/13/22/23/26 in this snapshot;
+this is not owner consent. Full audit and evidence: FIRST_SCAN_INTEGRATION_AUDIT.md
+and evidence/first-scan-integration-audit.json. Three initial CI API timeouts were
+retained and one read-only retry each returned successful PR-triggered runs.
+
+Developer-identified DEV-FINITE-STEREO-PEER-CLOSE: accepted a correction for finite
+CLI camera close/restore overlapping its peer's still-active acquisition. Read-only
+USB tracing of the existing kernel monitor observed tiny peer buffers after the
+first camera's shutdown; this is distinct from continuing paired truncations.
+The existing completion policy allowed independent close at each frame limit.
+
+Changed source: scancraft-cli/src/stereo_probe.rs and its new completion.rs.
+Two-worker Completion waits before camera.close while keeping each non-Send
+Capture on its owning thread. Existing peer-error/panic/spawn-failure cancellation
+and scoped termination release the wait. No new unsafe/dependency, relaxed image
+validation, error suppression or recording-format change. Stream-group restoration
+remains after worker joins. No live_stereo/laser_stream correction is claimed;
+those paths remain separate. Driver/cleanup blocking can still retain ownership
+and joins indefinitely, so SCAN-REV-005 is not resolved by this change.
+
+Validation: full integration gate828pass before source edits; corrected finite
+capture gate831pass/1existingignored plus fmt/strict frozen all-targetClippy/release.
+Three regressions verify first worker waits, failed peer cancellation releases it,
+and termination/excess arrivals return errors. No Rust edits after that gate.
+No >1GiB capacity test or forced driver hang was run. The exact final source/binary
+and implementation commit are bound in the private evidence/checkpoint after commit.
+
+Two initial1200frame/camera30FPS trials: old baseline ongoing89/5 withstartup82/1;
+oldUSBtraced ongoing10/95 withstartup0/82. Declared new/old/old/new comparison:
+ongoing7/8,9/8,5/95,8/8;startup67/0,1/0,0/81,2/0. All exit0, zero reported missing
+metadata, full stream/illumination GETbeforeafter equal. New code avoids the large
+observed terminal burst in these trials; old code reproduces it intermittently.
+Continuing rejects stillFAIL<0.1%; no reliability/synchronization qualification.
+Sampled processRSS/CPU is narrow evidence only, not whole-system or60minute memory.
+
+USB trace909688bulk events has balanced tags, with only ten nonzero(-2) completions
+atshutdown.9/10continuing paired rejection byte counts match successful same-PTS
+completion lengths minus observed12byteheaders; one disagreement remains. Partial
+headers, unretained monitor-drop stats and driver/HCD vsphysical-wire limits prevent
+firmware/controller/kernel attribution. Atleast22retained tiny peer rejects follow
+the first shutdown; do not infer an exact whole-tail count from capped samples.
+No module load, kernel tuning, firmware or permanent control write was performed.
+
+Three further native finite line recordings retain16frames/camera each:96rawframes,
+all six recordings passCRC/footer replay; each has15equal-PTS/within1000us candidates.
+Temporary property151line trial and full reported stream/illumination states restore.
+Last right image inspected: visible stripes/bright spots, not physical surface or
+metric accuracy evidence. Initial private harness expected nonexistent report.json;
+capture succeeded and was preserved, corrected harness used the actual stdout report
+and resumed without overwriting/recapturing. Failure and correction logs retained.
+No GUI/edit/save/export or calibrated reconstruction trial was falsely claimed.
+
+Evidence: private first-scan-integration-ao3yvkv3 includes all source/binary hashes,
+API snapshots, runner/probe scripts, logs, counterbalance design, USB trace/analysis,
+raw captures and replay. Only aggregate source/docs/public GitHub metadata enter Git.
+CodeRabbit0.9.2doctor passes9checks including auth/backend/WebSocket; usage still
+exit1 lookup_failed forquota/billing/credits. No review was requested or claimed,
+no paid usage/upload/push/PR/mainmerge/protection bypass. Independent review pending.
+See FINITE_STEREO_COMPLETION.md for exact scope, evidence and remaining defects.
+
+First independently validated object scan remains NOT ACHIEVED. Calibration
+approval, physical scale/ground truth, model-bound reconstruction, tracking/fusion
+integration, live duration capacity, continuing transport loss and repeated native
+project/export qualification remain required. Stop unrelated feature expansion.
