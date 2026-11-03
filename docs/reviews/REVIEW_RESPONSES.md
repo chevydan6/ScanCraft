@@ -4379,3 +4379,41 @@ release gate is unchanged; exact690643c CI41671761778/run239 passed. Same-sessio
 CodeRabbit quota remains unavailable; no new/paid review. Physical qualification,
 sustained reliability, 90% processing, independent assessment and hard cleanup bounds
 remain outstanding. Reviewer files were read only.
+
+
+## DEV-ARCHIVE-WAIT — response to assignment442 CI evidence
+
+Accepted: exact690643c CI is mixed, not all-green. GitHub run41671746358
+(push) failed while41671761778 (pull_request) succeeded. The retained failed
+log reports177passed/1failed app tests in24seconds; only the ten-second wait
+assertion identifies the failure. This does not establish an export defect or a
+scheduler-only explanation. No new numbered independent finding is invented.
+
+`crates/scancraft-app/src/archive_ui.rs` test helper now observes completion
+before evaluating its deadline, preserves the ten-second bound for pending work,
+and reports elapsed/limit, progress, thread completion, mode, inputs, destination
+and UI message on timeout before requesting cancellation. Previously it could
+assert after tick consumed a valid completion. That is a confirmed helper defect,
+not a proven cause of the CI incident. Production worker/export code is unchanged;
+cooperative cancellation and Drop joining still provide no hard I/O deadline.
+
+Deterministic regressions feed ready success/error through the actual UI tick at
+an expired deadline and check pending-work timeout diagnostics, cancellation and
+subsequent completion. Existing real file archive/project-export tests still run.
+Local baseline two archive tests passed; initial new-test compilation failed on
+struct update syntax for a Drop type, corrected with explicit fields. Focused
+four-test run passed. Full gate/publication commit recorded below when terminal.
+CodeRabbit0.9.2 quota check returned lookup_failed for every quota/billing field;
+no new review or paid request was made, and unavailable review is not a pass.
+Original CI delay remains unexplained pending stronger evidence or recurrence
+with diagnostics. Only the independent reviewer can assess closure.
+
+Validation completion: implementation `fb7214f8cc74dca27ba260f25d2e9db56b72616c`.
+`tools/check.sh` passed890tests/oneexistingignored, formatting, strict all-target
+Clippy and optimized workspace build. An additional complete app run constrained
+to one local CPU with16testthreads passed180tests in2.33s (whole command2.547s);
+this does not reproduce the GitHub host or explain its earlier delay. No deadline
+was increased and no validation was removed. Private evidence archive-wait-20261104
+retains failed-CI metadata/log, baseline, initial compile failure, focused/gate/
+constrained-run logs and exact public source/diff fingerprints. Original CI
+incident remains unproven as fixed; current-head CI and independent review follow.

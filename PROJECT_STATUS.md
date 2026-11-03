@@ -1,5 +1,12 @@
 # Project status
 
+Latest validation correction: `fb7214f` fixes an archive-test completion/deadline
+ordering defect and adds pending-worker timeout diagnostics without extending its
+ten-second limit. Production export is unchanged. Local formatting, strict Clippy,
+890 tests/one existing ignored, and release build pass; all180app tests also pass
+on one local CPU with16testthreads. The earlier GitHub export-test delay has not
+been reproduced or proven fixed. See developer response DEV-ARCHIVE-WAIT.
+
 Latest hardware validation: the budgeted native recording worker saves **1,200
 frames per camera**, with every saved payload/metadata CRC matching pre-recording
 data. A deliberately insufficient left quota fails explicitly, retains a
@@ -8,7 +15,10 @@ state. All 2,802 complete original records verify. Normal-trial ongoing rejects
 are 12/11 (0.949237% combined), so reliability still fails the 0.1% target. The
 probe omits calibrated processing; this is not a complete scan. See
 [native worker evidence and limits](docs/LIVE_EXTENDED_SESSIONS.md#native-worker-validation).
-The source gate remains 888 tests; 690643c CI41671761778/run239 passed.
+The source gate for that hardware trial passed 888 tests locally. At the same
+690643c head, PR-triggered CI41671761778/run239 passed but push-triggered
+CI41671746358/run238 failed an archive-worker test wait deadline. These are mixed
+CI results; the successful run does not supersede the failure.
 
 
 Latest capacity integration: opt-in IR schema 2 admits up to **100,000 frames per
@@ -20,7 +30,8 @@ RSS is 53,200 KiB for 64 × 32 images and ten fused voxels. The actual release C
 inspects complete/recovery journals and the native GUI opens the resulting project.
 See [configuration, evidence and limits](docs/LIVE_EXTENDED_SESSIONS.md).
 This is capacity validation, not a 30-minute hardware run or first measured scan.
-Independent assessment of SCAN-REV-021 remains pending.
+The independent reviewer resolved SCAN-REV-021 for bounded capacity only; sustained
+hardware and physical qualification remain outstanding (assignment442).
 
 
 Latest native-app integration: **Calibration → Fit calibration** now runs the
