@@ -3957,3 +3957,44 @@ the wording remained in d3992a646720b807de18866427acc08b4879b50c before this fix
 No application source or hardware change; no repeated hardware/Rust suite is
 needed for this evidence-only correction. Whitespace and publication secret
 checks apply. Causal, observer-overhead and qualification limitations remain.
+
+## DEV-METADATA-REQUEUE — controlled reproduction and correction — 2026-11-03
+
+Developer-identified defect accepted; this is not a new independent finding.
+Source 907484e4fa2967e45ca10840fc48f0eed523f124 changes device/src/lib.rs and adds
+device/src/paired_dequeue.rs. Video is copied but not requeued until exact-sequence
+metadata servicing/requeue completes. Existing wrapping comparison, 32-packet
+bound, pending-future handling, validation and rejection counters remain intact.
+Copy/metadata errors still attempt video requeue; combined errors retain both
+diagnostics and requeue failure cannot be swallowed as cooperative cancellation.
+
+A bounded in-memory tracer removes acquisition-time trace-file writes. Its
+4-thread/8000-event offline self-test and strict C build pass. Initial control/
+delay/delay/control runs reproduce empty metadata only in both110ms delayed
+trials. Corrected/old/old/corrected300-frame/camera runs then report ongoing L/R
+rejects0/0,1/0,1/0,0/0 and matching sequence gaps. Each old failure is empty
+metadata at the expected later sequence; traces verify actual slot-return order.
+The uninjected corrected900-frame/camera run still has paired truncation1/1.
+All6600acceptedframes/18recordings replay and all per-trial settings comparisons
+pass. Driver/parameters/service/allfiveidleformats are restored after both series.
+
+On the installed baseline driver, SIGINT while a video slot is held completes the
+current pair in metadata-first return order, then stops allfourstreams, restores
+settings and preserves replayable98/100-frame prefixes without success publication.
+The original harness incorrectly expected mid-frame cancellation and failed that
+assertion; it remains retained. Corrected offline analysis verifies the finite
+CLI's actual frame-boundary semantics. Exact native exit code was not persisted
+before the harness assertion; nonzero exit was already asserted successfully.
+
+Full863tests/1existingignored,fmt/strictClippy/releasePASS; five new device tests
+cover ordering, sequence/wrap/bounds/stop and failure handling. Private source-bound
+evidence: metadata-requeue-bu1_jio4 and metadata-order-ox4xx69i. Report:
+docs/METADATA_REQUEUE_ORDER.md. CodeRabbit quota lookup again unavailable; no new
+completed review or paid request claimed. Independent implementation review pending.
+
+SCAN-REV-005 and021 remain accepted/unresolved;006 remains physically unqualified.
+The independent reviewer resolved026 at87bd080 in Assignment403; development did
+not close or modify that record. No independent finding file/status/severity,
+firmware, permanent installed driver, protected branch or crate dependency graph was changed
+by development in this milestone. Holding a video slot during metadata wait can
+reduce video queue slack; no unmeasured throughput or universal cleanup claim.

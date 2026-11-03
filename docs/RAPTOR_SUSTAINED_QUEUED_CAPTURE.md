@@ -1,5 +1,10 @@
 # Sustained Raptor capture with queued recording — 2026-11-03
 
+Follow-up: [controlled metadata requeue reproduction and correction](METADATA_REQUEUE_ORDER.md)
+tests the timing hypothesis below and fixes the reproduced slot-return ordering.
+It does not identify the cause of the natural pause or retroactively qualify this
+capture as lossless. The measurements below belong to the preceding implementation.
+
 **Confirmed:** the existing eight-frame recording worker and experimental
 32-URB kernel queue completed a ten-minute dual-camera capture. All 36,000
 accepted frames passed complete native replay. There were 11 ongoing rejects

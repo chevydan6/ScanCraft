@@ -1,5 +1,17 @@
 # Project status
 
+[Metadata requeue ordering](docs/METADATA_REQUEUE_ORDER.md) is corrected in source
+907484e. A controlled pause between video and metadata returns reproduced empty
+timestamp metadata twice; matched corrected/old/old/corrected trials eliminated
+that failure in both corrected runs while retaining it in both old runs. Metadata
+now returns before video-slot reuse; validation and counters remain intact. All
+6,600 accepted frames across the reproduction/comparison/natural trials replayed.
+Paired truncation and startup failures remain. A held-buffer SIGINT trial restored
+settings and retained replayable 98/100-frame prefixes; it verifies frame-boundary
+cancellation, not preemption. Full 863-test formatting/Clippy/release gate passes.
+Next: sustained revalidation of this corrected binary and separate USB failures,
+while measured physical scale and the first object reconstruction remain open.
+
 [Sustained combined capture](docs/RAPTOR_SUSTAINED_QUEUED_CAPTURE.md) completed
 18,000 valid frames per camera over ten minutes using the existing queued recorder
 and temporary 32-URB candidate. All 36,000 frames replayed. Eleven ongoing rejects
