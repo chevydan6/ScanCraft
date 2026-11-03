@@ -1,5 +1,11 @@
 # Project status
 
+[Sequential capture inspection](docs/LASER_CAPTURE_SEQUENCE.md) now verifies every
+stored pair with reused raw indexes. The 828-test gate passes; nine saved Raptor
+captures preserve 222 pairs / 391,481 candidate points and camera views exactly.
+Exploratory tracking executes on two saved sequences, but pose/scale accuracy,
+calibrated reconstruction, fusion integration and sustained scanning remain open.
+
 [Saved laser captures reopen](docs/SAVED_LASER_CAPTURES.md) with pair selection,
 retained camera images and transactional error handling. The 824-test gate passes;
 nine older folders preserve 18 selected views exactly, and fresh native capture,

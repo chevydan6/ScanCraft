@@ -43,6 +43,116 @@ fn capture(schema: u32) -> (Files, std::path::PathBuf) {
 fn read(path: &Path) -> Value {
     serde_json::from_slice(&fs::read(path).unwrap()).unwrap()
 }
+
+#[test]
+fn sequential_pairs_equal_individual_views_in_both_formats() {
+    for schema in [1, 2] {
+        let (_f, root) = capture(schema);
+        let work = WorkControl::default();
+        let expected = [
+            load_pair(&root, 0, &work).unwrap(),
+            load_pair(&root, 1, &work).unwrap(),
+        ];
+        let mut next = 0;
+        let count = visit_pairs(&root, &work, |index, pair| {
+            assert_eq!(index, next);
+            let previous = &expected[index as usize];
+            assert_eq!(pair.positions, previous.positions);
+            assert_eq!(pair.first_observations, previous.first_observations);
+            assert_eq!(pair.report, previous.report);
+            assert_eq!(
+                serde_json::to_value(pair.frames).unwrap(),
+                serde_json::to_value(&previous.frames).unwrap()
+            );
+            next += 1;
+            Ok(())
+        })
+        .unwrap();
+        assert_eq!((count, next), (2, 2));
+    }
+}
+
+#[test]
+fn sequential_callbacks_are_provisional_until_final_checks_pass() {
+    for kind in 0..5 {
+        let (_f, root) = capture(1);
+        if kind == 0 {
+            // Valid journal CRC/order but incorrect second-pair raw lineage.
+            edit_pair(&root, 1, |r| r["frames"][0]["payload_crc32"] = json!(0));
+        }
+        let work = WorkControl::default();
+        let mut calls = 0;
+        let error = visit_pairs(&root, &work, |index, _| {
+            calls += 1;
+            match kind {
+                1 => return Err("intentional callback failure".into()),
+                2 => work.cancel(),
+                3 if index == 1 => fs::write(root.join("geometry.json"), b"changed")?,
+                4 if index == 1 => work.cancel(),
+                _ => {}
+            }
+            Ok(())
+        })
+        .unwrap_err()
+        .to_string();
+        assert_eq!(calls, if kind >= 3 { 2 } else { 1 });
+        assert!(
+            error.contains(match kind {
+                0 => "binding differs",
+                1 => "intentional callback failure",
+                3 => "changed",
+                _ => "cancelled",
+            }),
+            "{kind}: {error}"
+        );
+    }
+}
+
+#[test]
+fn sequential_preflight_rejects_bad_whole_journal_before_callbacks() {
+    let (_f, root) = capture(2);
+    let path = root.join("pairs-000000.ndjson");
+    let mut bytes = fs::read(&path).unwrap();
+    bytes[0] = b'!';
+    fs::write(path, bytes).unwrap();
+    let mut calls = 0;
+    assert!(
+        visit_pairs(&root, &WorkControl::default(), |_, _| {
+            calls += 1;
+            Ok(())
+        })
+        .is_err()
+    );
+    assert_eq!(calls, 0);
+}
+
+#[test]
+fn sequential_processing_failures_are_preserved_and_totals_must_agree() {
+    let (_f, root) = capture(1);
+    edit_pair(&root, 1, |r| r["result"] = json!({"Err":"stored failure"}));
+    let work = WorkControl::default();
+    let mut errors = 0;
+    let result = visit_pairs(&root, &work, |index, pair| {
+        if index == 1 {
+            assert!(pair.positions.is_empty());
+            assert_eq!(pair.report["stored_pair_error"], "stored failure");
+            errors += 1;
+        }
+        Ok(())
+    });
+    assert!(
+        result
+            .unwrap_err()
+            .to_string()
+            .contains("failed-processing count")
+    );
+    assert_eq!(errors, 1);
+    let mut report = read(&root.join("report.json"));
+    report["summary"]["failed_processing_pairs"] = json!(1);
+    write(&root.join("report.json"), &report);
+    redigest(&root, "report.json");
+    assert_eq!(visit_pairs(&root, &work, |_, _| Ok(())).unwrap(), 2);
+}
 fn write(path: &Path, value: &Value) {
     fs::write(path, serde_json::to_vec(value).unwrap()).unwrap();
 }

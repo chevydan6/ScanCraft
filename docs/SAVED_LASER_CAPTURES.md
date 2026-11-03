@@ -11,12 +11,18 @@ project are separate unfinished work.
 # Command-line indices start at zero: this opens the 28th processed pair.
 target/release/scancraft --laser-candidates /path/to/capture 27
 target/release/scancraft-cli inspect-laser-capture /path/to/capture 27
+# Verify every pair and print only a final summary.
+target/release/scancraft-cli inspect-laser-capture /path/to/capture --all
 ```
 
 Omitting the GUI startup index selects the first pair. Existing single-pair
 matching folders remain supported at index zero / Pair 1. The CLI inspector
 accepts completed capture folders and prints the verified view summary, without
 dumping raw pixels or starting acquisition. SIGINT/SIGTERM request cancellation.
+
+The [sequential reader](LASER_CAPTURE_SEQUENCE.md) reuses the raw indexes for
+all-pair inspection; its provisional callbacks require staged consumers. The
+single-pair verification scope described below remains unchanged.
 
 ## Architecture and verification boundary
 

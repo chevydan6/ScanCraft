@@ -1,5 +1,11 @@
 # Architecture
 
+`laser_stream::bundle::visit_pairs` adds sequential read-only access using the
+same pair-binding implementation as `load_pair`, with one Playback index per
+camera and two complete journal passes. Callbacks are provisional until final
+source/counter checks succeed; consumers must stage results. The CLI `--all`
+inspector publishes only a successful summary. See docs/LASER_CAPTURE_SEQUENCE.md.
+
 The diagnostic viewer routes existing single-pair and complete capture folders
 through `candidate_bundle::load_at`. New `laser_stream::bundle::load_pair` reuses
 guarded inventory/CRC, complete journal validation and raw Playback indexing, then

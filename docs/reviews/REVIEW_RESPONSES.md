@@ -3429,3 +3429,68 @@ change; unavailable is not a pass. Independent review remains pending. 005/006/
 007/021 and other existing findings are unchanged. Complete editable scan projects,
 calibrated geometry/accuracy, optical binding, tracking/fusion, sustained preview/
 processing/resources, transport reliability and final release remain incomplete.
+
+
+## Developer milestone — verified sequential laser capture reader
+
+Developer integration work, not an invented independent finding. Accepted next
+step: expose complete saved Raptor pairs to staged reconstruction/tracking consumers
+without repeated raw-recording indexing. Baseline commit
+`cbd9f53ee9da567da590c6d54e0fa8b449c6462b`; branch
+`dev/verified-capture-sequence`. The implementation commit and tested source/binary
+bindings are recorded in the recovery checkpoint and private evidence after commit.
+Latest shared findings read: Assignment 360. Existing findings, including
+SCAN-REV-005/006/007/021, remain reviewer-owned; no closure is claimed.
+
+Changed sources: workflow `laser_stream/bundle.rs`, `bundle/load.rs` and
+`load/tests.rs`; CLI `live_scan.rs` and `main.rs`. `visit_pairs` shares the existing
+pair binding/display checks with `load_pair`, verifies the complete journal before
+callbacks, reuses two Playback indexes and streams a second journal pass. Callbacks
+remain provisional until final identity/counter checks succeed. A later failure
+must discard staged output. All stored processing errors remain visible, and their
+count must match the terminal report. CLI `inspect-laser-capture DIR --all` keeps
+only counters and prints after success. No geometry, acquisition, protocol, GUI
+control, format/quota, dependency or calibration changes.
+
+Validation: 828 passed / one existing ignored test; formatting, strict frozen
+all-target Clippy and release workspace build passed. Four new tests cover exact
+schema-1/2 individual/sequential views, late lineage failure, callback failure,
+early/late cancellation, final path mutation, preflight journal corruption,
+preserved processing errors and terminal error-count discrepancies. Initial Clippy
+reported a needless borrow, corrected without suppression before the passing gate.
+No Rust edits after that gate; the existing >1 GiB capacity test was not rerun.
+
+A release-library probe validates nine saved Raptor capture folders: 222 pairs /
+391,481 candidate points, exact stored coordinates/observation references and full
+FrameViews independently reconstructed from raw frames. The frozen pre-change
+selected-pair reference executable also passes those folders. All 199 original
+input files retain SHA-256. Complete view checksums match individual traversal on
+61- and 28-pair datasets. One elapsed observation, including reference checks,
+is 29.748 versus 2.315 seconds for 61 pairs and 3.497 versus 0.752 for 28; no
+controlled benchmark or sustained throughput/RSS claim follows.
+
+Release CLI --all matches reference totals. A private copied legacy capture with
+a bad second-pair raw reference and updated journal digest fails with no stdout.
+SIGINT/SIGTERM tests observe installed handlers before signalling; both return
+cancellation exit 1 without a partial summary. No hardware acquisition, GUI launch
+or scanner control test was performed in this read-only milestone; previous native
+and GUI evidence is historical, not claimed as freshly repeated.
+
+Private exploratory use of the unchanged Tracker: one declared diagonal-relative
+policy and at most384 uniformly ordered samples, 61 pairs yield1anchor/57accepted/
+2nonconverged/1residual rejection;28pairs yield1anchor/26accepted/1residual rejection.
+Poses, residuals, overlaps and reasons retained. The numerical API's mm fields
+are used only as unverified supplied-unit distances in that private probe, never
+as metric application state. No independently measured trajectory/scale truth,
+physical accuracy, fusion qualification or calibrated scanning capability follows.
+Method, assumptions and limitations: docs/LASER_CAPTURE_SEQUENCE.md.
+
+Evidence: private artifact directory `capture-sequence-6o6k20vn`, reference-all.json,
+single.json, track-final.json, cli-all.json, cli-bad-later-reference.json,
+cli-signals.json, gate-fixed.log and retained initial failure logs. Raw data and
+probes excluded from publication. Fresh CodeRabbit0.9.2 usage exit1 returns
+lookup_failed for included capacity, billing period and credits. Review remains
+unavailable: no review request/upload, paid service, push/PR or merge. No protected
+review file or main branch changed. Full mission remains incomplete; next work is
+verified reconstruction/model binding and staged tracking/fusion with independent
+pose truth, not promotion of diagnostic coordinates into millimeter projects.

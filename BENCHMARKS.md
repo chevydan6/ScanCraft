@@ -1,5 +1,11 @@
 # Benchmarks
 
+[Sequential capture reader](docs/LASER_CAPTURE_SEQUENCE.md): exact reference checks
+cover 222 saved pairs / 391,481 points. Two single-observation comparisons with
+reference work included show less elapsed time than repeatedly opening individual
+pairs; these are not controlled throughput or sustained-memory benchmarks.
+Exploratory tracking acceptance is reported separately from physical accuracy.
+
 [Helper diagnostic validation](docs/HELPER_DIAGNOSTICS.md) adds failure-isolation
 evidence, not a performance claim: 808-test gate, successful synthetic/full-stderr
 processing and exact matches for 37 saved Raptor pair records. A finite healthy GUI trial processes

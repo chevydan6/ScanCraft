@@ -98,6 +98,44 @@ fn load_inner(
     work: &WorkControl,
     before_final: &dyn Fn() -> Result<(), Error>,
 ) -> Result<Loaded, Error> {
+    let mut loaded = None;
+    read_inner(
+        directory,
+        Some(pair_index),
+        work,
+        &mut |_, pair| {
+            loaded = Some(pair);
+            Ok(())
+        },
+        before_final,
+    )?;
+    loaded.ok_or_else(|| "selected pair was not found".into())
+}
+
+/// Visit every stored pair in order, using one raw index per camera. Checks the
+/// complete capture/journal before callbacks, then binds each pair to raw frames.
+/// Memory retained by this reader is bounded by the two recording indexes, one
+/// record and one pair of frames/views; callback-owned memory is the caller's duty.
+///
+/// Callbacks are PROVISIONAL: a later pair, callback, cancellation or final source
+/// identity check can fail. Stage outputs and publish only after this returns Ok.
+/// Does not recompute matching, qualify units, export geometry or access hardware.
+/// Empty captures are rejected as by load_pair; filesystem reads have no deadline.
+pub fn visit_pairs(
+    directory: &Path,
+    work: &WorkControl,
+    mut visitor: impl FnMut(u64, Loaded) -> Result<(), Error>,
+) -> Result<u64, Error> {
+    read_inner(directory, None, work, &mut visitor, &|| Ok(()))
+}
+
+fn read_inner(
+    directory: &Path,
+    pair_index: Option<u64>,
+    work: &WorkControl,
+    visitor: &mut dyn FnMut(u64, Loaded) -> Result<(), Error>,
+    before_final: &dyn Fn() -> Result<(), Error>,
+) -> Result<u64, Error> {
     work.check()?;
     let mut guard = Guard::default();
     guard.open(directory, true, 0)?;
@@ -178,12 +216,15 @@ fn load_inner(
         counts[0].ok_or("missing first source")?,
         counts[1].ok_or("missing second source")?,
     ];
-    if summary.processed_pairs > counts[0].min(counts[1]) || pair_index >= summary.processed_pairs {
+    if summary.processed_pairs == 0
+        || summary.processed_pairs > counts[0].min(counts[1])
+        || pair_index.is_some_and(|index| index >= summary.processed_pairs)
+    {
         return Err("saved pair index is outside the completed capture".into());
     }
     let mut selected = None;
     let journal = pair_journal::visit(directory, Mode::Complete, work, |i, bytes, _| {
-        if i == pair_index {
+        if Some(i) == pair_index {
             selected =
                 Some(serde_json::from_slice::<record::Record>(bytes).map_err(|e| e.to_string())?);
         }
@@ -205,58 +246,46 @@ fn load_inner(
         (None, None) => {}
         _ => return Err("capture journal summary disagrees".into()),
     }
-    let selected = selected.ok_or("selected pair was not found")?;
-    let display = selected.display(plan.interfaces())?;
     let mut sources = [
         Playback::open(&directory.join("first.raptor"), work)?,
         Playback::open(&directory.join("second.raptor"), work)?,
     ];
-    let mut frames = Vec::with_capacity(2);
-    for (i, source) in sources.iter_mut().enumerate() {
+    let mut reader = PairReader {
+        plan: &plan,
+        report: &report,
+        sources: &mut sources,
+        counts,
+        drops,
+        pair_count: journal.pairs,
+        profiles,
+    };
+    let mut failed_pairs = 0;
+    let mut deliver = |index, record: record::Record| -> Result<(), Error> {
+        failed_pairs += u64::from(record.result.is_err());
+        let loaded = reader.load(&record, index, work)?;
+        visitor(index, loaded)?;
         work.check()?;
-        let reference = &selected.frames[i];
-        if source.profile() != &profiles[i]
-            || source.len() as u64 != counts[i]
-            || reference.recording_role
-                != if i == 0 {
-                    "first.raptor"
-                } else {
-                    "second.raptor"
-                }
+        Ok(())
+    };
+    if let Some(index) = pair_index {
+        deliver(index, selected.ok_or("selected pair was not found")?)?;
+    } else {
+        // Reuse the complete streaming reader; no whole-journal Value/record array
+        // or per-pair raw-file re-indexing. Its final checks remain mandatory too.
+        let replay = pair_journal::visit(directory, Mode::Complete, work, |index, bytes, _| {
+            let record =
+                serde_json::from_slice::<record::Record>(bytes).map_err(|e| e.to_string())?;
+            deliver(index, record).map_err(|e| e.to_string())
+        })?;
+        if (replay.pairs, replay.bytes, replay.segments)
+            != (journal.pairs, journal.bytes, journal.segments)
         {
-            return Err("capture raw profile/count/role disagrees".into());
+            return Err("capture journal changed during pair traversal".into());
         }
-        let frame = source.select_raw(usize::try_from(reference.frame_index)?, work)?;
-        if reference.sequence != frame.frame.sequence
-            || reference.host_timestamp_us != frame.frame.host_timestamp_us
-            || reference.flags != frame.frame.flags
-            || reference.payload_crc32 != crc32fast::hash(&frame.frame.data)
-            || reference.metadata_crc32 != crc32fast::hash(&frame.frame.metadata)
-            || scancraft_core::uvc_pts(&frame.frame.metadata)? != Some(selected.raw_pts)
-        {
-            return Err("selected capture pair raw-frame binding differs".into());
-        }
-        if let Some(a) = &selected.acquisition
-            && (a.journaled_frames[i] <= reference.frame_index
-                || a.journaled_frames[i] > counts[i]
-                || a.processing_queue_drops[i] > drops[i])
-        {
-            return Err("selected capture progress counters disagree".into());
-        }
-        frames.push(frame);
     }
-    if frames[0]
-        .frame
-        .host_timestamp_us
-        .abs_diff(frames[1].frame.host_timestamp_us)
-        > plan.request.processing.maximum_host_delta_us
-    {
-        return Err("selected capture pair exceeds host window".into());
+    if pair_index.is_none() && failed_pairs != summary.failed_processing_pairs {
+        return Err("capture failed-processing count disagrees with stored pairs".into());
     }
-    let views = [
-        FrameView::from_frame(&frames[0].profile, &frames[0].frame, work)?,
-        FrameView::from_frame(&frames[1].profile, &frames[1].frame, work)?,
-    ];
     before_final()?;
     for source in &sources {
         source.check_source()?;
@@ -264,19 +293,95 @@ fn load_inner(
     plan.guard.check()?;
     guard.check()?;
     work.check()?;
-    Ok(Loaded {
-        positions: display.positions,
-        first_observations: display.first_observations,
-        frames: views,
-        report: json!({"queries":display.queries,"candidate_points":display.queries-display.failures-display.without_unique,
+    Ok(journal.pairs)
+}
+
+struct PairReader<'a> {
+    plan: &'a Plan,
+    report: &'a CaptureReport,
+    sources: &'a mut [Playback; 2],
+    counts: [u64; 2],
+    drops: [u64; 2],
+    pair_count: u64,
+    profiles: &'a [scancraft_core::StreamProfile; 2],
+}
+impl PairReader<'_> {
+    fn load(
+        &mut self,
+        selected: &record::Record,
+        pair_index: u64,
+        work: &WorkControl,
+    ) -> Result<Loaded, Error> {
+        let Self {
+            plan,
+            report,
+            sources,
+            counts,
+            drops,
+            pair_count,
+            profiles,
+        } = self;
+        let display = selected.display(plan.interfaces())?;
+        let mut frames = Vec::with_capacity(2);
+        for (i, source) in sources.iter_mut().enumerate() {
+            work.check()?;
+            let reference = &selected.frames[i];
+            if source.profile() != &profiles[i]
+                || source.len() as u64 != counts[i]
+                || reference.recording_role
+                    != if i == 0 {
+                        "first.raptor"
+                    } else {
+                        "second.raptor"
+                    }
+            {
+                return Err("capture raw profile/count/role disagrees".into());
+            }
+            let frame = source.select_raw(usize::try_from(reference.frame_index)?, work)?;
+            if reference.sequence != frame.frame.sequence
+                || reference.host_timestamp_us != frame.frame.host_timestamp_us
+                || reference.flags != frame.frame.flags
+                || reference.payload_crc32 != crc32fast::hash(&frame.frame.data)
+                || reference.metadata_crc32 != crc32fast::hash(&frame.frame.metadata)
+                || scancraft_core::uvc_pts(&frame.frame.metadata)? != Some(selected.raw_pts)
+            {
+                return Err("selected capture pair raw-frame binding differs".into());
+            }
+            if let Some(a) = &selected.acquisition
+                && (a.journaled_frames[i] <= reference.frame_index
+                    || a.journaled_frames[i] > counts[i]
+                    || a.processing_queue_drops[i] > drops[i])
+            {
+                return Err("selected capture progress counters disagree".into());
+            }
+            frames.push(frame);
+        }
+        if frames[0]
+            .frame
+            .host_timestamp_us
+            .abs_diff(frames[1].frame.host_timestamp_us)
+            > plan.request.processing.maximum_host_delta_us
+        {
+            return Err("selected capture pair exceeds host window".into());
+        }
+        let views = [
+            FrameView::from_frame(&frames[0].profile, &frames[0].frame, work)?,
+            FrameView::from_frame(&frames[1].profile, &frames[1].frame, work)?,
+        ];
+        Ok(Loaded {
+            positions: display.positions,
+            first_observations: display.first_observations,
+            frames: views,
+            report: json!({"queries":display.queries,"candidate_points":display.queries-display.failures-display.without_unique,
             "query_failures":display.failures,"queries_without_unique_match":display.without_unique,
-            "stored_pair_error":display.error,"pair_index":pair_index,"pair_count":journal.pairs,
+            "stored_pair_error":display.error,"pair_index":pair_index,"pair_count":pair_count,
             "source_frame_indices":selected.frames.each_ref().map(|r|r.frame_index),
             "artifact_integrity_verified":true,"retained_frame_bindings_verified":true,
             "bundled_recording_integrity_verified":true,"historical_original_recordings_verified":false,
             "numerical_recomputation_verified":false,"geometry_binding_verified":false,
             "source_restoration_reported":report.reported_source_restoration.as_deref() == Some("PASS"),"physical_accuracy_qualified":false,"units_verified":false}),
-    })
+        })
+    }
 }
 fn verify_artifacts(
     directory: &Path,

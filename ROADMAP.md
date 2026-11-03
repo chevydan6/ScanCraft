@@ -1,5 +1,12 @@
 # Roadmap
 
+Sequential recorded-pair access now avoids repeated whole-recording indexing and
+checks every pair's raw lineage. Exploratory existing-Tracker runs are recorded,
+without claiming physical accuracy. Next validate model/units and pose truth,
+then connect staged tracking/fusion and persistent scan state. Do not interpret
+accepted candidate alignments as calibrated reconstruction. See
+docs/LASER_CAPTURE_SEQUENCE.md; physical calibration remains deferred.
+
 Completed native captures now reopen with stored-pair selection and retained images,
 including older files with explicitly unknown restoration metadata. Next connect
 verified capture lineage to genuine calibrated reconstruction and tracking/fusion
