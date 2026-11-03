@@ -45,7 +45,7 @@ pub struct CloudUi {
     reconstruction_open: bool,
     recording_files: [String; 5],
     recording_indices: [usize; 2],
-    recording_open: bool,
+    recording_open_requested: bool,
     source_directory: String,
     recording_reference_directory: String,
     bundle_target: String,
@@ -105,7 +105,7 @@ impl Default for CloudUi {
             reconstruction_open: false,
             recording_files: Default::default(),
             recording_indices: [0; 2],
-            recording_open: false,
+            recording_open_requested: false,
             source_directory: String::new(),
             recording_reference_directory: String::new(),
             bundle_target: String::new(),
@@ -125,7 +125,7 @@ impl CloudUi {
         self.reconstruction_files[0] = path.clone();
         self.recording_files[0] = path.clone();
         self.recorded_sequence_files[0] = path;
-        self.recording_open = true;
+        self.recording_open_requested = true;
         self.message = "Calibration selected. Choose recordings and settings to reconstruct; the current model is unchanged.".into();
     }
     pub fn open_cylinder_startup(&mut self, path: PathBuf, maximum_rms_mm: f64) {
@@ -243,7 +243,7 @@ impl CloudUi {
             output.display().to_string(),
         ];
         self.recording_indices = [inputs.left_index, inputs.right_index];
-        self.recording_open = true;
+        self.recording_open_requested = true;
         self.start(Operation::ReconstructRecordings { inputs, output });
     }
     fn reconstruction_operation(&self) -> Operation {
@@ -504,7 +504,10 @@ impl CloudUi {
                 }
             });
         });
-        egui::CollapsingHeader::new("Reconstruct recorded stereo frames").default_open(self.recording_open).show(ui,|ui| {
+        // Consume the explicit handoff once: default_open cannot override egui's
+        // persisted collapsed state, and a permanent override prevents manual collapse.
+        let recording_open = std::mem::take(&mut self.recording_open_requested).then_some(true);
+        egui::CollapsingHeader::new("Reconstruct recorded stereo frames").open(recording_open).show(ui,|ui| {
             ui.label("Explicit left/right frame selection with supplied calibration and settings. Exposure synchronization and physical calibration binding are not independently verified. Supply an appropriate calibration record and verify its physical scale.");
             ui.add_enabled_ui(idle,|ui| {
                 for (label,value) in ["Calibration file","Left recording (interface 0)","Right recording (interface 2)","Reconstruction settings","New result folder"].into_iter().zip(self.recording_files.iter_mut()) {
@@ -1197,6 +1200,103 @@ mod tests {
         assert_eq!(ui.recording_files[1], "left-recording");
         assert_eq!(ui.path, "unsaved-model");
         assert!(ui.dirty && !ui.is_busy());
+    }
+    #[test]
+    fn selecting_calibration_reopens_visited_controls_without_forcing_them_open() {
+        let context = egui::Context::default();
+        context.style_mut(|style| style.animation_time = 0.);
+        let mut cloud = CloudUi {
+            dirty: true,
+            path: "unsaved-model".into(),
+            recording_files: [
+                "old.rapcal",
+                "left-recording",
+                "right-recording",
+                "settings",
+                "output",
+            ]
+            .map(String::from),
+            recording_indices: [3, 7],
+            ..Default::default()
+        };
+        cloud.document.as_mut().unwrap().editor = Some(
+            scancraft_geometry::Editor::new(
+                scancraft_geometry::Cloud {
+                    points: vec![scancraft_geometry::Point {
+                        position: [1., 2., 3.],
+                        color: None,
+                        normal: None,
+                    }],
+                },
+                8,
+            )
+            .unwrap(),
+        );
+        cloud.document.as_mut().unwrap().selection = vec![0];
+        let mut folder = String::new();
+        let mut frame = |cloud: &mut CloudUi, events| {
+            context.run(
+                egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(
+                        egui::Pos2::ZERO,
+                        egui::vec2(1150., 850.),
+                    )),
+                    events,
+                    ..Default::default()
+                },
+                |ctx| {
+                    egui::CentralPanel::default().show(ctx, |ui| cloud.ui(ui, &mut folder));
+                },
+            )
+        };
+        let label_position = |output: &egui::FullOutput, label: &str| {
+            output.shapes.iter().find_map(|shape| match &shape.shape {
+                egui::epaint::Shape::Text(text) if text.galley.text() == label => Some(text.pos),
+                _ => None,
+            })
+        };
+        // First visit stores the default collapsed state, as in an ordinary session.
+        let initial = frame(&mut cloud, vec![]);
+        assert!(label_position(&initial, "Reconstruct recorded stereo frames").is_some());
+        assert!(label_position(&initial, "Left recording (interface 0)").is_none());
+        for candidate in ["first.rapcal", "second.rapcal"] {
+            cloud.select_calibration(std::path::Path::new(candidate));
+            let selected = frame(&mut cloud, vec![]);
+            assert!(label_position(&selected, "Left recording (interface 0)").is_some());
+            assert_eq!(cloud.recording_files[0], candidate);
+            let pointer = label_position(&selected, "Reconstruct recorded stereo frames").unwrap()
+                + egui::vec2(10., 5.);
+            // Manual collapse must still work after the one-shot handoff.
+            for pressed in [true, false] {
+                frame(
+                    &mut cloud,
+                    vec![
+                        egui::Event::PointerMoved(pointer),
+                        egui::Event::PointerButton {
+                            pos: pointer,
+                            button: egui::PointerButton::Primary,
+                            pressed,
+                            modifiers: egui::Modifiers::default(),
+                        },
+                    ],
+                );
+            }
+            let collapsed = frame(&mut cloud, vec![]);
+            assert!(label_position(&collapsed, "Left recording (interface 0)").is_none());
+        }
+        assert_eq!(
+            &cloud.recording_files[1..],
+            ["left-recording", "right-recording", "settings", "output"]
+        );
+        assert_eq!(cloud.recording_indices, [3, 7]);
+        assert_eq!(cloud.path, "unsaved-model");
+        assert!(cloud.dirty && !cloud.is_busy());
+        let document = cloud.document.as_ref().unwrap();
+        assert_eq!(document.selection, [0]);
+        assert_eq!(
+            document.editor.as_ref().unwrap().cloud.points[0].position,
+            [1., 2., 3.]
+        );
     }
     #[test]
     fn expanded_source_and_measurements_leave_viewport_inside_default_window() {
