@@ -3,7 +3,7 @@
 use crate::{PreparedCamera, epipolar::raw_field_matrices, stereo::StereoCalibration};
 use nalgebra::{Matrix3, Vector3};
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeSet;
+use std::{cell::OnceCell, collections::BTreeSet};
 mod index;
 use index::{BLOCK_SEGMENTS, Block, MAX_TRACE_VERTICES};
 
@@ -72,6 +72,39 @@ pub(crate) struct NormalizedTrace<'t> {
     raw: &'t [[f64; 2]],
     points: Vec<Vector3<f64>>,
     blocks: Vec<Block>,
+}
+
+// Lazy per-pixel constraint bound to one immutable preparing model/configuration.
+// No trace results, session history or cross-pixel state is cached.
+pub(crate) struct PixelQuery<'p, 'g> {
+    owner: &'p PreparedTrace<'g>,
+    pixel: [f64; 2],
+    config: Config,
+    line: OnceCell<Result<Vector3<f64>, String>>,
+}
+impl PixelQuery<'_, '_> {
+    pub(crate) fn intersections_cached(
+        &self,
+        trace: &Result<NormalizedTrace<'_>, String>,
+        cancelled: &mut impl FnMut() -> bool,
+    ) -> Result<Intersections, String> {
+        // Keep the old line-preparation checkpoint even when arithmetic is reused.
+        // A pulse cancellation still precedes cached geometry/trace errors.
+        if cancelled() {
+            return Err("epipolar trace cancelled".into());
+        }
+        let line = self
+            .line
+            .get_or_init(|| self.owner.compute_line(self.pixel, self.config))
+            .as_ref()
+            .map_err(Clone::clone)?;
+        self.owner.intersect_line_indexed(
+            *line,
+            trace.as_ref().map_err(Clone::clone)?,
+            self.config,
+            cancelled,
+        )
+    }
 }
 
 /// Numerically validated camera geometry; preparation does not qualify calibration.
@@ -220,6 +253,9 @@ impl<'a> PreparedTrace<'a> {
             }
         }
         check(cancelled)?;
+        self.compute_line(first_pixel, config)
+    }
+    fn compute_line(&self, first_pixel: [f64; 2], config: Config) -> Result<Vector3<f64>, String> {
         let line = self.essential * Vector3::from(self.first.ray(first_pixel)?);
         let norm = line.x.hypot(line.y).hypot(line.z);
         let xy_norm = line.x.hypot(line.y);
@@ -233,20 +269,13 @@ impl<'a> PreparedTrace<'a> {
         Ok(line)
     }
 
-    pub(crate) fn intersections_cached(
-        &self,
-        first_pixel: [f64; 2],
-        trace: &Result<NormalizedTrace<'_>, String>,
-        config: Config,
-        cancelled: &mut impl FnMut() -> bool,
-    ) -> Result<Intersections, String> {
-        let line = self.line(first_pixel, config, cancelled)?;
-        self.intersect_line_indexed(
-            line,
-            trace.as_ref().map_err(Clone::clone)?,
+    pub(crate) fn for_pixel(&self, first_pixel: [f64; 2], config: Config) -> PixelQuery<'_, 'a> {
+        PixelQuery {
+            owner: self,
+            pixel: first_pixel,
             config,
-            cancelled,
-        )
+            line: OnceCell::new(),
+        }
     }
 
     fn intersect_line_linear(
@@ -654,3 +683,6 @@ mod tests {
 
 #[cfg(test)]
 mod index_tests;
+
+#[cfg(test)]
+mod query_tests;

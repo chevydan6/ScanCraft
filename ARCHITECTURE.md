@@ -1,5 +1,10 @@
 # Architecture
 
+Laser matching now binds a lazy first-camera epipolar constraint to one immutable
+model/pixel/configuration for one call. It reuses the exact line across cached
+second-camera traces and preserves per-trace cancellation/error ordering; no shared
+mutable cache or format change is introduced. See docs/CACHED_EPIPOLAR_QUERIES.md.
+
 Optional helper/device/workflow stderr notes now use a bounded, best-effort Rust
 core primitive. Private app state logs use checked directory descriptors, inherited
 active-file locks and bounded inactive retention. Supervisors keep exit status and

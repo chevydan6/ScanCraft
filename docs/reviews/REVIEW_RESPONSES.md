@@ -3226,3 +3226,64 @@ and complete old serializer bytes; all3 manifests match lengths/CRC. The final
 GUI-error test shows retained exit1/reason/path and a valid persisted supervisor
 record after app exit, with all existing capture hashes unchanged and no scanner
 FDs. Screenshot inspected. Source has not changed since the repeated gate.
+
+
+## SCAN-REV-025 — Accepted; permanent concurrent append regression
+
+The independent reviewer resolved the specific formatter-fragment interleaving
+defect in Assignment 359 after inspecting committed 6fc557db5c1b6a46ec5531b7c1590a1cfbbe5563.
+This acknowledges the reviewer's decision and supersedes the earlier pending-review
+statement for that specific correction; no reviewer-owned status was edited.
+The correction's Vec/newline/write_all remains unchanged.
+
+Added `helper_diagnostics/tests.rs::concurrent_child_notes_do_not_fragment_retained_supervisor_records`:
+a synthetic child shares the real append description and writes 20,000 short notes
+while the real supervisor failure function appends 2,000 bounded JSON records. Every
+line must parse as one complete supervisor record or one child note, with all
+counts and 384-byte UTF-8 reason prefixes/truncation verified. This independently
+written invariant test does not import the reviewer's probe. Focused test and full
+812-test/fmt/strict-Clippy/release gate pass. A private harness importing the exact
+old 1507747 module (test path adjusted) fails this same permanent regression with
+malformed JSON; the old module and failed log are retained. No production rollback
+was performed. Commit binding is retained in the
+developer recovery checkpoint after commit.
+
+Limits remain: partial writes/external writers/FS faults/power loss can corrupt
+best-effort diagnostics; there is no hard I/O deadline. No original native-incident
+attribution, numerical/hardware qualification or 005 closure follows. Findings 006,
+007 and 021 remain unchanged; 024 remains reviewer-resolved for schema 2 only.
+
+## Developer milestone — per-pixel epipolar constraint reuse
+
+Developer optimization, not an invented independent finding. Source changes:
+`scancraft-calibration/src/epipolar_trace.rs` and `laser_trace.rs`, with three new
+`epipolar_trace/query_tests.rs` regressions. A query-local OnceCell avoids repeating
+first-camera inverse distortion/essential-line computation for every second trace.
+Arithmetic, complete results, per-trace cancellation sites/error priority, budgets,
+ambiguity and scalar fallback remain unchanged. No new dependency/unsafe/global
+cache/format or physical calibration change. Rationale and provenance are documented
+in docs/CACHED_EPIPOLAR_QUERIES.md; checkpoint binds final commit/source/binaries.
+
+Validation: full 812-test gate with one existing ignored test, 216 analytic known-point cases;
+all 24 retained pairs preserve 63,436 complete queries / 185,094,875 serialized detail bytes,
+compact reports and 624 timed numerical executions. Final same-binary production
+versus exact 6fc557d baseline copy saves about 4.8–5.9 ms/pair on five reported inputs,
+with JSON/I/O/display excluded and compiler namespace effects acknowledged.
+
+Actual baseline/current/current/baseline GUI trials save 64 raw frames/camera and process
+49/54/54/47 pairs. Current 84.375% remains below 90%. All helpers exit; GUI owns zero camera FDs;
+full stream/illumination readbacks restore; raw integrity and manifests pass.
+Current startup rejects 1/0 and 89/88, ongoing 2/2 and 1/1 remain fully retained; no
+reliability qualification. Active close saves 8 raw frames/camera and 8 pairs, zero queue drops,
+startup 95/92, ongoing 1/1, one incomplete buffer/camera; 0.313477 s close-to-exit is one observation.
+The LP_NUM_THREADS=2/private authenticated display readiness condition is explicit.
+Inspected saved/active GUI images. The frozen earlier engine/serializer validates
+all 212 new native records / 403,462 candidate values, raw references and whole old record
+bytes exactly. All five manifests pass lengths/CRCs; final accessible deviceFD
+inventory is empty. Private raw/calibration/screenshots/probes stay outside Git.
+
+Fresh repository-scoped CodeRabbit 0.9.2 usage returns 1: included quota, billing and
+credits all lookup_failed. No review request/upload/paid flag/push/PR/merge or
+protection bypass. This is unavailable review, not a pass. Independent review of
+the cache and permanent regression is pending. Sustained processing, calibrated
+accuracy, tracking/fusion, full scan-to-editable-mesh and release remain incomplete.

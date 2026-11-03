@@ -1,5 +1,11 @@
 # Project status
 
+[Per-pixel epipolar reuse](docs/CACHED_EPIPOLAR_QUERIES.md) removes repeated
+first-ray work without changing complete results. The 812-test gate and 216
+analytic cases pass. Short native trials process 54/64 pairs versus 47–49/64
+with the preserved build; 84.375% remains below 90%. Startup rejects and physical
+accuracy remain unqualified. CodeRabbit quota/billing lookup is unavailable.
+
 [Helper diagnostic isolation](docs/HELPER_DIAGNOSTICS.md) fixes reproduced stderr
 write panics that prevent final IPC or abort synthetic reconstruction. Private
 state logs retain process failure status after GUI closure. The 808-test gate,

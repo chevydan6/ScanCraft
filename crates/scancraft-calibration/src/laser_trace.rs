@@ -282,6 +282,7 @@ impl<'a> PreparedMatcher<'a> {
             Some(projections) => projections,
             None => self.project_sheets(first_pixel, sheets, cancelled)?,
         };
+        let constraint = self.epipolar.for_pixel(first_pixel, config.intersection);
         let mut results = Vec::with_capacity(traces.len());
         let mut work = vertices;
         let mut supported_combinations = 0;
@@ -290,12 +291,7 @@ impl<'a> PreparedMatcher<'a> {
         for (trace_index, trace) in traces.iter().enumerate() {
             check(cancelled)?;
             let intersections = match cache {
-                Some(cache) => self.epipolar.intersections_cached(
-                    first_pixel,
-                    &cache[trace_index],
-                    config.intersection,
-                    cancelled,
-                )?,
+                Some(cache) => constraint.intersections_cached(&cache[trace_index], cancelled)?,
                 None => self.epipolar.intersections(
                     first_pixel,
                     trace,

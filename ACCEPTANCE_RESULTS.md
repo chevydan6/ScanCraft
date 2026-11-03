@@ -4,6 +4,7 @@ PASS means the stated narrow experiment passed, not the full release gate.
 
 | Experiment | Result | Evidence |
 | --- | --- | --- |
+| Per-pixel epipolar constraint reuse | PASS narrow scope: 812-test gate, 216 analytic cases, 63,436 complete saved queries exact; native current 54/64 twice versus baseline 47/64 and 49/64; all five capture/close trials restore measured state | [Method and limits](docs/CACHED_EPIPOLAR_QUERIES.md); 84.375% below 90%; high startup rejects, no sustained/physical qualification |
 | Optional diagnostic write failure isolation | PASS narrow scope: 808-test gate; full-stderr malformed and successful synthetic/replay helper processes; retained exit status/private logs; healthy native capture/close restoration | [Methods and limits](docs/HELPER_DIAGNOSTICS.md); original native early exit remains unattributed; no shutdown/physical qualification |
 | Concurrent laser camera detection | PASS narrow scope: 794-test gate, 130 paired numerical executions and 314 complete raw-linked records equivalent; finite new GUI trials 47–50/64, still below 90% | [Method, trials and retained failures](docs/PARALLEL_LASER_DETECTION.md); no sustained/physical qualification |
 | Schema-2 segmented laser storage | PASS narrow scope: 791-test gate; explicit 9000-record / 1,182,790,236-byte / 71-segment synthetic test; real GUI rollover and close/restoration; 65 legacy/new pair records exact | [Limits and evidence](docs/SEGMENTED_LASER_JOURNAL.md); 21/32 native processing remains below 90%; no duration/accuracy qualification |

@@ -174,3 +174,43 @@ fn best_effort_notes_accept_oversized_json_formatters_without_panicking() {
         serde_json::json!({"diagnostic_test":"é".repeat(8192)})
     ));
 }
+
+#[test]
+fn concurrent_child_notes_do_not_fragment_retained_supervisor_records() {
+    let temp = Temp::new();
+    let (path, log) = create(&temp.0).unwrap();
+    let mut command = Command::new("python3");
+    command.args(["-c","import os,sys\nwhile sys.stdin.buffer.read(1):\n for _ in range(10): os.write(2,b'CHILD_NOTE\\n')"])
+        .stdin(Stdio::piped()).stdout(Stdio::null()).stderr(Stdio::from(log.try_clone().unwrap()));
+    let mut child = crate::capture_process::OwnedChild::spawn(&mut command).unwrap();
+    let reason = "é".repeat(384);
+    for _ in 0..2000 {
+        child
+            .child()
+            .stdin
+            .as_mut()
+            .unwrap()
+            .write_all(&[1])
+            .unwrap();
+        let _ = failure(child.child(), "test helper", &path, &log, &reason);
+    }
+    child.child().stdin.take();
+    assert!(child.child().wait().unwrap().success());
+    let content = fs::read_to_string(&path).unwrap();
+    let mut records = 0;
+    let mut notes = 0;
+    for line in content.lines().skip(1) {
+        if line == "CHILD_NOTE" {
+            notes += 1;
+            continue;
+        }
+        let record: serde_json::Value =
+            serde_json::from_str(line).expect("fragmented supervisor record or child note");
+        assert_eq!(record["kind"], "supervisor_failure");
+        assert_eq!(record["reason_truncated"], true);
+        assert_eq!(record["reason"].as_str().unwrap().len(), 384);
+        records += 1;
+    }
+    assert_eq!(records, 2000);
+    assert_eq!(notes, 20000);
+}

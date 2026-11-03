@@ -1,5 +1,13 @@
 # Roadmap
 
+Per-pixel epipolar reuse reduces measured numerical processing to 27.3–29.6 ms
+on five reported saved pairs, with complete result equality. Current short native
+trials reach 54/64 (84.375%), still below 90%. Next isolate remaining dispatch,
+serialization and acquisition costs without dropping required raw/journal data;
+investigate startup rejects, then advance calibrated reconstruction and tracking
+when the required physical evidence is available. Preserve the deferred physical
+calibration boundary. See docs/CACHED_EPIPOLAR_QUERIES.md.
+
 Reproduced stderr-write panics and lost process status are corrected with bounded
 best-effort notes and retained private failure logs. The original early native helper
 exit remains unattributed; use the new records if it recurs, preserving locks and

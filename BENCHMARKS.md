@@ -193,3 +193,16 @@ saved pose median86.610→32.485ms (median paired ratio2.672), box49.997→23.59
 result equal outside timers. Matching only, excluding preparation/image/JSON/I/O;
 shared warm host, no live/accuracy/general speedup inference.
 See docs/INDEXED_EPIPOLAR_TRACES.md for exact scope, cancellation counts and limits.
+
+
+## Per-pixel epipolar constraint reuse
+
+Final production processor versus copied exact 6fc557d baseline geometry/pair
+processor, same release binary and decoded inputs, 13 alternating iterations/first
+warmup: five reported saved pair medians 35.176/32.421/35.381/32.288/32.153 ms become
+29.553/27.455/29.478/27.307/27.319 ms. Numerical engine only; JSON/I/O/display excluded.
+All 24 pairs / 63,436 full queries / 185,094,875 detail bytes match, as do 624 complete executions.
+Two short actual GUI trials reach 54/64 pairs each versus 49/64 and 47/64 baseline;
+84.375% remains below 90%. All raw integrity/state restoration checks pass, but
+startup and ongoing rejects persist. No sustained, latency, memory or accuracy
+qualification. See docs/CACHED_EPIPOLAR_QUERIES.md for scope and compiler-context limits.
