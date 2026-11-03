@@ -1,6 +1,15 @@
 # Project status
 
-Latest transport evidence: an explicit64MiB USB monitor ring fixes the diagnostic
+Latest queue-depth comparison: three fully observed 600-frame/camera trials at
+depths 5 → 32 → 5 saved and replayed 3,600 genuine frames. Depth 32 still produced
+a paired short frame during a roughly 6.1 ms completion gap; it is not a complete
+fix. All three trials fail the total rejection target. Complete USB/header traces
+match all 3,610 accepted/ongoing-rejected frame associations, and 63 state-group
+checks pass. The baseline module, formats and service were restored after each
+trial; no persistent driver or firmware change. [Evidence and limits](docs/RAPTOR_QUEUE_HEADER_COMPARISON.md).
+Physical scale and an independently measured object scan remain outstanding.
+
+Earlier transport evidence: an explicit64MiB USB monitor ring fixes the diagnostic
 packet-loss problem; runtime tcpdump mapping had been only8KiB. A corrected
 all-CPU trace and USB monitor both report zero loss, matching226,688bulk completions
 and all1,206accepted/rejected frames. Short frames already contain5–15fewer image

@@ -1,5 +1,9 @@
 # Raptor USB queue-depth trials — 2026-11-03
 
+Later [complete-header comparison](RAPTOR_QUEUE_HEADER_COMPARISON.md) observes an
+ongoing paired short frame even at depth 32. The finite zero-rejection results
+below remain historical observations, not a guarantee or qualified fix.
+
 Follow-up: [ten-minute capture with the queued recorder](RAPTOR_SUSTAINED_QUEUED_CAPTURE.md)
 extends the short-trial evidence below. It retains nonzero truncation/metadata
 failures and does not replace this ABBA comparison or establish release readiness.

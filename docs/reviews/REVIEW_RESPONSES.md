@@ -4482,3 +4482,42 @@ raw ftrace is an alternative, not required to validate these paired observations
 Independent closure remains the reviewer's responsibility. Assignment449's exact
 21e85d2 CI completion is acknowledged. A fresh CodeRabbit quota check exits1 with
 lookup_failed in every billing/quota field; no new review or paid request follows.
+
+## DEV-QUEUE-HEADERS — larger request queue is not a complete fix
+
+Developer investigation, not a new independent finding or finding closure.
+Assignment450's bounded acceptance of preceding header correlation and
+failure-safe retention is acknowledged. Both a55eedb publication CI runs
+41685116970/41685126431 subsequently completed successfully. Its physical,
+startup, causal and exceptional-byte limitations remain applicable.
+
+Using the same verified experimental module in all arms, a temporary 5/32/5
+comparison saved 600 frames per camera per arm, with complete replay of all
+3,600 frames. Startup rejects L/R: 0/97, 1/1, 94/0. Ongoing: 2/2, 1/1, 2/2.
+Every complete rejection proxy fails <0.1%. Depth 32 has one paired short frame
+missing five image blocks per camera during 6081/6059 us completion gaps.
+Software-pending counts are 32/31 at their ends, not proof of hardware capacity.
+No qualified driver fix, performance advantage or causal diagnosis is claimed.
+
+All three USB/ftrace collections report zero loss and balance identities.
+All 3,610 accepted/ongoing-rejected frame PTS/FID/EOF/length associations match.
+A1 right/A2 left each have 188 unrecognized successful prefixes before the
+first accepted frame; these are preserved, not excluded from reported startup
+failure evidence. Native startup samples are capped, so full per-buffer startup
+reconstruction remains incomplete. All 63 state-group comparisons match, five
+formats per trial and the baseline module/service/tracing are restored after
+each arm. Final images remain a clipped board without a measured object.
+
+Source files changed: documentation only, RAPTOR_QUEUE_HEADER_COMPARISON.md,
+RAPTOR_QUEUE_DEPTH_TRIAL.md, PROJECT_STATUS.md and this response. No production
+code or validation changes. Existing 890-test/fmt/Clippy/release gate applies to
+unchanged code. Private queue-header-aba-20261104 binds commands, module hashes,
+recordings, traces, analyzers, replay and restoration. Publication commit is
+recorded in the private publication metadata and Git history. This new evidence
+awaits independent review; only the reviewer may change its findings/statuses.
+
+Assignment453 independently confirms the a55eedb CI completion above. Fresh
+CodeRabbit repository-level usage exits1 with all quota/billing fields reporting
+lookup_failed; no review or paid request was made. An initial lookup outside the
+repository also reported not_git_repository and was retained separately rather
+than interpreted as account capacity. The corrected lookup remains unavailable.
