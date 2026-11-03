@@ -148,7 +148,7 @@ fn exercise(fault: Fault) -> Outcome {
         let result = record_with_sink(
             profile(),
             count,
-            (&flag, &Control::default()),
+            (&flag, &Control::default(), None),
             sender,
             Side::Left,
             || Ok(source),

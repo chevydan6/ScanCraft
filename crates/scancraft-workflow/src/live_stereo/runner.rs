@@ -25,6 +25,7 @@ use std::{
     thread,
     time::Duration,
 };
+mod completion;
 mod recording;
 use recording::record_controlled;
 type Result<T> = std::result::Result<T, String>;
@@ -33,6 +34,12 @@ type Result<T> = std::result::Result<T, String>;
 pub trait Source {
     fn context(&self) -> Result<CaptureContext>;
     fn next(&mut self) -> Result<Option<Frame>>;
+    /// Cooperative cancellation while acquiring. Adapters with polling reads
+    /// should override this and check `cancelled` at their safe read boundaries.
+    /// The default preserves existing sources, but cannot interrupt `next`.
+    fn next_until(&mut self, cancelled: &dyn Fn() -> bool) -> Result<Option<Frame>> {
+        if cancelled() { Ok(None) } else { self.next() }
+    }
     fn statistics(&self) -> Value;
     fn close(self) -> Result<()>;
 }
@@ -69,7 +76,7 @@ fn record<S: Source>(
         profile,
         path,
         maximum,
-        (stop, &Control::default()),
+        (stop, &Control::default(), None),
         sender,
         side,
         open,
@@ -204,7 +211,8 @@ fn execute<S: Source + 'static>(
         handles: Vec::new(),
     };
     let mut spawn_error = None;
-    for side in [Side::Left, Side::Right] {
+    let slots = completion::participants(stop.clone());
+    for (side, mut slot) in [Side::Left, Side::Right].into_iter().zip(slots) {
         let sender = sender.clone();
         let stop = stop.clone();
         let open = open.clone();
@@ -224,7 +232,7 @@ fn execute<S: Source + 'static>(
                         profile.clone(),
                         &path,
                         maximum,
-                        (&stop, &control),
+                        (&stop, &control, Some(&mut slot)),
                         sender,
                         side,
                         || open(side, profile),

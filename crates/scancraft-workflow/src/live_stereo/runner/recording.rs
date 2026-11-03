@@ -1,6 +1,6 @@
 //! Camera ownership is independent of bounded recording writes. Close the source
 //! before draining storage, including acquisition failure and unwinding paths.
-use super::{Control, Event, Result, Sample, Side, Source, SourceReport};
+use super::{Control, Event, Result, Sample, Side, Source, SourceReport, completion::Participant};
 use scancraft_core::StreamProfile;
 use scancraft_recording::{Writer, queued::QueuedWriter};
 use serde_json::Value;
@@ -22,7 +22,7 @@ pub(super) fn record_controlled<S: Source>(
     profile: StreamProfile,
     path: &Path,
     maximum: usize,
-    signals: (&AtomicBool, &Control),
+    signals: (&AtomicBool, &Control, Option<&mut Participant>),
     sender: SyncSender<Event>,
     side: Side,
     open: impl FnOnce() -> Result<S>,
@@ -53,13 +53,13 @@ pub(super) fn record_controlled<S: Source>(
 fn record_with_sink<S: Source, W: Write + Send + 'static>(
     profile: StreamProfile,
     maximum: usize,
-    signals: (&AtomicBool, &Control),
+    signals: (&AtomicBool, &Control, Option<&mut Participant>),
     sender: SyncSender<Event>,
     side: Side,
     open: impl FnOnce() -> Result<S>,
     sink: (impl FnOnce() -> Result<W>, impl FnOnce(W) -> Result<()>),
 ) -> Result<SourceReport> {
-    let (stop, control) = signals;
+    let (stop, control, completion) = signals;
     // Outside the unwind boundary: a source panic must not join a blocked writer
     // while the camera is still open. Declaration order also protects outer unwind.
     let mut writer = None;
@@ -80,7 +80,9 @@ fn record_with_sink<S: Source, W: Write + Send + 'static>(
             if stop.load(Ordering::Relaxed) || control.stop_requested() {
                 break;
             }
-            let Some(frame) = source.next()? else {
+            let Some(frame) =
+                source.next_until(&|| stop.load(Ordering::Relaxed) || control.stop_requested())?
+            else {
                 break;
             };
             // Processing and recording each own their bytes. The recording queue
@@ -114,6 +116,9 @@ fn record_with_sink<S: Source, W: Write + Send + 'static>(
     .unwrap_or_else(|_| Err("capture worker panicked".into()));
     if acquired.is_err() {
         stop.store(true, Ordering::Relaxed);
+    }
+    if let Some(completion) = completion {
+        completion.acquisition_finished();
     }
     let closed = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| source.close()))
         .unwrap_or_else(|_| Err("source cleanup panicked".into()));

@@ -17,8 +17,11 @@ impl Source for Native {
         capture_context(&self.0)
     }
     fn next(&mut self) -> Result<Option<Frame>> {
+        self.next_until(&|| false)
+    }
+    fn next_until(&mut self, cancelled: &dyn Fn() -> bool) -> Result<Option<Frame>> {
         self.0
-            .next_frame_until(|| self.1.stop_requested())
+            .next_frame_until(|| cancelled() || self.1.stop_requested())
             .map_err(|e| e.to_string())
     }
     fn statistics(&self) -> Value {
