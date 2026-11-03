@@ -4,6 +4,7 @@ PASS means the stated narrow experiment passed, not the full release gate.
 
 | Experiment | Result | Evidence |
 | --- | --- | --- |
+| Corrected metadata-order sustained acquisition | PASS duration/integrity scope: 18,000 accepted/camera over 600.275 s, all 36,000 replay; FAIL all-rejection proxy 110/36,110 = 0.304625%; ongoing 14/36,014 = 0.038874% | [Source-bound method, overhead and restoration](docs/RAPTOR_SUSTAINED_METADATA_ORDER.md); startup and seven paired truncations remain; no physical/live qualification |
 | Finite stereo peer completion | PASS narrow lifecycle evidence: 831-test gate; controlled new/old/old/new comparison and three fresh recorded line trials with complete replay/restoration | [Methods](docs/FINITE_STEREO_COMPLETION.md); continuing rejects still FAIL <0.1%; no calibrated object reconstruction |
 | Sequential completed-capture reader | PASS narrow integrity scope: 828-test gate; 222 saved pairs / 391,481 points and raw FrameViews exact; callback failure/cancellation/mutation and CLI partial-output checks | [Methods and limits](docs/LASER_CAPTURE_SEQUENCE.md); diagnostic tracking observations are not calibrated pose or fusion qualification |
 | Reopen completed laser captures | PASS narrow scope: 824-test gate; 18 older selected views / 26,750 points and full FrameViews exact; 129 input files unchanged; final native capture and close/restart/reopen; actual GUI pair switch and failed-selection preservation | [Methods and limits](docs/SAVED_LASER_CAPTURES.md); diagnostic views only, no calibrated/editable scan-project or tracking qualification |
@@ -38,7 +39,7 @@ PASS means the stated narrow experiment passed, not the full release gate.
 | Full device reliability gate | INCOMPLETE / FAIL | Cold reconnection unqualified; corruption threshold fails |
 | Dual-IR duration repeat, 2026-11-02 | PASS, one run; 18,010 accepted per camera over >603 s | [Bound source/binary and results](docs/NATIVE_CAPTURE_REPEATABILITY.md) |
 | Ongoing buffer rejection proxy, 2026-11-02 | FAIL, left 0.5412%, right 0.5632%; startup separately retained | Same run; V4L2 buffers, not physical exposure counts |
-| Calibration and geometry accuracy | DEFERRED | User request; no calibrated ground truth |
+| Calibration and geometry accuracy | INCOMPLETE | Physical calibration authorized; independent physical scale and object ground truth still required. [Procedure](docs/FIRST_SCAN_CALIBRATION_PLAN.md) |
 | Full native live-scan-to-qualified-mesh release | INCOMPLETE | Offline mesh tools exist; calibrated live pipeline and release qualification remain open |
 | Editing full mission gate | INCOMPLETE | Basic offline tools implemented; advanced operations pending |
 

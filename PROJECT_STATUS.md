@@ -1,5 +1,18 @@
 # Project status
 
+[Corrected sustained capture](docs/RAPTOR_SUSTAINED_METADATA_ORDER.md) now records
+18,000 accepted frames per camera over 600.275 seconds using source 907484e and
+the temporary 32-URB candidate. All 36,000 frames replay, every traced matching
+metadata return precedes video reuse, and no ongoing empty metadata occurs.
+Seven paired truncations and 96 right-camera startup rejects remain:
+**0.038874% ongoing, 0.304625% including startup**, so the all-rejection target
+still fails. The 300-frame/camera preflight also retains 91 startup rejects and
+paired truncation. Driver, parameters, service, all five idle formats and native
+stream/illumination states are restored. The full 863-test source gate is unchanged;
+independent implementation review and physical scan qualification remain open.
+See the report for tracer overhead and measured CPU/RSS. Next: startup/transport
+investigation and independently measured reconstruction.
+
 [Metadata requeue ordering](docs/METADATA_REQUEUE_ORDER.md) is corrected in source
 907484e. A controlled pause between video and metadata returns reproduced empty
 timestamp metadata twice; matched corrected/old/old/corrected trials eliminated
@@ -9,7 +22,7 @@ now returns before video-slot reuse; validation and counters remain intact. All
 Paired truncation and startup failures remain. A held-buffer SIGINT trial restored
 settings and retained replayable 98/100-frame prefixes; it verifies frame-boundary
 cancellation, not preemption. Full 863-test formatting/Clippy/release gate passes.
-Next: sustained revalidation of this corrected binary and separate USB failures,
+The sustained revalidation above extends this evidence; separate USB failures remain,
 while measured physical scale and the first object reconstruction remain open.
 
 [Sustained combined capture](docs/RAPTOR_SUSTAINED_QUEUED_CAPTURE.md) completed

@@ -3998,3 +3998,30 @@ not close or modify that record. No independent finding file/status/severity,
 firmware, permanent installed driver, protected branch or crate dependency graph was changed
 by development in this milestone. Holding a video slot during metadata wait can
 reduce video queue slack; no unmeasured throughput or universal cleanup claim.
+
+
+## DEV-METADATA-SUSTAINED — corrected-source duration validation — 2026-11-03
+
+Developer evidence for 907484e, not a new independent finding or closure.
+No application source changes. The same corrected CLI/temporary 32-URB candidate
+completes 18,000 accepted frames/camera over 600.275 s. Startup L/R 0/96, ongoing
+7/7, gaps 7/7: ongoing 0.038874% but all 110/36,110 = 0.304625% FAIL. Seven paired
+truncations remain; no ongoing empty metadata. Trace verifies 36,110 metadata
+returns before video QBUF with zero unmatched returns/trace errors. Preflight
+300/camera retains startup 0/91 and ongoing 1/1. All 36,600 accepted frames in
+four recordings replay CRC/order/footer; all trial/global state and five idle
+formats restore. Six selected sustained images show the board, still clipped
+at the right camera edge; no new calibration pose or measured object is claimed.
+
+Evidence: private sustained-ordered-s2y99uc1; public
+RAPTOR_SUSTAINED_METADATA_ORDER.md, PROJECT_STATUS, ACCEPTANCE_RESULTS, BENCHMARKS
+and metadata-order crosslink. The fixed 400,000-row tracer uses 308,800,000 bytes,
+passes strict build and four-thread 400,000-event boundary test, and writes its
+trace file only at teardown; observer cost remains. Whole-CLI maximum RSS
+357,472 KiB includes the tracer; partial 445.064 s CPU is 8.084224% of one core.
+No new Rust implementation gate is needed: source 863 tests/fmt/Clippy/release
+and 5943cd1 CI pass remain applicable. CodeRabbit quota retry is lookup_failed;
+no paid/completed review. The independent reviewer retains exclusive authority;
+005/006/021 qualifications remain open. Physical units, a measured object and
+repeated native end-to-end scans remain unproven. Reviewer-owned findings and
+agent instructions were not modified or staged.

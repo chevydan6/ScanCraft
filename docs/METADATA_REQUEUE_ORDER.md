@@ -159,8 +159,9 @@ restoration events are retained with SHA-256 manifests. Private data are not in 
 CodeRabbit quota lookup remains `lookup_failed`; no new completed automated review
 or paid review is claimed. Independent implementation review remains outstanding.
 
-**Next:** revalidate sustained acquisition with the corrected binary, preserving
-startup, truncation and sequence-gap accounting. Holding a video slot during
+**Follow-up:** [sustained corrected capture](RAPTOR_SUSTAINED_METADATA_ORDER.md)
+now extends this evidence to ten minutes, preserving startup, truncation and
+sequence-gap accounting. The all-rejection target still fails. Holding a video slot during
 metadata work reduces available video slots during that wait; no throughput
 advantage is claimed without measurement. SCAN-REV-005 cleanup bounds,
 SCAN-REV-006 physical qualification and SCAN-REV-021 live-session capacity remain

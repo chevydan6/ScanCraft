@@ -1,5 +1,14 @@
 # Benchmarks
 
+[Corrected sustained acquisition](docs/RAPTOR_SUSTAINED_METADATA_ORDER.md):
+18,000 accepted frames/camera over 600.275 seconds; all-rejection proxy 0.304625%
+FAIL, ongoing 0.038874%. Whole CLI: 652.71 s, 39.95 s user / 55.65 s system CPU,
+reported 14% CPU, maximum RSS 357,472 KiB. A partial 445.064 s acquisition sample
+averages 8.084224% of one core, RSS 333,732–338,644 KiB. These include a fixed
+308,800,000-byte prefaulted diagnostic buffer; do not compare RSS directly with
+smaller-tracer trials or call it application-only memory. No GUI rendering,
+reconstruction throughput or physical accuracy claim follows.
+
 [Finite stereo completion trials](docs/FINITE_STEREO_COMPLETION.md): counterbalanced
 new/old/old/new runs preserve 1,200 accepted frames per camera; new ongoing rejects
 7/8 and8/8, old9/8 and5/95. This isolates a finite teardown interaction, not a pass
