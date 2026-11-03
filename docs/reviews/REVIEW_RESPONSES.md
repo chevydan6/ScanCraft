@@ -4813,3 +4813,105 @@ queue overflow on both sides and exits101 after10.01s; live worktree unchanged.
 This checks sensitivity to preview-only admission, not the exact CI scheduling
 cause. CodeRabbit quota/billing lookup remains unavailable; no review upload,
 completed automated review or paid usage is claimed.
+
+
+## SCAN-REV-031 — verification follow-up and separate hardware evidence
+
+Accepted correction remains test-only at dbfc2fa4b966fa6a49cc7688dc8bb451521cebf9.
+Independent assignment485 reports it Resolved in the fixture scope; development
+has not altered the reviewer's findings. Exact-head push41706905583 and
+PR41706960114 both complete successfully. The review-readiness diagnostic still
+finds no known completed current-head CodeRabbit review; no merge approval follows.
+
+Separate developer experiment: docs/RAPTOR_COMBINED_ACQUISITION.md records a finite
+1800frame/camera candidate-plus-paused-logger diagnostic. All3600 saved frames
+replay, zero ongoing rejects/gaps, startup1/1, total2/3602. Complete USB/host and
+strict accepted headers pass, checked state/original module/services restore.
+Sixteen private inputs bound before capture; original prior failures retained.
+No production source change, generalized reliability or dimensional-accuracy claim.
+Source files changed in this milestone: this response, PROJECT_STATUS.md and the
+new report. Exact evidence publication commit is retained in Git history. Full
+physical qualification remains outstanding; independent hardware review pending.
+
+Fresh full tools/check.sh completes:892passed0failed1ignored,fmt/strictClippy/release
+PASS. Complete host analysis counts0copy-workers/350653timerpairs; recycling model
+self-tests pass and actual338590cycles/side account. Initial missing-directory
+analyzer invocations retained and corrected, no raw-data change. CodeRabbit usage
+lookup_failed again; no upload or paid review. All report claims are finite.
+
+
+## DEV-SUSTAINED-COMBINED — developer hardware evidence, not finding closure
+
+Separate declared18300frame/camera capture using the reviewed temporary bounded-copy
+candidate and paused optional logger, acquisitionHEAD7947954e3ee81709a0b9ea03565a882207269c7b.
+No production implementation changed. All36600savedframes pass native internal and
+two external CRC/footer replays; spans610.042251/610.042255s, startup/ongoing rejects
+and gaps0/0. Complete13761774USB events and strict36600header associations pass;
+21nativefields/fiveformats/originalbaseline+params/logger/WirePlumber/globaltrace
+restore. New explicitUSB/native-duration/proxy assessment returns true. No private
+host trace or physical-exposure/accuracy claim. Candidate remains experimental.
+
+Private inputs15boundbeforeexecution;54offlineadmissioncases pass, genuine prior
+good and missingEOF parser outputs match exactly. Initialnoop fault-injection test
+failure retained/corrected without assessment-code change. New public sources:
+docs/RAPTOR_SUSTAINED_COMBINED.md,PROJECT_STATUS.md,this response only. No finding
+status/severity changed; independent verification of this evidence remains pending.
+Prior892-test/fmt/Clippy/release gate covers unchanged implementation; both7947954
+CI runs pass, independently confirmed495. CodeRabbit completion remains absent.
+Physicalscale/objectreconstruction/threeaccuracytrials/nativeGUI qualification remain
+unfinished. Exact evidence-publication commit is retained in Git history.
+
+Native final-frame extraction65910 passes for both full recordings; images viewed,
+right-board-edge clipping persists. Fresh CodeRabbit usage85256 exits1 with all
+lookup_failed; no review upload or paid usage. No new Rust gate repeated because
+application/source/manifests are unchanged from the verified892-test implementation.
+
+
+## SCAN-REV-032 — accepted; developer evidence correction supplied
+
+Accepted. The original private sustained assessment trusted present command successes
+and summary counters without requiring an exact capture, distinct per-camera replay
+outputs or reconciliation with actual samples. The independent five counterexamples
+are legitimate. Actual capture verification in assignment 496 remains distinct from
+assessment completeness; assignment 500 independently confirms both 36e4adb CI passes.
+
+Correction: private sustained-admission-fix-20261104/admit_complete.py requires exact
+capture argv/output and one replay per declared path, matching saved/fresh raw
+profile/context/count/payload/integrity. raw-check/src/main.rs uses production
+IndexedRecording::build for complete CRC/footer/sample validation and guarded source
+identity; both paths are rechecked after both reads. Fresh unchanged strict USB
+analysis runs in a NEW directory; summaries/rows, actual samples, sequence/metadata
+and derived timing/association metrics must reconcile. Original assessment thresholds,
+state/restore/collector checks remain mandatory. Original evidence is immutable.
+Normal CLI never admits solely from cached receipts; pure functions are test seams.
+
+Tests: fresh validation 84719 exits 0; 36,600 complete raw frames and 13,761,774 USB events
+reconcile, input stamps unchanged. Regression 86725 exits 0: 95 new cases (including
+all five independent counterexamples, coupled sample/header faults and three
+JSON-type regressions),54 original
+summary cases unchanged, plus5 actual CLI refusal cases. Private helper fmt/strict
+Clippy 54446/release and Python compilation pass. Sixteen correction-source bindings
+remain unchanged; they were recorded during validation, not pre-execution attestation.
+No application change; prior 892-test/fmt/Clippy/release gate remains the implementation
+baseline. No new hardware, physical accuracy or malicious-writer attestation claim.
+
+Public source files changed: docs/RAPTOR_ADMISSION_RECONCILIATION.md,
+docs/RAPTOR_SUSTAINED_COMBINED.md,PROJECT_STATUS.md and this response only. The private
+helper is not shipped in the application. Exact documentation commit follows in Git
+history/publication metadata. Previous capture commit 36e4adbeef88adbaba0a7b7ab3ab5e6b2b02443e
+and raw evidence remain retained. SCAN-REV-032 stays Medium/Open until the reviewer
+independently verifies it; development does not close or alter the finding.
+
+Limits: finite 30 Hz/GREY/v2 diagnostic, complete ongoing rejection samples required,
+no fresh host trace, calibration/units/object accuracy/repeatability still unqualified.
+The header analyzer retains its finite in-memory grouping. Source guards do not
+establish authenticity against malicious writers. CodeRabbit substantive review is
+still unavailable; no paid usage or review/merge approval follows.
+
+Final developer inspection found Python equality could equate False with 0 and
+integer with floating-point counts. The first correction and 92-case results are
+retained in first-correction-version; a three-case negative control confirms that
+gap. Final same() comparison preserves JSON types. Full raw/USB validation-2 and
+95-case regressions pass after that correction. Initial CodeRabbit usage was run
+outside Git and failed; the corrected repository-scoped lookup also exits 1 with
+all quota/billing fields lookup_failed. Neither invocation uploads a review.
