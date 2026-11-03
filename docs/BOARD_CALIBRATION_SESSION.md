@@ -108,3 +108,11 @@ The native app currently runs single-pair preparation. Session UI integration,
 validation-pose scoring, physically qualified stereo geometry, independent scale
 and a first measured object reconstruction remain outstanding. This session
 workflow supplies traceable inputs; it is not a qualified calibration wizard.
+
+## Separate fixed-camera validation
+
+The native `validate-planar-pose` command can score explicit held-out observations
+against a supplied fixed camera, preserving arbitrary target units. See
+[contract, real evidence and domain limitations](FIXED_CAMERA_POSE_VALIDATION.md).
+Session assembly does not automatically run this command or attest independent
+lens provenance; validation views remain separate from fitting.

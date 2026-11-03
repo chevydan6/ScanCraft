@@ -1,5 +1,11 @@
 # Architecture
 
+`calibration::planar_pose` fits one six-parameter planar pose with a fixed lens,
+reusing native homography initialization, Brown derivatives and normal blocks.
+`workflow::planar_pose` and `validate-planar-pose` retain exact inputs and diagnostic
+outputs without assuming metric units or opening hardware. See
+[fixed-camera validation](docs/FIXED_CAMERA_POSE_VALIDATION.md).
+
 `board_session` composes existing observation and planar-fitting workflows. It
 processes poses sequentially, preserves per-pose bundles, checks common target/
 profiles and separates validation observations from camera fit requests. No

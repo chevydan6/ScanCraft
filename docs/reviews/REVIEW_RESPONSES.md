@@ -3715,3 +3715,32 @@ optical pose diversity or cryptographic identity. No measured RSS/FPS or hard
 cleanup deadline claimed. CodeRabbit usage returned lookup_failed; no review/paid
 request or approval. Prior ba495f6 publicCI41616702836 completed success. Independent
 reviewer records and finding status/severity/closure remain exclusively unchanged.
+
+## Native fixed-camera held-out pose validation — 2026-11-03
+
+SCAN-REV-006 remains accepted and physically unqualified. Source commit
+68cf31fc4e6f4871c364c706aad22019903d9a3e adds calibration planar_pose.rs/tests.rs, workflow
+planar_pose.rs and CLI validate-planar-pose dispatch; module exports and existing
+stereo pose seed visibility change. No existing solver behavior or dependencies
+change. Six pose parameters fit against fixed lenses, with explicit supplied-unit
+translation and retained per-observation residuals. Existing domain, validation,
+normal-system and publication helpers are reused. No auto calibration activation.
+
+Five focused tests and the complete850-pass/1-existing-ignored gate pass, including
+formatting, strict all-target Clippy and release builds. Collinearity regression
+uses distinct collinear locations; objective gradients agree with finite
+differences. Genuine held-out left38 observations give RMS0.135029585575px matching
+OpenCV5.0. Fullright36 correctly FAILS inverse lens domain; two observations exceed
+training coverage. A separate explicitly retained inner98% subset excludes3 and
+fits33 at RMS0.168662045384px, also matching OpenCV. No camera domain expansion or
+hidden rejection. Independent native-residual recomputation differs<=1.37e-12px;
+sourceSHA, exactrequest and CRC/length checks pass. These are six-parameter pose
+fits and numerical reference agreement, not metric accuracy or an object scan.
+
+See docs/FIXED_CAMERA_POSE_VALIDATION.md for inputs, provenance, evidence and limits.
+Physical units, broader lens coverage, session/GUI automatic integration and real
+object reconstruction remain open. No private observations published. CodeRabbit
+usage returned lookup_failed; no CLI review, paid request or approval claimed.
+PR32 had no inline review threads at the checked snapshot. Prior15dd52b publicCI
+41618852246 completed success, not new-source coverage. Independent reviewer
+files/status/severity/conclusions remain exclusively unchanged.

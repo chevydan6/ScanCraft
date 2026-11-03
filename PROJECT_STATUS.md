@@ -1,5 +1,15 @@
 # Project status
 
+[Native fixed-camera pose validation](docs/FIXED_CAMERA_POSE_VALIDATION.md) now
+checks held-out board pixels with lenses fixed. Real left38 RMS0.13503px matches
+OpenCV. Full right36 correctly fails lens coverage; a separately documented
+33-point interior subset gives RMS0.16866px, with no domain expansion. Full850
+tests/one-existing-ignored, formatting, strict Clippy and release build pass.
+This is pixel-space pose validation, not physical scale or an object scan.
+Previous head15dd52b publicCI41618852246 completed success; new-head review/CI
+remain separate. Calibration/session GUI integration and measured object trials
+remain the immediate priorities.
+
 [Recorded multi-pose sessions](docs/BOARD_CALIBRATION_SESSION.md) now retain
 training/validation splits, check target/profile consistency and reject reused
 camera-frame fingerprints. Optional independent camera fits use training only

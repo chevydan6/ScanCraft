@@ -1,5 +1,8 @@
 # ScanCraft | ArtCraft Ecosystem Candidate
 
+Native [fixed-camera board validation](docs/FIXED_CAMERA_POSE_VALIDATION.md) is
+available for recorded observations; physical accuracy remains unqualified.
+
 ScanCraft is an independent, open-source 3D scanning application in development,
 with native Linux/Rust support for Creality Raptor acquisition and extensible
 calibration, reconstruction, point-cloud and mesh workflows.
