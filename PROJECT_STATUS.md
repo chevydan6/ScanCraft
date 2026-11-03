@@ -1,5 +1,18 @@
 # Project status
 
+[Bounded finite recording](docs/BOUNDED_RECORDING.md) now separates camera
+servicing from recording writes using eight owned frames per camera and explicit
+failure on overflow. In controlled Raptor trials, a 200 ms write delay caused
+two additional sequence gaps with the old writer and none with the queued writer;
+six dequeues continued during each queued delayed write. A 600 ms stall fails
+explicitly, stops cameras before draining, preserves replayable prefixes and
+publishes no successful capture. SIGINT cleanup also passes. Full858-test gate,
+formatting, strict Clippy and optimized builds pass. Ordinary USB rejects remain;
+this is finite CLI recording, not a fix for every live runner or a qualified scan.
+Exact source2e3e2d8; private inputs remain outside Git. Next: combine this measured
+recording improvement with longer queue-depth trials, preserving startup and
+sequence-gap accounting. Physical scale and the first measured object remain open.
+
 [Controlled queue-depth trials](docs/RAPTOR_QUEUE_DEPTH_TRIAL.md) now provide
 actual hardware evidence for the existing experimental kernel candidate.
 Two ABBA comparisons retained and replayed 16,800 accepted buffers: depth 5

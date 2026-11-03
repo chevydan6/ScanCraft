@@ -3851,3 +3851,44 @@ CLI review claimed. An initial usage invocation from outside the repository
 returned not_git_repository for included reviews and is retained separately.
 PR32's current inline-thread list was empty at the checked snapshot, not review
 approval; its existing draft review behavior remains unchanged.
+
+## Bounded finite recording and storage-stall validation — 2026-11-03
+
+Developer finding DEV-FINITE-RECORDING-STALL accepted: synchronous Writer::push
+on the camera thread makes acquisition vulnerable to storage pauses. This is
+not an invented independent finding or proof of the earlier natural153.1ms
+pause's cause. A fresh natural trace maxwrite6.470ms did not reproduce it.
+Explicit200ms left-write fault injection reproduces two additional sequence gaps.
+
+Source correction2e3e2d8639b091a0001f803c64d1384dd1df2a15 adds original
+scancraft-recording::queued::QueuedWriter and integrates it into finite CLI
+stereo_probe recording. Capacity8/camera, nonblocking ownership transfer,
+explicit poisoned failure on overflow/disconnection, unchanged Writer format/
+validation/CRC, joined workers and no successful publication after errors.
+stereo_probe/recording::complete closes cameras before draining, cancels peers
+and aggregates acquisition/close/write errors. Unwind ownership order retained.
+Changed source: recording/src/{lib.rs,queued.rs,queued/tests.rs},
+cli/src/{stereo_probe.rs,stereo_probe/recording.rs}.
+
+Full858passed/1existingignored fmt/strictClippy/releasegate PASS. Six worker and
+two cleanup regressions include byte identity, blocked storage/capacity, overflow
+poisoning, failures/panic, slow sink destructor, ordering and joined cleanup.
+Real controllednew/old/old/new300frame/camera trials with200mswrite delay show
+ongoingrejects3/3,1/1,2/2,2/2 and sequencegaps3/3,3/1,4/2,2/2. Newwriter services
+sixleftbuffers onanotherthread duringeachblockedwrite; oldservicesnone. All2400
+acceptedbuffers replay; pertrialsettingsrestore. Naturalnew1800/camera stillhas
+12/12ongoingrejects/gaps; this does not fix underlyingUSB failures.
+
+Real600msstall failsqueue explicitly; allfourSTREAMOFFs precede delayedwriteend,
+208/212frame prefixes replay, no successdirectory/manifest, settingsrestorePASS.
+SIGINTafter100leftframes similarly retains100/101frame prefixes and restores.
+Private exactsource/binary/traces/evidence: recording-stall-a0_zqzay. Initial
+diagnosticcompilefailure/untracedcapture retained, excluded fromtiming evidence.
+See docs/BOUNDED_RECORDING.md for scope, memory cost and reproduction details.
+
+SCAN-REV-005 remains accepted/open: joins/filesystem/kernelcalls have no hard
+deadline.006 remains accepted/unqualified;021 live IRcapacity unchanged. This
+integration is finite CLIrecording, not alllive/GUIpaths. No independentfinding
+status/severity/closure changed and no reviewer-owned file modified or staged.
+CodeRabbitusage fromrepo again lookup_failed; no completednewreview, approval or
+paidrequest claimed. Prior23d36d7 CI41628369876 passed, not newsource CI coverage.
