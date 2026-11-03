@@ -4730,3 +4730,50 @@ claiming reviewer closure. c907ae5 bothCI pass; new publication hash is recorded
 Git history/private publication metadata. New evidence awaits independent review;
 no completedCodeRabbit review is claimed. Physical calibration is authorized, but
 independent scale, measured object reconstruction and repeatability remain absent.
+
+## SCAN-REV-031 — accepted; correction remains outstanding
+
+Accepted. `tests/live_capacity.rs::Paced::next_until` acknowledges a consumed
+processing preview; it does not wait for either independent recording consumer.
+The documented eight-frame queue can correctly fail closed before the synthetic
+success fixture reaches its1,001-pair assertions. Push41702132020 at a4d2de1 fails
+with that error; PR41702142669 passes. The original failure log is retained.
+One unchanged local run of all four capacity tests on CPU0 with four test threads
+passes in4.34s. That does not correct the missing synchronization or supersede CI.
+
+No production/test source changed for this response. Proposed correction is a
+bounded test seam that acknowledges both recording consumers before advancing the
+synthetic source, plus a deliberately delayed-writer regression. Preserve the
+actual nonblocking eight-frame admission, poisoning, overflow, cancellation and
+retained-prefix contracts. Do not replace synchronization with longer sleeps,
+larger queues, skipped tests or retries until green. Implementation, a fresh full
+gate and new-head CI remain outstanding. Only the reviewer may verify/close031.
+
+## DEV-NO-LID-SUSTAINED — remaining losses and diagnostic correction
+
+Two declared1,800-frame/camera trials at a4d2de17f77fb3cb0d4baef9af467f00fd779d06
+save/replay7,200 frames with unchanged baseline driver and temporarily paused
+optional logger. First startup107/102,ongoing2/2; corrected startup84/0,ongoing4/4.
+Every complete and ongoing-only proxy fails. IRQ trace placement is CPU15 then
+CPU10, so no isolated between-trial performance comparison is claimed.
+
+The first USB monitor incorrectly retains its old60-second deadline and exits2;
+collector exits1, strict parser refuses, admission remains denied. Manual replay
+passes. Separate explicitly incomplete-prefix analysis accounts for observed
+rejections but retains47 missing native associations and two partial tails. No
+full USB qualification or first-trial kernel-log comparison is claimed.
+
+The private corrected helper uses an explicit bounded monotonic deadline (180s
+in the corrected trial). Strictcompile,19deadlinecases,6invalidCLIcases and2PCAP
+checks pass. Corrected USB/host traces are complete and all3,600 accepted headers
+match, but left321/right239 lack EOF. FID-toggle accounting matches all3,608 native
+lengths without accepting malformed frames; strict admission exits1. All four
+incident pairs overlap zero software-pending intervals and copy-worker waits.
+Complete byte/trace-based software queue diagnostics do not override EOF failure.
+
+All28 native state comparisons across both trials and saved formats/services/
+observer/tracing restore; corrected kernel logs are unchanged. Source/driver and
+original logger remain unchanged. Public report docs/RAPTOR_NO_LID_SUSTAINED.md,
+PROJECT_STATUS.md and this response retain methods, failures, exact counts,
+resource scope and CI031. Publication commit is recorded in history/private metadata.
+No completedCodeRabbit review or physical reconstruction qualification is claimed.

@@ -1,5 +1,17 @@
 # Project status
 
+Latest one-minute mitigation trials: [capture without diagnostic lid polling](docs/RAPTOR_NO_LID_SUSTAINED.md)
+saves/replays7,200 real frames, but ongoing rejects per camera remain2 then4.
+The first monitor's60-second deadline expired; corrected instrumentation retains
+complete USB/host traces. One pair lacks EOF, so strict admission still fails.
+All four corrected-trial incidents include zero software-pending request intervals
+and delayed copy workers. Both trials restore the original observer and checked
+state; no permanent change or calibrated object scan. Acquisition-head CI is mixed:
+PR41702142669 passes; push41702132020 fails a synthetic recording-queue overflow.
+Independent SCAN-REV-031 is accepted; a local four-test pass is not a fix. Next:
+deterministic fixture synchronization with recording consumers, then remaining
+real request-recycling delays and physical reconstruction.
+
 Latest controlled observation: [timed lid reads versus cached controls](docs/RAPTOR_LID_READ_CONTROL.md)
 associates all three ongoing rejected camera pairs with the three longest direct
 laptop lid-state reads; none with eight cached reads. IRQ placement stays CPU15.
