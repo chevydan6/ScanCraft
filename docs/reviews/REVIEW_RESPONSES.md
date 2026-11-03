@@ -4554,3 +4554,47 @@ independent review; no status/severity change or completed automated review clai
 
 Fresh repository-level CodeRabbit usage exits1 with every included/billing/credit
 field reporting lookup_failed. No new review, paid request or upload follows.
+
+## DEV-BOUNDED-COPY — prepared opt-in completion-copy experiment
+
+Developer implementation proposal grounded in DEV-HOST-SERVICE's measured
+software request starvation, not an independent finding closure or qualified fix.
+The GPL-2.0-only patch in experiments/kernel-inline-copy defaults off and selects
+only original Raptor IR bulk-input capture, positive/consistent transfer lengths
+at most12288bytes, one copy operation and copy length no greater than actual bytes.
+It copies, releases the decoder-acquired reference once, clears completed work
+and reuses the original atomic resubmit/error path. Ineligible cases preserve
+the original zero-operation immediate submit or remaining-operation worker;
+cancellation/error handling precedes the new call. Load-time
+parameter freeze and read-only sysfs permissions prevent runtime mode changes.
+
+The baseline rebuild is byte-identical to installed579c7633…127e5. Candidate
+bcce45bd…76bbbf compiles with matching kernel vermagic/srcversion12034367675945449357638.
+Public patch application reproduces the candidate source.54 tests extract the
+actual completion/worker/helper/setter functions into strictC11stubs and verify
+boundary dispatch, guarded bytes, reference release, fallback, cancellation,
+frozen/error paths, submission flags/errors and parameter freeze. The first
+test expectation incorrectly omitted unexpected-error fallthrough when frozen;
+it was corrected to preserve existing behavior, with the initial failure retained.
+Linux patch-check indentation/header issues were corrected; final check has
+zeroerrors/warnings. No validation or error-reporting rule was weakened.
+
+Full Rust gate:890passed,1existingignored,formatting/strictClippy/releasePASS.
+These stubs do not establish real kernel concurrency, USB/parser semantics,
+IRQ latency or hardware improvement. No candidate module has been loaded.
+The new copy-byte cap is not a deadline. Longer host-event gaps, startup framing,
+the exceptional-byte case and physical reconstruction remain unresolved.
+
+Changed files: experiments/kernel-inline-copy patch/test/license/README,
+THIRD_PARTY_NOTICES.md, PROJECT_STATUS.md and this response. No Rust runtime or
+installed driver changes. Private inline-copy-20261104 retains initial/final
+tests, builds, source bindings and reproduction. Publication hash is recorded
+in Git history/private metadata. The proposal awaits independent review;
+reviewer-owned records and statuses remain untouched. Fresh CodeRabbit quota
+lookup again reports all fields unavailable; no paid or completed review claimed.
+
+Clean patch application and a separate full rebuild reproduce the candidate
+module byte for byte. Assignment458 independently verifies the preceding
+host-service observations, including the shorter incident's worker/task identity
+and queue-starvation accounting, and confirms both e178af3 CI runs passed. That
+supports the experiment's motivation, not this candidate's runtime correctness.

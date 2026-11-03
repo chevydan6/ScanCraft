@@ -30,8 +30,9 @@ No copied vendor DLL, firmware, shader or captured scanner image is included.
 See docs/publication/PUBLICATION_AUDIT.md for scope and reproducibility limits.
 
 Experimental Linux kernel patches and policy tests under experiments/kernel-queue
+and experiments/kernel-inline-copy
 are GPL-2.0-only, separately from the MIT Rust workspace; their original Linux
-license is included in that directory.
+license is included in each directory.
 
 | Package | Version | Declared license |
 | --- | --- | --- |

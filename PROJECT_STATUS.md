@@ -1,6 +1,15 @@
 # Project status
 
-Latest host-service investigation: a complete 4,014,236-event trace distinguishes
+Latest experiment: an opt-in [bounded completion-copy kernel patch](experiments/kernel-inline-copy/README.md)
+targets the observed camera-worker scheduling delay. It limits copying to one
+operation of at most 12 KiB on the original Raptor IR bulk-input streams, retaining
+the original fallback, cancellation and error paths. Candidate compilation,
+54 actual-callback stub tests and Linux patch checks pass; the baseline rebuild
+matches the installed module. The Rust gate passes 890 tests/one ignored, formatting,
+strict Clippy and release build. **The candidate has not been loaded or hardware-qualified.**
+No acquisition improvement or physical scan is claimed.
+
+Earlier host-service investigation: a complete 4,014,236-event trace distinguishes
 three paired truncations overlapping 3.869–5.318 ms without selected events across
 all CPUs from a fourth with camera-work scheduling delays and 923/895 µs of zero
 software-pending requests. All 1,200 saved frames replay; acquisition still fails
