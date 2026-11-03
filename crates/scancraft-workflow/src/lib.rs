@@ -1,16 +1,28 @@
-//! Shared bounded, cancellable offline reconstruction and atomic bundle publication.
+//! Shared bounded, cancellable reconstruction/scanning and atomic bundle publication.
+pub mod board_session;
+mod bounded_json;
+mod calibration_bundle;
+pub mod calibration_candidate;
+pub mod calibration_observations;
+pub mod candidate_bundle;
 pub mod frame_document;
+pub mod laser_stream;
 pub mod mesh_document;
 pub mod mesh_history;
 pub mod mesh_trim;
 pub mod meshing;
 pub mod output;
+pub mod planar_calibration;
+pub mod planar_pose;
+pub mod recorded_traces;
 pub mod scan_project;
 pub mod scan_project_load;
 pub mod section_document;
 pub mod sequence;
 pub mod statistical;
+pub mod stereo_calibration;
 pub mod stereo_surface;
+pub mod target_corners;
 use crate::output::{publish, staging};
 use image::{ColorType, ImageDecoder, codecs::png::PngDecoder};
 use scancraft_calibration::{CameraModel, stereo::TriangulationLimits, storage};
@@ -34,7 +46,7 @@ use std::{
     path::{Path, PathBuf},
 };
 pub type Error = Box<dyn std::error::Error + Send + Sync>;
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Request {
     schema_version: u32,
@@ -128,43 +140,72 @@ fn gray_png(bytes: &[u8], expected: [u32; 2]) -> Result<Vec<u8>, Error> {
     decoder.read_image(&mut pixels)?;
     Ok(pixels)
 }
+// An owned streaming artifact lets computation emit records without owning file
+// policy. The existing closure API delegates to the same write/finalization path.
+pub(crate) struct ArtifactWriter<'a> {
+    path: PathBuf,
+    role: String,
+    out: CheckedWriter<'a>,
+}
+impl<'a> ArtifactWriter<'a> {
+    pub(crate) fn open(path: &Path, name: &str, work: &'a WorkControl) -> Result<Self, Error> {
+        let path = path.join(name);
+        let file = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&path)?;
+        Ok(Self {
+            path,
+            role: name.into(),
+            out: CheckedWriter {
+                inner: BufWriter::new(file),
+                work,
+                bytes: 0,
+            },
+        })
+    }
+    pub(crate) fn finish(mut self) -> Result<Digest, Error> {
+        self.out.flush()?;
+        self.out.inner.get_ref().sync_all()?;
+        let work = self.out.work;
+        drop(self.out);
+        let mut file = File::open(&self.path)?;
+        let mut bytes = 0;
+        let mut hash = crc32fast::Hasher::new();
+        let mut buffer = [0; 65536];
+        loop {
+            work.check()?;
+            let n = file.read(&mut buffer)?;
+            if n == 0 {
+                break;
+            }
+            hash.update(&buffer[..n]);
+            bytes += n as u64;
+        }
+        Ok(Digest {
+            role: self.role,
+            bytes,
+            crc32: hash.finalize(),
+        })
+    }
+}
+impl Write for ArtifactWriter<'_> {
+    fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
+        self.out.write(bytes)
+    }
+    fn flush(&mut self) -> io::Result<()> {
+        self.out.flush()
+    }
+}
 fn artifact(
     path: &Path,
     name: &str,
     work: &WorkControl,
     write: impl FnOnce(&mut CheckedWriter<'_>) -> Result<(), Error>,
 ) -> Result<Digest, Error> {
-    let file = OpenOptions::new()
-        .write(true)
-        .create_new(true)
-        .open(path.join(name))?;
-    let mut out = CheckedWriter {
-        inner: BufWriter::new(file),
-        work,
-        bytes: 0,
-    };
-    write(&mut out)?;
-    out.flush()?;
-    out.inner.get_ref().sync_all()?;
-    drop(out);
-    let mut file = File::open(path.join(name))?;
-    let mut bytes = 0;
-    let mut hash = crc32fast::Hasher::new();
-    let mut buffer = [0; 65536];
-    loop {
-        work.check()?;
-        let n = file.read(&mut buffer)?;
-        if n == 0 {
-            break;
-        }
-        hash.update(&buffer[..n]);
-        bytes += n as u64;
-    }
-    Ok(Digest {
-        role: name.into(),
-        bytes,
-        crc32: hash.finalize(),
-    })
+    let mut artifact = ArtifactWriter::open(path, name, work)?;
+    write(&mut artifact.out)?;
+    artifact.finish()
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FileInputs {
@@ -247,7 +288,17 @@ fn process_images(
     inputs: Vec<Digest>,
     work: &WorkControl,
 ) -> Result<Prepared, Error> {
-    let processor = StereoProcessor::build(calibration, request.output_grid, work)?;
+    let processor = StereoProcessor::build(calibration, request.output_grid.clone(), work)?;
+    process_with_processor(&processor, request, left, right, inputs, work)
+}
+fn process_with_processor(
+    processor: &StereoProcessor,
+    request: Request,
+    left: &[u8],
+    right: &[u8],
+    inputs: Vec<Digest>,
+    work: &WorkControl,
+) -> Result<Prepared, Error> {
     let source = processor.rectification().source();
     let stereo_request = StereoRequest {
         left: GrayImage::new(source.left.width, source.left.height, left)?,
@@ -472,6 +523,24 @@ impl Write for CheckedWriter<'_> {
 mod tests {
     use super::*;
     use image::ImageEncoder;
+    #[test]
+    fn owned_streaming_artifacts_preserve_digests_no_overwrite_and_cancellation() {
+        let temp = Temp::new();
+        let work = WorkControl::default();
+        let mut stream = ArtifactWriter::open(&temp.0, "stream.bin", &work).unwrap();
+        stream.write_all(b"one").unwrap();
+        stream.write_all(b"two").unwrap();
+        let digest = stream.finish().unwrap();
+        assert_eq!(digest.bytes, 6);
+        assert_eq!(digest.crc32, crc32fast::hash(b"onetwo"));
+        assert!(ArtifactWriter::open(&temp.0, "stream.bin", &work).is_err());
+        let mut cancelled = ArtifactWriter::open(&temp.0, "cancelled.bin", &work).unwrap();
+        cancelled.write_all(b"prefix").unwrap();
+        work.cancel();
+        assert!(cancelled.write_all(b"extra").is_err());
+        assert!(cancelled.finish().is_err());
+        assert_eq!(fs::read(temp.0.join("cancelled.bin")).unwrap(), b"prefix");
+    }
     fn fixture() -> FileInputs {
         let root =
             PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../evidence/offline-cli-dataset");
@@ -609,3 +678,9 @@ pub mod source_verification;
 pub mod project_bundle;
 
 pub mod recording_archive;
+
+pub mod recording_timing;
+
+pub mod recorded_sequence;
+
+pub mod live_stereo;

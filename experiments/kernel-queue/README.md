@@ -1,6 +1,8 @@
 # Raptor IR queue-depth experiment
 
-**Compiled and policy-tested; not loaded, installed or hardware-qualified.**
+**Compiled, policy-tested and temporarily exercised on hardware; not installed
+persistently or hardware-qualified.** See the
+[controlled depth-5/depth-32 trials](../../docs/RAPTOR_QUEUE_DEPTH_TRIAL.md).
 This is a workstation-specific kernel experiment, not an application dependency
 or a production fix. The installed known-good module remains unchanged.
 
@@ -61,7 +63,7 @@ behavior of kstrtouint, or USB transport. The full kernel module also compiles
 without warnings and has matching kernel vermagic. Runtime safety/behavior
 remains unverified.
 
-## Pending hardware experiment
+## Hardware experiment requirements
 
 Do not replace the current installed module merely because this candidate
 builds. A future administrator-controlled test must preserve the exact original
@@ -72,6 +74,12 @@ same format/rate/start ordering, raw image content, timestamps, error/rejection
 accounting, reconnect/cleanup and non-Raptor camera behavior. Begin with short
 runs before repeating duration trials. Never ignore error flags to improve rates.
 
-Noninteractive sudo authentication was unavailable during preparation. No
-candidate load or installed-module modification was attempted. The candidate
-is not part of any claimed passing hardware gate.
+Noninteractive sudo authentication was unavailable during the original
+preparation. Later controlled trials temporarily loaded the historical local
+candidate and restored the original module and service. That local binary uses
+the pre-rebrand `raptor_urbs` parameter; the published patch above uses
+`scancraft_urbs`. Exact source equivalence after this explicit name mapping and
+a byte-identical rebuild are documented in the trial report. The original build
+commands and harness paths above describe the preparation environment; adapt
+the verified mount/path mapping when reproducing elsewhere. The candidate is
+not part of any claimed passing hardware qualification gate.

@@ -4,8 +4,12 @@ use scancraft_calibration::{Brown5, CameraModel, stereo::RigidPose};
 use scancraft_core::{Frame, StreamProfile, validate_frame};
 use scancraft_geometry::work::{Stage, WorkControl};
 
+pub mod components;
+pub mod corners;
 pub mod diagnostics;
 pub mod laser;
+pub mod laser_continuity;
+pub mod shape;
 pub mod stereo;
 
 pub const MAX_PIXELS: usize = 4_194_304;

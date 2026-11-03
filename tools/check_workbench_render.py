@@ -62,12 +62,18 @@ def main():
     parser.add_argument('project', type=Path)
     parser.add_argument('output', type=Path)
     modes = parser.add_mutually_exclusive_group()
+    modes.add_argument("--fit-calibration-candidate", action="store_true", help="fit an explicit candidate request into output/result without opening a camera")
+    modes.add_argument("--observe-calibration-pair", action="store_true", help="process an explicit board request JSON into output/result and show its camera observations")
+    modes.add_argument("--match-recorded-laser-traces", action="store_true", help="process a directory with geometry.json, first.raptor, second.raptor, request.json into output/result and show candidates")
+    modes.add_argument("--replay-laser", action="store_true", help="run a device-free helper with geometry.json, stream-request.json, first.raptor and second.raptor into output/result")
+    modes.add_argument("--laser-candidates", action="store_true", help="open a recorded laser candidate bundle with unverified model units")
     modes.add_argument('--statistical-preview', action='store_true', help='preview statistical candidates with k=4 and sigma=1')
     modes.add_argument('--open-scan-project', action='store_true', help='verify and open exported scan folder')
     modes.add_argument('--export-scan-project', action='store_true', help='export saved project, sources and full recordings from input directory')
     modes.add_argument('--archive-recordings', action='store_true', help='archive complete input left.raptor/right.raptor into result/')
     modes.add_argument('--export-project-bundle', action='store_true', help='export input bundle project and retained sources into result/')
     modes.add_argument('--verify-source-bundle', action='store_true', help='load project.orproj from the input bundle and explicitly verify its sources')
+    modes.add_argument('--reconstruct-recorded-sequence', action='store_true', help='run explicit recorded sequence dataset through native background job')
     modes.add_argument('--reconstruct-recordings', action='store_true', help='reconstruct bundled synthetic recorded stereo frame selections')
     modes.add_argument('--play-recording', action='store_true', help='open synthetic recording in the native offline playback panel')
     modes.add_argument('--recover-recording', action='store_true', help='recover synthetic interrupted recording into result/')
@@ -91,7 +97,7 @@ def main():
     parser.add_argument('--xvfb', type=Path, default=Path(shutil.which('Xvfb') or Path.home()/'.cache/scancraft-test-tools/usr/bin/Xvfb'))
     args = parser.parse_args()
     project, binary, output = args.project.resolve(), args.binary.resolve(), args.output.resolve()
-    valid_input=project.is_dir() if args.reconstruct or args.reconstruct_recordings or args.verify_source_bundle or args.export_project_bundle or args.archive_recordings or args.export_scan_project or args.open_scan_project or args.fuse_sequence else project.is_file()
+    valid_input=project.is_dir() if args.replay_laser or args.match_recorded_laser_traces or args.laser_candidates or args.reconstruct or args.reconstruct_recorded_sequence or args.reconstruct_recordings or args.verify_source_bundle or args.export_project_bundle or args.archive_recordings or args.export_scan_project or args.open_scan_project or args.fuse_sequence else project.is_file()
     if not valid_input or not binary.is_file() or not args.xvfb.is_file():
         raise SystemExit('input project/dataset, release binary and Xvfb must exist')
     display = next(n for n in range(90, 200) if not Path(f'/tmp/.X11-unix/X{n}').exists() and not Path(f'/tmp/.X{n}-lock').exists())
@@ -120,6 +126,8 @@ def main():
                 command=[str(binary),str(project)]
                 if args.reconstruct:
                     command=[str(binary),'--reconstruct',str(project/'calibration.rapcal'),str(project/'left.png'),str(project/'right.png'),str(project/'request.json'),str(output/'result')]
+                if args.reconstruct_recorded_sequence:
+                    command=[str(binary),'--reconstruct-recorded-sequence',str(project/'calibration.rapcal'),str(project/'left.raptor'),str(project/'right.raptor'),str(project/'request.json'),str(project/'sequence.json'),str(output/'result')]
                 if args.reconstruct_recordings:
                     command=[str(binary),'--reconstruct-recordings',str(project/'calibration.rapcal'),str(project/'left.raptor'),'1',str(project/'right.raptor'),'2',str(project/'request.json'),str(output/'result')]
                 if args.statistical_preview:
@@ -138,6 +146,16 @@ def main():
                     command=[str(binary),'--mesh-plane-preview',str(project),'1','0','0','0']
                 if args.mesh:
                     command=[str(binary),'--mesh',str(project)]
+                if args.fit_calibration_candidate:
+                    command=[str(binary),"--fit-calibration-candidate",str(project),str(output/"result")]
+                if args.observe_calibration_pair:
+                    command=[str(binary),"--observe-calibration-pair",str(project),str(output/"result")]
+                if args.match_recorded_laser_traces:
+                    command=[str(binary),'--match-recorded-laser-traces',str(project/'geometry.json'),str(project/'first.raptor'),'0',str(project/'second.raptor'),'0',str(project/'request.json'),str(output/'result')]
+                if args.replay_laser:
+                    command=[str(binary),"--replay-laser",str(project/"geometry.json"),str(project/"stream-request.json"),str(project/"first.raptor"),str(project/"second.raptor"),str(output/"result")]
+                if args.laser_candidates:
+                    command=[str(binary),'--laser-candidates',str(project)]
                 if args.play_recording:
                     command=[str(binary),'--play-recording',str(project)]
                 if args.recover_recording:
@@ -195,7 +213,7 @@ def main():
                     name = 'window.png' if capture == 0 else f'window-{capture+1}.png'
                     subprocess.run(['import', '-display', f':{display}', '-window', 'root', str(output/name)], env=env, check=True, timeout=10)
                 result = {'scope': 'private-display startup render only; requires screenshot inspection, not full GUI workflow or hardware qualification',
-                          'project': str(project), 'mode': 'statistical_preview' if args.statistical_preview else 'open_scan_project' if args.open_scan_project else 'export_scan_project' if args.export_scan_project else 'archive_recordings' if args.archive_recordings else 'export_project_bundle' if args.export_project_bundle else 'verify_source_bundle' if args.verify_source_bundle else 'reconstruct_recordings' if args.reconstruct_recordings else 'play_recording' if args.play_recording else 'recover_recording' if args.recover_recording else 'import_mesh' if args.import_mesh else 'mesh_smooth_preview' if args.mesh_smooth_preview else 'mesh_simplify_preview' if args.mesh_simplify_preview else 'fit_cylinder' if args.fit_cylinder else 'frame_document' if args.frame_document else 'coordinate_frame' if args.coordinate_frame else 'mesh_section' if args.mesh_section else 'measurement_outlines' if args.measurement_outlines else 'cloud_normals' if args.cloud_normals else 'mesh_normals' if args.mesh_normals else 'mesh_boundaries' if args.mesh_boundaries else ('mesh_plane_preview' if args.mesh_plane_preview else ('mesh' if args.mesh else ('fuse_sequence' if args.fuse_sequence else ('reconstruct' if args.reconstruct else 'open_file')))), 'result_bundle': str(output/'result') if args.reconstruct or args.reconstruct_recordings or args.export_project_bundle or args.archive_recordings or args.export_scan_project or args.fuse_sequence or args.import_mesh or args.recover_recording else None, 'software_rendering_requested': True, 'camera_device_fds': camera_fds,
+                          'project': str(project), 'mode': 'calibration_candidate' if args.fit_calibration_candidate else 'recorded_board_observations' if args.observe_calibration_pair else 'laser_recording_replay' if args.replay_laser else 'recorded_laser_processing' if args.match_recorded_laser_traces else 'laser_candidates' if args.laser_candidates else 'reconstruct_recorded_sequence' if args.reconstruct_recorded_sequence else 'statistical_preview' if args.statistical_preview else 'open_scan_project' if args.open_scan_project else 'export_scan_project' if args.export_scan_project else 'archive_recordings' if args.archive_recordings else 'export_project_bundle' if args.export_project_bundle else 'verify_source_bundle' if args.verify_source_bundle else 'reconstruct_recordings' if args.reconstruct_recordings else 'play_recording' if args.play_recording else 'recover_recording' if args.recover_recording else 'import_mesh' if args.import_mesh else 'mesh_smooth_preview' if args.mesh_smooth_preview else 'mesh_simplify_preview' if args.mesh_simplify_preview else 'fit_cylinder' if args.fit_cylinder else 'frame_document' if args.frame_document else 'coordinate_frame' if args.coordinate_frame else 'mesh_section' if args.mesh_section else 'measurement_outlines' if args.measurement_outlines else 'cloud_normals' if args.cloud_normals else 'mesh_normals' if args.mesh_normals else 'mesh_boundaries' if args.mesh_boundaries else ('mesh_plane_preview' if args.mesh_plane_preview else ('mesh' if args.mesh else ('fuse_sequence' if args.fuse_sequence else ('reconstruct' if args.reconstruct else 'open_file')))), 'result_bundle': str(output/'result') if args.fit_calibration_candidate or args.observe_calibration_pair or args.replay_laser or args.match_recorded_laser_traces or args.reconstruct or args.reconstruct_recorded_sequence or args.reconstruct_recordings or args.export_project_bundle or args.archive_recordings or args.export_scan_project or args.fuse_sequence or args.import_mesh or args.recover_recording else None, 'software_rendering_requested': True, 'camera_device_fds': camera_fds,
                           'screenshot': 'window.png', 'binary_sha256': binary_sha256, 'app_pid': app.pid, 'private_display_window_geometry': windows, 'capture_interval_app_cpu_ticks': process_cpu_ticks(app.pid)-cpu_start, 'capture_interval_seconds': time.monotonic()-cpu_started, 'cpu_ticks_per_second': os.sysconf('SC_CLK_TCK'), 'app_alive_at_capture': True}
                 (output/'capture.json').write_text(json.dumps(result, indent=2)+'\n')
                 print(json.dumps(result))

@@ -1,0 +1,12 @@
+{
+  "scope": "Synthetic version7 sequence creation, filtering, moved-folder explicit verification and native GUI startup operations; no hardware qualification",
+  "project_magic": "ORPROJ07",
+  "referenced_artifacts": 27,
+  "frame_selections": 3,
+  "gui_cli_identical_files_excluding_location_dependent_project_and_manifest": 27,
+  "projects_equal_after_descriptive_directory_normalization": true,
+  "manifest_difference_only_project_bytes_crc": true,
+  "edited_project_retains_exact_initial_references": true,
+  "moved_source_verification_passed": true,
+  "original_input_sha256s_unchanged": true
+}

@@ -82,3 +82,7 @@ An acquisition-only 30000-buffer-per-camera soak was started separately with
 evidence/native-stereo-soak-01-summary.json: duration exceeds ten minutes for
 both cameras, but rejection proxies exceed threshold and the left accepted
 rate is 36.5 Hz versus 49.5 Hz on the right. This is not full qualification.
+
+Offline full-recording timestamp diagnostics are available through
+`recording-timing`; see [RECORDING_TIMING.md](RECORDING_TIMING.md). Nearest candidates
+and equal raw PTS do not qualify exposure synchronization.

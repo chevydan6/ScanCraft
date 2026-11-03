@@ -1,0 +1,255 @@
+{
+  "schema": 1,
+  "scope": "synthetic Brown5 refinement only; not Raptor optical binding/physical accuracy",
+  "fixture_sha256": "7a49587588631cbbd52f8fde055f9175561ab500e786775be00b5d737ded2d40",
+  "opencv_version": "5.0.0",
+  "numpy_version": "2.5.4",
+  "cases": [
+    {
+      "name": "exact_zero_skew",
+      "views": 12,
+      "points_per_view": 99,
+      "initial_rms_px": 0.7403563948091826,
+      "error": {
+        "intrinsics_vs_truth_px": 3.7168308608670486e-06,
+        "distortion_vs_truth": 7.46281676299726e-08,
+        "scaled_gradient_inf": 4.110871319935598e-09,
+        "translation_vs_truth_mm": 2.7149752027000248e-06,
+        "rotation_frobenius_vs_truth": 7.499448663397647e-09,
+        "rms_recomputation_px": 2.1320048907728784e-16,
+        "max_recomputation_px": 0.0,
+        "final_rms_px": 3.866514482735927e-08,
+        "opencv_intrinsics_discrepancy_px": 5.183514520012977e-05,
+        "opencv_distortion_discrepancy": 4.326013163634575e-05,
+        "opencv_rms_discrepancy_px": 1.8929398245405306e-05
+      },
+      "limit": {
+        "intrinsics_vs_truth_px": 0.0001,
+        "distortion_vs_truth": 0.0001,
+        "scaled_gradient_inf": 1e-06,
+        "translation_vs_truth_mm": 0.0001,
+        "rotation_frobenius_vs_truth": 1e-06,
+        "rms_recomputation_px": 1e-09,
+        "max_recomputation_px": 1e-09,
+        "final_rms_px": 1e-06,
+        "opencv_intrinsics_discrepancy_px": 0.02,
+        "opencv_distortion_discrepancy": 0.002,
+        "opencv_rms_discrepancy_px": 0.0001
+      },
+      "scaled_information_min_eigenvalue": 0.001786559602395429,
+      "accepted_iterations": 8,
+      "opencv_reference": {
+        "intrinsics": [
+          [
+            900.0000510768507,
+            0.0,
+            628.9999963394565
+          ],
+          [
+            0.0,
+            850.0000515933187,
+            392.99998145385695
+          ],
+          [
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "distortion_k1_k2_p1_p2_k3": [
+          -0.12000103826875114,
+          0.035012545051710225,
+          0.0007999951783537648,
+          -0.0011000014681680922,
+          -0.008043334759803976
+        ],
+        "rms_px": 1.8968063390232664e-05,
+        "method": "calibrateCamera full Brown5, zero skew, common seed, float32 observations"
+      },
+      "pass": true
+    },
+    {
+      "name": "exact_nonzero_skew",
+      "views": 12,
+      "points_per_view": 99,
+      "initial_rms_px": 0.7313007194516917,
+      "error": {
+        "intrinsics_vs_truth_px": 3.7383935023171944e-06,
+        "distortion_vs_truth": 7.856981731196866e-08,
+        "scaled_gradient_inf": 4.108682838367039e-09,
+        "translation_vs_truth_mm": 2.7151037042755474e-06,
+        "rotation_frobenius_vs_truth": 7.496639521341745e-09,
+        "rms_recomputation_px": 2.273593197700233e-16,
+        "max_recomputation_px": 0.0,
+        "final_rms_px": 3.863441869299565e-08
+      },
+      "limit": {
+        "intrinsics_vs_truth_px": 0.0001,
+        "distortion_vs_truth": 0.0001,
+        "scaled_gradient_inf": 1e-06,
+        "translation_vs_truth_mm": 0.0001,
+        "rotation_frobenius_vs_truth": 1e-06,
+        "rms_recomputation_px": 1e-09,
+        "max_recomputation_px": 1e-09,
+        "final_rms_px": 1e-06
+      },
+      "scaled_information_min_eigenvalue": 0.0017856990430513678,
+      "accepted_iterations": 8,
+      "opencv_reference": null,
+      "pass": true
+    },
+    {
+      "name": "noisy_zero_skew",
+      "views": 12,
+      "points_per_view": 99,
+      "initial_rms_px": 0.7402830651697514,
+      "error": {
+        "intrinsics_vs_truth_px": 0.027318372682657355,
+        "distortion_vs_truth": 0.011542909593422301,
+        "scaled_gradient_inf": 5.435334678697247e-10,
+        "translation_vs_truth_mm": 0.019872311080305592,
+        "rotation_frobenius_vs_truth": 8.623834112300583e-05,
+        "rms_recomputation_px": 6.938893903907228e-17,
+        "max_recomputation_px": 0.0,
+        "final_rms_px": 0.019821854632451785,
+        "opencv_intrinsics_discrepancy_px": 7.80287435873106e-05,
+        "opencv_distortion_discrepancy": 3.347139754208885e-05,
+        "opencv_rms_discrepancy_px": 3.528986428046055e-07
+      },
+      "limit": {
+        "intrinsics_vs_truth_px": 1.0,
+        "distortion_vs_truth": 0.1,
+        "scaled_gradient_inf": 1e-06,
+        "translation_vs_truth_mm": 1.0,
+        "rotation_frobenius_vs_truth": 0.01,
+        "rms_recomputation_px": 1e-09,
+        "max_recomputation_px": 1e-09,
+        "final_rms_px": 0.03,
+        "opencv_intrinsics_discrepancy_px": 0.02,
+        "opencv_distortion_discrepancy": 0.002,
+        "opencv_rms_discrepancy_px": 0.0001
+      },
+      "scaled_information_min_eigenvalue": 0.0017863909405115967,
+      "accepted_iterations": 9,
+      "opencv_reference": {
+        "intrinsics": [
+          [
+            899.972654947223,
+            0.0,
+            628.9885141638582
+          ],
+          [
+            0.0,
+            849.9819102869034,
+            392.9867491466815
+          ],
+          [
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "distortion_k1_k2_p1_p2_k3": [
+          -0.11979687488662571,
+          0.03251818924690479,
+          0.0008028091256006029,
+          -0.0010975407610831474,
+          0.0035094381958802132
+        ],
+        "rms_px": 0.01982220753109459,
+        "method": "calibrateCamera full Brown5, zero skew, common seed, float32 observations"
+      },
+      "pass": true
+    }
+  ],
+  "pass": true,
+  "base_commit": "761036d5a9697477c6f05de94728f4a84698c955",
+  "source_sha256": {
+    "crates/scancraft-calibration/src/refinement.rs": "e88f757a020e8d45c172e248257f8a5ec83dd7c351a3460be097dc06ec8d5e26",
+    "crates/scancraft-calibration/src/planar.rs": "f3df780fbd75481a22d7397c47ec2319ad754a0cc983502e98d29d5c00d8e563",
+    "crates/scancraft-calibration/examples/brown_reference.rs": "74b769e90bfe9db673fd535607dbde57611b67d10d4064fb344e6a3b144d17cc",
+    "crates/scancraft-workflow/src/planar_calibration.rs": "02139c57a13f458a861f119fb053117a2c3c886e3b010c3adf50fee30bccd484",
+    "crates/scancraft-cli/src/main.rs": "830269e12cd91459f19e575b9d1242b90243b592fe746422a8e728b53d0367e4",
+    "tools/compare_brown_calibration_opencv.py": "42215e198eb70cdeb36e0c1c6bf246fc3b860737d5c9fdef59d47fa83c74fec8",
+    "tools/reference-requirements.txt": "99d7c4bdc55c5d52d84ba2d52a9ec486e13ab37eede6a758d679158d174a4f74"
+  },
+  "workspace_gate": {
+    "command": "tools/check.sh",
+    "exit_code": 0,
+    "passed_rust_tests": 598,
+    "formatting": "pass",
+    "strict_all_target_clippy": "pass",
+    "release_workspace_build": "pass",
+    "log_sha256": "5be5b9efc35d548bb10e9742ebb0008b6ce4e9ccdaa6c9daa8f4a9ef01d6a213"
+  },
+  "negative_control": {
+    "change": "exact zero-skew refined k1 increased by0.05",
+    "exit_code": 1,
+    "expected_rejection": true
+  },
+  "release_cli": {
+    "cases": [
+      {
+        "name": "exact_zero_skew",
+        "exit_code": 0,
+        "repeat_existing_output_exit_code": 1,
+        "input_sha256": "3425a83fa9463bb56e497e3a0cc275483571ca5261fcdbcc93fda07950dd6213",
+        "input_unchanged": true,
+        "retained_request_exact": true,
+        "existing_output_unchanged": true,
+        "rms_px": 3.866514461415878e-08,
+        "artifacts_sha256": {
+          "manifest.json": "b73c448a73559ab1e9e6da2b0a4a480197c5f91ffdfe04ce499de39a4c148d28",
+          "fit.json": "3bb5064d4535f324cf8e66a2b4b8b521c9a6c11ebdece37b52bf6fd2e1153669",
+          "observations.json": "3425a83fa9463bb56e497e3a0cc275483571ca5261fcdbcc93fda07950dd6213"
+        }
+      },
+      {
+        "name": "exact_nonzero_skew",
+        "exit_code": 0,
+        "repeat_existing_output_exit_code": 1,
+        "input_sha256": "1131d3f9997bf604ba4c98bd64ee3c32a339e7b5ab12e5814c195f9ab30b55f0",
+        "input_unchanged": true,
+        "retained_request_exact": true,
+        "existing_output_unchanged": true,
+        "rms_px": 3.863441892035497e-08,
+        "artifacts_sha256": {
+          "manifest.json": "940e14e3f4d1f1c1781a7cb466e29170be95bb146464374a0bfa99f42db0b8e1",
+          "fit.json": "5f39e7dfdbbd68d056dd2678f3b1c1844abb0f5a790539ac18ed079567276990",
+          "observations.json": "1131d3f9997bf604ba4c98bd64ee3c32a339e7b5ab12e5814c195f9ab30b55f0"
+        }
+      },
+      {
+        "name": "noisy_zero_skew",
+        "exit_code": 0,
+        "repeat_existing_output_exit_code": 1,
+        "input_sha256": "4ce6ca35a249bc861377008bac41b1fb76b0f2a5c5ab8f995cb393376e3c8e7c",
+        "input_unchanged": true,
+        "retained_request_exact": true,
+        "existing_output_unchanged": true,
+        "rms_px": 0.019821854632451716,
+        "artifacts_sha256": {
+          "manifest.json": "90642bec865217ebfef20a811417bd16e23c1e4998db27b2e9e627e84cd15423",
+          "fit.json": "9e70adf0781b843f0096c488fca9cdb36283ebf83194c453062f4ff84edcf210",
+          "observations.json": "4ce6ca35a249bc861377008bac41b1fb76b0f2a5c5ab8f995cb393376e3c8e7c"
+        }
+      }
+    ],
+    "unknown_field_exit_code": 1,
+    "unknown_field_output_absent": true,
+    "binary_sha256": "dc86221fa5180ea277065aff22aaaddb6a080efb63f6405b917a1a5e3e3d598e",
+    "scope": "release CLI synthetic workflow only; no device operation"
+  },
+  "cancellation_mutation_control": {
+    "head": "7f1ad202fe4b4039d632e6727bcf82e2af19f7aa",
+    "change": "remove cancellation latch in isolated mutation only",
+    "original_source_sha256": "e88f757a020e8d45c172e248257f8a5ec83dd7c351a3460be097dc06ec8d5e26",
+    "mutation_source_sha256": "6e3f91a4bfa7285bc44c6ab0b1bbbac932d74d3a0810780d7745ae453214cecc",
+    "exit_code": 101,
+    "failure": "cancelled fit incorrectly returned Ok when latch removed",
+    "test": "refinement::tests::cancellation_and_nonconvergence_preserve_input",
+    "log_sha256": "7c9e281bce7cfc526a4bde17df77149b8aafc44fa3ceb95401cf3e4d68321c97",
+    "scope": "intentional isolated mutation control, not a historical production bug",
+    "production_green_gate": "598 tests at unchanged canonical source; separate mutation target directory"
+  }
+}

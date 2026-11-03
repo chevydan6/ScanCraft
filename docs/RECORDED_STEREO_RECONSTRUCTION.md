@@ -90,3 +90,8 @@ The editable project now also retains bounded initial source metadata and retain
 artifact references in ORPROJ05. Raw frame payloads remain external; keep the full
 bundle. Initial lineage survives edits but is not current per-point correspondence.
 See PROJECT_ORIGIN.md for validation, compatibility and persistence evidence.
+
+The adapter also exposes a reusable RecordingProcessor for checked multi-pair
+processing. [Offline recorded sequences](RECORDED_STEREO_SEQUENCE.md) connect
+explicit pairs to existing tracking/fusion while retaining per-frame raw sources.
+This does not qualify exposure pairing, device binding or physical geometry.

@@ -1,0 +1,145 @@
+{
+  "schema": 1,
+  "scope": "synthetic numerical initializer validation only; not physical Raptor calibration or accuracy",
+  "fixture_sha256": "674b55670a556eb13f0c1f3458dd9f6861f43f9101bbc5488d4b25ed7647bac9",
+  "opencv_version": "5.0.0",
+  "numpy_version": "2.5.4",
+  "cases": [
+    {
+      "name": "exact_zero_skew",
+      "views": 8,
+      "points_per_view": 63,
+      "error": {
+        "intrinsics_vs_truth_px": 5.9117155615240335e-12,
+        "max_translation_vs_truth_mm": 4.116760533940818e-12,
+        "max_rotation_frobenius_vs_truth": 1.2251008243096758e-14,
+        "reported_rms_discrepancy_px": 2.167039282304302e-17,
+        "reported_max_discrepancy_px": 0.0,
+        "opencv_intrinsics_vs_truth_px": 0.0002110083999014023,
+        "rust_vs_opencv_intrinsics_px": 0.00021100840581311786
+      },
+      "limit": {
+        "intrinsics_vs_truth_px": 1e-06,
+        "max_translation_vs_truth_mm": 1e-06,
+        "max_rotation_frobenius_vs_truth": 1e-08,
+        "reported_rms_discrepancy_px": 1e-09,
+        "reported_max_discrepancy_px": 1e-09,
+        "opencv_intrinsics_vs_truth_px": 0.02,
+        "rust_vs_opencv_intrinsics_px": 0.02
+      },
+      "opencv_reference": {
+        "method": "OpenCV calibrateCamera, refined zero-skew/fixed zero distortion; float32 observations",
+        "rms_px": 1.8150277480749665e-05,
+        "matrix": [
+          [
+            919.9997889916001,
+            0.0,
+            620.9998869138416
+          ],
+          [
+            0.0,
+            869.9998022066904,
+            349.0001018621154
+          ],
+          [
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "pass": true
+    },
+    {
+      "name": "exact_nonzero_skew",
+      "views": 8,
+      "points_per_view": 63,
+      "error": {
+        "intrinsics_vs_truth_px": 3.524291969370097e-12,
+        "max_translation_vs_truth_mm": 2.910683592681308e-12,
+        "max_rotation_frobenius_vs_truth": 9.473031224097933e-15,
+        "reported_rms_discrepancy_px": 1.1241651995163276e-16,
+        "reported_max_discrepancy_px": 0.0
+      },
+      "limit": {
+        "intrinsics_vs_truth_px": 1e-06,
+        "max_translation_vs_truth_mm": 1e-06,
+        "max_rotation_frobenius_vs_truth": 1e-08,
+        "reported_rms_discrepancy_px": 1e-09,
+        "reported_max_discrepancy_px": 1e-09
+      },
+      "opencv_reference": null,
+      "pass": true
+    },
+    {
+      "name": "noisy_zero_skew",
+      "views": 8,
+      "points_per_view": 63,
+      "error": {
+        "intrinsics_vs_truth_px": 0.10828940123690245,
+        "max_translation_vs_truth_mm": 0.08715750784967256,
+        "max_rotation_frobenius_vs_truth": 0.00015208805324459264,
+        "reported_rms_discrepancy_px": 2.2898349882893854e-16,
+        "reported_max_discrepancy_px": 0.0,
+        "opencv_intrinsics_vs_truth_px": 0.06736755060876476,
+        "rust_vs_opencv_intrinsics_px": 0.08483663851257006
+      },
+      "limit": {
+        "intrinsics_vs_truth_px": 2.0,
+        "max_translation_vs_truth_mm": 2.0,
+        "max_rotation_frobenius_vs_truth": 0.01,
+        "reported_rms_discrepancy_px": 1e-09,
+        "reported_max_discrepancy_px": 1e-09,
+        "opencv_intrinsics_vs_truth_px": 2.0,
+        "rust_vs_opencv_intrinsics_px": 2.0
+      },
+      "opencv_reference": {
+        "method": "OpenCV calibrateCamera, refined zero-skew/fixed zero distortion; float32 observations",
+        "rms_px": 0.019976373460601222,
+        "matrix": [
+          [
+            919.9765472372757,
+            0.0,
+            621.0673675506088
+          ],
+          [
+            0.0,
+            869.983878236503,
+            348.9860550646647
+          ],
+          [
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "pass": true
+    }
+  ],
+  "pass": true,
+  "source_sha256": {
+    "crates/scancraft-calibration/src/planar.rs": "f87b15df5248c2dd519de15817ecde8e7f425ada79a40ecaea5cbdb044b9edbc",
+    "crates/scancraft-calibration/examples/planar_reference.rs": "a325b541af9680986d9d1fc50c6a054cdc5b86d0873c9f027348c84630744861",
+    "tools/compare_planar_opencv.py": "19da89cc067662f07ecce6e417f0341e77c3f45a5f0981b277fb269e2c2a464e",
+    "tools/reference-requirements.txt": "99d7c4bdc55c5d52d84ba2d52a9ec486e13ab37eede6a758d679158d174a4f74"
+  },
+  "base_commit": "31cfbe1b8cbbac317afc9f85575242d0621f6a8f",
+  "method_reference": "Zhang MSR-TR-98-71, updated 2008-08-13; independent implementation, not copied source",
+  "reference_command": "cargo run --frozen --release -p scancraft-calibration --example planar_reference; python tools/compare_planar_opencv.py CASES OUTPUT",
+  "negative_control": {
+    "change": "exact zero-skew estimated fx increased by one pixel",
+    "exit_code": 1,
+    "pass": false,
+    "expected_rejection": true
+  },
+  "workspace_gate": {
+    "command": "tools/check.sh",
+    "exit_code": 0,
+    "passed_rust_tests": 589,
+    "formatting": "pass",
+    "strict_all_target_clippy": "pass",
+    "release_workspace_build": "pass",
+    "log_sha256": "f1f925b963a41c345ca9dbf6ec2efcd09f689b2c1fcd4370da64d1a5733d1f3f"
+  }
+}

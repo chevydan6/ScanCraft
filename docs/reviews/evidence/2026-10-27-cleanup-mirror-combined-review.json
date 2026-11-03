@@ -1,0 +1,68 @@
+{
+  "reviewed_commit": "d79959850bfa211cb558ea75476ba26b0553c82d",
+  "reviewed_tree": "b39ff49d488e59077b9c9c99b5d3b757f126b6b7",
+  "base_commit": "72c5cf607db70bb1f4226e728120e8b56814d60a",
+  "cli_version": "0.9.1",
+  "exit_code": 0,
+  "included_capacity_before_review": 1,
+  "billing_status_before_review": "inactive",
+  "paid_usage_authorized": false,
+  "raw_report_sha256": "420bf5f2a4fcb80560f84e4143a3651e1f678a2d917df770d14f7e95a22dfce9",
+  "completion": {
+    "type": "complete",
+    "status": "review_completed",
+    "findings": 0,
+    "gate": {
+      "threshold": "major",
+      "status": "passed",
+      "blockingFindings": 0
+    },
+    "reviewedFiles": [
+      "crates/scancraft-device/src/cleanup_errors.rs",
+      "crates/scancraft-device/src/lib.rs",
+      "crates/scancraft-image/examples/sdk_mirror_reference.rs",
+      "docs/CALIBRATION.md",
+      "docs/MIRROR_STATUS.md",
+      "docs/reviews/REVIEW_RESPONSES.md",
+      "docs/reviews/evidence/2026-10-27-sdk-byte-mirror-reference.json",
+      "docs/reviews/evidence/2026-10-27-stream-cleanup-review.json",
+      "tools/probe_sdk_byte_mirror.py",
+      "tools/sdk_byte_mirror_probe.c",
+      "tools/test_sdk_byte_mirror_probe.py"
+    ],
+    "outcome": "completed",
+    "message": "Review completed"
+  },
+  "file_git_blobs": {
+    "crates/scancraft-device/src/cleanup_errors.rs": "755777283a0b5c14ef3eafdf0e2af6ef94bea9db",
+    "crates/scancraft-device/src/lib.rs": "b270da306f9d7091514f0ea67c888c0367b6e27a",
+    "crates/scancraft-image/examples/sdk_mirror_reference.rs": "d386388e9ae6d9708a36c8e7ad7500b64d851b46",
+    "docs/CALIBRATION.md": "aad4cbcc5926ae4c8a587dbf4b8b845be7b290e1",
+    "docs/MIRROR_STATUS.md": "8a928f20fd8aa4947d43cf2ecec64e63f64f7560",
+    "docs/reviews/REVIEW_RESPONSES.md": "01e375b66643a96cbb3941eeacc0c61fa89fd73b",
+    "docs/reviews/evidence/2026-10-27-sdk-byte-mirror-reference.json": "fda48348c5f3052964b29f16c577e347dff3bd71",
+    "docs/reviews/evidence/2026-10-27-stream-cleanup-review.json": "f7c4d95a0306f1236a8d09d8ec4b4f2d90ad4a51",
+    "tools/probe_sdk_byte_mirror.py": "3f3180b1112b92b4ff99e8f9ba0945280d23ed77",
+    "tools/sdk_byte_mirror_probe.c": "32ff2b9109f946335dd9a479dba1c9e2c1a3905b",
+    "tools/test_sdk_byte_mirror_probe.py": "5c8cf6de3db22bad5de931bf00e34cd166d85d16"
+  },
+  "binding": "Operator captured head/tree before/after and file blobs; not service immutable-head attestation.",
+  "covered_cleanup_correction_commit": "a6fa2d5f74afb8ebb11f199be1e67482b7fac358",
+  "cleanup_source_blobs_equal_at_reviewed_head": true,
+  "validation": {
+    "workspace_rust_tests": 544,
+    "formatting": "passed",
+    "strict_clippy": "passed",
+    "release_build": "passed",
+    "python_guard_tests": 3,
+    "python_guard_tests_status": "passed",
+    "actual_vendor_native_equal_pixels": 2304075,
+    "log_sha256": "e97ae70cc9679829ff723f82dfbd8a8065736bf06c6901fbc986298e4d070e99"
+  },
+  "limitations": [
+    "GitHub App full reviews remain separate and pending.",
+    "No scanner runtime orientation, calibration binding or physical accuracy qualification.",
+    "No bounded driver shutdown claim.",
+    "Evidence follow-up changes metadata only."
+  ]
+}

@@ -1,4 +1,5 @@
 //! Host-protocol query transport; operational setters are isolated in scoped modules.
+pub mod device_version;
 pub mod flood_trial;
 pub mod illumination;
 pub mod line_trial;

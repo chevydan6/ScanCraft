@@ -1,0 +1,83 @@
+{
+  "reviewed_commit": "484524d20ccc2707cbb62951d1dedfff28bd4642",
+  "reviewed_tree": "58b61cd1c602ba5855e57601a1a2a41a19ed7395",
+  "base_commit": "e1c4fc686f5451c6a0ef9a82ff4eba546fb5dfee",
+  "cli_version": "0.9.1",
+  "exit_code": 0,
+  "included_reviews_before_launch": 2,
+  "usage_billing_before_launch": "inactive",
+  "paid_consent": false,
+  "completion": {
+    "type": "complete",
+    "status": "review_completed",
+    "findings": 1,
+    "gate": {
+      "threshold": "major",
+      "status": "passed",
+      "blockingFindings": 0
+    },
+    "reviewedFiles": [
+      "ARCHITECTURE.md",
+      "PROJECT_STATUS.md",
+      "crates/scancraft-cli/src/live_scan.rs",
+      "crates/scancraft-cli/src/main.rs",
+      "crates/scancraft-workflow/examples/synthetic_live_scan.rs",
+      "crates/scancraft-workflow/src/lib.rs",
+      "crates/scancraft-workflow/src/live_stereo.rs",
+      "crates/scancraft-workflow/src/live_stereo/runner.rs",
+      "crates/scancraft-workflow/tests/live_stereo.rs",
+      "docs/LIVE_STEREO_SCAN.md",
+      "docs/reviews/REVIEW_RESPONSES.md",
+      "docs/reviews/evidence/2026-10-27-live-stereo-runtime.json"
+    ],
+    "outcome": "completed",
+    "message": "Review completed"
+  },
+  "raw_report_sha256": "718f21ca3cbc768f873406a40089d103ebf74748df0782d1d1e3429a9c134edf",
+  "file_git_blobs": {
+    "ARCHITECTURE.md": "eeb81a91fc40e224fdc21a99acb0fb2b4f43e018",
+    "PROJECT_STATUS.md": "d120b6c9e948477d3b69c7cbfa3d83b3867c73e0",
+    "crates/scancraft-cli/src/live_scan.rs": "9021b1f0204262c8d54e4fd8bfa241ad15debc72",
+    "crates/scancraft-cli/src/main.rs": "267556a3e4428ad072c1cbeff644c2585743cf11",
+    "crates/scancraft-workflow/examples/synthetic_live_scan.rs": "b029810c3aa100b1cfe1626d6bd362d4a46b8dec",
+    "crates/scancraft-workflow/src/lib.rs": "c0ae20b98c8aa102d79a47924b6bda48ab6f45b5",
+    "crates/scancraft-workflow/src/live_stereo.rs": "aa2a1df1d72f33225cc30d333fdba09b06575fb1",
+    "crates/scancraft-workflow/src/live_stereo/runner.rs": "75c5e5609a8aef4adfc26cda5c6af8845523c86d",
+    "crates/scancraft-workflow/tests/live_stereo.rs": "127b8e24aa7519293872fbcc0631185e4e124fa8",
+    "docs/LIVE_STEREO_SCAN.md": "417df04edf994c4ea234158395f4f6e4fd28cdab",
+    "docs/reviews/REVIEW_RESPONSES.md": "e0e8251dda9d3ce3415cba75ec8d4190ece925e3",
+    "docs/reviews/evidence/2026-10-27-live-stereo-runtime.json": "c5c73b4b9daed47ebb54a36487b83fb2ae77ba5e"
+  },
+  "binding": "Operator recorded unchanged head/tree before/after; not service immutable-head attestation.",
+  "findings": [
+    {
+      "developer_id": "CR-LIVE-IDEMPOTENT-RESTORE",
+      "severity": "minor",
+      "file": "crates/scancraft-cli/src/live_scan.rs",
+      "title": "Avoid a second unconditional `lease.restore()` after a successful publication.",
+      "disposition": "Confirmation accepted; proposed defect/change disputed because restore is already idempotent after success.",
+      "evidence": [
+        "SettingsLease::restore stream_group.rs:95 returns Ok immediately when restored is true, before all ioctls.",
+        "It sets restored=result.is_ok; bundle requires restore success before publication.",
+        "SettingsLease::drop calls the same guarded restore method.",
+        "On early or failed restoration, the outer fallback remains useful; no published success can encounter new restore I/O."
+      ],
+      "existing_source_blob": "88fb8adce8cec4feffb6b33e7893afd10242908d",
+      "code_change_required": false
+    }
+  ],
+  "validation": {
+    "rust_tests": 560,
+    "formatting": "passed",
+    "strict_clippy": "passed",
+    "release_build": "passed",
+    "log_sha256": "5185cafd63e3b72398f92cc90c5ab133cd8b63d8007bc5c11fb5f1dcabad7d20",
+    "runtime_manifest": "2026-10-27-live-stereo-runtime.json"
+  },
+  "limitations": [
+    "Synthetic injected-source proof; real native hardware path not exercised.",
+    "No qualified binding/synchronization/physical accuracy or bounded driver shutdown.",
+    "Live GUI and interactive pause/resume/stop remain future integration work.",
+    "GitHub App review remains separate and pending."
+  ]
+}

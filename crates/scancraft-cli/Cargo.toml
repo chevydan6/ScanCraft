@@ -7,6 +7,7 @@ repository.workspace = true
 description = "ScanCraft native Linux scanning and geometry workflows"
 
 [dependencies]
+scancraft-acquisition = { path = "../scancraft-acquisition" }
 scancraft-core.workspace = true
 scancraft-device.workspace = true
 scancraft-recording.workspace = true

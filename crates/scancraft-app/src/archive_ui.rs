@@ -230,11 +230,95 @@ mod tests {
         std::fs::remove_dir_all(target).unwrap();
     }
     fn wait(ui: &mut ArchiveUi) {
+        wait_for(ui, std::time::Duration::from_secs(10)).unwrap_or_else(|error| panic!("{error}"));
+    }
+    fn wait_for(ui: &mut ArchiveUi, timeout: std::time::Duration) -> Result<(), String> {
         let start = std::time::Instant::now();
-        while ui.is_busy() {
+        loop {
             ui.tick();
-            assert!(start.elapsed() < std::time::Duration::from_secs(10));
+            // Observe completion before the deadline: tick can consume the result
+            // and join the worker after this test thread was descheduled.
+            let Some(job) = &ui.job else {
+                return Ok(());
+            };
+            if start.elapsed() >= timeout {
+                let diagnostic = format!(
+                    "archive test timed out after {:?} (limit {timeout:?}); progress={:?}; worker_finished={}; with_project={}; paths={:?}; project_paths={:?}; message={:?}",
+                    start.elapsed(),
+                    job.work.progress(),
+                    job.thread.is_finished(),
+                    ui.with_project,
+                    ui.paths,
+                    ui.project_paths,
+                    ui.message,
+                );
+                job.work.cancel();
+                return Err(diagnostic);
+            }
             std::thread::sleep(std::time::Duration::from_millis(1));
         }
+    }
+
+    #[test]
+    fn wait_consumes_ready_success_and_error_before_expired_deadline() {
+        for (result, expected) in [
+            (Ok([3, 4]), "Archived 3 left and 4 right frames"),
+            (
+                Err("deliberate archive failure".into()),
+                "Archive failed or cancelled: deliberate archive failure",
+            ),
+        ] {
+            let (tx, rx) = mpsc::channel();
+            tx.send(result).unwrap();
+            let mut ui = ArchiveUi {
+                job: Some(Job {
+                    work: Arc::new(WorkControl::default()),
+                    rx,
+                    thread: thread::spawn(|| {}),
+                }),
+                paths: Default::default(),
+                project_paths: Default::default(),
+                with_project: false,
+                open: false,
+                message: String::new(),
+            };
+            wait_for(&mut ui, std::time::Duration::ZERO).unwrap();
+            assert!(!ui.is_busy());
+            assert!(ui.message.contains(expected), "{}", ui.message);
+        }
+    }
+
+    #[test]
+    fn wait_timeout_reports_pending_work_and_requests_cancellation() {
+        let work = Arc::new(WorkControl::default());
+        work.update(scancraft_geometry::work::Stage::Writing, 1, 2)
+            .unwrap();
+        let control = work.clone();
+        let (tx, rx) = mpsc::channel();
+        let mut ui = ArchiveUi {
+            paths: ["left".into(), "right".into(), "destination".into()],
+            job: Some(Job {
+                work: work.clone(),
+                rx,
+                thread: thread::spawn(move || {
+                    while control.check().is_ok() {
+                        thread::sleep(std::time::Duration::from_millis(1));
+                    }
+                    let _ = tx.send(Err("Operation cancelled".into()));
+                }),
+            }),
+            project_paths: Default::default(),
+            with_project: false,
+            open: false,
+            message: String::new(),
+        };
+        let error = wait_for(&mut ui, std::time::Duration::ZERO).unwrap_err();
+        assert!(error.contains("archive test timed out"), "{error}");
+        assert!(error.contains("Writing"), "{error}");
+        assert!(error.contains("0.5"), "{error}");
+        assert!(error.contains("destination"), "{error}");
+        assert!(work.check().is_err());
+        wait(&mut ui);
+        assert!(ui.message.contains("Operation cancelled"));
     }
 }

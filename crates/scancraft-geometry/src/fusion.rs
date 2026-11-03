@@ -161,8 +161,18 @@ impl VoxelFusion {
     /// Deterministic lexicographic voxel order; one centroid per voxel. Missing
     /// attributes do not dilute present colors/normals. Opposing normals can cancel.
     pub fn cloud(&self, work: &WorkControl) -> Result<Cloud, String> {
-        let mut points = Vec::with_capacity(self.voxels.len());
-        for (i, voxel) in self.voxels.values().enumerate() {
+        self.cloud_stride(1, work)
+    }
+    /// Display-only deterministic subset; does not modify fusion or allocate the full cloud.
+    pub fn preview_cloud(&self, maximum: usize, work: &WorkControl) -> Result<Cloud, String> {
+        if !(1..=50_000).contains(&maximum) {
+            return Err("preview requires 1..50000 points".into());
+        }
+        self.cloud_stride(self.voxels.len().div_ceil(maximum).max(1), work)
+    }
+    fn cloud_stride(&self, stride: usize, work: &WorkControl) -> Result<Cloud, String> {
+        let mut points = Vec::with_capacity(self.voxels.len().div_ceil(stride));
+        for (i, voxel) in self.voxels.values().enumerate().step_by(stride) {
             work.update(Stage::Processing, i, self.voxels.len())?;
             let n = Vector3::from(voxel.normal);
             let length = n.norm();
@@ -387,5 +397,29 @@ mod tests {
             crate::formats::read_ply(std::io::Cursor::new(bytes), None).unwrap(),
             before
         );
+    }
+    #[test]
+    fn display_sampling_bounds_allocation_and_preserves_complete_fusion() {
+        let work = WorkControl::default();
+        let mut fusion = VoxelFusion::new(0.1, 100).unwrap();
+        let cloud = Cloud {
+            points: (0..10)
+                .map(|i| Point {
+                    position: [i as f64, 2., 3.],
+                    color: Some([10, 20, 30]),
+                    normal: Some([1., 0., 0.]),
+                })
+                .collect(),
+        };
+        fusion
+            .integrate(0, &cloud, &Rigid::identity(), &work)
+            .unwrap();
+        let full = fusion.cloud(&work).unwrap();
+        let sample = fusion.preview_cloud(3, &work).unwrap();
+        assert!(sample.points.len() <= 3);
+        assert!(sample.points.iter().all(|p| full.points.contains(p)));
+        assert_eq!(fusion.cloud(&work).unwrap(), full);
+        assert!(fusion.preview_cloud(0, &work).is_err());
+        assert!(fusion.preview_cloud(50001, &work).is_err());
     }
 }

@@ -126,9 +126,8 @@ impl StereoProcessor {
         let mut mapping_failures = Vec::new();
         for (rectified_match_index, m) in matching.accepted.iter().enumerate() {
             work.check()?;
-            match rectification
-                .source_pixels(m.left_pixel.map(f64::from), m.right_pixel.map(f64::from))
-            {
+            let pixels = m.pixel_match();
+            match rectification.source_pixels(pixels.left_pixel, pixels.right_pixel) {
                 Ok((left_pixel, right_pixel)) => mapped_matches.push(MappedMatch {
                     seed_index: m.seed_index,
                     rectified_match_index,
@@ -267,6 +266,7 @@ mod tests {
             min_patch_stddev: 5.,
             min_correlation: 0.9,
             min_uniqueness_margin: 0.05,
+            subpixel: None,
         }
     }
     fn limits() -> TriangulationLimits {

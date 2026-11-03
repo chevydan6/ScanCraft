@@ -1,0 +1,52 @@
+{
+  "scope": "operator-side immutable revision binding, not CodeRabbit server attestation",
+  "head_before": "3a37db079708af952060037ad44e978236d9f791",
+  "base": "a178690bc8aca0eaeea87cc113975903e5365983",
+  "tree_before": "30d4e026b1c72d552836024ba2346df0e435cd29",
+  "files": {
+    "ARCHITECTURE.md": "148a8722cf6efd851e8270e5de4d27c61c9ad5d9",
+    "PROJECT_STATUS.md": "d13802c195fe9eecb6d313409a43008b53835877",
+    "crates/scancraft-app/src/capture_close.rs": "fe65bc37b0e4aab003d504662e301759c76f8736",
+    "crates/scancraft-app/src/main.rs": "11dee242fc3ccb2725c4f3332d6e3512d02644f6",
+    "docs/reviews/REVIEW_RESPONSES.md": "9e0dfa9299679b235be1d673700ecdcec016848b"
+  },
+  "started_utc": "2026-10-26T09:50:38.620286+00:00",
+  "paid_consent": false,
+  "command": [
+    "coderabbit",
+    "review",
+    "--agent",
+    "--gate",
+    "major",
+    "--committed",
+    "--base-commit",
+    "a178690bc8aca0eaeea87cc113975903e5365983"
+  ],
+  "completed_utc": "2026-10-26T09:52:00.417878+00:00",
+  "head_after": "3a37db079708af952060037ad44e978236d9f791",
+  "tree_after": "30d4e026b1c72d552836024ba2346df0e435cd29",
+  "exit_code": 0,
+  "report_sha256": "4119de21c70923df43dcb5320cf75703fe9e9f08f39b2bf5d948b84b75639563",
+  "completion": {
+    "type": "complete",
+    "status": "review_completed",
+    "findings": 0,
+    "gate": {
+      "threshold": "major",
+      "status": "passed",
+      "blockingFindings": 0
+    },
+    "reviewedFiles": [
+      "ARCHITECTURE.md",
+      "PROJECT_STATUS.md",
+      "crates/scancraft-app/src/capture_close.rs",
+      "crates/scancraft-app/src/main.rs",
+      "docs/reviews/REVIEW_RESPONSES.md"
+    ],
+    "outcome": "completed",
+    "message": "Review completed"
+  },
+  "limitations": "Operator-observed head/tree stability, not service-attested immutable-head identity; completion is CLI review, not a GitHub review badge or closure of SCAN-REV-005.",
+  "test_log_sha256": "ede015aef864bb1015ea1cec1ae47d4516c98f87ae7518845b6a930e3a8f1743",
+  "rust_tests_passed": 511
+}

@@ -4,6 +4,23 @@ PASS means the stated narrow experiment passed, not the full release gate.
 
 | Experiment | Result | Evidence |
 | --- | --- | --- |
+| Idle USB reset as a startup remedy | FAIL reliability: two of four reset tests retain large startup bursts; four controls also fail. All 1,440 seed/test frames replay and checked state restores | [Counterbalanced method and retained failures](docs/RAPTOR_USB_RESET_TRIAL.md); no production reset or physical qualification |
+| Corrected metadata-order sustained acquisition | PASS duration/integrity scope: 18,000 accepted/camera over 600.275 s, all 36,000 replay; FAIL all-rejection proxy 110/36,110 = 0.304625%; ongoing 14/36,014 = 0.038874% | [Source-bound method, overhead and restoration](docs/RAPTOR_SUSTAINED_METADATA_ORDER.md); startup and seven paired truncations remain; no physical/live qualification |
+| Finite stereo peer completion | PASS narrow lifecycle evidence: 831-test gate; controlled new/old/old/new comparison and three fresh recorded line trials with complete replay/restoration | [Methods](docs/FINITE_STEREO_COMPLETION.md); continuing rejects still FAIL <0.1%; no calibrated object reconstruction |
+| Sequential completed-capture reader | PASS narrow integrity scope: 828-test gate; 222 saved pairs / 391,481 points and raw FrameViews exact; callback failure/cancellation/mutation and CLI partial-output checks | [Methods and limits](docs/LASER_CAPTURE_SEQUENCE.md); diagnostic tracking observations are not calibrated pose or fusion qualification |
+| Reopen completed laser captures | PASS narrow scope: 824-test gate; 18 older selected views / 26,750 points and full FrameViews exact; 129 input files unchanged; final native capture and close/restart/reopen; actual GUI pair switch and failed-selection preservation | [Methods and limits](docs/SAVED_LASER_CAPTURES.md); diagnostic views only, no calibrated/editable scan-project or tracking qualification |
+| Buffered schema-2 encoding | PASS narrow byte/storage/capture scope: 814-test gate plus explicit >1 GiB regression; native 57/64 and 58/64 with 2 MiB segments, separate 61/64 with 16 MiB segments; cleanup/readbacks pass | [Methods and limits](docs/SEGMENTED_PAIR_ENCODING.md); one small-segment trial below 90%, all sustained/physical gates remain open |
+| Per-pixel epipolar constraint reuse | PASS narrow scope: 812-test gate, 216 analytic cases, 63,436 complete saved queries exact; native current 54/64 twice versus baseline 47/64 and 49/64; all five capture/close trials restore measured state | [Method and limits](docs/CACHED_EPIPOLAR_QUERIES.md); 84.375% below 90%; high startup rejects, no sustained/physical qualification |
+| Optional diagnostic write failure isolation | PASS narrow scope: 808-test gate; full-stderr malformed and successful synthetic/replay helper processes; retained exit status/private logs; healthy native capture/close restoration | [Methods and limits](docs/HELPER_DIAGNOSTICS.md); original native early exit remains unattributed; no shutdown/physical qualification |
+| Concurrent laser camera detection | PASS narrow scope: 794-test gate, 130 paired numerical executions and 314 complete raw-linked records equivalent; finite new GUI trials 47–50/64, still below 90% | [Method, trials and retained failures](docs/PARALLEL_LASER_DETECTION.md); no sustained/physical qualification |
+| Schema-2 segmented laser storage | PASS narrow scope: 791-test gate; explicit 9000-record / 1,182,790,236-byte / 71-segment synthetic test; real GUI rollover and close/restoration; 65 legacy/new pair records exact | [Limits and evidence](docs/SEGMENTED_LASER_JOURNAL.md); 21/32 native processing remains below 90%; no duration/accuracy qualification |
+| Bounded asynchronous preview preparation | PASS narrow scope: 779-test gate, 65 old/new snapshot comparisons exact, 33 saved reports and three actual IPC previews verified; native 32 raw/camera and 22 pairs, below 90% | [Ownership, measurements and limitations](docs/ASYNC_LASER_PREVIEW.md); no sustained/physical qualification |
+| Buffered laser pair journals | PASS narrow scope: 774-test gate, same-byte/checksum serializer comparison; new native GUI saves 32 raw/camera and processes 21 pairs, still below 90%; verified root-close publication/restoration | [Profile and limits](docs/LASER_STREAM_PROFILE.md); default-renderer failures and physical qualification unchanged |
+| Native laser GUI diagnostic integration | PASS narrow renderer-limited scope: 32 raw/camera, 19 pairs, raw/candidate previews, verified recording and restoration; actual close during acquisition saves 7/7 raw and 6 pairs | [GUI contracts and evidence](docs/LIVE_LASER_GUI.md); default-renderer starts fail; no calibrated scanning qualification |
+| Default private software-renderer native start | FAIL in two trials: zero accepted frames, incomplete/error-flagged buffers and timeout; cleanup/restoration reported and readbacks match | Same report; correlation with renderer condition is not causal proof |
+| Bounded laser handoff, offline | PASS narrow scope: 8 new regressions, 1200-pair synthetic run, 9 saved Raptor pair reports exact with raw-journal CRC/frame equality | [Contracts and limitations](docs/BOUNDED_LASER_STREAM.md); implementation `16b9092dbcd5fcd09162569a941691cbfa75fee3`; no native live/physical qualification |
+| Native laser candidate stream, short warm trial | PASS narrow functional scope: 16 raw/camera, 12 processed pairs, 1857–2023 diagnostic candidates/pair, replay/restoration pass; 75% processed is below 90% target | [Native capture evidence and limits](docs/NATIVE_LASER_CAPTURE.md); no calibrated or sustained-live qualification |
+| Native laser graceful Ctrl-C | PASS one warm trial: 3/2 raw frames, 2 pairs, valid publication/restoration; ~0.190s signal-to-exit | Same report; no hard shutdown bound |
 | Native discovery | PASS, one observation | CLI discovery, six Raptor nodes |
 | Left IR structural acquisition | PASS, 100 payloads; optical usability unqualified | evidence/native-left-ir.json |
 | Right IR structural acquisition | PASS, 100 payloads; optical usability unqualified | evidence/native-right-ir.json |
@@ -21,7 +38,9 @@ PASS means the stated narrow experiment passed, not the full release gate.
 | Dual-IR buffer rejection proxy | FAIL, 92 / 18,192 per camera = 0.505717% | Same trial; no warmup exclusion; not physical exposure counts |
 | Post-soak warm reopen quality | INCOMPLETE / ISSUE OBSERVED, valid buffers but 111 left / 1 right rejects | evidence/stereo-ir-soak-20261026/after-soak-probe.json |
 | Full device reliability gate | INCOMPLETE / FAIL | Cold reconnection unqualified; corruption threshold fails |
-| Calibration and geometry accuracy | DEFERRED | User request; no calibrated ground truth |
+| Dual-IR duration repeat, 2026-11-02 | PASS, one run; 18,010 accepted per camera over >603 s | [Bound source/binary and results](docs/NATIVE_CAPTURE_REPEATABILITY.md) |
+| Ongoing buffer rejection proxy, 2026-11-02 | FAIL, left 0.5412%, right 0.5632%; startup separately retained | Same run; V4L2 buffers, not physical exposure counts |
+| Calibration and geometry accuracy | INCOMPLETE | Physical calibration authorized; independent physical scale and object ground truth still required. [Procedure](docs/FIRST_SCAN_CALIBRATION_PLAN.md) |
 | Full native live-scan-to-qualified-mesh release | INCOMPLETE | Offline mesh tools exist; calibrated live pipeline and release qualification remain open |
 | Editing full mission gate | INCOMPLETE | Basic offline tools implemented; advanced operations pending |
 
@@ -758,3 +777,61 @@ the initially failed 0.04 mm expectation. Native private-display synthetic fusio
 integrates 3/4 frames, recovers after loss and produces 27 points; CLI/GUI artifacts
 match byte-for-byte. Evidence: huber-plane-* and docs/POINT_TO_PLANE_ICP.md. These
 checks do not qualify global registration, real scanner geometry or physical gates.
+
+## Live workflow and retained-session software gates — synthetic PASS only
+
+- Live processor/runner and native GUI have injected-source and private-display
+  evidence for raw retention, tracking/fusion, pause/resume, graceful stop versus
+  abort, final preview/counters, window close and editor handover (572-test stage).
+- ORPROJ08 retains initial live-session references through edits and reopening.
+  Moved folders verify explicitly; altered raw/calibration/reports and symlinks
+  fail (574-test stage). Release CLI/GUI verified 8 retained synthetic artifacts.
+- Edited live projects export both full referenced raw recordings, verified copies
+  and replayed editable state. CLI/GUI export and both raw replays passed
+  (576-test stage). This does not save resumable fusion weights.
+- Cooperative native stop has 3 injected-read tests and a 579-test full gate.
+  A real driver shutdown deadline remains unqualified; SCAN-REV-005 remains Open.
+- The pause-boundary regression raises the combined gate to 580 tests. Paired
+  map concurrency raises it to 583, with exact synthetic output comparisons.
+  These later counts describe the combined development tree.
+
+Evidence: docs/LIVE_STEREO_GUI.md, LIVE_SESSION_REFERENCES.md,
+COOPERATIVE_CAPTURE_STOP.md, PAIRED_REMAP_CONCURRENCY.md and the associated
+review/benchmark JSON reports. Formatting, strict Clippy and release build passed
+at each stated stage. Real Raptor calibration/mode binding, synchronization,
+dimensional accuracy, transport reliability, processing throughput and 10 complete
+hardware trials remain unqualified. These software results do not establish
+alpha, beta or stable readiness.
+
+## Planar initialization — synthetic evidence only
+
+Six focused native tests and three independent reference cases pass for initial
+pinhole intrinsics, target poses, residuals and degeneracy/input rejection.
+OpenCV comparison uses a refined zero-skew/zero-distortion fit, not the same
+objective as the native five-intrinsic linear initializer. These checks do not
+change any physical scanner qualification gate. Target detection, distortion
+estimation, nonlinear refinement, joint stereo calibration and genuine Raptor
+optical binding remain incomplete. Physical calibration remains deferred.
+Evidence: docs/PLANAR_CALIBRATION_INITIALIZER.md and
+docs/reviews/evidence/2026-10-27-planar-initializer-reference.json.
+
+## Brown5 refinement — synthetic software evidence only
+
+Joint intrinsics/distortion/target-pose fitting has seven numerical and two workflow
+regressions. Three 12-view synthetic cases pass truth/NumPy and zero-skew OpenCV
+checks. Release CLI fits retain exact inputs, preserve existing outputs and reject
+malformed requests; an altered distortion coefficient fails the reference checker.
+This does not qualify Raptor optics or change hardware acceptance gates. See
+docs/BROWN_CALIBRATION_REFINEMENT.md and
+docs/reviews/evidence/2026-10-27-brown-calibration-reference.json.
+
+## Fixed-intrinsic stereo fitting — synthetic PASS only
+
+The full 607-test/fmt/strict-Clippy/release gate passes. Three independent synthetic
+fixed-lens stereo cases and held-out native triangulation checks pass; noisy
+hold-out error about 0.0298 mm is not scanner accuracy. Fixed lenses are declarations,
+not physically qualified Raptor parameters. Three prior mono reference fixtures
+and release CLI artifact sets remain byte-identical after shared-code extraction.
+Actual hardware/calibration/synchronization/reliability acceptance gates are unchanged.
+Evidence: docs/STEREO_EXTRINSIC_CALIBRATION.md and
+docs/reviews/evidence/2026-10-27-stereo-calibration-reference.json.

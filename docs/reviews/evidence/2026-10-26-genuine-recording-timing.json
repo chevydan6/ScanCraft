@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "scope": "Read-only replay of previously captured genuine Raptor recordings; 1000us caller-selected diagnostic limit, not approved exposure tolerance",
+  "left_frames": 100,
+  "right_frames": 100,
+  "max_host_delta_us": 1000,
+  "unique_nearest_within_limit": 6,
+  "equidistant_nearest_within_limit": 0,
+  "outside_limit": 94,
+  "right_frames_used_by_multiple_left_candidates": 0,
+  "raw_pts_equal_unique_candidates": 3,
+  "samples_truncated": false,
+  "clock_domains_verified": false,
+  "synchronization_verified": false,
+  "physical_accuracy_qualified": false,
+  "input_bytes_unchanged_sha256_checked": true,
+  "not_qualified": [
+    "clock domains",
+    "exposure pairing",
+    "camera mode/calibration binding",
+    "optical content",
+    "physical geometry"
+  ],
+  "dataset": "Historical native-stereo-recording-01; private payloads not redistributed",
+  "reproduction": "scancraft-cli recording-timing LEFT_RECORDING RIGHT_RECORDING 1000; requires the original private recording pair"
+}

@@ -22,9 +22,11 @@ their existing behavior. Whole-file integrity validation precedes detection.
 
 Radius must be 1..128 and the 2*radius+1 window must fit the image width.
 Windows truncate at image boundaries; edge-connected candidates remain
-rejected. Two monotone queues implement erosion/dilation in O(pixels),
-independent of radius. Buffers comprise one bounded contrast image, two reused
-row buffers and a bounded window queue. Raw input is borrowed and never
+rejected. Block prefix/suffix extrema implement erosion/dilation in O(pixels)
+under the window-fit bound. Buffers comprise one bounded contrast image, two reused
+row buffers and two scratch rows of width+2*radius bytes. See
+[block opening](BLOCK_LASER_OPENING.md) for provenance, edge handling and measured
+comparison with the previous queue implementation. Raw input is borrowed and never
 modified. Cancellation, dimension/output limits and explicit rejection counts
 are retained; no partially truncated observation list is returned.
 

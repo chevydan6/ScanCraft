@@ -37,6 +37,7 @@ struct KQuery<'a> {
 }
 struct Node {
     point: usize,
+    minimum_index: usize,
     axis: usize,
     left: Option<usize>,
     right: Option<usize>,
@@ -86,6 +87,7 @@ impl<'a> SpatialIndex<'a> {
         let node = self.nodes.len();
         self.nodes.push(Node {
             point: *point,
+            minimum_index: *point,
             axis,
             left: None,
             right: None,
@@ -94,6 +96,11 @@ impl<'a> SpatialIndex<'a> {
         let right = self.partition(right, depth + 1, work)?;
         self.nodes[node].left = left;
         self.nodes[node].right = right;
+        self.nodes[node].minimum_index = [left, right]
+            .into_iter()
+            .flatten()
+            .map(|child| self.nodes[child].minimum_index)
+            .fold(*point, usize::min);
         Ok(Some(node))
     }
     /// None for an empty index or distances outside finite f64 representation.
@@ -154,6 +161,17 @@ impl<'a> SpatialIndex<'a> {
             .collect())
     }
     fn search_k(&self, index: usize, query: &mut KQuery<'_>) -> Result<(), String> {
+        // Distances cannot improve on zero. Once k zero-distance neighbors
+        // exist, only a lower original index can improve the ranked result.
+        // This subtree minimum is conservative even when it includes exclude.
+        // Do not apply this shortcut to positive radii or approximate zeros.
+        if query.heap.len() == query.k
+            && let Some(worst) = query.heap.peek()
+            && worst.0.distance_mm == 0.
+            && self.nodes[index].minimum_index >= worst.0.index
+        {
+            return Ok(());
+        }
         query.visits += 1;
         if query.visits.is_multiple_of(32) {
             query.work.check()?;
@@ -246,6 +264,71 @@ impl<'a> SpatialIndex<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn coincident_neighbors_are_exact_without_visiting_the_whole_tree() {
+        let points = vec![[0.; 3]; 4096];
+        let work = WorkControl::default();
+        let index = SpatialIndex::build(&points, &work).unwrap();
+        for exclude in [None, Some(0), Some(2), Some(4095)] {
+            let mut query = KQuery {
+                point: [0.; 3],
+                k: 4,
+                exclude,
+                heap: BinaryHeap::with_capacity(4),
+                visits: 0,
+                work: &work,
+            };
+            index.search_k(index.root.unwrap(), &mut query).unwrap();
+            let actual: Vec<_> = query
+                .heap
+                .into_sorted_vec()
+                .into_iter()
+                .map(|n| n.0.index)
+                .collect();
+            let expected: Vec<_> = (0..points.len())
+                .filter(|i| Some(*i) != exclude)
+                .take(4)
+                .collect();
+            assert_eq!(actual, expected);
+            // A structural work bound, not a timing assertion. Previously all
+            // 4096 nodes were visited per query, causing quadratic filtering.
+            assert!(query.visits < 128, "visited {} nodes", query.visits);
+        }
+    }
+    #[test]
+    fn mixed_coincident_groups_keep_brute_force_order_for_all_query_types() {
+        let points: Vec<_> = (0..257)
+            .map(|i| [((i * 17) % 5) as f64, ((i * 13) % 3) as f64, 0.])
+            .collect();
+        let work = WorkControl::default();
+        let index = SpatialIndex::build(&points, &work).unwrap();
+        for point in [[0.; 3], [1., 2., 0.], [0.5, 0.5, 0.], [100., 20., 1.]] {
+            for exclude in [None, Some(0), Some(19), Some(256)] {
+                for k in [1, 4, 17, 256] {
+                    let mut expected: Vec<_> = points
+                        .iter()
+                        .enumerate()
+                        .filter(|(i, _)| Some(*i) != exclude)
+                        .map(|(i, p)| Neighbor {
+                            index: i,
+                            distance_mm: (point[0] - p[0])
+                                .hypot(point[1] - p[1])
+                                .hypot(point[2] - p[2]),
+                        })
+                        .collect();
+                    expected.sort_by(|a, b| {
+                        a.distance_mm
+                            .total_cmp(&b.distance_mm)
+                            .then(a.index.cmp(&b.index))
+                    });
+                    assert_eq!(
+                        index.k_nearest(point, k, exclude, &work).unwrap(),
+                        expected[..k]
+                    );
+                }
+            }
+        }
+    }
     #[test]
     fn k_queries_match_brute_force_with_duplicates_ties_exclusion_and_guards() {
         let mut points: Vec<_> = (0..250)

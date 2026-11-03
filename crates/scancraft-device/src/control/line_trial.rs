@@ -108,7 +108,7 @@ impl<'a> ScopedLine<'a> {
 impl Drop for ScopedLine<'_> {
     fn drop(&mut self) {
         if let Err(e) = self.restore() {
-            eprintln!("{e}");
+            scancraft_core::diagnostics::note(format_args!("{e}"));
         }
     }
 }

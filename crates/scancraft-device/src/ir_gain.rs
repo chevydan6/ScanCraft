@@ -154,7 +154,7 @@ impl<'lock> ScopedIrGain<'lock> {
 impl Drop for ScopedIrGain<'_> {
     fn drop(&mut self) {
         if let Err(e) = self.restore() {
-            eprintln!("{e}");
+            scancraft_core::diagnostics::note(format_args!("{e}"));
         }
     }
 }

@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 pub mod coordinate_frame;
 pub mod cylinder;
 pub mod fusion;
+pub mod live_references;
 pub mod measurement;
 mod measurement_history;
 pub mod measurement_snapshot;
@@ -23,6 +24,7 @@ pub mod plane_measurement;
 pub mod point_plane;
 pub mod project_origin;
 pub mod recording_references;
+pub mod sequence_references;
 pub mod session;
 pub mod spatial;
 pub mod statistical_filter;
@@ -193,6 +195,10 @@ impl Cloud {
 #[serde(deny_unknown_fields)]
 pub struct Editor {
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    live_session: Option<live_references::LiveSession>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    sequence: Option<sequence_references::Sequence>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     recordings: Option<recording_references::Recordings>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     origin: Option<project_origin::Origin>,
@@ -209,6 +215,20 @@ pub struct Editor {
 }
 impl Editor {
     pub fn validate_history(&self) -> Result<(), String> {
+        if let Some(live) = &self.live_session {
+            live.validate()?;
+            if self.origin.is_some() || self.recordings.is_some() || self.sequence.is_some() {
+                return Err(
+                    "live-session and other reconstruction provenance cannot coexist".into(),
+                );
+            }
+        }
+        if let Some(sequence) = &self.sequence {
+            sequence.validate()?;
+            if self.origin.is_some() || self.recordings.is_some() {
+                return Err("single-frame and sequence provenance cannot coexist".into());
+            }
+        }
         if let Some(origin) = &self.origin {
             origin.validate()?;
         }
@@ -250,6 +270,8 @@ impl Editor {
             return Err("history limit exceeds 32".into());
         }
         Ok(Self {
+            live_session: None,
+            sequence: None,
             origin: None,
             recordings: None,
             cloud,
@@ -265,6 +287,14 @@ impl Editor {
     /// Callers must separately verify/copy sources; this performs no filesystem I/O.
     pub fn copied_with_source_directory(&self, directory: String) -> Result<Self, String> {
         self.validate_history()?;
+        if let Some(live) = &self.live_session {
+            let mut live = live.clone();
+            live.directory_display = directory;
+            live.validate()?;
+            let mut copy = self.clone();
+            copy.live_session = Some(live);
+            return Ok(copy);
+        }
         let mut origin = self
             .origin
             .clone()
@@ -301,7 +331,7 @@ impl Editor {
     /// it describes initial inputs, not current per-point correspondence.
     pub fn attach_origin(&mut self, origin: project_origin::Origin) -> Result<(), String> {
         origin.validate()?;
-        if self.origin.is_some() {
+        if self.origin.is_some() || self.sequence.is_some() || self.live_session.is_some() {
             return Err("initial project origin is already attached".into());
         }
         if !self.undo.is_empty()
@@ -312,6 +342,55 @@ impl Editor {
             return Err("attach initial provenance before editing or measuring".into());
         }
         self.origin = Some(origin);
+        Ok(())
+    }
+    /// Initial multi-frame references retained independently of geometry history.
+    pub fn sequence(&self) -> Option<&sequence_references::Sequence> {
+        self.sequence.as_ref()
+    }
+    /// Attach once before edits/measurements. This performs metadata validation
+    /// only; loading/reopening never follows the external directory reference.
+    pub fn attach_sequence(
+        &mut self,
+        sequence: sequence_references::Sequence,
+    ) -> Result<(), String> {
+        sequence.validate()?;
+        if self.origin.is_some()
+            || self.recordings.is_some()
+            || self.sequence.is_some()
+            || self.live_session.is_some()
+            || !self.undo.is_empty()
+            || !self.redo.is_empty()
+            || !self.measurements.is_empty()
+            || self.has_measurement_history()
+        {
+            return Err("attach sequence provenance once before editing or measuring".into());
+        }
+        self.sequence = Some(sequence);
+        Ok(())
+    }
+    pub fn live_session(&self) -> Option<&live_references::LiveSession> {
+        self.live_session.as_ref()
+    }
+    /// Attach initial live-session metadata once, before edits/measurements; no filesystem I/O.
+    pub fn attach_live_session(
+        &mut self,
+        live: live_references::LiveSession,
+    ) -> Result<(), String> {
+        self.validate_history()?;
+        live.validate()?;
+        if self.live_session.is_some()
+            || self.sequence.is_some()
+            || self.origin.is_some()
+            || self.recordings.is_some()
+            || !self.undo.is_empty()
+            || !self.redo.is_empty()
+            || !self.measurements.is_empty()
+            || self.has_measurement_history()
+        {
+            return Err("attach live-session provenance once before editing or measuring".into());
+        }
+        self.live_session = Some(live);
         Ok(())
     }
     pub fn measurements(&self) -> &[measurement_snapshot::Snapshot] {

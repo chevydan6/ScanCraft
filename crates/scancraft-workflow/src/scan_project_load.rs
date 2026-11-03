@@ -32,11 +32,16 @@ struct Entry {
     directory: bool,
 }
 #[derive(Default)]
-struct Guard {
+pub(crate) struct Guard {
     entries: Vec<Entry>,
 }
 impl Guard {
-    fn open(&mut self, path: &Path, directory: bool, max: u64) -> Result<&mut File, Error> {
+    pub(crate) fn open(
+        &mut self,
+        path: &Path,
+        directory: bool,
+        max: u64,
+    ) -> Result<&mut File, Error> {
         let before = fs::symlink_metadata(path)?;
         if (directory && !before.is_dir())
             || (!directory && (!before.is_file() || before.len() > max))
@@ -61,7 +66,7 @@ impl Guard {
         });
         Ok(&mut self.entries.last_mut().unwrap().file)
     }
-    fn read(
+    pub(crate) fn read(
         &mut self,
         path: &Path,
         max: u64,
@@ -90,7 +95,7 @@ impl Guard {
         }
         Ok((bytes, total, hash.finalize()))
     }
-    fn check(&self) -> Result<(), Error> {
+    pub(crate) fn check(&self) -> Result<(), Error> {
         for e in &self.entries {
             let current = fs::symlink_metadata(&e.path)?;
             if (e.directory && !current.is_dir())

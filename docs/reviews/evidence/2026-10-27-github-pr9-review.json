@@ -1,0 +1,45 @@
+{
+  "recorded_utc": "2026-10-26T19:45:58.301175+00:00",
+  "pr": 9,
+  "initial_app_covered_commit": {
+    "sourceCommitId": "a68666f14516730a60bf1e9c85dae4bd932bee9a",
+    "coveredCommitId": "a68666f14516730a60bf1e9c85dae4bd932bee9a",
+    "kind": "reviewed"
+  },
+  "formal_review_state": "COMMENTED",
+  "formal_review_id": 5657772372,
+  "initial_actionable_comments": [
+    {
+      "id": 4381521555,
+      "severity": "minor",
+      "issue": "Empty verification folder can be submitted",
+      "decision": "Accepted and corrected in dff5748"
+    },
+    {
+      "id": 4381521578,
+      "severity": "minor",
+      "issue": "Missing frame parent error lacks path",
+      "decision": "Accepted and corrected in dff5748"
+    }
+  ],
+  "corrected_commit": "dff5748834049f456eef6128129b4affe2c9078b",
+  "scoped_independent_confirmation_url": "https://github.com/chevydan6/ScanCraft/pull/9#issuecomment-6425555338",
+  "confirmation": "CodeRabbit independently inspected correction commit/source/regression and both replies; both findings addressed; did not rerun tests/full review",
+  "confirmation_snapshot_sha256": "00464abe05c07c0bfe29a6f64e1e249d446036d92e328f8d7e974641605cbc9a",
+  "thread_resolution_limitation_url": "https://github.com/chevydan6/ScanCraft/pull/9#issuecomment-6425624258",
+  "limitation": "CodeRabbit reports viewerCanResolve:false for both threads through its connection; threads unchanged and unresolved. A permitted reviewer must close them. Development did not self-resolve or change permissions/protection.",
+  "limitation_snapshot_sha256": "7ea82b88eb7cac9a3b4436f6d85f228cd2dccc54e1dd92c48ce969fe6b2c9928",
+  "premerge_checks": {
+    "passed": 4,
+    "warnings": 1,
+    "docstring_coverage_percent": 28.57,
+    "threshold_percent": 80,
+    "functions": 28,
+    "analyzed_files": 9,
+    "unsupported_skipped": 7
+  },
+  "advisory_disposition": "Blanket percentage alone disputed as functional blocker; module/type/API contracts documented, concrete missing contracts remain actionable; no threshold weakened",
+  "ci": "Initial a68666f both tests passed; correction dff5748 one passed and one still in Linux dependency installation at observation. No failed source check inferred.",
+  "data_handling": "Only sanitized metadata/public comment URLs retained; scoped service-access links omitted",
+  "limits": "COMMENTED/scoped confirmation are not APPROVED, owner merge consent, full-head fresh review or physical qualification; no paid consent/flag or repeated full-review command"
+}

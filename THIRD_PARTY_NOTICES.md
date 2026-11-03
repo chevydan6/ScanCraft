@@ -1,5 +1,11 @@
 # Dependency notices
 
+The native device-version query independently implements protocol facts/layout
+referenced from MIT-licensed OrbbecSDK_v2 revision
+85e94c4ee4032817df2e33228dbd7f51517d3d4e. Its upstream MIT notice is retained in
+THIRD_PARTY_LICENSES/OrbbecSDK_v2-protocol-reference/LICENSE-MIT. No SDK or extension
+binary is linked or redistributed. See [protocol provenance](docs/DEVICE_VERSION.md).
+
 Source-publication inventory: Cargo.lock pins the dependency graph. The complete
 338-package external metadata inventory (including inactive/platform-specific
 packages), upstream revisions where supplied by crates, authors and collected notice

@@ -3,6 +3,7 @@ use scancraft_geometry::work::WorkControl;
 use scancraft_image::{
     GrayImage,
     laser::{LineConfig, detect_rows, detect_rows_with_opening},
+    laser_continuity::{self, Config as ContinuityConfig},
 };
 use scancraft_recording::{Reader, selection::read_selected};
 use serde_json::{Value, json};
@@ -18,6 +19,7 @@ pub fn run(
     index: u64,
     config: LineConfig,
     opening_radius: Option<u32>,
+    continuity: Option<ContinuityConfig>,
 ) -> Result<Value, Error> {
     let file = OpenOptions::new()
         .read(true)
@@ -26,13 +28,20 @@ pub fn run(
     if !file.metadata()?.is_file() {
         return Err("recording must be a regular file".into());
     }
-    analyze(BufReader::new(file), index, config, opening_radius)
+    analyze(
+        BufReader::new(file),
+        index,
+        config,
+        opening_radius,
+        continuity,
+    )
 }
 fn analyze(
     input: impl Read,
     index: u64,
     config: LineConfig,
     opening_radius: Option<u32>,
+    continuity: Option<ContinuityConfig>,
 ) -> Result<Value, Error> {
     let reader = Reader::new(input)?;
     let version = reader.version;
@@ -76,6 +85,33 @@ fn analyze(
         report["parameters"]["opening_radius"] = json!(radius);
         report["signal_units"] = json!("raw minus row morphological opening, 8-bit contrast");
         report["saturation_units"] = json!("original raw 8-bit intensity");
+    }
+    if let Some(config) = continuity {
+        let traced = laser_continuity::trace_rows(
+            image.size(),
+            &result.observations,
+            config,
+            &WorkControl::default(),
+        )?;
+        report["continuity"] = json!({
+            "scope":"within-image row traces only; not temporal tracking or projector identity",
+            "parameters":{
+                "maximum_row_gap":config.maximum_row_gap,
+                "maximum_horizontal_step":config.maximum_horizontal_step,
+                "maximum_slope":config.maximum_slope,
+                "minimum_span_rows":config.minimum_span_rows,
+                "minimum_observations":config.minimum_observations,
+                "maximum_comparisons":config.maximum_comparisons
+            },
+            "comparisons":traced.comparisons,
+            "ambiguous_observations":traced.ambiguous_observations,
+            "raw_observations_preserved":true,
+            "traces":traced.traces.iter().map(|t|json!({
+                "observation_indices":t.observation_indices,
+                "span_rows":t.span_rows,
+                "continuity_supported":t.continuity_supported
+            })).collect::<Vec<_>>()
+        });
     }
     Ok(report)
 }
@@ -123,34 +159,60 @@ mod tests {
     #[test]
     fn diagnostic_retains_lineage_and_rejects_late_corruption() {
         let bytes = fixture();
-        let result = analyze(bytes.as_slice(), 0, config(), None).unwrap();
+        let result = analyze(bytes.as_slice(), 0, config(), None, None).unwrap();
         assert_eq!(result["source_total_frames"], 2);
         assert_eq!(result["accepted_observations"], 1);
         assert_eq!(result["sensor_pts"], 100);
         assert_eq!(result["physical_accuracy_qualified"], false);
         assert!((result["observations"][0]["pixel"][0].as_f64().unwrap() - 13. / 6.).abs() < 1e-14);
-        assert!(analyze(&bytes[..bytes.len() - 1], 0, config(), None).is_err());
+        assert!(analyze(&bytes[..bytes.len() - 1], 0, config(), None, None).is_err());
         let mut corrupted = bytes.clone();
         let n = corrupted.len();
         corrupted[n - 13] ^= 1;
-        assert!(analyze(corrupted.as_slice(), 0, config(), None).is_err());
-        assert!(analyze(bytes.as_slice(), 2, config(), None).is_err());
+        assert!(analyze(corrupted.as_slice(), 0, config(), None, None).is_err());
+        assert!(analyze(bytes.as_slice(), 2, config(), None, None).is_err());
     }
     #[test]
     fn local_diagnostic_labels_contrast_and_preserves_original_frame_crc() {
         let bytes = fixture();
-        let raw = analyze(bytes.as_slice(), 0, config(), None).unwrap();
+        let raw = analyze(bytes.as_slice(), 0, config(), None, None).unwrap();
         let local_config = LineConfig {
             background: 0,
             minimum_peak: 10,
             ..config()
         };
-        let local = analyze(bytes.as_slice(), 0, local_config, Some(1)).unwrap();
+        let local = analyze(bytes.as_slice(), 0, local_config, Some(1), None).unwrap();
         assert_eq!(local["payload_crc32"], raw["payload_crc32"]);
         assert_eq!(local["metadata_crc32"], raw["metadata_crc32"]);
         assert_eq!(local["parameters"]["opening_radius"], 1);
         assert_eq!(local["accepted_observations"], 1);
         assert_eq!(local["saturation_units"], "original raw 8-bit intensity");
-        assert!(analyze(&bytes[..bytes.len() - 1], 0, local_config, Some(1)).is_err());
+        assert!(analyze(&bytes[..bytes.len() - 1], 0, local_config, Some(1), None).is_err());
+    }
+    #[test]
+    fn continuity_keeps_all_raw_observations_and_recording_integrity_gates() {
+        let bytes = fixture();
+        let limits = ContinuityConfig {
+            maximum_row_gap: 1,
+            maximum_horizontal_step: 1.,
+            maximum_slope: 0.,
+            minimum_span_rows: 0,
+            minimum_observations: 2,
+            maximum_comparisons: 100,
+        };
+        let raw = analyze(bytes.as_slice(), 0, config(), None, None).unwrap();
+        let mut traced = analyze(bytes.as_slice(), 0, config(), None, Some(limits)).unwrap();
+        assert_eq!(
+            traced["continuity"]["traces"][0]["observation_indices"],
+            json!([0])
+        );
+        assert_eq!(
+            traced["continuity"]["traces"][0]["continuity_supported"],
+            false
+        );
+        assert_eq!(traced["projector_line_identity_verified"], false);
+        traced.as_object_mut().unwrap().remove("continuity");
+        assert_eq!(traced, raw);
+        assert!(analyze(&bytes[..bytes.len() - 1], 0, config(), None, Some(limits)).is_err());
     }
 }

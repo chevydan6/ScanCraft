@@ -1,0 +1,34 @@
+{
+  "recorded_utc": "2026-10-26T12:02:49.398434+00:00",
+  "pr": 8,
+  "source_comment_url": "https://github.com/chevydan6/ScanCraft/pull/8#issuecomment-6415231559",
+  "comment_updated_at": "2026-10-26T11:56:41Z",
+  "covered_commit": {
+    "sourceCommitId": "312976145d08afbc96cc9466535e0ec54028152e",
+    "coveredCommitId": "312976145d08afbc96cc9466535e0ec54028152e",
+    "kind": "reviewed"
+  },
+  "command_reply_id": 6415310710,
+  "command_result": "Review finished",
+  "actionable_comments": 0,
+  "inline_comments": 0,
+  "formal_reviews": 0,
+  "review_threads": {
+    "totalCount": 0,
+    "nodes": []
+  },
+  "walkthrough_snapshot_sha256": "57f0bcbdeaaa2100a35bfc5a3242afa48a94d974de619bf62248dcaa83457e2e",
+  "premerge_checks": {
+    "passed": 4,
+    "warnings": 1,
+    "docstring_coverage_percent": 8.33,
+    "docstring_threshold_percent": 80.0,
+    "functions": 24,
+    "analyzed_files": 6,
+    "unsupported_skipped": 6
+  },
+  "advisory_disposition": "Disputed as blanket merge-blocking metric; targeted missing-contract concerns remain actionable. Publication/ownership/cancellation/provenance contracts documented; no threshold/check/configuration weakened.",
+  "ci_at_covered_head": "Both test checks passed: 121555435820 and121555459781",
+  "limits": "Completed GitHub walkthrough, not a formal APPROVED Review, owner merge consent, hardware qualification or review of later bookkeeping heads",
+  "data_handling": "Raw service-access links omitted; local snapshots retained outside Git; no paid consent or billing change"
+}

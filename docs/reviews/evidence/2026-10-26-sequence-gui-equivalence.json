@@ -1,0 +1,9 @@
+{
+  "scope": "Synthetic GUI startup background operation and CLI equivalence, not manual unsaved dialog or hardware qualification",
+  "files_compared": 29,
+  "all_output_bytes_identical": true,
+  "input_sha256s_unchanged": true,
+  "integrated_frames": 3,
+  "points": 5,
+  "physical_accuracy_qualified": false
+}

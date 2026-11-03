@@ -2,17 +2,27 @@
 //! Camera axes: +X right, +Y down, +Z forward; extrinsic translations are millimeters.
 use serde::{Deserialize, Serialize};
 
+pub mod ellipse;
 pub mod epipolar;
+pub mod epipolar_trace;
 pub mod factory;
 pub mod factory_brown;
 pub mod factory_laser;
 pub mod factory_named;
 pub mod factory_pose;
 pub mod laser_surface;
+pub mod laser_trace;
+mod normal_blocks;
 pub mod orientation;
+pub mod planar;
+pub mod planar_pose;
+mod projection_differential;
 pub mod rectification;
+pub mod refinement;
 pub mod stereo;
+pub mod stereo_fit;
 pub mod storage;
+pub mod target;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
 #[serde(deny_unknown_fields)]

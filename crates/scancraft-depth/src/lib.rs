@@ -1,5 +1,6 @@
 //! Calibrated sparse correspondence reconstruction. Matching and exposure synchronization
 //! are upstream requirements; accepting geometry does not establish physical accuracy.
+pub mod laser_pair;
 pub mod matching;
 pub mod pipeline;
 use scancraft_calibration::{

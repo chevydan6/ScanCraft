@@ -1,0 +1,43 @@
+{
+  "scope": "synthetic numeric leaf, not a loaded SDK or active Raptor pipeline",
+  "dll_sha256": "d36c0e8ea1e2123c5bc8288d8676608da255bffd8063e2b051dcf39c3fa79231",
+  "leaf_sha256": "79f60568dba34b46690caffd20fb045e0816e08c681fbc16ce40df41ccb4700d",
+  "leaf_rva": "0x3297b0",
+  "leaf_length": 93,
+  "helper_sha256": "d1c950e0e05bf669c5555470746fe91b9b6dc36b6551a1d5d568c779da5a34f5",
+  "sandbox": "bubblewrap: unshared namespaces/network, private dev, read-only work and runtime libraries",
+  "input_first_pass_read_only": true,
+  "buffer_guard_pages": true,
+  "comparison": "output[y*width+x] == input[(y+1)*width-1-x] for every pixel",
+  "result": {
+    "synthetic_shapes": 6,
+    "pixels_checked_each_direction": 2304075,
+    "row_reversal_exact": true,
+    "involution_exact": true
+  },
+  "synthetic_output_sha256": "985732008ce07bbcc0ce40176c1207d7f890b771c3daa9631e3ef3edba19399b",
+  "native_pixel_comparison": {
+    "equal_bytes": 2304075,
+    "exact": true
+  },
+  "vendor_leaf_executed": true,
+  "dll_loaded": false,
+  "hardware_accessed": false,
+  "sdk_output_image_orientation_verified": false,
+  "camera_assignment_verified": false,
+  "calibration_binding_verified": false,
+  "raw_vendor_code_or_disassembly_distributed": false,
+  "native_defaults_changed": false,
+  "validation": {
+    "python_guard_tests": 3,
+    "python_guard_tests_status": "passed",
+    "python_syntax": "passed",
+    "actual_wrong_native_reference": "rejected",
+    "workspace_tests_passed": 544,
+    "formatting": "passed",
+    "clippy": "passed",
+    "release_build": "passed",
+    "workspace_log_sha256": "af712f92f7655f09d38b7c3840d7bb3355bc9e00b63bab0c9042228b835cbfd1",
+    "automated_review": "completed: combined d799598 vs72c5cf6, zero findings, major passed; see combined review manifest"
+  }
+}

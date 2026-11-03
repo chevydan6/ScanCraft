@@ -1,5 +1,8 @@
 # ScanCraft | ArtCraft Ecosystem Candidate
 
+Native [fixed-camera board validation](docs/FIXED_CAMERA_POSE_VALIDATION.md) is
+available for recorded observations; physical accuracy remains unqualified.
+
 ScanCraft is an independent, open-source 3D scanning application in development,
 with native Linux/Rust support for Creality Raptor acquisition and extensible
 calibration, reconstruction, point-cloud and mesh workflows.
@@ -19,6 +22,13 @@ are not yet qualified. This is not currently a professional CrealityScan replace
 - [Build and install](docs/BUILD.md)
 - [Architecture](ARCHITECTURE.md), [current status](PROJECT_STATUS.md), [roadmap](ROADMAP.md)
 - [Compatibility and migration](docs/MIGRATION.md)
+- [Recorded multi-pose calibration sessions](docs/BOARD_CALIBRATION_SESSION.md) (separate training/validation; optional camera fits)
+- [Native calibration preparation panel](docs/NATIVE_BOARD_PREPARATION.md) (recorded camera views and marker decisions)
+- [Recorded board observations](docs/RECORDED_TARGET_OBSERVATIONS.md) (native image-to-fit inputs; physical units require verification)
+- [Offline planar calibration fitting](docs/BROWN_CALIBRATION_REFINEMENT.md) (experimental; supplied observations only)
+- [Fixed-intrinsic stereo fitting](docs/STEREO_EXTRINSIC_CALIBRATION.md) (experimental; no hardware calibration)
+- [Native recorded laser processing](docs/NATIVE_RECORDED_LASER_PROCESSING.md) and [candidate viewer](docs/CANDIDATE_VIEWER.md) (unqualified diagnostic geometry)
+- [Reopen saved laser captures and select pairs](docs/SAVED_LASER_CAPTURES.md) (read-only diagnostic view)
 - [Contribution guide](CONTRIBUTING.md), [security reporting](SECURITY.md)
 - [Rebranding verification](docs/publication/VERIFICATION.md)
 - [Publication review](docs/publication/PUBLICATION_AUDIT.md)
@@ -55,8 +65,10 @@ not authentication, and retain incomplete `.partial` files on failure.
 
 Acquisition, image preview, raw recording/replay and diagnostics, plus imported
 point-cloud viewing, box trimming, voxel downsampling, undo/redo, PLY interchange
-and versioned editable projects. No scanner-generated point clouds yet. Calibration
-is deferred at the user's request. No geometric scale or accuracy claims.
+and versioned editable projects. Saved Raptor frames can produce and display laser
+matching candidates in a separate native diagnostic view. Qualified scanner-generated
+models remain unavailable. Calibration is deferred at the user's request; no
+geometric scale or accuracy claims are made.
 The historical Python prototype under `prototypes/` is not production code.
 Private hardware captures are excluded from git. Do not distribute vendor
 binaries or private scans. Read PROJECT_STATUS.md and ACCEPTANCE_RESULTS.md
@@ -136,7 +148,15 @@ conversion choice. See docs/WORKBENCH_PROJECT_OPEN.md for verified behavior.
 
 The Point clouds tab now offers **Reconstruct from stereo images**, with a
 background worker, progress/cancellation and saved diagnostics/PLY/project.
-The explicit input-file workflow can also start with `scancraft-app --reconstruct
+The explicit input-file workflow can also start with `scancraft --reconstruct
 CALIBRATION LEFT.PNG RIGHT.PNG SETTINGS NEW_RESULT_FOLDER`. See
 [GUI reconstruction](docs/GUI_RECONSTRUCTION.md). Current validation is synthetic;
 actual Raptor calibration and live scanning remain unfinished.
+
+Experimental native laser candidate capture is available through
+`scancraft-cli scan-live-laser`; see [configuration, data integrity and current
+limitations](docs/NATIVE_LASER_CAPTURE.md). It saves raw frames and unqualified
+candidate coordinates. [Native GUI capture controls](docs/LIVE_LASER_GUI.md) and
+[reopening saved captures](docs/SAVED_LASER_CAPTURES.md) provide diagnostic camera
+and single-pair views. Calibrated accuracy, continuous tracking/fusion and the
+complete editable scanning workflow remain unfinished.

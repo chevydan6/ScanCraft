@@ -1,0 +1,774 @@
+{
+  "schema_version": 1,
+  "collected_utc": "2026-11-03T07:04:28.780330+00:00",
+  "integration_head": "c5c8ed77bdcd5cfc54b49c8cd8506efc34f9aab4",
+  "original_developer_head": "1d7380a733e56a988e493279931f1df10eaf0bd6",
+  "all_29_developer_heads_are_ancestors": true,
+  "reviewer_pr_excluded": true,
+  "merge_authorized": false,
+  "scope": "Dependency/history, current-head known review coverage, visible threads and first page of PR-triggered workflow runs; not an exhaustive algorithm audit.",
+  "pull_requests": [
+    {
+      "number": 1,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/1",
+      "title": "Establish CodeRabbit independent review workflow",
+      "state": "open",
+      "draft": false,
+      "base_branch": "main",
+      "base_sha": "4125c96dd3581a94c8fc49cfbb827ba444aed814",
+      "head_branch": "dev/coderabbit-review-workflow",
+      "head_sha": "ba5ec7ca187fe9da6aa94e0dbc706e96c3ee15ae",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [
+        "no_known_completed_coderabbit_review_of_current_head"
+      ],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 40292658258,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 2,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/2",
+      "title": "Independent protection audit, reviewer charter and baseline findings (do not merge)",
+      "state": "open",
+      "draft": false,
+      "base_branch": "main",
+      "base_sha": "4125c96dd3581a94c8fc49cfbb827ba444aed814",
+      "head_branch": "dev/protection-audit",
+      "head_sha": "f385c1dcc7b64e0cbf2ca8822c0004819b924393",
+      "ancestor_of_integration": false,
+      "review_coverage_blockers": [
+        "no_known_completed_coderabbit_review_of_current_head"
+      ],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 40297649173,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 3,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/3",
+      "title": "Recover capture lifecycle and keep ordinary close responsive",
+      "state": "open",
+      "draft": false,
+      "base_branch": "dev/coderabbit-review-workflow",
+      "base_sha": "ba5ec7ca187fe9da6aa94e0dbc706e96c3ee15ae",
+      "head_branch": "dev/exact-coincident-neighbors",
+      "head_sha": "cc1322b797d44b51182fbb30f7ed8da6e38e59ff",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [
+        "no_known_completed_coderabbit_review_of_current_head"
+      ],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 40304311975,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 4,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/4",
+      "title": "Add opt-in fractional stereo refinement",
+      "state": "open",
+      "draft": false,
+      "base_branch": "dev/exact-coincident-neighbors",
+      "base_sha": "cc1322b797d44b51182fbb30f7ed8da6e38e59ff",
+      "head_branch": "dev/subpixel-stereo-refinement",
+      "head_sha": "12fc3a2b8039d2e4e14aa2e56843002168cc2855",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [
+        "no_known_completed_coderabbit_review_of_current_head"
+      ],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 40310721844,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 5,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/5",
+      "title": "Inspect stereo recording timing without inferring synchronized exposures",
+      "state": "open",
+      "draft": true,
+      "base_branch": "dev/subpixel-stereo-refinement",
+      "base_sha": "12fc3a2b8039d2e4e14aa2e56843002168cc2855",
+      "head_branch": "dev/recording-timing-diagnostics",
+      "head_sha": "b452b09eb8f7d36a979d1356c7ef2444fe566fa5",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [
+        "draft_pull_request",
+        "no_known_completed_coderabbit_review_of_current_head"
+      ],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 40311936484,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 6,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/6",
+      "title": "Cross-check stereo raw PTS values against recorded host timing",
+      "state": "open",
+      "draft": true,
+      "base_branch": "dev/recording-timing-diagnostics",
+      "base_sha": "b452b09eb8f7d36a979d1356c7ef2444fe566fa5",
+      "head_branch": "dev/recording-clock-comparison",
+      "head_sha": "0d6e96ee07cc684858d2b1fcbd4a50dac64f0d84",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [
+        "draft_pull_request",
+        "no_known_completed_coderabbit_review_of_current_head"
+      ],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 40312973800,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 7,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/7",
+      "title": "Reconstruct explicit recorded stereo sequences through native tracking and fusion",
+      "state": "open",
+      "draft": true,
+      "base_branch": "dev/recording-clock-comparison",
+      "base_sha": "0d6e96ee07cc684858d2b1fcbd4a50dac64f0d84",
+      "head_branch": "dev/recorded-stereo-sequence",
+      "head_sha": "47293ddac09742995bff3e75fa5427f1ed9a5a76",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [
+        "draft_pull_request",
+        "no_known_completed_coderabbit_review_of_current_head"
+      ],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 40315774967,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "heads_stable_during_connector_collection": true,
+      "initial_workflow_lookup_error": "ConnectTimeout: ",
+      "workflow_error": null
+    },
+    {
+      "number": 8,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/8",
+      "title": "Add native guarded background workflow for recorded stereo sequences",
+      "state": "open",
+      "draft": false,
+      "base_branch": "dev/recorded-stereo-sequence",
+      "base_sha": "47293ddac09742995bff3e75fa5427f1ed9a5a76",
+      "head_branch": "dev/recorded-sequence-gui",
+      "head_sha": "13790e34aa9455811fced42bbb3b5661506d3c35",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [
+        "no_known_completed_coderabbit_review_of_current_head"
+      ],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 40319557415,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "heads_stable_during_connector_collection": true,
+      "initial_workflow_lookup_error": "ConnectTimeout: ",
+      "workflow_error": null
+    },
+    {
+      "number": 9,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/9",
+      "title": "Retain sequence source references through project editing and reopening",
+      "state": "open",
+      "draft": false,
+      "base_branch": "dev/recorded-sequence-gui",
+      "base_sha": "13790e34aa9455811fced42bbb3b5661506d3c35",
+      "head_branch": "dev/sequence-project-references",
+      "head_sha": "8da307e102983d2b47678588bd514adc8ee30128",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [
+        "no_known_completed_coderabbit_review_of_current_head",
+        "unresolved_review_threads"
+      ],
+      "unresolved_threads": 2,
+      "workflow_runs": [
+        {
+          "id": 40389670779,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 10,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/10",
+      "title": "Preserve all stream cleanup failure diagnostics",
+      "state": "open",
+      "draft": false,
+      "base_branch": "dev/sequence-project-references",
+      "base_sha": "8da307e102983d2b47678588bd514adc8ee30128",
+      "head_branch": "dev/stream-cleanup-diagnostics",
+      "head_sha": "a6fa2d5f74afb8ebb11f199be1e67482b7fac358",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 40391103593,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 11,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/11",
+      "title": "Verify SDK byte mirror arithmetic with an isolated synthetic probe",
+      "state": "open",
+      "draft": false,
+      "base_branch": "dev/stream-cleanup-diagnostics",
+      "base_sha": "a6fa2d5f74afb8ebb11f199be1e67482b7fac358",
+      "head_branch": "dev/sdk-byte-mirror-reference",
+      "head_sha": "e1c4fc686f5451c6a0ef9a82ff4eba546fb5dfee",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [
+        "no_known_completed_coderabbit_review_of_current_head"
+      ],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 40396036477,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 12,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/12",
+      "title": "Connect native stereo capture to incremental reconstruction and fusion",
+      "state": "open",
+      "draft": false,
+      "base_branch": "dev/sdk-byte-mirror-reference",
+      "base_sha": "e1c4fc686f5451c6a0ef9a82ff4eba546fb5dfee",
+      "head_branch": "dev/live-stereo-scan",
+      "head_sha": "84b89f42c977173bab580ca9d1d8eea90e81d3b2",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [
+        "no_known_completed_coderabbit_review_of_current_head",
+        "unresolved_review_threads"
+      ],
+      "unresolved_threads": 1,
+      "workflow_runs": [
+        {
+          "id": 40405245981,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 13,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/13",
+      "title": "Add native live scan GUI controls and bounded previews",
+      "state": "open",
+      "draft": false,
+      "base_branch": "dev/live-stereo-scan",
+      "base_sha": "84b89f42c977173bab580ca9d1d8eea90e81d3b2",
+      "head_branch": "dev/live-stereo-controls",
+      "head_sha": "9a071e293f64216d1d5d90564e6bde58d6e917c9",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 40413972658,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 14,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/14",
+      "title": "Retain live scan session lineage in editable projects",
+      "state": "open",
+      "draft": true,
+      "base_branch": "dev/live-stereo-controls",
+      "base_sha": "9a071e293f64216d1d5d90564e6bde58d6e917c9",
+      "head_branch": "dev/live-session-lineage",
+      "head_sha": "5871a7a5b171f3dd75e6cd3612a3504fc7c9e77a",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [
+        "draft_pull_request",
+        "no_known_completed_coderabbit_review_of_current_head"
+      ],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 40417772893,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 15,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/15",
+      "title": "Export edited live projects with complete raw session references",
+      "state": "open",
+      "draft": true,
+      "base_branch": "dev/live-session-lineage",
+      "base_sha": "5871a7a5b171f3dd75e6cd3612a3504fc7c9e77a",
+      "head_branch": "dev/live-session-export",
+      "head_sha": "80bca7080bab834d10f945f92ebc0b0365608faa",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [
+        "draft_pull_request",
+        "no_known_completed_coderabbit_review_of_current_head"
+      ],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 40417770395,
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 40417770220,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 16,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/16",
+      "title": "Observe cooperative stop between native capture waits",
+      "state": "open",
+      "draft": true,
+      "base_branch": "dev/live-session-export",
+      "base_sha": "80bca7080bab834d10f945f92ebc0b0365608faa",
+      "head_branch": "dev/cooperative-capture-stop",
+      "head_sha": "b2ca99c7d2adf37a1b66189b6aedb35397ee872e",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [
+        "draft_pull_request",
+        "no_known_completed_coderabbit_review_of_current_head"
+      ],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 40417771138,
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 40417771403,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 17,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/17",
+      "title": "Remap large stereo pairs concurrently with measured sequential fallbacks",
+      "state": "open",
+      "draft": false,
+      "base_branch": "dev/cooperative-capture-stop",
+      "base_sha": "b2ca99c7d2adf37a1b66189b6aedb35397ee872e",
+      "head_branch": "dev/paired-remap-concurrency",
+      "head_sha": "31cfbe1b8cbbac317afc9f85575242d0621f6a8f",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [
+        "no_known_completed_coderabbit_review_of_current_head"
+      ],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 40420421106,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 18,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/18",
+      "title": "Add native planar camera initialization and numerical reference checks",
+      "state": "open",
+      "draft": false,
+      "base_branch": "dev/paired-remap-concurrency",
+      "base_sha": "31cfbe1b8cbbac317afc9f85575242d0621f6a8f",
+      "head_branch": "dev/planar-calibration-initializer",
+      "head_sha": "761036d5a9697477c6f05de94728f4a84698c955",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [
+        "no_known_completed_coderabbit_review_of_current_head"
+      ],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 40425268894,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 19,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/19",
+      "title": "Fit Brown5 camera calibration with native refinement and offline CLI",
+      "state": "open",
+      "draft": false,
+      "base_branch": "dev/planar-calibration-initializer",
+      "base_sha": "761036d5a9697477c6f05de94728f4a84698c955",
+      "head_branch": "dev/brown-calibration-refinement",
+      "head_sha": "26987bbf0b49d2c2f5d3a3d4a658b7fb8f9bd9d6",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [
+        "no_known_completed_coderabbit_review_of_current_head"
+      ],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 40429230248,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 20,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/20",
+      "title": "Add fixed-intrinsic stereo calibration and diagnostic CLI",
+      "state": "open",
+      "draft": false,
+      "base_branch": "dev/brown-calibration-refinement",
+      "base_sha": "26987bbf0b49d2c2f5d3a3d4a658b7fb8f9bd9d6",
+      "head_branch": "dev/stereo-extrinsic-calibration",
+      "head_sha": "9f853105d241c08dda8b2c14be9b31ee94b050e3",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [
+        "no_known_completed_coderabbit_review_of_current_head"
+      ],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 40435347206,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 21,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/21",
+      "title": "Decode Raptor SCR observations and inspect recording tag consistency",
+      "state": "open",
+      "draft": false,
+      "base_branch": "dev/stereo-extrinsic-calibration",
+      "base_sha": "9f853105d241c08dda8b2c14be9b31ee94b050e3",
+      "head_branch": "dev/raptor-scr-observations",
+      "head_sha": "5336d8fd71c9ad489927ab1a9425fed95f2f314a",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [
+        "no_known_completed_coderabbit_review_of_current_head"
+      ],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 40447245400,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 22,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/22",
+      "title": "Isolate scanner preview and live scanning in supervised Rust helpers",
+      "state": "open",
+      "draft": false,
+      "base_branch": "dev/raptor-scr-observations",
+      "base_sha": "5336d8fd71c9ad489927ab1a9425fed95f2f314a",
+      "head_branch": "dev/capture-session-isolation",
+      "head_sha": "224621b491a6a1811d184ac30f619e09d2713754",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 40458994741,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 23,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/23",
+      "title": "Move scanner discovery off the GUI thread with retained child ownership",
+      "state": "open",
+      "draft": false,
+      "base_branch": "dev/capture-session-isolation",
+      "base_sha": "224621b491a6a1811d184ac30f619e09d2713754",
+      "head_branch": "dev/discovery-process-isolation",
+      "head_sha": "a5deec7249d944c4f9f9fa70d0c019c5821fa37f",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 40461769150,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 24,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/24",
+      "title": "Add offline target-corner measurements and read-only review coverage diagnostics",
+      "state": "open",
+      "draft": false,
+      "base_branch": "dev/discovery-process-isolation",
+      "base_sha": "a5deec7249d944c4f9f9fa70d0c019c5821fa37f",
+      "head_branch": "dev/review-readiness",
+      "head_sha": "53f374a220127cb8fc326f839f74313fd54a4601",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [
+        "no_known_completed_coderabbit_review_of_current_head"
+      ],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 40494567665,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 25,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/25",
+      "title": "Document the frozen ScanCraft architecture provenance and qualification audit",
+      "state": "open",
+      "draft": false,
+      "base_branch": "dev/review-readiness",
+      "base_sha": "53f374a220127cb8fc326f839f74313fd54a4601",
+      "head_branch": "dev/architecture-audit",
+      "head_sha": "008f9b76334c871f6b769c5ae24f22a6ab9e04a3",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [
+        "no_known_completed_coderabbit_review_of_current_head"
+      ],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 41428595537,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "heads_stable_during_connector_collection": true,
+      "initial_workflow_lookup_error": "ReadTimeout: ",
+      "workflow_error": null
+    },
+    {
+      "number": 26,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/26",
+      "title": "Add native component observations for recorded scanner images",
+      "state": "open",
+      "draft": false,
+      "base_branch": "dev/architecture-audit",
+      "base_sha": "008f9b76334c871f6b769c5ae24f22a6ab9e04a3",
+      "head_branch": "dev/marker-observations",
+      "head_sha": "352d6629cca91f5f999cbe41f53497764faad864",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 41434551576,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 27,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/27",
+      "title": "Associate planar targets using four-anchor image hypotheses",
+      "state": "open",
+      "draft": false,
+      "base_branch": "dev/marker-observations",
+      "base_sha": "352d6629cca91f5f999cbe41f53497764faad864",
+      "head_branch": "dev/target-association",
+      "head_sha": "fe5470ee431b1a0d0490af714f98431f7508b571",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [
+        "no_known_completed_coderabbit_review_of_current_head",
+        "unresolved_review_threads"
+      ],
+      "unresolved_threads": 1,
+      "workflow_runs": [
+        {
+          "id": 41445949614,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 28,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/28",
+      "title": "Report component shape quality while retaining raw observations",
+      "state": "open",
+      "draft": false,
+      "base_branch": "dev/target-association",
+      "base_sha": "b7124d917784afcf4f70eb06bac0ff96e6c565fd",
+      "head_branch": "dev/component-shape-quality",
+      "head_sha": "9181d0fd48570416d0a9b69987c27349bd6fe19b",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [
+        "unresolved_review_threads"
+      ],
+      "unresolved_threads": 1,
+      "workflow_runs": [
+        {
+          "id": 41446923082,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 29,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/29",
+      "title": "Document sustained Raptor capture evidence and remaining reliability failures",
+      "state": "open",
+      "draft": false,
+      "base_branch": "dev/component-shape-quality",
+      "base_sha": "9e72156970e75df96be9f57f0bff791edd8a5222",
+      "head_branch": "dev/capture-validation",
+      "head_sha": "0d6eb4119e79e2220b3bd88227d41db4c5edb975",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [
+        "no_known_completed_coderabbit_review_of_current_head"
+      ],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 41445940125,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    },
+    {
+      "number": 30,
+      "url": "https://github.com/chevydan6/ScanCraft/pull/30",
+      "title": "Add bounded stripe continuity diagnostics without discarding raw detections",
+      "state": "open",
+      "draft": false,
+      "base_branch": "dev/capture-validation",
+      "base_sha": "0d6eb4119e79e2220b3bd88227d41db4c5edb975",
+      "head_branch": "dev/stripe-continuity",
+      "head_sha": "b8c772078a7e9478301d39d2f4ee5988f40547e5",
+      "ancestor_of_integration": true,
+      "review_coverage_blockers": [
+        "no_known_completed_coderabbit_review_of_current_head"
+      ],
+      "unresolved_threads": 0,
+      "workflow_runs": [
+        {
+          "id": 41449538212,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "workflow_error": null,
+      "heads_stable_during_connector_collection": true
+    }
+  ]
+}

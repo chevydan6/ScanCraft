@@ -63,6 +63,7 @@ fn main() {
         min_patch_stddev: 5.,
         min_correlation: 0.9,
         min_uniqueness_margin: 0.05,
+        subpixel: None,
     };
     let matched =
         match_rectified(&rig, &left, &right, &seeds, config, &WorkControl::default()).unwrap();

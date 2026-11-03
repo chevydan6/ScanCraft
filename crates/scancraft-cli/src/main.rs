@@ -1,9 +1,12 @@
+mod component_diagnostics;
 mod extract_frame;
 mod factory_dump;
 mod image_export;
 mod laser_diagnostics;
+mod live_scan;
 mod output;
 mod reconstruct_stereo;
+mod recording_scr;
 mod stereo_probe;
 mod termination;
 use scancraft_core::{StreamProfile, uvc_pts};
@@ -32,6 +35,229 @@ fn stereo_fps(args: &[String]) -> Result<u32, Box<dyn std::error::Error>> {
 fn run() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<_> = env::args().collect();
     match args.get(1).map(String::as_str) {
+        Some("refine-target-corners") => {
+            if args.len() != 5 {
+                return Err(
+                    "refine-target-corners requires IMAGE.PNG SEEDS_JSON NEW_OUTPUT_DIRECTORY"
+                        .into(),
+                );
+            }
+            let _signals = termination::Guard::install()?;
+            let report = scancraft_workflow::target_corners::run(
+                std::path::Path::new(&args[2]),
+                std::path::Path::new(&args[3]),
+                std::path::Path::new(&args[4]),
+                &scancraft_geometry::work::WorkControl::default(),
+                &|| termination::check().is_err(),
+            )
+            .map_err(|e| e.to_string())?;
+            println!("{}", serde_json::to_string_pretty(&report)?);
+        }
+        Some("validate-planar-pose") => {
+            if args.len() != 4 {
+                return Err(
+                    "validate-planar-pose requires OBSERVATIONS_JSON NEW_OUTPUT_DIRECTORY".into(),
+                );
+            }
+            let _signals = termination::Guard::install()?;
+            let report = scancraft_workflow::planar_pose::run(
+                std::path::Path::new(&args[2]),
+                std::path::Path::new(&args[3]),
+                &scancraft_geometry::work::WorkControl::default(),
+                &|| termination::check().is_err(),
+            )
+            .map_err(|e| e.to_string())?;
+            println!("{}", serde_json::to_string_pretty(&report)?);
+        }
+        Some("fit-calibration-candidate") => {
+            if args.len() != 4 {
+                return Err(
+                    "fit-calibration-candidate requires REQUEST_JSON NEW_OUTPUT_DIRECTORY".into(),
+                );
+            }
+            let _signals = termination::Guard::install()?;
+            let report = scancraft_workflow::calibration_candidate::run(
+                std::path::Path::new(&args[2]),
+                std::path::Path::new(&args[3]),
+                &scancraft_geometry::work::WorkControl::default(),
+                &|| termination::check().is_err(),
+            )
+            .map_err(|e| e.to_string())?;
+            println!("{}", serde_json::to_string_pretty(&report)?);
+        }
+        Some("calibrate-stereo-extrinsics") => {
+            if args.len() != 4 {
+                return Err(
+                    "calibrate-stereo-extrinsics requires OBSERVATIONS_JSON NEW_OUTPUT_DIRECTORY"
+                        .into(),
+                );
+            }
+            let _signals = termination::Guard::install()?;
+            let report = scancraft_workflow::stereo_calibration::run(
+                std::path::Path::new(&args[2]),
+                std::path::Path::new(&args[3]),
+                &scancraft_geometry::work::WorkControl::default(),
+                &|| termination::check().is_err(),
+            )
+            .map_err(|e| e.to_string())?;
+            println!("{}", serde_json::to_string_pretty(&report)?);
+        }
+        Some("prepare-board-session") => {
+            if args.len() != 4 {
+                return Err(
+                    "prepare-board-session requires SESSION_JSON NEW_OUTPUT_DIRECTORY".into(),
+                );
+            }
+            let _signals = termination::Guard::install()?;
+            let report = scancraft_workflow::board_session::run(
+                std::path::Path::new(&args[2]),
+                std::path::Path::new(&args[3]),
+                &scancraft_geometry::work::WorkControl::default(),
+                &|| termination::check().is_err(),
+            )
+            .map_err(|e| e.to_string())?;
+            println!("{}", serde_json::to_string_pretty(&report)?);
+        }
+        Some("observe-calibration-pair") => {
+            if args.len() != 4 {
+                return Err(
+                    "observe-calibration-pair requires REQUEST_JSON NEW_OUTPUT_DIRECTORY".into(),
+                );
+            }
+            let _termination = termination::Guard::install()?;
+            let report = scancraft_workflow::calibration_observations::run(
+                std::path::Path::new(&args[2]),
+                std::path::Path::new(&args[3]),
+                &scancraft_geometry::work::WorkControl::default(),
+                &|| termination::check().is_err(),
+            )
+            .map_err(|e| e.to_string())?;
+            println!("{}", serde_json::to_string_pretty(&report)?);
+        }
+        Some("calibrate-planar") => {
+            if args.len() != 4 {
+                return Err(
+                    "calibrate-planar requires OBSERVATIONS_JSON NEW_OUTPUT_DIRECTORY".into(),
+                );
+            }
+            let _signals = termination::Guard::install()?;
+            let report = scancraft_workflow::planar_calibration::run(
+                std::path::Path::new(&args[2]),
+                std::path::Path::new(&args[3]),
+                &scancraft_geometry::work::WorkControl::default(),
+                &|| termination::check().is_err(),
+            )
+            .map_err(|e| e.to_string())?;
+            println!("{}", serde_json::to_string_pretty(&report)?);
+        }
+        Some("scan-live-laser") => {
+            if args.len() != 5 {
+                return Err(
+                    "scan-live-laser requires GEOMETRY_JSON STREAM_REQUEST_JSON NEW_DIRECTORY"
+                        .into(),
+                );
+            }
+            let report = live_scan::run_laser(
+                std::path::Path::new(&args[2]),
+                std::path::Path::new(&args[3]),
+                std::path::Path::new(&args[4]),
+            )?;
+            println!("{}", serde_json::to_string_pretty(&report)?);
+        }
+        Some("scan-live-stereo") => {
+            if args.len() != 6 {
+                return Err("scan-live-stereo requires CALIBRATION RECONSTRUCTION_SETTINGS SCAN_SETTINGS NEW_DIRECTORY".into());
+            }
+            let report = live_scan::run(
+                std::path::Path::new(&args[2]),
+                std::path::Path::new(&args[3]),
+                std::path::Path::new(&args[4]),
+                std::path::Path::new(&args[5]),
+            )?;
+            println!("{}", serde_json::to_string_pretty(&report)?);
+        }
+        Some("reconstruct-recorded-sequence") => {
+            if args.len() != 8 {
+                return Err("reconstruct-recorded-sequence requires CALIBRATION LEFT_RECORDING RIGHT_RECORDING RECONSTRUCTION_SETTINGS SEQUENCE_SETTINGS NEW_DIRECTORY".into());
+            }
+            let inputs = scancraft_workflow::recording_reconstruction::Inputs {
+                calibration: args[2].clone().into(),
+                left: args[3].clone().into(),
+                right: args[4].clone().into(),
+                settings: args[5].clone().into(),
+                left_index: 0,
+                right_index: 0,
+            };
+            let report = scancraft_workflow::recorded_sequence::run(
+                &inputs,
+                std::path::Path::new(&args[6]),
+                std::path::Path::new(&args[7]),
+                &scancraft_geometry::work::WorkControl::default(),
+            )
+            .map_err(|e| e.to_string())?;
+            println!("{}", serde_json::to_string_pretty(&report)?);
+        }
+        Some("recording-scr") => {
+            if args.len() != 3 {
+                return Err("recording-scr requires RECORDING".into());
+            }
+            let mut reader = Reader::new(BufReader::new(File::open(&args[2])?))?;
+            let report = recording_scr::inspect(&mut reader)?;
+            println!("{}", serde_json::to_string_pretty(&report)?);
+        }
+        Some("recording-timing") => {
+            if args.len() != 5 {
+                return Err(
+                    "recording-timing requires LEFT_RECORDING RIGHT_RECORDING MAX_HOST_DELTA_US"
+                        .into(),
+                );
+            }
+            let report = scancraft_workflow::recording_timing::inspect(
+                std::path::Path::new(&args[2]),
+                std::path::Path::new(&args[3]),
+                args[4].parse()?,
+                &scancraft_geometry::work::WorkControl::default(),
+            )
+            .map_err(|e| e.to_string())?;
+            println!("{}", serde_json::to_string_pretty(&report)?);
+        }
+        Some("inspect-laser-capture") => {
+            if args.len() != 4 {
+                return Err(
+                    "inspect-laser-capture requires DIRECTORY PAIR_INDEX (from zero) or --all"
+                        .into(),
+                );
+            }
+            let directory = std::path::Path::new(&args[2]);
+            let report = if args[3] == "--all" {
+                live_scan::inspect_all_laser_pairs(directory)?
+            } else {
+                live_scan::inspect_laser_capture(directory, args[3].parse()?)?
+            };
+            println!("{}", serde_json::to_string_pretty(&report)?);
+        }
+        Some("inspect-laser-journal" | "inspect-live-journal") => {
+            let mode = match args.get(3).map(String::as_str) {
+                None => scancraft_workflow::laser_stream::pair_journal::Mode::Complete,
+                Some("--recovery") => {
+                    scancraft_workflow::laser_stream::pair_journal::Mode::Recovery
+                }
+                _ => return Err("expected optional --recovery".into()),
+            };
+            if !(3..=4).contains(&args.len()) {
+                return Err("journal inspection requires DIRECTORY [--recovery]".into());
+            }
+            let _termination = termination::Guard::install()?;
+            let root = std::path::Path::new(&args[2]);
+            let work = scancraft_geometry::work::WorkControl::default();
+            let visitor = |_, _: &[u8], _| termination::check().map_err(|e| e.to_string());
+            let report = if args[1] == "inspect-live-journal" {
+                scancraft_workflow::live_stereo::pair_journal::visit(root, mode, &work, visitor)?
+            } else {
+                scancraft_workflow::laser_stream::pair_journal::visit(root, mode, &work, visitor)?
+            };
+            println!("{}", serde_json::to_string_pretty(&report)?);
+        }
         Some("recover-recording") => {
             if args.len() != 5 {
                 return Err(
@@ -547,12 +773,74 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .map_err(|e| e.to_string())?;
             println!("{}", serde_json::to_string_pretty(&summary)?);
         }
-        Some("detect-stripes") => {
-            if args.len() != 9 && !(args.len() == 11 && args[9] == "--opening-radius") {
-                return Err("detect-stripes requires RECORDING INDEX BACKGROUND MIN_PEAK MAX_WIDTH SATURATION MAX_OBSERVATIONS [--opening-radius RADIUS]".into());
+        Some("detect-components" | "inspect-components") => {
+            let shape = args[1] == "inspect-components";
+            if args.len() != if shape { 9 } else { 8 } {
+                return Err("detect-components requires RECORDING INDEX THRESHOLD MIN_AREA MAX_AREA MAX_COMPONENTS; inspect-components additionally requires MAX_RMS_PX".into());
             }
-            let opening_radius = if args.len() == 11 {
-                Some(args[10].parse()?)
+            let report = component_diagnostics::run(
+                std::path::Path::new(&args[2]),
+                args[3].parse()?,
+                scancraft_image::components::Config {
+                    threshold: args[4].parse()?,
+                    minimum_area: args[5].parse()?,
+                    maximum_area: args[6].parse()?,
+                    maximum_components: args[7].parse()?,
+                },
+                if shape { Some(args[8].parse()?) } else { None },
+            )?;
+            println!("{}", serde_json::to_string_pretty(&report)?);
+        }
+        Some("match-recorded-laser-traces") => {
+            if args.len() != 9 {
+                return Err("match-recorded-laser-traces requires GEOMETRY_JSON FIRST_RECORDING FIRST_INDEX SECOND_RECORDING SECOND_INDEX REQUEST_JSON NEW_DIRECTORY".into());
+            }
+            let inputs = scancraft_workflow::recorded_traces::Inputs {
+                geometry: args[2].clone().into(),
+                first_recording: args[3].clone().into(),
+                first_index: args[4].parse()?,
+                second_recording: args[5].clone().into(),
+                second_index: args[6].parse()?,
+                request: args[7].clone().into(),
+            };
+            let report = scancraft_workflow::recorded_traces::run_automatic(
+                &inputs,
+                std::path::Path::new(&args[8]),
+                &scancraft_geometry::work::WorkControl::default(),
+            )
+            .map_err(|e| e.to_string())?;
+            println!("{}", serde_json::to_string_pretty(&report)?);
+        }
+        Some("associate-recorded-traces") => {
+            if args.len() != 9 {
+                return Err("associate-recorded-traces requires GEOMETRY_JSON FIRST_RECORDING FIRST_INDEX SECOND_RECORDING SECOND_INDEX REQUEST_JSON NEW_DIRECTORY".into());
+            }
+            let inputs = scancraft_workflow::recorded_traces::Inputs {
+                geometry: args[2].clone().into(),
+                first_recording: args[3].clone().into(),
+                first_index: args[4].parse()?,
+                second_recording: args[5].clone().into(),
+                second_index: args[6].parse()?,
+                request: args[7].clone().into(),
+            };
+            let report = scancraft_workflow::recorded_traces::run(
+                &inputs,
+                std::path::Path::new(&args[8]),
+                &scancraft_geometry::work::WorkControl::default(),
+            )
+            .map_err(|e| e.to_string())?;
+            println!("{}", serde_json::to_string_pretty(&report)?);
+        }
+        Some("detect-stripes" | "trace-stripes") => {
+            let tracing = args[1] == "trace-stripes";
+            let positional = if tracing { 14 } else { 9 };
+            if args.len() != positional
+                && !(args.len() == positional + 2 && args[positional] == "--opening-radius")
+            {
+                return Err("detect-stripes requires RECORDING INDEX BACKGROUND MIN_PEAK MAX_WIDTH SATURATION MAX_OBSERVATIONS; trace-stripes additionally requires MAX_ROW_GAP MAX_X_STEP MAX_SLOPE MIN_SPAN MIN_POINTS; both accept [--opening-radius RADIUS]".into());
+            }
+            let opening_radius = if args.len() == positional + 2 {
+                Some(args[positional + 1].parse()?)
             } else {
                 None
             };
@@ -568,6 +856,18 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 args[3].parse()?,
                 config,
                 opening_radius,
+                if tracing {
+                    Some(scancraft_image::laser_continuity::Config {
+                        maximum_row_gap: args[9].parse()?,
+                        maximum_horizontal_step: args[10].parse()?,
+                        maximum_slope: args[11].parse()?,
+                        minimum_span_rows: args[12].parse()?,
+                        minimum_observations: args[13].parse()?,
+                        maximum_comparisons: 20_000_000,
+                    })
+                } else {
+                    None
+                },
             )?;
             println!("{}", serde_json::to_string_pretty(&report)?);
         }
@@ -798,6 +1098,20 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 )?
             );
         }
+        Some("device-version") => {
+            let lock = SessionLock::acquire()?;
+            let version = scancraft_device::control::device_version::read(&lock)?;
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&serde_json::json!({
+                    "schema_version": 1, "read_only": true,
+                    "opcode": 3, "property_id": 1000, "version": version,
+                    "source_device_binding_verified": false,
+                    "calibration_binding_verified": false,
+                    "interpretation": "Device-reported version strings; not authenticated identity, unique serial verification or a firmware update"
+                }))?
+            );
+        }
         Some("protocol-version") => {
             let _lock = SessionLock::acquire()?;
             let payload = scancraft_device::control::protocol_version()?;
@@ -1012,7 +1326,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         }
         _ => {
             return Err(
-                "Usage: scancraft-cli filter-statistical PROJECT_OR_PLY K SIGMA_MULTIPLIER NEW_DIRECTORY | verify-project-recordings PROJECT RECORDINGS_DIRECTORY | verify-scan-project SCAN_FOLDER | export-scan-project PROJECT SOURCE_BUNDLE LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | archive-recordings LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | export-project-bundle PROJECT SOURCE_BUNDLE NEW_OUTPUT_DIRECTORY | verify-source-bundle PROJECT BUNDLE_DIRECTORY | reconstruct-recordings CALIBRATION LEFT_RECORDING LEFT_INDEX RIGHT_RECORDING RIGHT_INDEX SETTINGS NEW_OUTPUT_DIRECTORY | recover-recording INPUT MAX_FRAMES NEW_OUTPUT_DIRECTORY | stream-state INTERFACE | import-mesh FILE obj|stl mm|in|m separate|weld-exact NEW_OUTPUT_DIRECTORY | smooth-mesh MESH_OR_PROJECT ITERATIONS RELAXATION MAX_DISPLACEMENT_MM MAX_NORMAL_DEGREES CREASE_DEGREES NEW_OUTPUT_DIRECTORY | stereo-line-capture FRAME_COUNT NEW_OUTPUT_DIRECTORY [--fps FPS] | orient-mesh MESH_OR_PROJECT REVERSE_COMPONENT_IDS_OR_none NEW_RESULT_FOLDER | fill-mesh-boundary MESH_OR_PROJECT BOUNDARY_ID MAX_PLANARITY_MM NEW_OUTPUT_DIRECTORY | split-mesh-vertex-fans MESH_OR_PROJECT COMMA_SEPARATED_VERTEX_IDS NEW_RESULT_FOLDER | simplify-mesh MESH_OR_PROJECT TARGET_TRIANGLES MAX_DISPLACEMENT_MM MAX_NORMAL_DEGREES CREASE_DEGREES MAX_COLLAPSES NEW_OUTPUT_DIRECTORY | mesh-topology MESH_OR_PROJECT | mesh-boundaries MESH_OR_PROJECT | save-mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM NEW_OUTPUT_DIRECTORY | mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM | mesh-components MESH_OR_PROJECT | select-mesh-components MESH_OR_PROJECT [keep|remove] IDS NEW_OUTPUT_DIRECTORY | cleanup-mesh MESH_OR_PROJECT [duplicates|unused|both] NEW_OUTPUT_DIRECTORY | mesh-history PROJECT [undo|redo] NEW_OUTPUT_DIRECTORY | trim-mesh MESH_JSON NX NY NZ OFFSET NEW_OUTPUT_DIRECTORY | mesh-grid ORGANIZED_GRID_JSON NEW_OUTPUT_DIRECTORY | fuse-sequence SETTINGS_JSON NEW_OUTPUT_DIRECTORY | detect-stripes RECORDING INDEX BACKGROUND MIN_PEAK MAX_WIDTH SATURATION MAX_OBSERVATIONS [--opening-radius RADIUS] | discover | controls | mirror-status | illumination-status | stereo-flood-capture FRAME_COUNT NEW_OUTPUT_DIRECTORY [--fps FPS] | stereo-gain-capture FRAME_COUNT RAW_GAIN NEW_OUTPUT_DIRECTORY [--fps FPS] | factory-laser-fields FACTORY_REGION_FILE | factory-lenses FACTORY_REGION_FILE | factory-verify FACTORY_REGION_FILE | factory-inspect FACTORY_REGION_FILE | factory-header REGION | factory-read REGION NEW_OUTPUT_DIRECTORY | protocol-version | validate INTERFACE FRAME_COUNT [--fps FPS] | capture INTERFACE OUTPUT FRAME_COUNT [--fps FPS] | replay FILE [--decode] | export-image FILE OUTPUT.PNG | stereo-probe FRAME_COUNT [--fps FPS] | extract-frame RECORDING INDEX NEW_OUTPUT_DIRECTORY | stereo-capture FRAME_COUNT NEW_OUTPUT_DIRECTORY [--fps FPS] | reconstruct-stereo CALIBRATION LEFT.PNG RIGHT.PNG REQUEST.JSON OUTPUT_DIRECTORY"
+                "Usage: scancraft-cli inspect-laser-capture DIRECTORY PAIR_INDEX|--all | inspect-laser-journal DIRECTORY [--recovery] | inspect-live-journal DIRECTORY [--recovery] | scan-live-laser GEOMETRY_JSON STREAM_REQUEST_JSON NEW_DIRECTORY | match-recorded-laser-traces GEOMETRY_JSON FIRST_RECORDING FIRST_INDEX SECOND_RECORDING SECOND_INDEX REQUEST_JSON NEW_DIRECTORY | associate-recorded-traces GEOMETRY_JSON FIRST_RECORDING FIRST_INDEX SECOND_RECORDING SECOND_INDEX REQUEST_JSON NEW_DIRECTORY | trace-stripes RECORDING INDEX BACKGROUND MIN_PEAK MAX_WIDTH SATURATION MAX_OBSERVATIONS MAX_ROW_GAP MAX_X_STEP MAX_SLOPE MIN_SPAN MIN_POINTS [--opening-radius RADIUS] | inspect-components RECORDING INDEX THRESHOLD MIN_AREA MAX_AREA MAX_COMPONENTS MAX_RMS_PX | detect-components RECORDING INDEX THRESHOLD MIN_AREA MAX_AREA MAX_COMPONENTS | refine-target-corners IMAGE.PNG SEEDS_JSON NEW_OUTPUT_DIRECTORY | recording-scr RECORDING | validate-planar-pose OBSERVATIONS_JSON NEW_OUTPUT_DIRECTORY | fit-calibration-candidate REQUEST_JSON NEW_OUTPUT_DIRECTORY | calibrate-stereo-extrinsics OBSERVATIONS_JSON NEW_OUTPUT_DIRECTORY | prepare-board-session SESSION_JSON NEW_OUTPUT_DIRECTORY | observe-calibration-pair REQUEST_JSON NEW_OUTPUT_DIRECTORY | calibrate-planar OBSERVATIONS_JSON NEW_OUTPUT_DIRECTORY | scan-live-stereo CALIBRATION RECONSTRUCTION_SETTINGS SCAN_SETTINGS NEW_DIRECTORY | reconstruct-recorded-sequence CALIBRATION LEFT_RECORDING RIGHT_RECORDING RECONSTRUCTION_SETTINGS SEQUENCE_SETTINGS NEW_DIRECTORY | recording-timing LEFT_RECORDING RIGHT_RECORDING MAX_HOST_DELTA_US | filter-statistical PROJECT_OR_PLY K SIGMA_MULTIPLIER NEW_DIRECTORY | verify-project-recordings PROJECT RECORDINGS_DIRECTORY | verify-scan-project SCAN_FOLDER | export-scan-project PROJECT SOURCE_BUNDLE LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | archive-recordings LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | export-project-bundle PROJECT SOURCE_BUNDLE NEW_OUTPUT_DIRECTORY | verify-source-bundle PROJECT BUNDLE_DIRECTORY | reconstruct-recordings CALIBRATION LEFT_RECORDING LEFT_INDEX RIGHT_RECORDING RIGHT_INDEX SETTINGS NEW_OUTPUT_DIRECTORY | recover-recording INPUT MAX_FRAMES NEW_OUTPUT_DIRECTORY | stream-state INTERFACE | import-mesh FILE obj|stl mm|in|m separate|weld-exact NEW_OUTPUT_DIRECTORY | smooth-mesh MESH_OR_PROJECT ITERATIONS RELAXATION MAX_DISPLACEMENT_MM MAX_NORMAL_DEGREES CREASE_DEGREES NEW_OUTPUT_DIRECTORY | stereo-line-capture FRAME_COUNT NEW_OUTPUT_DIRECTORY [--fps FPS] | orient-mesh MESH_OR_PROJECT REVERSE_COMPONENT_IDS_OR_none NEW_RESULT_FOLDER | fill-mesh-boundary MESH_OR_PROJECT BOUNDARY_ID MAX_PLANARITY_MM NEW_OUTPUT_DIRECTORY | split-mesh-vertex-fans MESH_OR_PROJECT COMMA_SEPARATED_VERTEX_IDS NEW_RESULT_FOLDER | simplify-mesh MESH_OR_PROJECT TARGET_TRIANGLES MAX_DISPLACEMENT_MM MAX_NORMAL_DEGREES CREASE_DEGREES MAX_COLLAPSES NEW_OUTPUT_DIRECTORY | mesh-topology MESH_OR_PROJECT | mesh-boundaries MESH_OR_PROJECT | save-mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM NEW_OUTPUT_DIRECTORY | mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM | mesh-components MESH_OR_PROJECT | select-mesh-components MESH_OR_PROJECT [keep|remove] IDS NEW_OUTPUT_DIRECTORY | cleanup-mesh MESH_OR_PROJECT [duplicates|unused|both] NEW_OUTPUT_DIRECTORY | mesh-history PROJECT [undo|redo] NEW_OUTPUT_DIRECTORY | trim-mesh MESH_JSON NX NY NZ OFFSET NEW_OUTPUT_DIRECTORY | mesh-grid ORGANIZED_GRID_JSON NEW_OUTPUT_DIRECTORY | fuse-sequence SETTINGS_JSON NEW_OUTPUT_DIRECTORY | detect-stripes RECORDING INDEX BACKGROUND MIN_PEAK MAX_WIDTH SATURATION MAX_OBSERVATIONS [--opening-radius RADIUS] | discover | controls | mirror-status | illumination-status | stereo-flood-capture FRAME_COUNT NEW_OUTPUT_DIRECTORY [--fps FPS] | stereo-gain-capture FRAME_COUNT RAW_GAIN NEW_OUTPUT_DIRECTORY [--fps FPS] | factory-laser-fields FACTORY_REGION_FILE | factory-lenses FACTORY_REGION_FILE | factory-verify FACTORY_REGION_FILE | factory-inspect FACTORY_REGION_FILE | factory-header REGION | factory-read REGION NEW_OUTPUT_DIRECTORY | device-version | protocol-version | validate INTERFACE FRAME_COUNT [--fps FPS] | capture INTERFACE OUTPUT FRAME_COUNT [--fps FPS] | replay FILE [--decode] | export-image FILE OUTPUT.PNG | stereo-probe FRAME_COUNT [--fps FPS] | extract-frame RECORDING INDEX NEW_OUTPUT_DIRECTORY | stereo-capture FRAME_COUNT NEW_OUTPUT_DIRECTORY [--fps FPS] | reconstruct-stereo CALIBRATION LEFT.PNG RIGHT.PNG REQUEST.JSON OUTPUT_DIRECTORY"
                     .into(),
             );
         }

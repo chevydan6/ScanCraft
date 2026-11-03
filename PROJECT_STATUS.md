@@ -1,6 +1,441 @@
 # Project status
 
+Latest host-service investigation: a complete 4,014,236-event trace distinguishes
+three paired truncations overlapping 3.869–5.318 ms without selected events across
+all CPUs from a fourth with camera-work scheduling delays and 923/895 µs of zero
+software-pending requests. All 1,200 saved frames replay; acquisition still fails
+its rejection target. No production, driver or firmware change. [Evidence and limits](docs/RAPTOR_HOST_SERVICE_TRACE.md).
+The scheduling mechanism is a concrete investigation target, not a qualified fix
+or proof of the cause of the longer gaps. Physical object reconstruction remains outstanding.
+
+Earlier queue-depth comparison: three fully observed 600-frame/camera trials at
+depths 5 → 32 → 5 saved and replayed 3,600 genuine frames. Depth 32 still produced
+a paired short frame during a roughly 6.1 ms completion gap; it is not a complete
+fix. All three trials fail the total rejection target. Complete USB/header traces
+match all 3,610 accepted/ongoing-rejected frame associations, and 63 state-group
+checks pass. The baseline module, formats and service were restored after each
+trial; no persistent driver or firmware change. [Evidence and limits](docs/RAPTOR_QUEUE_HEADER_COMPARISON.md).
+Physical scale and an independently measured object scan remain outstanding.
+
+Earlier transport evidence: an explicit64MiB USB monitor ring fixes the diagnostic
+packet-loss problem; runtime tcpdump mapping had been only8KiB. A corrected
+all-CPU trace and USB monitor both report zero loss, matching226,688bulk completions
+and all1,206accepted/rejected frames. Short frames already contain5–15fewer image
+payload blocks at the host-controller observation boundary, with successful
+statuses and normal EOF. Device/controller cause remains unresolved; acquisition
+still fails its target. [Complete header correlation](docs/RAPTOR_IRQ_COMPLETION_TRACE.md#follow-up-explicit-monitor-ring-and-complete-header-correlation).
+No application/firmware/driver changes. Board-scale measurement is pending.
+
+Latest hardware investigation: complete IRQ/USB tracing correlates six paired
+short-frame incidents with1.423–4.452ms completion gaps; one overlaps a1.678ms
+interrupt-handler interval. This is a timing lead, not an established root cause
+or fix. One rejected frame has an unexplained20,664-byte discrepancy. A follow-up
+USB monitor lost packets and is explicitly incomplete. All3,600 saved frames
+across three trials replay, checked state restores, and acquisition still fails
+the rejection target. [Methods, failures and limits](docs/RAPTOR_IRQ_COMPLETION_TRACE.md).
+Source2ce5903 passes both push/PR CI runs41675798228/41675808266.
+
+Latest validation correction: `fb7214f` fixes an archive-test completion/deadline
+ordering defect and adds pending-worker timeout diagnostics without extending its
+ten-second limit. Production export is unchanged. Local formatting, strict Clippy,
+890 tests/one existing ignored, and release build pass; all180app tests also pass
+on one local CPU with16testthreads. The earlier GitHub export-test delay has not
+been reproduced or proven fixed. See developer response DEV-ARCHIVE-WAIT.
+
+Latest hardware validation: the budgeted native recording worker saves **1,200
+frames per camera**, with every saved payload/metadata CRC matching pre-recording
+data. A deliberately insufficient left quota fails explicitly, retains a
+200-frame prefix and a complete 202-frame right recording, and restores checked
+state. All 2,802 complete original records verify. Normal-trial ongoing rejects
+are 12/11 (0.949237% combined), so reliability still fails the 0.1% target. The
+probe omits calibrated processing; this is not a complete scan. See
+[native worker evidence and limits](docs/LIVE_EXTENDED_SESSIONS.md#native-worker-validation).
+The source gate for that hardware trial passed 888 tests locally. At the same
+690643c head, PR-triggered CI41671761778/run239 passed but push-triggered
+CI41671746358/run238 failed an archive-worker test wait deadline. These are mixed
+CI results; the successful run does not supersede the failure.
+
+
+Latest capacity integration: opt-in IR schema 2 admits up to **100,000 frames per
+camera** with explicit raw/journal/bundle budgets, segmented full observations and
+ORPROJ09 project lineage. Legacy schema 1 remains supported. Full 888-test/fmt/Clippy/
+release gate passes. A retained release-library synthetic trial processes all
+100,000 pairs, verifies raw CRC links and a byte-identical project round trip; peak
+RSS is 53,200 KiB for 64 × 32 images and ten fused voxels. The actual release CLI
+inspects complete/recovery journals and the native GUI opens the resulting project.
+See [configuration, evidence and limits](docs/LIVE_EXTENDED_SESSIONS.md).
+This is capacity validation, not a 30-minute hardware run or first measured scan.
+The independent reviewer resolved SCAN-REV-021 for bounded capacity only; sustained
+hardware and physical qualification remain outstanding (assignment442).
+
+
+Latest native-app integration: **Calibration → Fit calibration** now runs the
+candidate workflow in a cancellable background job. Explicit **Use for
+reconstruction** fills offline/live calibration inputs while preserving the loaded
+model. Full 883-test/fmt/Clippy/release gate passes. SCAN-REV-028 correction
+uses a one-shot explicit open request so previously collapsed reconstruction
+controls reopen on selection; subsequent manual collapse still works. A headless
+actual-workbench regression reproduces the old failure and verifies repeated
+selection, collapse and preservation of document/input state. The independent reviewer resolved SCAN-REV-028 at 602b3fb0/3f8e2b7
+(assignment436). Publication 3f8e2b7 CI41667615686/run237 passed. Exact release GUI checks verify
+synthetic fitting, actual selection clicks and refusal of real unverified QR units;
+all candidate artifacts match the CLI output. No acquisition starts automatically.
+See [native workflow and limits](docs/CALIBRATION_CANDIDATE.md#native-application-fitting-and-selection).
+Physical scale, broader calibration coverage and the first measured object scan
+remain incomplete; no new hardware capture occurred in this milestone.
+
+Latest integration: `fit-calibration-candidate` connects existing fixed-lens stereo
+fitting to reconstruction-readable RAPCAL01 records. Exact observations and explicit
+unit/binding declarations are retained; synthetic provenance cannot become physical,
+and unknown units are rejected. Full 878-test/fmt/Clippy/release gate passes. The
+release CLI fits and reconstructs the three-point synthetic fixture; real retained
+QR inputs with unverified units correctly refuse publication. No camera operation
+or calibration activation. See [handoff and limits](docs/CALIBRATION_CANDIDATE.md).
+The first independently measured object scan remains unfinished.
+
+Latest implementation: live IR source owners now coordinate acquisition completion
+before either closes. An additive cancellation callback reaches native read
+boundaries on peer failure and GUI stop. The full gate passes 875 tests, formatting,
+strict Clippy and release builds. Controlled corrected/old/old/corrected Raptor
+trials show 0/1/1/0 right video dequeues after peer shutdown; ongoing rejection
+counts remain nonzero. Corrected 600 ms write overflow preserves 208/209-frame
+prefixes and explicitly fails. All 2,817 saved frames in ten recordings replay;
+state, formats and service restore. The independent reviewer resolved SCAN-REV-027 at 01b183aa/447d960
+(assignment427). Hard cleanup deadlines, live capacity and the first measured object
+reconstruction remain incomplete. See [source completion](docs/LIVE_SOURCE_COMPLETION.md).
+
+Earlier [bounded live recording](docs/LIVE_RECORDING_QUEUE.md) integrated the
+eight-frame writer and exposed the now-addressed shutdown ordering defect.
+
+Latest vendor-stop investigation: SDK properties39/38 acknowledge all eight fixed
+requests, yet every stop arm in an eight-test ABBA BAAB comparison retains a
+startup burst. All1,440 accepted frames/32recordings replay,568,622USB monitor
+packets have no reported drops, and state/formats/service/module restore. No
+production stop-command fix is added. See [methods and limits](docs/RAPTOR_VENDOR_STOP_TRIAL.md).
+Physical scale and a first independently measured object scan remain incomplete.
+
+[Post-reset USB trace](docs/RAPTOR_USB_RESET_TRIAL.md#complete-trace-across-one-reset-and-startup)
+confirms that acknowledged USB reconfiguration does not prevent the previously
+observed header shift: both cameras retain an 18,432-byte prefix and headers
+shifted by 6,144 bytes. All 120 accepted frames replay; 49,890 monitor packets have
+no reported drops/truncations or unmatched requests. Four accepted sample images
+match USB pixels exactly. Checked state restores. A higher-level SDK vendor stop
+command is a new lead, but Raptor GET queries return 0x2 and write support remains
+unverified. No production reset, decoder or relaxed validation was added.
+
+[Idle USB reset comparison](docs/RAPTOR_USB_RESET_TRIAL.md) rules out treating a
+connection reset as a reliable startup fix: two of four reset trials still have
+large startup bursts. Four control tests also fail. All seed/test captures are
+retained: 1,440 accepted frames in 32 recordings replay, settings and all five idle
+formats restore, and the installed driver remains unchanged. No production reset
+path was added. Next: trace post-reset negotiation/payload framing while preserving
+error accounting; measured physical reconstruction remains the primary deliverable.
+
+[Corrected sustained capture](docs/RAPTOR_SUSTAINED_METADATA_ORDER.md) now records
+18,000 accepted frames per camera over 600.275 seconds using source 907484e and
+the temporary 32-URB candidate. All 36,000 frames replay, every traced matching
+metadata return precedes video reuse, and no ongoing empty metadata occurs.
+Seven paired truncations and 96 right-camera startup rejects remain:
+**0.038874% ongoing, 0.304625% including startup**, so the all-rejection target
+still fails. The 300-frame/camera preflight also retains 91 startup rejects and
+paired truncation. Driver, parameters, service, all five idle formats and native
+stream/illumination states are restored. The full 863-test source gate is unchanged;
+independent implementation review and physical scan qualification remain open.
+See the report for tracer overhead and measured CPU/RSS. Next: startup/transport
+investigation and independently measured reconstruction.
+
+[Metadata requeue ordering](docs/METADATA_REQUEUE_ORDER.md) is corrected in source
+907484e. A controlled pause between video and metadata returns reproduced empty
+timestamp metadata twice; matched corrected/old/old/corrected trials eliminated
+that failure in both corrected runs while retaining it in both old runs. Metadata
+now returns before video-slot reuse; validation and counters remain intact. All
+6,600 accepted frames across the reproduction/comparison/natural trials replayed.
+Paired truncation and startup failures remain. A held-buffer SIGINT trial restored
+settings and retained replayable 98/100-frame prefixes; it verifies frame-boundary
+cancellation, not preemption. Full 863-test formatting/Clippy/release gate passes.
+The sustained revalidation above extends this evidence; separate USB failures remain,
+while measured physical scale and the first object reconstruction remain open.
+
+[Sustained combined capture](docs/RAPTOR_SUSTAINED_QUEUED_CAPTURE.md) completed
+18,000 valid frames per camera over ten minutes using the existing queued recorder
+and temporary 32-URB candidate. All 36,000 frames replayed. Eleven ongoing rejects
+plus one startup reject give **0.033322% including startup** for this run; sequence
+gaps match ongoing rejects. Five paired truncations and one separate empty left
+metadata buffer remain defects. This single result does not establish repeatable
+reliability, 30-minute live scanning, exposure synchronization or physical accuracy.
+Whole-CLI maximum RSS was 55,824 KiB; a 485-second partial capture sample averaged
+8.726% of one core. Original driver, parameters, service, all five saved idle camera
+format/interval structures and native Raptor stream/illumination readbacks restored.
+Beginning/middle/end images show the board, still clipped at the right camera edge.
+Next: targeted metadata/truncation investigation and repeated reliability tests;
+physical scale and the independently measured first object remain prerequisites
+for dimensional qualification. Source 2e3e2d8 is unchanged; prior 858-test gate and
+exact 2bdb934 CI passed. No new independent-review approval or release is claimed.
+
+[Bounded finite recording](docs/BOUNDED_RECORDING.md) now separates camera
+servicing from recording writes using eight owned frames per camera and explicit
+failure on overflow. In controlled Raptor trials, a 200 ms write delay caused
+two additional sequence gaps with the old writer and none with the queued writer;
+six dequeues continued during each queued delayed write. A 600 ms stall fails
+explicitly, stops cameras before draining, preserves replayable prefixes and
+publishes no successful capture. SIGINT cleanup also passes. Full858-test gate,
+formatting, strict Clippy and optimized builds pass. Ordinary USB rejects remain;
+this is finite CLI recording, not a fix for every live runner or a qualified scan.
+Exact source2e3e2d8; private inputs remain outside Git. The longer combined trial
+above now extends this evidence, preserving startup and sequence-gap accounting.
+Physical scale and the first measured object remain open.
+
+[Controlled queue-depth trials](docs/RAPTOR_QUEUE_DEPTH_TRIAL.md) now provide
+actual hardware evidence for the existing experimental kernel candidate.
+Two ABBA comparisons retained and replayed 16,800 accepted buffers: depth 5
+had 37 ongoing rejects over 8,400 accepted buffers (0.438545% ongoing proxy),
+depth 32 had zero over 8,400. Startup still fails; the all-rejection proxies
+are 5.660377% and 2.109311%. One depth-32 sequence/PTS gap follows a long
+application-service pause, so zero rejects is not losslessness. The candidate
+rebuilt byte-identically and passed 79 policy checks. Original driver, parameters,
+service and saved IR/illumination readbacks are restored; no persistent install.
+That comparison's longest individual capture was about one minute; see the newer
+combined trial above. Further repeated/stress trials must keep
+startup framing and physical reconstruction requirements separate. Existing
+850-test source gate is unchanged; exact preceding head23d075c public CI passed.
+
+[Consecutive USB restart traces](docs/RAPTOR_USB_STARTUP_FRAMING.md#consecutive-restart-reproduction)
+reproduce the shifted framing twice, including after a three-second pause and
+successful stop-time clear-halt requests. A separate ongoing truncated stereo
+frame loses25 payload blocks per camera across a roughly4.5ms completion gap;
+no zero-outstanding-URB interval was observed. All180acceptedframes replayed.
+These are diagnostic findings; production source and the installed driver remain
+unchanged, and no acquisition or geometry qualification target is newly passed.
+
+[USB startup trace](docs/RAPTOR_USB_STARTUP_FRAMING.md) now identifies a concrete
+6,144-byte header-boundary shift in one failed startup. Zero reported monitor
+drops, balanced transfers and full payloads support the analysis. A finite
+boundary model explains all157 dequeued buffer lengths; two accepted images match
+USB bytes exactly. Root cause and a safe correction remain open; no driver,
+firmware or application change, and no rejection counters were relaxed.
+
+[Fresh startup investigation](docs/RAPTOR_STARTUP_INVESTIGATION.md) retained580
+real frames across nine short stereo captures; all18 recordings replayed and
+reported settings restored. Startup rejection persists even with completed
+format/rate setup and serialized stream starts, so no speculative production
+change was made. The board view is effectively unchanged; diverse poses and
+independent scale/object measurements remain missing. Publishedcf59693 CI passed.
+
+[Native fixed-camera pose validation](docs/FIXED_CAMERA_POSE_VALIDATION.md) now
+checks held-out board pixels with lenses fixed. Real left38 RMS0.13503px matches
+OpenCV. Full right36 correctly fails lens coverage; a separately documented
+33-point interior subset gives RMS0.16866px, with no domain expansion. Full850
+tests/one-existing-ignored, formatting, strict Clippy and release build pass.
+This is pixel-space pose validation, not physical scale or an object scan.
+Previous head15dd52b publicCI41618852246 completed success; new-head review/CI
+remain separate. Calibration/session GUI integration and measured object trials
+remain the immediate priorities.
+
+[Recorded multi-pose sessions](docs/BOARD_CALIBRATION_SESSION.md) now retain
+training/validation splits, check target/profile consistency and reject reused
+camera-frame fingerprints. Optional independent camera fits use training only
+and require declared millimeters. The 845-test gate passes; actual three-training/
+one-validation collection preserves all prior artifact bytes and refuses fitting
+for unverified units. Session GUI integration, physical scale and the first
+independently measured object surface remain open. Prior ba495f6 CI passed.
+
+[Native calibration preparation](docs/NATIVE_BOARD_PREPARATION.md) now runs the
+recorded-board workflow in the desktop app and displays both source images with
+aligned marker decisions. Final 842-test gate passes; the held-out board GUI
+bundle equals the preceding CLI output byte-for-byte. Error rendering and saved
+result preservation are checked. Live FPS, physical scale and the first real
+object scan remain unqualified. Prior b516f27 GitHub CI completed successfully;
+this panel needs its own published-head CI and independent review.
+
+[Recorded board observations](docs/RECORDED_TARGET_OBSERVATIONS.md) now connect
+explicit Raptor frame pairs to source-bound calibration inputs. Four saved real
+poses reproduce prior component/shape/association results exactly; all eight
+snapshots replay. The full 839-test gate passes. Unverified units remain explicit;
+no calibrated object surface, GUI calibration wizard or physical-accuracy claim.
+Next: integrate multi-pose fitting/GUI and collect diverse board poses with
+independent dimensional evidence. CodeRabbit review remains unavailable.
+
+[Native device-version query](docs/DEVICE_VERSION.md) now reports the connected
+Raptor firmware as 1.5.7. Three native reads match the retained reference; a
+subsequent 20-frame stereo capture passes replay and state restoration. The
+835-test gate passes. The official downloaded V1.4.8 package is older; no firmware
+change occurred. Calibration binding remains unverified. Public CI also passed for
+integration PR32 head c292711; the new recorded-board workflow has local gate
+evidence and needs its own published-head CI/review.
+
+First genuine scan mission: [all 30 PRs audited](docs/FIRST_SCAN_INTEGRATION_AUDIT.md).
+Local `dev/first-genuine-scan-integration` preserves all 29 developer heads; reviewer
+PR2 remains separate. No merge into main or protection change. Known current-head
+review/conversation readiness passes only PR10/13/22/23/26; other gaps remain.
+
+[Finite stereo completion](docs/FINITE_STEREO_COMPLETION.md) now waits for both
+cameras before either closes. A controlled new/old/old/new hardware comparison
+supports removal of a large peer-teardown burst; continuing rejects still exceed
+0.1%. The 831-test gate and three fresh 16-frame-per-camera line recordings pass
+in their narrow scopes; calibration and accurate object reconstruction do not.
+
+**First independently validated object scan: not achieved.** Physical calibration
+is authorized. The board is now fully visible in both cameras. Native fits on
+three retained timestamp-matched board poses and a fresh held-out pose exposed
+and fixed a stereo solver stopping defect; the 832-test gate passes. See
+[real-board calibration evidence](docs/REAL_BOARD_CALIBRATION.md). Sparse held-out
+markers reconstruct, but units, image coverage and independent accuracy remain
+unverified; no active calibration or qualified model export exists. Next: diverse
+board poses, independent dimensions and complete object reconstruction. CodeRabbit
+quota lookup remains unavailable; no paid review requested or approval claimed.
+
+[Sequential capture inspection](docs/LASER_CAPTURE_SEQUENCE.md) now verifies every
+stored pair with reused raw indexes. The 828-test gate passes; nine saved Raptor
+captures preserve 222 pairs / 391,481 candidate points and camera views exactly.
+Exploratory tracking executes on two saved sequences, but pose/scale accuracy,
+calibrated reconstruction, fusion integration and sustained scanning remain open.
+
+[Saved laser captures reopen](docs/SAVED_LASER_CAPTURES.md) with pair selection,
+retained camera images and transactional error handling. The 824-test gate passes;
+nine older folders preserve 18 selected views exactly, and fresh native capture,
+close/restart/reopen and actual GUI pair switching pass. These remain unqualified
+diagnostic coordinates, separate from editable projects and tracking/fusion.
+
+[Buffered segmented encoding](docs/SEGMENTED_PAIR_ENCODING.md) reuses the existing
+serializer helper and preserves complete journals. The 814-test gate and explicit
+>1 GiB storage regression pass. Short native 2 MiB-segment trials process 57/64
+and 58/64; a separate 16 MiB request reaches 61/64. These are diagnostic observations,
+not sustained or physical qualification; startup rejects and review remain open.
+
+[Per-pixel epipolar reuse](docs/CACHED_EPIPOLAR_QUERIES.md) removes repeated
+first-ray work without changing complete results. The 812-test gate and 216
+analytic cases pass. Short native trials process 54/64 pairs versus 47–49/64
+with the preserved build; 84.375% remains below 90%. Startup rejects and physical
+accuracy remain unqualified. CodeRabbit quota/billing lookup is unavailable.
+
+[Helper diagnostic isolation](docs/HELPER_DIAGNOSTICS.md) fixes reproduced stderr
+write panics that prevent final IPC or abort synthetic reconstruction. Private
+state logs retain process failure status after GUI closure. The 808-test gate,
+full-stderr saved-data replay and short healthy native capture/close checks pass;
+24/32 processed frames remain below 90%. The original unexplained helper exit
+is not attributed or declared fixed; sustained and physical qualification remain open.
+
+[Concurrent camera detection](docs/PARALLEL_LASER_DETECTION.md) reuses the existing
+Rust detectors with one bounded scoped worker for large pairs. The 794-test gate
+passes. Same-binary numerical processing is 32.3–33.2 ms versus 40.1–40.9 ms serial;
+short native concurrent trials process 47–50/64 versus 41–42/64 serial, still below
+90%. Transport rejects, an unresolved early helper exit, geometry and sustained
+qualification remain incomplete. Failed attempts and environment issues are retained.
+
+[Segmented laser journals](docs/SEGMENTED_LASER_JOURNAL.md) add opt-in schema 2
+storage admission, bounded segments, streaming verification and read-only recovery.
+The 791-test Rust gate and separate 1.18 GB synthetic capacity test pass. Native
+GUI rollover/close and 65 saved pair records pass integrity checks; finite native
+processing remains 21/32 (65.625%), below 90%. Long-duration qualification,
+calibrated geometry and tracking/fusion remain incomplete. Schema 1 is preserved.
+
+[Asynchronous laser previews](docs/ASYNC_LASER_PREVIEW.md) move full raw statistics
+and thumbnails to the existing bounded publisher. The 779-test gate passes; a
+native trial saves 32 raw frames/camera and processes 22 pairs (68.75%, below 90%).
+Geometry/accuracy, tracking/fusion, sustained reliability and a long-session pair-log
+policy remain incomplete. This is diagnostic preview, not a qualified fused scan.
+
+[Measured pair-journal buffering](docs/LASER_STREAM_PROFILE.md) reduces the saved-data
+report write component while retaining exact bytes and checksums. The 774-test
+Rust gate passes; a new native GUI trial saves 32 raw frames/camera and processes
+21 pairs (65.625%, still below 90%). Engine time remains the larger bottleneck.
+
+[Native laser GUI diagnostics](docs/LIVE_LASER_GUI.md) now provide Start/Stop,
+raw camera and single-pair candidate previews through a supervised helper. All
+771 tests and the Rust gate pass. A renderer-limited native trial saves 32 frames
+per camera and processes 19 pairs; default private software-renderer starts fail.
+Rendering/transport robustness, calibrated accuracy, tracking/fusion and sustained
+throughput remain incomplete. No full scan or release qualification is claimed.
+
 Stage: experimental. Specification: docs/MISSION.txt.
+
+[Native laser candidate capture](docs/NATIVE_LASER_CAPTURE.md) now runs through the
+CLI and shared acquisition API with raw retention, explicit processing drops,
+verified restoration and saved-pair replay. A real scoped-line trial saved 16 frames
+per camera and processed 12 pairs with 1,857–2,023 unqualified candidates each. The
+processed fraction was 75% in that short trial; throughput, calibrated accuracy, tracking/
+fusion and robust live GUI operation remain incomplete.
+
+[Bounded laser frame handoff](docs/BOUNDED_LASER_STREAM.md) now joins raw journaling,
+fixed-size association and in-memory reconstruction in a reusable workflow. It
+passes 1200-pair synthetic and saved-frame replay checks. Live GUI integration,
+tracking/fusion and continuous-duration qualification remain incomplete.
+
+[Conservative epipolar indexing](docs/INDEXED_EPIPOLAR_TRACES.md) reduces measured
+matching-only time on two larger saved workloads while retaining the scalar path
+and complete numerical results. No new live-scanning or accuracy qualification is
+claimed; independent automated review remains pending.
+
+## Latest local reconstruction checkpoint — 2026-11-03
+
+The local development tree passes 779 Rust tests, formatting, strict Clippy and
+release build. Recording-backed seeded trace diagnostics preserve source frames
+and interpolation lineage. A new native sheet-supported full-trace matcher removes
+the need for supplied partner seeds at the numerical component boundary; it has
+36 independent known-point synthetic reference cases and exact agreement with
+the prior composition on saved Raptor observations. See
+[sheet-supported traces](docs/SHEET_SUPPORTED_TRACES.md) and
+[recorded correspondence](docs/RECORDED_TRACE_CORRESPONDENCE.md).
+
+[Automatic recorded matching](docs/RECORDED_SHEET_MATCHING.md) now connects the
+matcher to validated real recordings, detection and continuity without supplied
+partner seeds. It preserves all query diagnostics and source-linked candidate
+coordinates. Three saved Raptor pairs reproduce earlier numerical results exactly;
+this remains provisional geometry, not a calibrated scan or a live GUI feature.
+
+[Prepared trace reuse](docs/PREPARED_LASER_TRACES.md) preserves complete results
+and reduced the measured matching workload from 187.3 ms to 7.9 ms plus 0.31 ms
+preparation in a paired benchmark. This is a matching-stage result on one saved
+scene; detection, recording I/O and live/physical qualification remain separate.
+
+[Block-based laser opening](docs/BLOCK_LASER_OPENING.md) preserves all twelve
+saved on/off camera reports exactly and reduces the radius-12 morphology workload
+from 70.2 ms to 14.6 ms in a paired probe. Integrated two-image detection measured
+18.8 ms; whole recorded CLI runs measured 0.13–0.14 seconds. These remain offline
+observations, with unchanged physical qualification and review/publication gaps.
+
+[New rotating-board and box trials](docs/ROTATING_TARGET_EVIDENCE.md) retain 900
+frames per camera and show both useful candidates and failures across viewpoints.
+Ongoing rejected buffers remain about 0.442% in that run. Front-view clipping,
+weak box return and conservative processing limits prevent declaring reliable
+end-to-end reconstruction; material-aware quality feedback is a current priority.
+
+The native [Laser candidates viewport](docs/CANDIDATE_VIEWER.md) now opens checked
+recorded diagnostic bundles with orbit/pan/zoom and explicit unverified-unit labels.
+Both retained camera frames now appear with exact raw intensity summaries and
+endpoint counts. Optional contrast stretching affects display copies only.
+Synthetic, box and zero-candidate board renders pass local checks. This is read-only
+candidate visualization; calibrated model generation and live scanning remain unfinished.
+
+The tab now [processes recorded laser pairs](docs/NATIVE_RECORDED_LASER_PROCESSING.md)
+using explicit model/settings files, with stage progress, cancellation and saved
+diagnostic output. Native-app results exactly reproduce earlier complete synthetic,
+box and zero-candidate board reports. Over-budget input fails without publication;
+saved output remains identifiable if subsequent display loading fails. This remains
+an offline diagnostic path with unqualified geometry and no scanner controls.
+
+[Projected-root work admission](docs/PROJECTED_ROOT_WORK_BOUND.md) now processes
+the formerly over-budget rotating pose: 2532 candidates, with a proved bound of
+64.7 million under the unchanged 100-million cap. All eight previous pose results
+remain exact, including the two zero-candidate cases. Native-app processing is
+verified. Worst-pose matching and full JSON serialization remain too expensive
+to claim live throughput; calibration, coverage and tracking/fusion remain open.
+
+[In-memory laser-pair computation](docs/IN_MEMORY_LASER_PAIRS.md) separates the
+shared numerical engine from recording/JSON publication. Compact query outcomes
+and camera counters remain available without full diagnostic JSON. All eleven
+recorded bundles and three seeded bundles remain byte-identical. Specific paired
+tests measured 104.1 ms without query JSON versus 160.5 ms with it on the expensive
+rotating pose; this is not live qualification.
+
+These latest changes are local and await automated review/publication: CodeRabbit
+quota/billing lookup is unavailable although its local doctor passes. Genuine
+calibrated reconstruction, reliable full live scans and professional release
+qualification remain incomplete. No physical calibration or device changes were
+performed. The checkpoint sections below record earlier development evidence;
+their counts and publication statements describe those historical stages.
+
+## Earlier checkpoints
 
 Latest robust-registration checkpoint: 489 workspace Rust tests and 19 reference/tooling
 tests pass, with strict all-target lint, formatting and release binaries/examples.
@@ -1955,3 +2390,248 @@ recovery; CLI/GUI output artifacts match. Bias and an initial failed unsupported
 test expectation are retained in evidence. See docs/POINT_TO_PLANE_ICP.md and
 huber-plane-* evidence. No genuine geometry, global alignment, live scanning,
 transport or physical accuracy gate is advanced. Calibration remains deferred.
+
+
+Development checkpoint 2026-10-26: exact coincident-point k-neighbor pruning added
+with brute-force/order and structural work-bound regression tests. All 499 Rust
+tests and six NumPy statistical-filter comparisons pass. The 4000-coincident-point
+CLI workload median improved from 534.388 ms to 39.297 ms (three runs each); this
+is not general scanner or million-point qualification. See docs/benchmarks/COINCIDENT_NEIGHBORS.md
+and developer-owned docs/reviews/REVIEW_RESPONSES.md. Independent shared findings
+were absent and were not created by development. Hardware discovery remains empty.
+
+SCAN-REV-004 development correction: capture panic/disconnection now reaches an
+explicit stopped/error state after thread completion. Five hardware-free lifecycle
+regressions pass, including retained incomplete recording and replacement-worker
+availability; full workspace has 504 passing Rust tests. Await independent reviewer
+verification. SCAN-REV-005 shutdown-bound and physical scanning qualifications
+remain unresolved. No hardware, firmware or calibration writes performed.
+
+Final correction checkpoint: 505 Rust tests pass with six hardware-free capture
+regressions, including deterministic late-publication and repeated immediate-success
+checks. CodeRabbit completed a committed review of 231695c against the workflow
+branch with zero findings and a passed major gate. Draft PR #3 is available for
+independent verification; no reviewer finding was closed by development and no merge
+or protection change was performed. Genuine reconstruction and bounded driver
+shutdown remain unqualified. See developer responses for exact commit scope.
+
+SCAN-REV-005 ordinary-close mitigation: window close requests stop and keeps the UI
+open while capture cleanup remains active. Completion explicitly rechecks unsaved/
+busy project guards; errors keep diagnostics visible. Replacement capture cannot
+start during pending close. Six additional hardware-free tests pass; full frozen
+Rust gate now 511 tests. No measured whole-app shutdown bound or real driver-stall
+qualification is claimed. Reviewer's finding is not closed by development.
+
+## Optional fractional stereo checkpoint
+
+Opt-in three-sample quadratic ZNCC peak refinement now propagates fractional
+observations through original-camera triangulation. Integer matching remains the
+default and existing confidence gates remain prerequisites. Independent NumPy
+polynomial fitting agrees within 7.4e-15 across four synthetic signed shifts; native
+CLI persistence and no-overwrite checks pass. A further regression verifies two
+rotated-camera configurations, including fractional rectified x becoming original
+y, against independently computed pixel rotations and analytic plane depth.
+
+519 Rust tests, formatting, strict Clippy and release build pass. Earlier 518-test
+implementation received completed CodeRabbit CLI review with zero findings; later
+test/docs work is tracked separately in developer responses. Private-display GUI
+startup/render passed; this is not live scanning qualification. See
+docs/SUBPIXEL_STEREO.md and docs/reviews/evidence/2026-10-26-subpixel-validation.json.
+Fresh discovery returned no scanner. Genuine calibrated Raptor reconstruction,
+transport reliability, physical accuracy, live workflow and bounded forced teardown
+remain unqualified. No calibration or firmware operation was performed.
+
+## Read-only recorded timing checkpoint
+
+`recording-timing` validates complete stereo recordings then reports nearest-host
+value candidates, ties, reuse and raw PTS equality without automatically pairing
+frames for geometry. 524 Rust tests, formatting, strict Clippy and release build
+pass, including an exhaustive-distance oracle and native CLI source preservation.
+Source: indexed.rs, recording_playback.rs, recording_timing.rs; method and memory
+tradeoffs: docs/RECORDING_TIMING.md.
+
+Read-only replay of the preserved genuine 100+100-frame native stereo recording,
+at a caller-selected 1000us diagnostic limit, found six unique nearest candidates
+in range, 94 outside, no ties/reuse, and three raw-PTS-equal in-range candidates.
+Both original file SHA256 values were unchanged. Only aggregate evidence is
+published in docs/reviews/evidence/2026-10-26-genuine-recording-timing.json; raw
+images/timestamps remain private. This limit is not a qualified exposure tolerance.
+These observations do not verify clock domains, exposure synchronization, optical
+content, calibrated geometry or hardware accuracy. No new acquisition, physical
+calibration or firmware operation was performed.
+
+## Host/PTS comparison checkpoint
+
+The read-only native timing report now independently compares unique raw PTS
+values across complete recordings, withholding repeated values as ambiguous.
+529 Rust tests and frozen format/Clippy/release pass. Genuine historical replay
+finds72 equal-PTS pairs, only3 within1000us of host time; host differences range
+8..20026us. Independent parser agrees and inputSHA256s are unchanged. This narrows
+investigation but does not establish a cause or synchronized exposures. Details,
+standard flag interpretation and qualification limits: docs/RECORDED_CLOCK_OBSERVATIONS.md.
+No genuine calibrated geometry, new acquisition, physical calibration or firmware
+action. Independent reviewer rejected the alleged earlier PTS compatibility defect;
+raw CodeRabbit gate remains recorded as blocked, not silently relabeled passed.
+
+## Offline recorded-stereo sequence checkpoint
+
+A reusable recording processor now keeps validated indexes and rectification maps
+across explicitly selected pairs. The new native CLI sequence workflow connects
+reconstruction to the existing point-to-point tracking/fusion session, retains each
+raw pair and diagnostics, and atomically publishes fused PLY/editable project.
+Tracking rejection preserves diagnostics and is not fused; a subsequent valid pair
+can recover against the retained reference. No-geometry failure retains current
+raw inputs/rejection evidence in incomplete staging rather than inventing poses.
+
+535 Rust tests, formatting, strict Clippy and release build pass. New regressions
+cover cached report equivalence/source mutation, full retained inputs, project
+reopening/overwrite/input preservation, cancellation/index errors, synthetic
+wrong-depth rejection/recovery, no-geometry diagnostics and actual CLI execution.
+Details: docs/RECORDED_STEREO_SEQUENCE.md. Per-frame provenance remains in the full
+external bundle; fused standalone projects do not yet embed multi-frame lineage.
+Point-to-plane selection, meshing in this path, blank-frame recovery/resumption,
+dedicated GUI orchestration and genuine live/calibrated Raptor evidence remain
+unfinished. No scanner, firmware or physical calibration action was performed.
+
+## Native recorded-sequence GUI checkpoint
+
+The Point clouds panel now submits recorded stereo sequences to the existing
+bounded geometry worker, with stage progress/cancellation and the save/discard
+guard before replacing unsaved work. Preparation stages the complete sequence;
+Editor/Preview construction precedes source revalidation and atomic publication.
+Only successful publication replaces the live document. CLI run composes the
+same phases, and startup arguments support repeatable offline operation.
+
+538 Rust tests, formatting, strict Clippy and release build pass. Regressions
+cover late cancellation/source mutation between phases, GUI preservation on
+errors, unsaved guards and saved/live geometry equality. Actual private-display
+GUI operation produced all29files byte-identical to CLI output, integrated three
+synthetic frames, preserved inputSHA256s and opened no camera descriptors.
+See docs/RECORDED_STEREO_SEQUENCE.md and sequence-gui-equivalence evidence.
+This is not manual dialog/hardware qualification. Multi-frame project provenance
+remains external, live integration and physical accuracy remain unfinished.
+
+## Persistent sequence-project references checkpoint
+
+ORPROJ07 preserves initial sequence selections, integration decisions, declared
+source/calibration ID and retained-artifact fingerprints across edit history and
+standalone save/reopen. Both saved and live GUI editors retain the same metadata.
+Older02..06 projects keep their old schema when sequence metadata is absent.
+Project loading never opens external sources. Explicit source verification now
+supports sequence folders and guards nested parents against symlinks/changes.
+
+541 Rust tests, formatting, strict Clippy and release pass. Runtime native CLI/GUI
+proof creates v7, filters/saves/reopens without losing refs and explicitly verifies
+27retained artifacts after moving the bundle; inputSHA256s unchanged. GUI/CLI27
+non-location-dependent files are identical, projects agree after descriptive-path
+normalization and root-manifest differences are only project size/CRC. Independent
+reviewer passed30targeted tests on a stable snapshot, not the full541suite.
+See docs/SEQUENCE_PROJECT_REFERENCES.md and sequence-references-runtime evidence.
+Raw sources/full reports stay external; fingerprints do not qualify original
+recording completeness, semantic replay, binding, synchronization or physical
+accuracy. No hardware/calibration/firmware change or new dependency.
+
+## Native live stereo pipeline implementation
+
+Added finite scan-live-stereo CLI acquisition -> raw recordings -> bounded
+association -> existing reconstruction/tracking/fusion -> project/PLY bundle.
+Synthetic injected sources exercise complete publication and cleanup; physical
+entry rejects synthetic calibration. Configured source binding, equal rawPTS and
+host-window association do not establish calibration/exposure accuracy. Actual
+Raptor operation remains unverified. Live GUI integration is now implemented
+and synthetically validated as described in the following milestone;
+no physical calibration, firmware or illumination operation was performed.
+See docs/LIVE_STEREO_SCAN.md and developer review responses for evidence scope.
+
+## Experimental live GUI milestone
+
+The live GUI now shares native device/session ownership through the local
+`scancraft-acquisition` crate. It offers reconstruction pause/resume, graceful
+stop/save, abort, bounded camera/cloud previews and guarded editor handover.
+See [behavior and validation](docs/LIVE_STEREO_GUI.md). The frozen Rust gate
+passed 571 tests; actual release-GUI interaction and busy-window close passed
+with synthetic sources only. Real calibrated reconstruction, source binding,
+synchronization, accuracy and bounded kernel shutdown remain unqualified.
+
+## Live-session lineage persistence
+
+Live geometry projects now use ORPROJ08 to retain initial session/pair decisions
+and full raw/calibration/settings/report artifact fingerprints through edits and
+reopening. Legacy versions 02–07 remain readable. Explicit GUI/CLI verification supports
+user-chosen moved folders; loading never follows recorded paths. Raw bytes stay
+external and fusion weights are not resumable. See docs/LIVE_SESSION_REFERENCES.md.
+The full frozen gate passed 574 tests; actual release synthetic runner and CLI
+verification passed8artifacts and rejected a modified raw recording (exit 1).
+These are software/byte-identity checks, not hardware qualification.
+
+## Live-session project archive export
+
+The existing project exporter now packages edited live projects with all
+referenced raw/calibration/settings/report artifacts. Original data/state stay
+unchanged; copied references relocate to the export. Full-state replay and
+source rechecks precede atomic publication. Explicit GUI/CLI workflows passed
+synthetic runtime verification and both raw replays; 576-test gate passed.
+This is not resumable fusion or physical qualification. Automated independent
+review remains pending included service capacity.
+
+## Cooperative native stop policy
+
+Live acquisition now checks shared stop between video/metadata waits and caps
+poll timeouts by remaining frame deadline. Abandoned pre-metadata video buffers
+are counted separately; disconnect errors are retained. The 579-test gate passes,
+including 3 new injected-read policy tests. This cannot preempt synchronous ioctls
+or establish a shutdown deadline; SCAN-REV-005 remains Open. See docs/COOPERATIVE_CAPTURE_STOP.md.
+Actual scanner timing/driver-stall qualification remains unavailable.
+
+## Measured paired image preparation
+
+Large stereo maps now use one scoped helper when at least two CPUs are reported;
+small/one-CPU/resource-limited cases retain sequential processing. Sampling math
+is unchanged. On this workstation, the production API’s synthetic 1920×1200 pair
+median changed from 89.930 to 43.795 ms with bit-identical outputs/masks. The 583-test gate
+passes; single-CPU and thread-denied child fallbacks passed. This is not full
+scan throughput, accuracy or RSS qualification. See docs/PAIRED_REMAP_CONCURRENCY.md
+and docs/benchmarks/paired-remap-2026-10-27.json. Automated review remains pending.
+
+## Planar camera initialization — experimental
+
+The native calibration crate now estimates initial five-parameter pinhole
+intrinsics and target poses from supplied metric plane/pixel correspondences.
+Six focused Rust regressions and a three-case independent synthetic OpenCV/NumPy
+comparison pass. This does not detect target corners, estimate distortion, refine
+a complete calibration or install a scanner model. Physical calibration remains
+deferred and genuine Raptor optical binding/accuracy unqualified. See
+docs/PLANAR_CALIBRATION_INITIALIZER.md.
+
+## Native Brown5 calibration refinement — software-only
+
+Supplied planar correspondences now support joint intrinsic/distortion/pose
+refinement, with analytic derivatives, block Schur solves, numerical stationarity/
+rank checks and cancellation. The offline calibrate-planar CLI retains exact input
+and publishes a diagnostic fit without replacing output or installing calibration.
+Seven numerical and two workflow tests plus three independent synthetic reference
+cases pass. Physical calibration stays deferred; Raptor optical binding, dimensional
+accuracy and joint stereo calibration remain unqualified. See
+docs/BROWN_CALIBRATION_REFINEMENT.md.
+
+## Fixed-intrinsic stereo fitting — software-only
+
+The native fitter now jointly estimates a right-from-left rig pose and all target
+poses from declared lens models and common target correspondences. The offline
+calibrate-stereo-extrinsics CLI retains exact inputs in an unqualified diagnostic
+bundle; lenses remain fixed. Shared projection/Schur/publication components preserve
+all three previous mono fixtures/artifact sets byte-for-byte. The 607-test full
+gate and synthetic OpenCV/NumPy/held-out triangulation checks pass. No physical
+calibration, actual Raptor optical binding, synchronization or accuracy is qualified.
+See docs/STEREO_EXTRINSIC_CALIBRATION.md.
+
+## Offline seeded target-corner measurement preparation
+
+An experimental Rust gradient-orthogonality corner refiner and shared CLI workflow
+now prepare pixel observations from explicit grayscale images/seeds, retaining
+exact inputs and target associations in a no-overwrite diagnostic bundle.
+Twelve synthetic cases agree with NumPy/OpenCV under stated numerical tolerances;
+no scanner accuracy or physical calibration is established. Full-board detection,
+coverage, uncertainty, source/mode binding and genuine calibrated reconstruction
+remain open. See docs/TARGET_CORNER_REFINEMENT.md. Physical calibration remains
+deferred; no capture calibration is installed or activated.

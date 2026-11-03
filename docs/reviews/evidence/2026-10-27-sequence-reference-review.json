@@ -1,0 +1,67 @@
+{
+  "recorded_utc": "2026-10-26T19:17:22.189076+00:00",
+  "head_observed_before_and_after": "c67a46fba687fb941cacd7b1d01912c52ea92597",
+  "tree_observed_before_and_after": "7984e96fb1f2a21f3e78b1147088526f74aa5e15",
+  "base": "13790e34aa9455811fced42bbb3b5661506d3c35",
+  "completion": {
+    "type": "complete",
+    "status": "review_completed",
+    "findings": 1,
+    "gate": {
+      "threshold": "major",
+      "status": "passed",
+      "blockingFindings": 0
+    },
+    "reviewedFiles": [
+      "ARCHITECTURE.md",
+      "PROJECT_STATUS.md",
+      "crates/scancraft-app/src/cloud_jobs.rs",
+      "crates/scancraft-app/src/cloud_ui.rs",
+      "crates/scancraft-cli/tests/recorded_sequence.rs",
+      "crates/scancraft-geometry/src/formats.rs",
+      "crates/scancraft-geometry/src/lib.rs",
+      "crates/scancraft-geometry/src/sequence_references.rs",
+      "crates/scancraft-workflow/src/recorded_sequence.rs",
+      "crates/scancraft-workflow/src/source_verification.rs",
+      "crates/scancraft-workflow/tests/recording_reconstruction.rs",
+      "docs/RECORDED_STEREO_SEQUENCE.md",
+      "docs/SEQUENCE_PROJECT_REFERENCES.md",
+      "docs/reviews/REVIEW_RESPONSES.md",
+      "docs/reviews/evidence/2026-10-26-sequence-references-runtime.json"
+    ],
+    "outcome": "completed",
+    "message": "Review completed"
+  },
+  "exit_code": 0,
+  "report_sha256": "5968b6a55e2c7338e9d6324a10f1fa75bbe1abc619261a6ab096bc698a4cc413",
+  "file_blobs": {
+    "ARCHITECTURE.md": "5dd468c081f25e4ef8bfb35aa12a102b34ffe97c",
+    "PROJECT_STATUS.md": "d9eeacc4f9f3c9afba825bdf68be6f64b26b109c",
+    "crates/scancraft-app/src/cloud_jobs.rs": "86cb9c14d39ed36f772e1be29d1739daa70c86b3",
+    "crates/scancraft-app/src/cloud_ui.rs": "01dc559a96cae5644cfc2c76bace4540b7c3d21c",
+    "crates/scancraft-cli/tests/recorded_sequence.rs": "20e383ba150dc1f05e78cf7667bf83998b1d7d41",
+    "crates/scancraft-geometry/src/formats.rs": "2bc69de91b1c8b38ae6d8cb402f06d6f100a683c",
+    "crates/scancraft-geometry/src/lib.rs": "ec6e3c8617fd638b48796032ec7a7663986d08a1",
+    "crates/scancraft-geometry/src/sequence_references.rs": "453cea46d3195152d93db520f21a214c51a7792c",
+    "crates/scancraft-workflow/src/recorded_sequence.rs": "92d28df921553135015735bb117f4bbbe3d718cf",
+    "crates/scancraft-workflow/src/source_verification.rs": "46062cf81b8ddec6f5ab688e7c1b3b18031595c0",
+    "crates/scancraft-workflow/tests/recording_reconstruction.rs": "2b90e126eff38adb85ed1910d254c9ea07aa65ee",
+    "docs/RECORDED_STEREO_SEQUENCE.md": "57bb5ca330302595a9da415f3201e195098506d9",
+    "docs/SEQUENCE_PROJECT_REFERENCES.md": "8ee85d12acce3c4bf6113e8fdced690f5adfa2bf",
+    "docs/reviews/REVIEW_RESPONSES.md": "361948bbd52d820f37ef525ff9dcc23f2dfbddcd",
+    "docs/reviews/evidence/2026-10-26-sequence-references-runtime.json": "820d32f05588bd6bfb8512f63439e434a0171282"
+  },
+  "full_gate": "541 Rust tests, frozen fmt, strict Clippy, release workspace build PASS",
+  "full_gate_log_sha256": "9caab2f86ea486a3ef831ceea6239f6d402afe7f105a5229b10deeb7d30b6e84",
+  "dispositions": [
+    {
+      "local_id": "CR-SEQREF-ID-BOUNDS",
+      "severity": "minor",
+      "decision": "Accepted confirmation request; existing preflight already sufficient, no code change",
+      "reason": "ScanSession::new/new_with_method enforces identical session ID ASCII/length before RecordingProcessor::open and staging; calibration storage::read invokes validate requiring 1..128-byte record ID before opening/indexing either recording."
+    }
+  ],
+  "billing": "Separately checked included capacity3 and inactive billing; no paid consent/flags",
+  "binding": "Operator-observed immutable source and artifact hashes; not server attestation of immutable review head",
+  "scope": "Persistent initial references and explicit artifact identity only; no physical scan qualification"
+}

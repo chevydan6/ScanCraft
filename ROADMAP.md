@@ -1,5 +1,81 @@
 # Roadmap
 
+Immediate mission priority: one independently measured real object, three repeat
+scans and native project/export verification. All developer PR heads are preserved
+on the first-scan integration branch. Finite CLI completion now prevents peer close
+before both acquisitions finish; recurring transport truncations remain above the
+acceptance target. Physical calibration procedure is prepared and approval pending.
+See docs/FIRST_SCAN_INTEGRATION_AUDIT.md, docs/FINITE_STEREO_COMPLETION.md and
+docs/FIRST_SCAN_CALIBRATION_PLAN.md. Do not expand unrelated features.
+
+Sequential recorded-pair access now avoids repeated whole-recording indexing and
+checks every pair's raw lineage. Exploratory existing-Tracker runs are recorded,
+without claiming physical accuracy. Next validate model/units and pose truth,
+then connect staged tracking/fusion and persistent scan state. Do not interpret
+accepted candidate alignments as calibrated reconstruction. See
+docs/LASER_CAPTURE_SEQUENCE.md; physical calibration remains deferred.
+
+Completed native captures now reopen with stored-pair selection and retained images,
+including older files with explicitly unknown restoration metadata. Next connect
+verified capture lineage to genuine calibrated reconstruction and tracking/fusion
+workflows while preserving the diagnostic/metric boundary; physical calibration
+remains deferred. Longer processing/preview/resource trials and transport startup
+rejects still need evidence. See docs/SAVED_LASER_CAPTURES.md.
+
+Segmented encoding now reuses fixed-buffer serialization: complete output bytes
+remain identical and measured append cost decreases. Current short native trials
+reach 57–58/64 with 2 MiB segments, and one separate 16 MiB request reaches 61/64.
+Next validate practical explicit storage budgets/checkpoint tradeoffs and longer
+processing/preview/resource behavior while investigating startup rejects. These
+results do not replace genuine calibrated reconstruction, tracking/fusion or a
+complete usable scan/project workflow. See docs/SEGMENTED_PAIR_ENCODING.md.
+
+Per-pixel epipolar reuse reduces measured numerical processing to 27.3–29.6 ms
+on five reported saved pairs, with complete result equality. Current short native
+trials reach 54/64 (84.375%), still below 90%. Next isolate remaining dispatch,
+serialization and acquisition costs without dropping required raw/journal data;
+investigate startup rejects, then advance calibrated reconstruction and tracking
+when the required physical evidence is available. Preserve the deferred physical
+calibration boundary. See docs/CACHED_EPIPOLAR_QUERIES.md.
+
+Reproduced stderr-write panics and lost process status are corrected with bounded
+best-effort notes and retained private failure logs. The original early native helper
+exit remains unattributed; use the new records if it recurs, preserving locks and
+source cleanup. Resume measured matching/dispatch optimization and software geometry
+validation while physical calibration is deferred. No further editing expansion
+before complete reliable reconstruction/scan workflows. See docs/HELPER_DIAGNOSTICS.md.
+
+Large-pair concurrent detection now reduces measured numerical work while preserving
+complete results. New finite GUI trials reach 47–50/64 processed pairs, still below
+90%; next profile remaining serial matching/dispatch, transport rejects and early
+helper-exit diagnostics. Preserve all failed attempts and raw observations. The
+private test display now verifies an X connection before launch; `/tmp` quota
+recovery is an environment measure, not a production reliability fix. See
+docs/PARALLEL_LASER_DETECTION.md. Storage finding024 is independently resolved in
+Assignment354 for opt-in schema2; sustained storage/resource qualification remains.
+
+Native laser Start/Stop and camera/candidate previews now use the supervised GUI
+helper. Next investigate renderer-load/startup transport failures and measure
+complete-pair dispatch/compute scheduling: the GUI finite trial processes only
+22 pairs from 32 raw frames per camera in the earlier buffering/preview-handoff
+trial, below 90%. Earlier saved-data profiling measured 43–46 ms of engine work
+alone; current concurrent-detection measurements are above. Profile/validate
+computational scheduling before increasing buffers. Preserve raw journals independently
+of optional previews and retain failed-run evidence. See docs/LIVE_LASER_GUI.md.
+
+Opt-in schema 2 now provides bounded long-session pair segments, storage admission,
+indexing and read-only recovery; schema 1 retains its 1 GiB pair-log limit. Validate
+maximum-count finalization, sustained resource usage, failure recovery and practical
+disk budgets before a dense 30-minute hardware trial. The separate >1 GiB synthetic
+test and short native rollover are capacity evidence, not duration qualification.
+See docs/SEGMENTED_LASER_JOURNAL.md. Keep explicit quotas and truthful cleanup.
+
+Calibrated dimensions, optical coverage, actual tracking/fusion and long-session
+project retention remain required, with physical calibration deferred. The old
+IR 1000-frame/session limit is unchanged. Prioritize real reconstruction and
+reliability over additional editing features. Direct stream-bundle diagnostic reopen
+is implemented; a complete usable model remains outstanding. Reopening is not fusion.
+
 1. Complete native acquisition: decoding, timestamps, controls, cold-start,
    reconnection, multiple cameras, explicit dropped-frame/error accounting.
 2. Complete recording schema for device/settings/calibration metadata; replay
@@ -306,3 +382,22 @@ SciPy comparison. Next add stronger correspondence/global alignment strategies,
 calibrated real-sequence evaluation, trajectory optimization and live integration.
 Do not interpret local robust convergence as verified physical or global alignment.
 Continue transport isolation and deferred genuine calibration/geometry requirements.
+
+Supplied-observation calibration now includes pinhole initialization and joint
+Brown5/intrinsic/target-pose refinement through an offline diagnostic CLI. Next add
+joint stereo fitting, target/subpixel detection, coverage/uncertainty and explicit
+device/mode binding. Physical calibration stays deferred. Supplied observations
+and small residuals do not qualify Raptor reconstruction or remove hardware trials.
+
+Fixed-intrinsic stereo fitting and its diagnostic CLI now connect known synthetic
+lenses/target poses to relative pose estimation and held-out triangulation. Next
+advance real source/mode/optical binding, target/subpixel detection and coverage/
+uncertainty; simultaneous lens/rig refinement remains distinct future work.
+Physical calibration remains deferred; no synthetic fit removes physical trials.
+
+Seeded subpixel target-corner refinement now has an offline image/association CLI
+and independent synthetic NumPy/OpenCV comparison. Next connect robust full-board
+detection/indexing, multi-view coverage and uncertainty to the existing numerical
+calibration workflows. Supplied associations still require verification; no real
+calibration, optics binding or M2 reconstruction qualification follows from this
+component. Physical calibration stays deferred.

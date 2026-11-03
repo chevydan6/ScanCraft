@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "scope": "Historical genuine native-stereo-recording-01 replay, aggregate-only; 1000us diagnostic limit is not an exposure tolerance",
+  "left_frames": 100,
+  "right_frames": 100,
+  "max_host_delta_us": 1000,
+  "unique_nearest_within_limit": 6,
+  "equidistant_nearest_within_limit": 0,
+  "outside_limit": 94,
+  "right_frames_used_by_multiple_left_candidates": 0,
+  "raw_pts_equal_unique_candidates": 3,
+  "raw_pts_comparison": {
+    "scope": "unique equal raw PTS values only; wrap epochs, clocks and exposures unverified",
+    "unique_equal_value_pairs": 72,
+    "left_frames_without_equal_right_value": 28,
+    "left_frames_with_ambiguous_equal_value": 0,
+    "unique_pairs_within_host_limit": 3,
+    "minimum_absolute_host_delta_us": 8,
+    "maximum_absolute_host_delta_us": 20026
+  },
+  "samples_truncated": false,
+  "clock_domains_verified": false,
+  "synchronization_verified": false,
+  "physical_accuracy_qualified": false,
+  "input_bytes_unchanged_sha256_checked": true,
+  "independent_parser_comparison": "Native unique-PTS count, within-limit count and host-difference extrema match separate Python CRC-validating parse of all frames"
+}

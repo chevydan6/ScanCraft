@@ -1,0 +1,17 @@
+{
+  "scope": "Completed CodeRabbit GitHub comment-based review; not an approving GitHub Review object",
+  "head": "1ae418fb357e26ddf2eb223acb6891c86988d7cb",
+  "base": "ba5ec7ca187fe9da6aa94e0dbc706e96c3ee15ae",
+  "comment_url": "https://github.com/chevydan6/ScanCraft/pull/3#issuecomment-6412390544",
+  "comment_updated_at": "2026-10-26T10:00:18Z",
+  "run_id": "4f5d0810-f7cf-47f5-be12-18a367a705b7",
+  "actionable_comments": 0,
+  "inline_review_threads": 0,
+  "advisory": {
+    "check": "Docstring Coverage",
+    "reported_percent": 7.14,
+    "threshold_percent": 80,
+    "disposition": "Disputed as a blanket release criterion for private helpers/tests; no check disabled or threshold lowered."
+  },
+  "limitations": "No blanket correctness approval, current-head review for later bookkeeping, hardware qualification or closure of SCAN-REV-005 is implied."
+}

@@ -1,6 +1,20 @@
 mod archive_ui;
+mod board_ui;
+mod candidate_ui;
+mod capture_close;
+mod capture_ipc;
+mod capture_process;
+mod capture_session;
+mod capture_worker;
 mod cloud_jobs;
 mod cloud_ui;
+mod discovery_process;
+mod helper_diagnostics;
+mod laser_display;
+mod laser_process;
+mod live_fixture;
+mod live_process;
+mod live_ui;
 mod measurement_view;
 mod mesh_ui;
 mod playback_ui;
@@ -8,19 +22,20 @@ mod recovery_ui;
 mod screen_tools;
 // Rust desktop workbench; acquisition/recording is independent of UI throughput.
 use eframe::egui;
-use scancraft_core::{Frame, StreamProfile};
-use scancraft_device::{Capture, SessionLock, discover};
+use scancraft_core::Frame;
+#[cfg(test)]
+use scancraft_core::StreamProfile;
+#[cfg(test)]
 use scancraft_recording::Writer;
+#[cfg(test)]
+use std::fs::OpenOptions;
 use std::{
-    fs::OpenOptions,
-    io::BufWriter,
     path::PathBuf,
     sync::{
         Arc,
         atomic::{AtomicBool, AtomicU64, Ordering},
         mpsc::{self, Receiver, TrySendError},
     },
-    thread,
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 fn camera_texture(
@@ -50,23 +65,32 @@ fn camera_texture(
 }
 struct Running {
     cancel: Arc<AtomicBool>,
+    abort: Arc<AtomicBool>,
     frames: Arc<AtomicU64>,
     preview_drops: Arc<AtomicU64>,
     rx: Receiver<Frame>,
-    result: Receiver<Result<String, String>>,
-    worker: Option<thread::JoinHandle<()>>,
+    worker: capture_worker::Worker,
 }
 struct App {
+    board: board_ui::BoardUi,
+    board_active: bool,
     recovery: recovery_ui::RecoveryUi,
     archive: archive_ui::ArchiveUi,
     playback: playback_ui::PlaybackUi,
     cloud: cloud_ui::CloudUi,
+    candidates: candidate_ui::CandidateUi,
+    candidates_active: bool,
+    live: live_ui::LiveUi,
+    live_active: bool,
     editing: bool,
     mesh_active: bool,
     mesh: mesh_ui::MeshUi,
     confirm_close: bool,
     close_allowed: bool,
+    closing_window: bool,
+    capture_close: capture_close::CaptureClose,
     running: Option<Running>,
+    discovery: Option<discovery_process::Discovery>,
     interface: u8,
     status: String,
     log: String,
@@ -82,16 +106,25 @@ struct App {
 impl Default for App {
     fn default() -> Self {
         Self {
+            board: Default::default(),
+            board_active: false,
             recovery: Default::default(),
             archive: Default::default(),
             playback: Default::default(),
             cloud: cloud_ui::CloudUi::default(),
+            candidates: Default::default(),
+            candidates_active: false,
+            live: Default::default(),
+            live_active: false,
             editing: false,
             mesh_active: false,
             mesh: mesh_ui::MeshUi::default(),
             confirm_close: false,
             close_allowed: false,
+            closing_window: false,
+            capture_close: Default::default(),
             running: None,
+            discovery: None,
             interface: 4,
             status: "Ready. Find the scanner to check its USB interfaces.".into(),
             log: String::new(),
@@ -110,112 +143,170 @@ impl Default for App {
     }
 }
 impl App {
+    fn capture_active_or_closing(&self) -> bool {
+        self.running.is_some()
+            || self.discovery.is_some()
+            || self.live.is_busy()
+            || self.candidates.capture_busy()
+            || self.capture_close.is_waiting()
+            || self.closing_window
+    }
+    fn needs_close_confirmation(&self) -> bool {
+        !self.close_allowed
+            && (self.cloud.is_dirty()
+                || self.cloud.is_busy()
+                || self.recovery.is_busy()
+                || self.playback.is_busy()
+                || self.archive.is_busy()
+                || self.board.is_busy()
+                || self.candidates.is_busy())
+    }
+    fn can_select_calibration(&self) -> bool {
+        !self.cloud.is_busy()
+            && !self.live.is_busy()
+            && !self.board.is_busy()
+            && self.running.is_none()
+            && self.discovery.is_none()
+            && !self.candidates.capture_busy()
+            && !self.confirm_close
+            && !self.capture_close.is_waiting()
+            && !self.closing_window
+    }
+    fn select_calibration(&mut self, path: PathBuf) -> bool {
+        if !self.can_select_calibration() {
+            return false;
+        }
+        self.cloud.select_calibration(&path);
+        self.live.select_calibration(&path);
+        self.board_active = false;
+        self.candidates_active = false;
+        self.mesh_active = false;
+        self.live_active = false;
+        self.editing = true;
+        true
+    }
+    fn request_window_close(&mut self, ctx: &egui::Context) {
+        if self.running.is_some() || self.live.is_busy() || self.candidates.capture_busy() {
+            self.capture_close_step(ctx, true, std::time::Instant::now());
+        } else if self.needs_close_confirmation() {
+            self.confirm_close = true;
+            ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+        } else {
+            self.closing_window = true;
+            ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+        }
+    }
+    fn capture_close_step(
+        &mut self,
+        ctx: &egui::Context,
+        requested: bool,
+        now: std::time::Instant,
+    ) -> bool {
+        match self.capture_close.advance(
+            requested,
+            self.running.is_some() || self.live.is_busy() || self.candidates.capture_busy(),
+            now,
+        ) {
+            capture_close::Action::CancelViewportClose => {
+                // Re-evaluate unsaved state after cleanup; prior close consent
+                // cannot cover edits made while capture is still stopping.
+                self.close_allowed = false;
+                if let Some(running) = &self.running {
+                    running.cancel.store(true, Ordering::Relaxed);
+                }
+                self.live.request_stop();
+                self.candidates.stop_capture();
+                ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+            }
+            capture_close::Action::RetryViewportClose => self.request_window_close(ctx),
+            capture_close::Action::None => {}
+        }
+        self.capture_close.is_waiting()
+    }
+    fn abort_pending_capture(&self) {
+        if let Some(running) = &self.running {
+            running.abort.store(true, Ordering::Relaxed);
+            running.cancel.store(true, Ordering::Relaxed);
+        }
+        self.live.abort();
+        self.candidates.abort_capture();
+    }
+    fn window_close_step(
+        &mut self,
+        ctx: &egui::Context,
+        requested: bool,
+        live_failed: bool,
+    ) -> bool {
+        if live_failed {
+            // Keep failure handling in the close boundary itself: a pending
+            // retry must not reopen a close request after helper failure.
+            self.capture_close.keep_open();
+            self.close_allowed = false;
+            if requested {
+                ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+            }
+        }
+        let close_requested = requested && !live_failed;
+        let waiting_for_capture =
+            self.capture_close_step(ctx, close_requested, std::time::Instant::now());
+        if close_requested && !waiting_for_capture && self.needs_close_confirmation() {
+            ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+            self.confirm_close = true;
+        } else if close_requested && !waiting_for_capture {
+            self.closing_window = true;
+        }
+        waiting_for_capture
+    }
     fn start(&mut self) {
+        if self.capture_active_or_closing() {
+            return;
+        }
         let interface = self.interface;
         let record = self.record;
         let folder = self.folder.clone();
         let cancel = Arc::new(AtomicBool::new(false));
+        let abort = Arc::new(AtomicBool::new(false));
         let frames = Arc::new(AtomicU64::new(0));
         let drops = Arc::new(AtomicU64::new(0));
         let (tx, rx) = mpsc::sync_channel(2);
-        let (done, result) = mpsc::channel();
         let c = cancel.clone();
+        let a = abort.clone();
         let f = frames.clone();
         let d = drops.clone();
-        let worker = thread::spawn(move || {
-            let run = || -> Result<String, String> {
-                let _locks = SessionLock::acquire().map_err(|e| e.to_string())?;
-                let profile = StreamProfile {
-                    interface,
-                    width: if interface == 4 { 1280 } else { 1920 },
-                    height: if interface == 4 { 800 } else { 1200 },
-                    fourcc: if interface == 4 { *b"MJPG" } else { *b"GREY" },
-                    fps: if interface == 4 { 10 } else { 50 },
-                };
-                let mut capture = if record {
-                    Capture::open_recording(profile.clone())
-                } else {
-                    Capture::open(profile.clone())
-                }
-                .map_err(|e| e.to_string())?;
-                let output = if record {
-                    let folder = PathBuf::from(folder);
-                    std::fs::create_dir_all(&folder).map_err(|e| e.to_string())?;
-                    let stamp = SystemTime::now()
-                        .duration_since(UNIX_EPOCH)
-                        .map_err(|e| e.to_string())?
-                        .as_nanos();
-                    Some(folder.join(format!("capture-{stamp}.raptor")))
-                } else {
-                    None
-                };
-                let partial = output.as_ref().map(|p| p.with_extension("raptor.partial"));
-                let mut recording = if let Some(path) = &partial {
-                    Some(
-                        Writer::with_context(
-                            BufWriter::new(
-                                OpenOptions::new()
-                                    .write(true)
-                                    .create_new(true)
-                                    .open(path)
-                                    .map_err(|e| e.to_string())?,
-                            ),
-                            profile,
-                            {
-                                let mut context = scancraft_recording::CaptureContext::default();
-                                if let Some(observed) = capture.recording_observations() {
-                                    context
-                                        .add_capture_observations(observed)
-                                        .map_err(|e| e.to_string())?;
-                                }
-                                context
-                            },
-                        )
-                        .map_err(|e| e.to_string())?,
-                    )
-                } else {
-                    None
-                };
-                while !c.load(Ordering::Relaxed) {
-                    let frame = capture.next_frame().map_err(|e| e.to_string())?;
-                    if let Some(w) = &mut recording {
-                        w.push(&frame).map_err(|e| e.to_string())?;
-                    }
+        let worker = match capture_worker::Worker::spawn(move || {
+            capture_process::run(
+                interface,
+                record,
+                std::path::Path::new(&folder),
+                &c,
+                &a,
+                |frame| {
                     f.fetch_add(1, Ordering::Relaxed);
                     match tx.try_send(frame) {
-                        Ok(()) => (),
+                        Ok(()) => true,
                         Err(TrySendError::Full(_)) => {
                             d.fetch_add(1, Ordering::Relaxed);
+                            true
                         }
-                        Err(TrySendError::Disconnected(_)) => break,
+                        Err(TrySendError::Disconnected(_)) => false,
                     }
-                }
-                let rejected = capture.rejected;
-                let missing = capture.metadata_missing;
-                let gaps = capture.sequence_drops;
-                capture.close().map_err(|e| e.to_string())?;
-                if let Some(w) = recording {
-                    let file = w.finish().map_err(|e| e.to_string())?;
-                    file.get_ref().sync_all().map_err(|e| e.to_string())?;
-                    drop(file);
-                    std::fs::hard_link(partial.as_ref().unwrap(), output.as_ref().unwrap())
-                        .map_err(|e| e.to_string())?;
-                    std::fs::remove_file(partial.as_ref().unwrap()).map_err(|e| e.to_string())?;
-                }
-                Ok(format!(
-                    "Stopped cleanly. Rejected buffers={rejected}, missing metadata={missing}, sequence gaps={gaps}. Recording: {}",
-                    output.map_or_else(|| "off".into(), |p| p.display().to_string())
-                ))
-            };
-            let _ = done.send(run());
-        });
+                },
+            )
+        }) {
+            Ok(worker) => worker,
+            Err(error) => {
+                self.status = "Capture not started".into();
+                self.log = format!("Could not create capture worker: {error}");
+                return;
+            }
+        };
         self.running = Some(Running {
             cancel,
+            abort,
             frames,
             preview_drops: drops,
             rx,
-            result,
-            worker: Some(worker),
+            worker,
         });
         self.status = "Starting native capture…".into();
     }
@@ -264,20 +355,24 @@ impl App {
             r.frames.load(Ordering::Relaxed),
             r.preview_drops.load(Ordering::Relaxed)
         );
-        if let Ok(result) = r.result.try_recv() {
+        if let Some(result) = self.running.as_mut().and_then(|r| r.worker.poll()) {
+            let failed = result.is_err();
             self.log = match result {
                 Ok(s) => s,
                 Err(e) => {
+                    // Keep the failure and partial-recording diagnostic visible;
+                    // a pending close must not silently consume capture errors.
+                    self.capture_close.keep_open();
+                    self.close_allowed = false;
                     format!("Capture failed: {e}. Any .partial file is an incomplete recording.")
                 }
             };
-            if let Some(mut r) = self.running.take()
-                && let Some(w) = r.worker.take()
-                && w.join().is_err()
-            {
-                self.log = "Capture worker panicked".into();
-            }
-            self.status = "Capture stopped".into();
+            self.running = None;
+            self.status = if failed {
+                "Capture worker ended; see cleanup diagnostics".into()
+            } else {
+                "Capture stopped".into()
+            };
         }
         ctx.request_repaint_after(Duration::from_millis(30));
     }
@@ -285,25 +380,40 @@ impl App {
 impl eframe::App for App {
     fn update(&mut self, ctx: &egui::Context, _: &mut eframe::Frame) {
         self.cloud.tick();
+        self.board.tick();
+        let laser_failed = self.candidates.tick();
+        let live_failed = self.live.tick(ctx) || laser_failed;
         self.mesh.tick();
         self.recovery.tick();
         self.archive.tick();
         self.playback.tick(ctx);
-        if self.recovery.is_busy() || self.playback.is_busy() || self.archive.is_busy() {
+        if self.recovery.is_busy()
+            || self.playback.is_busy()
+            || self.archive.is_busy()
+            || self.board.is_busy()
+            || self.candidates.is_busy()
+        {
             ctx.request_repaint_after(Duration::from_millis(50));
         }
-        if ctx.input(|i| i.viewport().close_requested())
-            && !self.close_allowed
-            && (self.cloud.is_dirty()
-                || self.cloud.is_busy()
-                || self.recovery.is_busy()
-                || self.playback.is_busy()
-                || self.archive.is_busy())
-        {
-            ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
-            self.confirm_close = true;
+        let requested = ctx.input(|i| i.viewport().close_requested());
+        let waiting_for_capture = self.window_close_step(ctx, requested, live_failed);
+        if self.closing_window {
+            return;
         }
-        if self.confirm_close {
+        if waiting_for_capture {
+            egui::Window::new("Stopping capture before closing")
+                .collapsible(false).resizable(false).show(ctx, |ui| {
+                    ui.label("Waiting for capture cleanup. Recordings are not finalized until capture stops.");
+                    if self.capture_close.slow(std::time::Instant::now()) {
+                        ui.label("Scanner cleanup is taking longer than expected. Restoration is not yet confirmed.");
+                        if (self.live.is_busy() || self.running.is_some() || self.candidates.capture_busy()) && ui.button("Abort capture (keep partial data)").clicked() {
+                            self.abort_pending_capture();
+                        }
+                    }
+                    if ui.button("Keep window open").clicked() { self.capture_close.keep_open(); self.confirm_close = false; }
+                });
+        }
+        if self.confirm_close && !waiting_for_capture {
             egui::Window::new("Close ScanCraft?")
                 .collapsible(false)
                 .resizable(false)
@@ -318,12 +428,16 @@ impl eframe::App for App {
                         || self.recovery.is_busy()
                         || self.playback.is_busy()
                         || self.archive.is_busy()
+                        || self.board.is_busy()
+                        || self.candidates.is_busy()
                     {
                         if ui.button("Cancel operation and keep open").clicked() {
                             self.cloud.cancel();
                             self.recovery.cancel();
                             self.playback.cancel();
                             self.archive.cancel();
+                            self.candidates.cancel();
+                            self.board.cancel();
                             self.confirm_close = false;
                         }
                     } else if ui.button("Save project and keep open").clicked() {
@@ -335,21 +449,41 @@ impl eframe::App for App {
                         self.recovery.cancel();
                         self.playback.cancel();
                         self.archive.cancel();
+                        self.candidates.cancel();
+                        self.board.cancel();
                         self.close_allowed = true;
                         self.confirm_close = false;
-                        ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                        self.request_window_close(ctx);
                     }
                 });
         }
+        // Once root Close is queued, do not accept new work or edits in
+        // the remainder of this frame after its safety checks have passed.
+        if self.closing_window {
+            return;
+        }
         if self.running.is_some()
+            || self.live.is_busy()
+            || self.candidates.capture_busy()
             || self.cloud.is_busy()
             || self.mesh.is_busy()
             || self.recovery.is_busy()
             || self.playback.is_busy()
             || self.archive.is_busy()
+            || self.board.is_busy()
+            || self.candidates.is_busy()
             || self.smoke.is_some()
         {
             ctx.request_repaint_after(Duration::from_millis(100));
+        }
+        if let Some(job) = &mut self.discovery {
+            if let Some(result) = job.poll() {
+                self.log = result.unwrap_or_else(|e| e);
+                self.status = "Discovery finished; see diagnostics".into();
+                self.discovery = None;
+            } else {
+                ctx.request_repaint_after(Duration::from_millis(30));
+            }
         }
         self.receive(ctx);
         if let Some(start) = self.smoke {
@@ -381,23 +515,41 @@ impl eframe::App for App {
         }
         egui::CentralPanel::default().show(ctx,|ui|{
             ui.horizontal(|ui|{
-                if ui.selectable_label(!self.mesh_active&&!self.editing,"Cameras").clicked(){self.mesh_active=false;self.editing=false;}
-                if ui.selectable_label(!self.mesh_active&&self.editing,"Point clouds").clicked(){self.mesh_active=false;self.editing=true;}
-                if ui.selectable_label(self.mesh_active,"Meshes").clicked(){self.mesh_active=true;}
+                if ui.selectable_label(!self.board_active&&!self.candidates_active&&!self.mesh_active&&!self.editing&&!self.live_active,"Cameras").clicked(){self.board_active=false;self.candidates_active=false;self.mesh_active=false;self.editing=false;self.live_active=false;}
+                if ui.selectable_label(!self.board_active&&!self.candidates_active&&!self.mesh_active&&self.editing&&!self.live_active,"Point clouds").clicked(){self.board_active=false;self.candidates_active=false;self.mesh_active=false;self.editing=true;self.live_active=false;}
+                if ui.selectable_label(!self.board_active&&!self.candidates_active&&self.live_active,"Live scan").clicked(){self.board_active=false;self.candidates_active=false;self.mesh_active=false;self.editing=false;self.live_active=true;}
+                if ui.selectable_label(!self.board_active&&!self.candidates_active&&self.mesh_active,"Meshes").clicked(){self.board_active=false;self.candidates_active=false;self.mesh_active=true;self.live_active=false;}
+                if ui.selectable_label(!self.board_active&&self.candidates_active,"Laser candidates").clicked(){self.board_active=false;self.candidates_active=true;}
+                if ui.selectable_label(self.board_active,"Calibration").clicked(){self.board_active=true;}
             });
+            if self.board_active {let can_use=self.can_select_calibration();if let Some(path)=self.board.ui(ui,!self.confirm_close&&!self.capture_close.is_waiting(),can_use){self.select_calibration(path);}return;}
+            if self.candidates_active {let can=self.discovery.is_none()&&self.running.is_none()&&!self.live.is_busy()&&!self.capture_close.is_waiting()&&!self.closing_window&&!self.confirm_close;self.candidates.ui(ui,can);return;}
+            if self.live_active {
+                let can_start=self.discovery.is_none()&&self.running.is_none()&&!self.candidates.capture_busy()&&!self.capture_close.is_waiting()&&!self.closing_window;
+                if let Some(path)=self.live.ui(ui,can_start,!self.cloud.is_busy()) && self.cloud.request_open(path) {self.editing=true;self.live_active=false;}
+                return;
+            }
             if self.mesh_active {self.mesh.ui(ui);return;}
             if self.editing {self.cloud.ui(ui,&mut self.folder);return;}
             ui.heading("ScanCraft");ui.label("ArtCraft Ecosystem Candidate · Experimental 0.1");
-            ui.label("Calibration deferred. Scanner reconstruction and accuracy qualification are not available yet.");ui.separator();
-            let active=self.running.is_some();
+            ui.label("Calibration candidates are experimental; genuine object reconstruction and dimensional accuracy remain unqualified.");ui.separator();
+            let active=self.capture_active_or_closing();
             let previous_interface=self.interface;
             ui.horizontal(|ui|{
                 ui.add_enabled_ui(!active,|ui|{
-                    if ui.button("Find scanner").clicked(){self.log=match discover(){Ok(n)=>format!("{} native video/metadata nodes\n{}",n.len(),n.iter().map(|n|format!("{} · interface {} · {}",n.path.display(),n.interface,if n.metadata{"metadata"}else{"image"})).collect::<Vec<_>>().join("\n")),Err(e)=>e.to_string()};}
+                    if ui.button("Find scanner").clicked(){
+                        match discovery_process::Discovery::start() {
+                            Ok(job)=>{self.discovery=Some(job);self.status="Finding scanner…".into();},
+                            Err(e)=>self.log=format!("Could not start discovery: {e}"),
+                        }
+                    }
                     egui::ComboBox::from_id_salt("camera").selected_text(match self.interface{0=>"Left IR",2=>"Right IR",_=>"Color"}).show_ui(ui,|ui|{ui.selectable_value(&mut self.interface,4,"Color");ui.selectable_value(&mut self.interface,0,"Left IR");ui.selectable_value(&mut self.interface,2,"Right IR");});
                     if ui.button("Start preview").clicked(){self.start();}
                 });
-                if ui.add_enabled(active,egui::Button::new("Stop")).clicked()&& let Some(r)=&self.running{r.cancel.store(true,Ordering::Relaxed);}
+                if ui.add_enabled(active,egui::Button::new("Stop")).clicked(){
+                    if let Some(r)=&self.running{r.cancel.store(true,Ordering::Relaxed);}
+                    if let Some(job)=&self.discovery{job.cancel();}
+                }
                 if ui.add_enabled(self.snapshot.is_some(),egui::Button::new("Save snapshot")).clicked(){
                     let dir=PathBuf::from(&self.folder);let stamp=SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_nanos();let path=dir.join(format!("snapshot-{stamp}.png"));
                     self.log=match std::fs::create_dir_all(&dir).and_then(|_|self.snapshot.as_ref().unwrap().save(&path).map_err(std::io::Error::other)){Ok(())=>format!("Saved {}",path.display()),Err(e)=>format!("Save failed: {e}")};
@@ -425,15 +577,34 @@ impl eframe::App for App {
 impl Drop for App {
     fn drop(&mut self) {
         if let Some(r) = &mut self.running {
+            r.abort.store(true, Ordering::Relaxed);
             r.cancel.store(true, Ordering::Relaxed);
-            if let Some(w) = r.worker.take() {
-                let _ = w.join();
-            }
+            let _ = r.worker.join();
         }
     }
 }
 #[derive(Debug, PartialEq)]
 enum Startup {
+    FitCalibration {
+        request: PathBuf,
+        output: PathBuf,
+    },
+    ObserveBoard {
+        request: PathBuf,
+        output: PathBuf,
+    },
+    CaptureLaser {
+        paths: Vec<PathBuf>,
+        origin: laser_display::Origin,
+    },
+    Candidates {
+        path: PathBuf,
+        index: u64,
+    },
+    ProcessCandidates {
+        inputs: scancraft_workflow::recorded_traces::Inputs,
+        target: PathBuf,
+    },
     StatisticalPreview {
         path: PathBuf,
         neighbors: usize,
@@ -465,6 +636,7 @@ enum Startup {
         output: PathBuf,
     },
     Playback(PathBuf),
+    SyntheticLive(PathBuf),
     Empty,
     File(PathBuf),
     Mesh(PathBuf),
@@ -511,6 +683,11 @@ enum Startup {
         inputs: scancraft_workflow::FileInputs,
         output: PathBuf,
     },
+    RecordedSequence {
+        inputs: scancraft_workflow::recording_reconstruction::Inputs,
+        settings: PathBuf,
+        output: PathBuf,
+    },
     FuseSequence {
         settings: PathBuf,
         output: PathBuf,
@@ -522,10 +699,16 @@ enum Startup {
 fn startup_args(args: Vec<std::ffi::OsString>) -> Result<Startup, String> {
     match args.as_slice() {
         [] => Ok(Startup::Empty),
+        [flag,request,output] if flag=="--fit-calibration-candidate" => Ok(Startup::FitCalibration{request:request.into(),output:output.into()}),
+        [flag,request,output] if flag=="--observe-calibration-pair" => Ok(Startup::ObserveBoard{request:request.into(),output:output.into()}),
         [flag] if flag == "--help" || flag == "-h" => Ok(Startup::Help),
         [flag] if flag == "--smoke-test" => Ok(Startup::Smoke),
         [flag] if flag == "--smoke-test-ir" => Ok(Startup::SmokeIr),
+        [flag,output] if flag == "--synthetic-live-scan" => Ok(Startup::SyntheticLive(output.into())),
         [flag,calibration,left,right,settings,output] if flag=="--reconstruct" => Ok(Startup::Reconstruct {inputs:scancraft_workflow::FileInputs {calibration:calibration.into(),left:left.into(),right:right.into(),settings:settings.into()},output:output.into()}),
+        [flag,cal,left,right,recon,settings,output] if flag=="--reconstruct-recorded-sequence" => Ok(Startup::RecordedSequence {
+            inputs:scancraft_workflow::recording_reconstruction::Inputs {calibration:cal.into(),left:left.into(),right:right.into(),settings:recon.into(),left_index:0,right_index:0},settings:settings.into(),output:output.into()
+        }),
         [flag,settings,output] if flag=="--fuse-sequence" => Ok(Startup::FuseSequence {settings:settings.into(),output:output.into()}),
         [flag,calibration,left,li,right,ri,settings,output] if flag=="--reconstruct-recordings" => {
             let index=|s:&std::ffi::OsString|s.to_str().ok_or("invalid recording index")?.parse::<usize>().map_err(|_|"invalid recording index");
@@ -541,6 +724,14 @@ fn startup_args(args: Vec<std::ffi::OsString>) -> Result<Startup, String> {
         [flag,left,right,target] if flag=="--archive-recordings"=>Ok(Startup::ArchiveRecordings{left:left.into(),right:right.into(),target:target.into()}),
         [flag,project,sources,target] if flag=="--export-project-bundle" => Ok(Startup::ExportBundle{project:project.into(),sources:sources.into(),target:target.into()}),
         [flag,project,directory] if flag=="--verify-source-bundle" => Ok(Startup::VerifySources{project:project.into(),directory:directory.into()}),
+        [flag,g,r,out] if flag=="--capture-laser"=>Ok(Startup::CaptureLaser {paths:vec![g.into(),r.into(),out.into()],origin:laser_display::Origin::Native}),
+        [flag,g,r,a,b,out] if flag=="--replay-laser"=>Ok(Startup::CaptureLaser {paths:vec![g.into(),r.into(),a.into(),b.into(),out.into()],origin:laser_display::Origin::RecordingReplay}),
+        [flag,path,index] if flag=="--laser-candidates" => Ok(Startup::Candidates { path:path.into(), index:index.to_str().ok_or("invalid candidate pair index")?.parse().map_err(|_|"invalid candidate pair index")? }),
+        [flag,path] if flag=="--laser-candidates" => Ok(Startup::Candidates { path: path.into(), index: 0 }),
+        [flag,geometry,first,fi,second,si,request,target] if flag=="--match-recorded-laser-traces" => {
+            let index=|s:&std::ffi::OsString|s.to_str().ok_or("invalid recording index")?.parse::<usize>().map_err(|_|"invalid recording index");
+            Ok(Startup::ProcessCandidates {inputs:scancraft_workflow::recorded_traces::Inputs {geometry:geometry.into(),first_recording:first.into(),first_index:index(fi)?,second_recording:second.into(),second_index:index(si)?,request:request.into()},target:target.into()})
+        }
         [flag,path] if flag=="--play-recording" => Ok(Startup::Playback(path.into())),
         [flag,path,ox,oy,oz,nx,ny,nz,tolerance] if flag=="--mesh-section" => {
             let parse=|v:&std::ffi::OsString|v.to_str().ok_or_else(||"section values must be text".to_owned()).and_then(|s|s.parse::<f64>().map_err(|_|"invalid section value".to_owned()));
@@ -575,14 +766,27 @@ fn startup_args(args: Vec<std::ffi::OsString>) -> Result<Startup, String> {
         [path] if !path.to_string_lossy().starts_with('-') => {
             Ok(Startup::File(PathBuf::from(path)))
         }
-        _ => Err("Usage: scancraft [PROJECT_OR_PLY_FILE] | --reconstruct CALIBRATION LEFT.PNG RIGHT.PNG SETTINGS NEW_RESULT_FOLDER | --fuse-sequence SETTINGS NEW_RESULT_FOLDER | --mesh MESH_JSON | --mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM | --mesh-boundaries MESH_OR_PROJECT | --fit-cylinder PROJECT_OR_PLY_FILE MAX_RMS_MM | --frame-document FRAME_FILE | --coordinate-frame PROJECT_OR_PLY_FILE | --measurement-outlines PROJECT_OR_PLY_FILE | --cloud-normals PROJECT_OR_PLY_FILE | --mesh-normals MESH_OR_PROJECT | --reconstruct-recordings CALIBRATION LEFT_RECORDING LEFT_INDEX RIGHT_RECORDING RIGHT_INDEX SETTINGS NEW_FOLDER | --statistical-preview PROJECT_OR_PLY K SIGMA_MULTIPLIER | --export-scan-project PROJECT SOURCE_BUNDLE LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --archive-recordings LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --export-project-bundle PROJECT SOURCE_BUNDLE NEW_DIRECTORY | --verify-source-bundle PROJECT DIRECTORY | --play-recording RECORDING | --recover-recording INPUT MAX_FRAMES NEW_FOLDER | --import-mesh FILE obj|stl mm|in|m separate|weld-exact NEW_FOLDER | --mesh-smooth-preview MESH_OR_PROJECT ITERATIONS RELAXATION MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG | --mesh-simplify-preview MESH_OR_PROJECT TARGET MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG MAX_COLLAPSES | --mesh-plane-preview MESH_JSON NX NY NZ OFFSET | --help | --smoke-test | --smoke-test-ir".into()),
+        _ => Err("Usage: scancraft [PROJECT_OR_PLY_FILE] | --synthetic-live-scan NEW_SYNTHETIC_OUTPUT | --reconstruct CALIBRATION LEFT.PNG RIGHT.PNG SETTINGS NEW_RESULT_FOLDER | --reconstruct-recorded-sequence CAL LEFT_RECORDING RIGHT_RECORDING RECON_SETTINGS SEQUENCE_SETTINGS NEW_FOLDER | --fuse-sequence SETTINGS NEW_RESULT_FOLDER | --mesh MESH_JSON | --mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM | --mesh-boundaries MESH_OR_PROJECT | --fit-cylinder PROJECT_OR_PLY_FILE MAX_RMS_MM | --frame-document FRAME_FILE | --coordinate-frame PROJECT_OR_PLY_FILE | --measurement-outlines PROJECT_OR_PLY_FILE | --cloud-normals PROJECT_OR_PLY_FILE | --mesh-normals MESH_OR_PROJECT | --reconstruct-recordings CALIBRATION LEFT_RECORDING LEFT_INDEX RIGHT_RECORDING RIGHT_INDEX SETTINGS NEW_FOLDER | --statistical-preview PROJECT_OR_PLY K SIGMA_MULTIPLIER | --export-scan-project PROJECT SOURCE_BUNDLE LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --archive-recordings LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --export-project-bundle PROJECT SOURCE_BUNDLE NEW_DIRECTORY | --verify-source-bundle PROJECT DIRECTORY | --capture-laser GEOMETRY_JSON STREAM_REQUEST_JSON NEW_DIRECTORY | --replay-laser GEOMETRY_JSON STREAM_REQUEST_JSON FIRST_RECORDING SECOND_RECORDING NEW_DIRECTORY | --laser-candidates BUNDLE_DIRECTORY [PAIR_INDEX] | --match-recorded-laser-traces GEOMETRY FIRST_RECORDING FIRST_INDEX SECOND_RECORDING SECOND_INDEX REQUEST NEW_FOLDER | --fit-calibration-candidate REQUEST_JSON NEW_FOLDER | --observe-calibration-pair REQUEST_JSON NEW_FOLDER | --play-recording RECORDING | --recover-recording INPUT MAX_FRAMES NEW_FOLDER | --import-mesh FILE obj|stl mm|in|m separate|weld-exact NEW_FOLDER | --mesh-smooth-preview MESH_OR_PROJECT ITERATIONS RELAXATION MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG | --mesh-simplify-preview MESH_OR_PROJECT TARGET MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG MAX_COLLAPSES | --mesh-plane-preview MESH_JSON NX NY NZ OFFSET | --help | --smoke-test | --smoke-test-ir".into()),
     }
 }
 fn main() -> eframe::Result {
+    let args: Vec<_> = std::env::args_os().skip(1).collect();
+    if let Some(code) = laser_process::helper_entry(&args) {
+        std::process::exit(code);
+    }
+    if let Some(code) = live_process::helper_entry(&args) {
+        std::process::exit(code);
+    }
+    if let Some(code) = discovery_process::helper_entry(&args) {
+        std::process::exit(code);
+    }
+    if let Some(code) = capture_process::helper_entry(&args) {
+        std::process::exit(code);
+    }
     let startup = match startup_args(std::env::args_os().skip(1).collect()) {
         Ok(Startup::Help) => {
             println!(
-                "Usage: scancraft [PROJECT_OR_PLY_FILE]\n       scancraft --reconstruct CALIBRATION LEFT.PNG RIGHT.PNG SETTINGS NEW_RESULT_FOLDER\n       scancraft --fuse-sequence SETTINGS NEW_RESULT_FOLDER\n       scancraft --mesh MESH_JSON\n       scancraft --mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM | --mesh-boundaries MESH_OR_PROJECT\n       scancraft --fit-cylinder PROJECT_OR_PLY_FILE MAX_RMS_MM | --frame-document FRAME_FILE | --coordinate-frame PROJECT_OR_PLY_FILE | --measurement-outlines PROJECT_OR_PLY_FILE | --cloud-normals PROJECT_OR_PLY_FILE\n       scancraft --mesh-normals MESH_OR_PROJECT\n       scancraft --reconstruct-recordings CALIBRATION LEFT_RECORDING LEFT_INDEX RIGHT_RECORDING RIGHT_INDEX SETTINGS NEW_FOLDER | --statistical-preview PROJECT_OR_PLY K SIGMA_MULTIPLIER | --export-scan-project PROJECT SOURCE_BUNDLE LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --archive-recordings LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --export-project-bundle PROJECT SOURCE_BUNDLE NEW_DIRECTORY | --verify-source-bundle PROJECT DIRECTORY | --play-recording RECORDING | --recover-recording INPUT MAX_FRAMES NEW_FOLDER | --import-mesh FILE obj|stl mm|in|m separate|weld-exact NEW_FOLDER | --mesh-smooth-preview MESH_OR_PROJECT ITERATIONS RELAXATION MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG | --mesh-simplify-preview MESH_OR_PROJECT TARGET MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG MAX_COLLAPSES | --mesh-plane-preview MESH_JSON NX NY NZ OFFSET\nOpen geometry without starting camera acquisition. Files without units require an explicit choice in the import panel."
+                "Usage: scancraft [PROJECT_OR_PLY_FILE]\n       scancraft --synthetic-live-scan NEW_SYNTHETIC_OUTPUT\n       scancraft --reconstruct CALIBRATION LEFT.PNG RIGHT.PNG SETTINGS NEW_RESULT_FOLDER\n       scancraft --reconstruct-recorded-sequence CAL LEFT_RECORDING RIGHT_RECORDING RECON_SETTINGS SEQUENCE_SETTINGS NEW_FOLDER\n       scancraft --fuse-sequence SETTINGS NEW_RESULT_FOLDER\n       scancraft --mesh MESH_JSON\n       scancraft --mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM | --mesh-boundaries MESH_OR_PROJECT\n       scancraft --fit-cylinder PROJECT_OR_PLY_FILE MAX_RMS_MM | --frame-document FRAME_FILE | --coordinate-frame PROJECT_OR_PLY_FILE | --measurement-outlines PROJECT_OR_PLY_FILE | --cloud-normals PROJECT_OR_PLY_FILE\n       scancraft --mesh-normals MESH_OR_PROJECT\n       scancraft --reconstruct-recordings CALIBRATION LEFT_RECORDING LEFT_INDEX RIGHT_RECORDING RIGHT_INDEX SETTINGS NEW_FOLDER | --statistical-preview PROJECT_OR_PLY K SIGMA_MULTIPLIER | --export-scan-project PROJECT SOURCE_BUNDLE LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --archive-recordings LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --export-project-bundle PROJECT SOURCE_BUNDLE NEW_DIRECTORY | --verify-source-bundle PROJECT DIRECTORY | --capture-laser GEOMETRY_JSON STREAM_REQUEST_JSON NEW_DIRECTORY | --replay-laser GEOMETRY_JSON STREAM_REQUEST_JSON FIRST_RECORDING SECOND_RECORDING NEW_DIRECTORY | --laser-candidates BUNDLE_DIRECTORY [PAIR_INDEX] | --match-recorded-laser-traces GEOMETRY FIRST_RECORDING FIRST_INDEX SECOND_RECORDING SECOND_INDEX REQUEST NEW_FOLDER | --fit-calibration-candidate REQUEST_JSON NEW_FOLDER | --observe-calibration-pair REQUEST_JSON NEW_FOLDER | --play-recording RECORDING | --recover-recording INPUT MAX_FRAMES NEW_FOLDER | --import-mesh FILE obj|stl mm|in|m separate|weld-exact NEW_FOLDER | --mesh-smooth-preview MESH_OR_PROJECT ITERATIONS RELAXATION MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG | --mesh-simplify-preview MESH_OR_PROJECT TARGET MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG MAX_COLLAPSES | --mesh-plane-preview MESH_JSON NX NY NZ OFFSET\nOpening geometry never starts camera acquisition. The synthetic-live diagnostic opens no scanner. Files without units require an explicit choice in the import panel."
             );
             return Ok(());
         }
@@ -601,6 +805,30 @@ fn main() -> eframe::Result {
         Box::new(move |_| {
             let mut app = App::default();
             match startup {
+                Startup::FitCalibration { request, output } => {
+                    app.board_active = true;
+                    app.board.start_candidate(request, output);
+                }
+                Startup::ObserveBoard { request, output } => {
+                    app.board_active = true;
+                    app.board.start(request, output);
+                }
+                Startup::CaptureLaser { paths, origin } => {
+                    app.candidates_active = true;
+                    app.candidates.start_capture(paths, origin);
+                }
+                Startup::Candidates { path, index } => {
+                    app.candidates_active = true;
+                    if index == 0 {
+                        app.candidates.open(path);
+                    } else {
+                        app.candidates.open_pair(path, index);
+                    }
+                }
+                Startup::ProcessCandidates { inputs, target } => {
+                    app.candidates_active = true;
+                    app.candidates.process(inputs, target);
+                }
                 Startup::StatisticalPreview {
                     path,
                     neighbors,
@@ -717,6 +945,15 @@ fn main() -> eframe::Result {
                     app.editing = true;
                     app.cloud.open_startup(path);
                 }
+                Startup::RecordedSequence {
+                    inputs,
+                    settings,
+                    output,
+                } => {
+                    app.editing = true;
+                    app.cloud
+                        .recorded_sequence_startup(inputs, settings, output);
+                }
                 Startup::FuseSequence { settings, output } => {
                     app.editing = true;
                     app.cloud.sequence_startup(settings, output);
@@ -741,6 +978,10 @@ fn main() -> eframe::Result {
                     app.smoke = Some(std::time::Instant::now());
                     app.start();
                 }
+                Startup::SyntheticLive(output) => {
+                    app.live_active = true;
+                    app.live.synthetic_startup(output);
+                }
                 Startup::Empty | Startup::Help => {}
             }
             Ok(Box::new(app))
@@ -752,6 +993,72 @@ mod startup_tests {
     use super::*;
     fn args(values: &[&str]) -> Vec<std::ffi::OsString> {
         values.iter().map(std::ffi::OsString::from).collect()
+    }
+    #[test]
+    fn calibration_candidate_startup_and_selection_respect_active_work_and_close() {
+        assert!(
+            matches!(startup_args(args(&["--fit-calibration-candidate", "fit request.json", "new candidate"])), Ok(Startup::FitCalibration {request,output}) if request == std::path::Path::new("fit request.json") && output == std::path::Path::new("new candidate"))
+        );
+        assert!(startup_args(args(&["--fit-calibration-candidate", "request"])).is_err());
+        let mut app = App::default();
+        app.board
+            .start_candidate("missing-request.json".into(), "unused-output".into());
+        assert!(app.needs_close_confirmation());
+        assert!(!app.select_calibration("must-not-select".into()));
+        app.board.cancel();
+        let end = std::time::Instant::now() + Duration::from_secs(5);
+        while app.board.is_busy() {
+            assert!(std::time::Instant::now() < end);
+            app.board.tick();
+            std::thread::yield_now();
+        }
+        assert!(app.select_calibration("explicit-selection.rapcal".into()));
+        assert!(app.editing && !app.board_active);
+        assert!(!app.cloud.is_busy() && !app.live.is_busy() && app.running.is_none());
+    }
+    #[test]
+    fn board_startup_preserves_paths_and_requires_both_arguments() {
+        let args = |items: &[&str]| items.iter().map(std::ffi::OsString::from).collect();
+        assert!(
+            matches!(startup_args(args(&["--observe-calibration-pair", "board request.json", "new result"])), Ok(Startup::ObserveBoard {request,output}) if request == std::path::Path::new("board request.json") && output == std::path::Path::new("new result"))
+        );
+        assert!(startup_args(args(&["--observe-calibration-pair", "request"])).is_err());
+    }
+    #[test]
+    fn board_job_participates_in_root_close_confirmation() {
+        let mut app = App::default();
+        app.board
+            .start("missing-request.json".into(), "unused-output".into());
+        assert!(app.needs_close_confirmation());
+        app.board.cancel();
+    }
+    #[test]
+    fn recorded_sequence_startup_requires_all_explicit_files() {
+        let args = |v: &[&str]| v.iter().map(std::ffi::OsString::from).collect();
+        assert!(matches!(
+            startup_args(args(&[
+                "--reconstruct-recorded-sequence",
+                "cal",
+                "left",
+                "right",
+                "recon",
+                "sequence",
+                "out"
+            ]))
+            .unwrap(),
+            Startup::RecordedSequence { .. }
+        ));
+        assert!(
+            startup_args(args(&[
+                "--reconstruct-recorded-sequence",
+                "cal",
+                "left",
+                "right",
+                "recon",
+                "sequence"
+            ]))
+            .is_err()
+        );
     }
     #[test]
     fn statistical_preview_parameters_are_explicit_and_validated() {
@@ -890,6 +1197,54 @@ mod startup_tests {
         .map(Into::into)
         .collect();
         assert!(startup_args(args).is_err());
+    }
+    #[test]
+    fn recorded_laser_processing_preserves_explicit_paths_and_rejects_invalid_indices() {
+        let args = |first: &str, second: &str| {
+            [
+                "--match-recorded-laser-traces",
+                "camera model.json",
+                "first.raptor",
+                first,
+                "second.raptor",
+                second,
+                "request.json",
+                "new output",
+            ]
+            .into_iter()
+            .map(Into::into)
+            .collect()
+        };
+        let startup = startup_args(args("3", "5")).unwrap();
+        assert!(
+            matches!(startup,Startup::ProcessCandidates {inputs,target} if inputs.geometry==std::path::Path::new("camera model.json") && inputs.first_index==3 && inputs.second_index==5 && inputs.request==std::path::Path::new("request.json") && target==std::path::Path::new("new output"))
+        );
+        for invalid in ["-1", "no", "184467440737095516160"] {
+            assert!(startup_args(args(invalid, "0")).is_err());
+            assert!(startup_args(args("0", invalid)).is_err());
+        }
+        assert!(
+            startup_args(vec!["--match-recorded-laser-traces".into(), "model".into()]).is_err()
+        );
+    }
+    #[test]
+    fn laser_capture_and_replay_startup_are_explicit_and_do_not_alias_saved_view() {
+        assert_eq!(
+            startup_args(args(&["--capture-laser", "g", "r", "out"])).unwrap(),
+            Startup::CaptureLaser {
+                paths: vec!["g".into(), "r".into(), "out".into()],
+                origin: laser_display::Origin::Native
+            }
+        );
+        assert_eq!(
+            startup_args(args(&["--replay-laser", "g", "r", "a", "b", "out"])).unwrap(),
+            Startup::CaptureLaser {
+                paths: vec!["g".into(), "r".into(), "a".into(), "b".into(), "out".into()],
+                origin: laser_display::Origin::RecordingReplay
+            }
+        );
+        assert!(startup_args(args(&["--capture-laser", "g", "r"])).is_err());
+        assert!(startup_args(args(&["--replay-laser", "g", "r", "out"])).is_err());
     }
     #[test]
     fn recording_playback_startup_is_explicit_and_requires_one_path() {
@@ -1040,7 +1395,374 @@ mod startup_tests {
             Startup::Reconstruct { .. }
         ));
         assert!(startup_args(args(&["--reconstruct", "calibration"])).is_err());
+        assert_eq!(
+            startup_args(args(&["--laser-candidates", "bundle"])).unwrap(),
+            Startup::Candidates {
+                path: "bundle".into(),
+                index: 0
+            }
+        );
         assert!(startup_args(args(&["--unknown"])).is_err());
         assert!(startup_args(args(&["one", "two"])).is_err());
+    }
+}
+
+#[cfg(test)]
+mod capture_recovery_tests {
+    use super::*;
+    #[test]
+    fn candidate_loading_keeps_the_root_window_open_until_cancelled_or_finished() {
+        let mut app = App::default();
+        app.candidates.open(std::env::temp_dir().join(format!(
+            "scancraft-missing-candidate-root-{}",
+            std::process::id()
+        )));
+        assert!(app.candidates.is_busy());
+        let context = egui::Context::default();
+        let _ = context.run(egui::RawInput::default(), |ctx| {
+            app.window_close_step(ctx, true, false);
+        });
+        assert!(app.confirm_close);
+        assert!(!app.closing_window);
+        app.candidates.cancel();
+    }
+    // Release injected stalls even if an assertion unwinds before normal cleanup.
+    // Otherwise App::drop could join a test worker still waiting on this sender.
+    struct ReleaseOnDrop(Option<mpsc::Sender<()>>);
+    impl ReleaseOnDrop {
+        fn release(&mut self) {
+            if let Some(sender) = self.0.take() {
+                let _ = sender.send(());
+            }
+        }
+    }
+    impl Drop for ReleaseOnDrop {
+        fn drop(&mut self) {
+            self.release();
+        }
+    }
+
+    fn running(run: impl FnOnce() -> Result<String, String> + Send + 'static) -> Running {
+        let (_sender, rx) = mpsc::channel();
+        Running {
+            cancel: Arc::new(AtomicBool::new(false)),
+            abort: Arc::new(AtomicBool::new(false)),
+            frames: Arc::new(AtomicU64::new(0)),
+            preview_drops: Arc::new(AtomicU64::new(0)),
+            rx,
+            worker: capture_worker::Worker::spawn(run).unwrap(),
+        }
+    }
+    fn finish(app: &mut App) {
+        let deadline = std::time::Instant::now() + Duration::from_secs(5);
+        let context = egui::Context::default();
+        while app.running.is_some() {
+            app.receive(&context);
+            assert!(
+                std::time::Instant::now() < deadline,
+                "capture failed to leave running state"
+            );
+            std::thread::yield_now();
+        }
+    }
+    #[test]
+    fn capture_completion_rechecks_busy_project_before_root_close_command() {
+        let mut app = App::default();
+        app.cloud.open_startup(
+            PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                .join("../../evidence/offline-cli-verified/project.orproj"),
+        );
+        assert!(app.cloud.is_busy()); // Retained until UI tick, even if load finishes.
+        let now = std::time::Instant::now();
+        app.capture_close.advance(true, true, now); // A prior capture close intent.
+        assert!(app.capture_active_or_closing()); // No replacement start while close is pending.
+        let ctx = egui::Context::default();
+        let output = ctx.run(Default::default(), |ctx| {
+            assert!(!app.capture_close_step(ctx, false, now));
+        });
+        assert!(app.confirm_close);
+        assert!(!app.close_allowed);
+        assert!(
+            !output.viewport_output[&egui::ViewportId::ROOT]
+                .commands
+                .contains(&egui::ViewportCommand::Close)
+        );
+        app.cloud.cancel();
+    }
+    #[test]
+    fn capture_error_cancels_pending_close_so_diagnostic_remains_visible() {
+        let mut app = App::default();
+        app.running = Some(running(|| Err("cleanup error".into())));
+        let ctx = egui::Context::default();
+        let now = std::time::Instant::now();
+        assert!(app.capture_close_step(&ctx, true, now));
+        finish(&mut app);
+        assert!(!app.capture_close.is_waiting());
+        assert!(!app.close_allowed);
+        assert!(app.log.contains("cleanup error"));
+        assert!(app.log.contains("incomplete recording"));
+        assert!(!app.capture_close_step(&ctx, false, now));
+    }
+    #[test]
+    fn ordinary_close_requests_stop_and_waits_without_abandoning_worker() {
+        let (release, wait) = mpsc::channel();
+        let mut app = App::default();
+        app.running = Some(running(move || {
+            wait.recv().unwrap();
+            Ok("cleanup finished".into())
+        }));
+        let mut release = ReleaseOnDrop(Some(release)); // Drops before App on failure.
+        let cancel = app.running.as_ref().unwrap().cancel.clone();
+        app.close_allowed = true; // Old discard consent must be rechecked.
+        let ctx = egui::Context::default();
+        let now = std::time::Instant::now();
+        app.request_window_close(&ctx);
+        assert!(app.capture_close.is_waiting());
+        assert!(cancel.load(Ordering::Relaxed));
+        assert!(!app.close_allowed);
+        // The worker is deliberately blocked. Polling and repeated close intent
+        // must retain its owner; do not close by dropping/joining it on the UI.
+        app.receive(&ctx);
+        assert!(app.running.is_some());
+        assert!(app.capture_close_step(&ctx, true, now + Duration::from_secs(20)));
+        assert!(app.capture_close.slow(now + Duration::from_secs(20)));
+        release.release();
+        finish(&mut app);
+        assert_eq!(app.log, "cleanup finished");
+        assert!(!app.capture_close_step(&ctx, false, now + Duration::from_secs(21)));
+        assert!(!app.capture_close.is_waiting());
+        assert!(app.closing_window);
+        assert!(app.capture_active_or_closing());
+    }
+    #[test]
+    fn capture_panic_restores_restart_state_and_preserves_partial_recording() {
+        static NEXT: AtomicU64 = AtomicU64::new(0);
+        let path = std::env::temp_dir().join(format!(
+            "scancraft-panic-{}-{}.raptor.partial",
+            std::process::id(),
+            NEXT.fetch_add(1, Ordering::Relaxed)
+        ));
+        let file = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&path)
+            .unwrap();
+        let profile = StreamProfile {
+            interface: 0,
+            width: 2,
+            height: 2,
+            fourcc: *b"GREY",
+            fps: 30,
+        };
+        let writer = Writer::new(file, profile).unwrap();
+        let before = std::fs::read(&path).unwrap();
+        let mut app = App::default();
+        app.running = Some(running(move || {
+            let _recording = writer;
+            panic!("injected capture failure");
+        }));
+        finish(&mut app);
+        assert_eq!(app.status, "Capture worker ended; see cleanup diagnostics");
+        assert!(app.log.contains("panicked"));
+        assert!(app.log.contains("incomplete recording"));
+        assert_eq!(std::fs::read(&path).unwrap(), before);
+        let mut reader =
+            scancraft_recording::Reader::new(std::fs::File::open(&path).unwrap()).unwrap();
+        assert!(
+            reader.read_frame().is_err(),
+            "partial recording must not become a completed recording"
+        );
+        // Start/interface controls use running.is_some(); a replacement worker
+        // can now complete. This test never opens a scanner or changes controls.
+        app.running = Some(running(|| Ok("replacement stopped".into())));
+        finish(&mut app);
+        assert_eq!(app.log, "replacement stopped");
+        std::fs::remove_file(path).unwrap();
+    }
+    #[test]
+    fn ordinary_capture_error_stops_and_remains_visible() {
+        let mut app = App::default();
+        app.running = Some(running(|| Err("injected capture error".into())));
+        finish(&mut app);
+        assert_eq!(app.status, "Capture worker ended; see cleanup diagnostics");
+        assert!(app.log.contains("injected capture error"));
+    }
+}
+
+#[cfg(test)]
+mod live_lifecycle_tests {
+    use super::*;
+    use serde_json::json;
+    struct Release(Option<std::sync::mpsc::Sender<()>>);
+    impl Drop for Release {
+        fn drop(&mut self) {
+            if let Some(sender) = self.0.take() {
+                let _ = sender.send(());
+            }
+        }
+    }
+    #[test]
+    fn laser_close_requests_stop_and_explicit_abort_preserves_guard_and_failure_view() {
+        let mut app = App::default();
+        let ctx = egui::Context::default();
+        let (sender, receiver) = std::sync::mpsc::channel();
+        let mut release = Release(Some(sender));
+        let control = app.candidates.test_capture(move |_| {
+            receiver.recv().unwrap();
+            Err("retained partial laser data".into())
+        });
+        assert!(app.capture_active_or_closing());
+        let _ = ctx.run(Default::default(), |ctx| {
+            assert!(app.capture_close_step(ctx, true, std::time::Instant::now()));
+        });
+        assert!(control.stop.load(Ordering::Relaxed));
+        assert!(control.work.check().is_ok());
+        assert!(app.candidates.capture_busy());
+        app.abort_pending_capture();
+        assert!(control.work.check().is_err());
+        assert!(app.candidates.capture_busy());
+        release.0.take().unwrap().send(()).unwrap();
+        let deadline = std::time::Instant::now() + Duration::from_secs(5);
+        let mut failed = false;
+        while app.candidates.capture_busy() {
+            failed |= app.candidates.tick();
+            assert!(std::time::Instant::now() < deadline);
+            std::thread::yield_now();
+        }
+        assert!(failed);
+        let _ = ctx.run(Default::default(), |ctx| {
+            app.window_close_step(ctx, true, failed);
+        });
+        assert!(!app.closing_window);
+        assert!(!app.capture_close.is_waiting());
+        assert!(!app.close_allowed);
+    }
+    #[test]
+    fn live_capture_close_waits_then_rechecks_other_work() {
+        let mut app = App::default();
+        let ctx = egui::Context::default();
+        let (sender, receiver) = std::sync::mpsc::channel();
+        let mut release = Release(Some(sender));
+        let control = app.live.test_job(move |_, _| {
+            receiver.recv().unwrap();
+            Ok(json!({"fused_points":0,"geometry_exported":false}))
+        });
+        assert!(app.capture_active_or_closing());
+        let _ = ctx.run(Default::default(), |ctx| {
+            assert!(app.capture_close_step(ctx, true, std::time::Instant::now()));
+        });
+        assert!(control.stop_requested());
+        assert!(!app.closing_window);
+        // A document job must still prevent automatic root close after camera cleanup.
+        app.cloud.open_startup(
+            PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                .join("../../evidence/offline-cli-verified/project.orproj"),
+        );
+        release.0.take().unwrap().send(()).unwrap();
+        let deadline = std::time::Instant::now() + Duration::from_secs(5);
+        while app.live.is_busy() {
+            app.live.tick(&ctx);
+            assert!(std::time::Instant::now() < deadline);
+            std::thread::yield_now();
+        }
+        let _ = ctx.run(Default::default(), |ctx| {
+            app.capture_close_step(ctx, false, std::time::Instant::now());
+        });
+        assert!(app.confirm_close);
+        assert!(!app.closing_window);
+    }
+    #[test]
+    fn pending_close_abort_is_explicit_and_never_bypasses_cleanup_or_document_checks() {
+        let mut app = App::default();
+        let ctx = egui::Context::default();
+        let (sender, receiver) = mpsc::channel();
+        let mut release = Release(Some(sender));
+        let (report, observe) = mpsc::channel();
+        let control = app.live.test_job(move |work, _| {
+            report.send(work.clone()).unwrap();
+            receiver.recv().unwrap();
+            Err("aborted with retained partial data".into())
+        });
+        let work = observe.recv_timeout(Duration::from_secs(5)).unwrap();
+        app.capture_close_step(&ctx, true, std::time::Instant::now());
+        assert!(control.stop_requested());
+        assert!(
+            work.check().is_ok(),
+            "ordinary close starts with graceful stop"
+        );
+        app.abort_pending_capture();
+        assert!(work.check().is_err());
+        assert!(app.capture_close.is_waiting());
+        assert!(!app.closing_window);
+        assert!(!app.close_allowed);
+        release.0.take().unwrap().send(()).unwrap();
+        let deadline = std::time::Instant::now() + Duration::from_secs(5);
+        while app.live.is_busy() {
+            app.live.tick(&ctx);
+            assert!(std::time::Instant::now() < deadline);
+            std::thread::yield_now();
+        }
+        app.window_close_step(&ctx, true, true);
+        assert!(!app.closing_window, "failure must remain visible");
+    }
+
+    #[test]
+    fn synthetic_startup_requires_explicit_output_and_does_not_select_camera_smoke() {
+        let args = |items: &[&str]| items.iter().map(std::ffi::OsString::from).collect();
+        assert_eq!(
+            startup_args(args(&["--synthetic-live-scan", "new-folder"])).unwrap(),
+            Startup::SyntheticLive("new-folder".into())
+        );
+        assert!(startup_args(args(&["--synthetic-live-scan"])).is_err());
+    }
+    #[test]
+    fn completion_frame_failure_cancels_a_simultaneous_root_close() {
+        let mut app = App::default();
+        let ctx = egui::Context::default();
+        let output = ctx.run(Default::default(), |ctx| {
+            assert!(!app.window_close_step(ctx, true, true));
+        });
+        assert!(!app.closing_window);
+        assert!(
+            output.viewport_output[&egui::ViewportId::ROOT]
+                .commands
+                .iter()
+                .any(|c| matches!(c, egui::ViewportCommand::CancelClose))
+        );
+    }
+}
+
+#[cfg(test)]
+mod saved_capture_args_tests {
+    use super::*;
+    #[test]
+    fn saved_capture_pair_index_is_explicit_and_preserves_legacy_default() {
+        let args = |items: &[&str]| items.iter().map(std::ffi::OsString::from).collect();
+        assert_eq!(
+            startup_args(args(&["--laser-candidates", "capture"])).unwrap(),
+            Startup::Candidates {
+                path: "capture".into(),
+                index: 0
+            }
+        );
+        assert_eq!(
+            startup_args(args(&["--laser-candidates", "capture", "7"])).unwrap(),
+            Startup::Candidates {
+                path: "capture".into(),
+                index: 7
+            }
+        );
+        for n in ["-1", "1.5", "18446744073709551616", "no"] {
+            assert!(startup_args(args(&["--laser-candidates", "capture", n])).is_err());
+        }
+        use std::os::unix::ffi::OsStringExt;
+        assert!(
+            startup_args(vec![
+                "--laser-candidates".into(),
+                "capture".into(),
+                std::ffi::OsString::from_vec(vec![255])
+            ])
+            .is_err()
+        );
     }
 }

@@ -1,0 +1,23 @@
+{
+  "scope": "release CLI exporting actual synthetic live runner output; no hardware",
+  "source_state": "uncommitted dev/live-session-export",
+  "copied_source_artifacts": 8,
+  "verified_artifacts": 8,
+  "verification_passed": true,
+  "both_raw_replay_decode": "PASS",
+  "original_bundle_sha256s_unchanged": true,
+  "tests_passed": 576,
+  "cli_sha256": "46528f665cc8f5132dae794ca39802ac65accb18dce6e3e8d52d2f2e43be748c",
+  "gate_log_sha256": "e5b3635884e16abaaa3074e786ac1596a0585aa7af99acbd9bb43cc25cd390a1",
+  "project_full_state_replay": "PASS",
+  "physical_accuracy_qualified": false,
+  "release_gui": {
+    "scope": "private authenticated X display startup export; synthetic data",
+    "visually_inspected": true,
+    "exported_source_artifacts": 8,
+    "exported_project_cli_verification_passed": true,
+    "camera_device_fds": [],
+    "binary_sha256": "bb6b9ec731f6a87a3e6c5784e774294a7612d2e1569a8eae0070348c12cbd6a4",
+    "screenshot_sha256": "b3eda6aa52db9f50beff7e8a739b3746a05b572a21874ed38db98ffc38d3dfa1"
+  }
+}

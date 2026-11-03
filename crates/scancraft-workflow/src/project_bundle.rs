@@ -56,14 +56,46 @@ fn export_inner_at(
     if fs::symlink_metadata(target).is_ok() {
         return Err("project bundle output already exists".into());
     }
-    let origin = editor
-        .origin()
-        .ok_or("project has no reconstruction provenance")?;
+    let live = editor.live_session();
+    let expected = if let Some(live) = live {
+        live.artifacts
+            .iter()
+            .map(|a| scancraft_geometry::project_origin::Artifact {
+                name: a.name.clone(),
+                bytes: a.bytes,
+                crc32: a.crc32,
+            })
+            .collect::<Vec<_>>()
+    } else {
+        editor
+            .origin()
+            .ok_or("project has no exportable reconstruction provenance")?
+            .artifacts
+            .clone()
+    };
+    let verify = |directory: &Path| {
+        if let Some(live) = live {
+            source_verification::verify_live(live, directory, work)
+        } else {
+            source_verification::verify(
+                editor
+                    .origin()
+                    .ok_or("project has no reconstruction provenance")?,
+                directory,
+                work,
+            )
+        }
+    };
+    let scope = if live.is_some() {
+        "live-session project bundle with complete referenced raw recordings"
+    } else {
+        "selected-frame project bundle"
+    };
     // Reject oversized documents before cloning history or allocating staging.
     let mut preflight = DigestSink::default();
     save_project(editor, &mut preflight)?;
     work.check()?;
-    let checked = source_verification::verify(origin, sources, work)?;
+    let checked = verify(sources)?;
     if !checked.passed {
         return Err("source artifacts do not match project references; bundle not created".into());
     }
@@ -71,7 +103,7 @@ fn export_inner_at(
     let partial = staging(target)?;
     let outcome=(||->Result<Value,Error> {
         let mut artifacts=Vec::new();
-        for expected in &origin.artifacts {
+        for expected in &expected {
             let digest=artifact(&partial,&expected.name,work,|out| {
                 let mut input=OpenOptions::new().read(true).custom_flags(libc::O_NOFOLLOW|libc::O_NONBLOCK).open(sources.join(&expected.name))?;
                 let metadata=input.metadata()?;
@@ -100,15 +132,15 @@ fn export_inner_at(
         if replay.bytes!=project.bytes || replay.hash.finalize()!=project.crc32{return Err("packaged project full-state replay mismatch".into());}
         drop(reopened);
         artifacts.push(project);
-        let copied=source_verification::verify(origin,&partial,work)?;
+        let copied=verify(&partial)?;
         if !copied.passed{return Err("copied source bundle failed verification".into());}
-        let details=json!({"schema_version":1,"scope":"edited project and five retained initial reconstruction artifacts; selected raw frames only","source_directory_display":sources.display().to_string(),"destination_directory_display":destination.display().to_string(),"source_check":checked,"copied_check":copied,"project_full_state_replay":"PASS","original_project_and_source_bytes_preserved":true,"source_device_binding_verified":false,"synchronization_verified":false,"physical_accuracy_qualified":false});
+        let details=json!({"schema_version":1,"scope":scope,"source_directory_display":sources.display().to_string(),"destination_directory_display":destination.display().to_string(),"source_check":checked,"copied_check":copied,"project_full_state_replay":"PASS","original_project_and_source_bytes_preserved":true,"source_device_binding_verified":false,"synchronization_verified":false,"physical_accuracy_qualified":false});
         artifacts.push(artifact(&partial,"bundle-report.json",work,|out|{serde_json::to_writer_pretty(out,&details)?;Ok(())})?);
-        let summary=json!({"schema_version":1,"scope":"selected-frame project bundle","points":editor.cloud.points.len(),"project_full_state_replay":"PASS","copied_source_artifacts":origin.artifacts.len(),"original_project_and_source_bytes_preserved":true,"source_device_binding_verified":false,"synchronization_verified":false,"physical_accuracy_qualified":false,"artifacts":artifacts});
+        let summary=json!({"schema_version":1,"scope":scope,"points":editor.cloud.points.len(),"project_full_state_replay":"PASS","copied_source_artifacts":expected.len(),"original_project_and_source_bytes_preserved":true,"source_device_binding_verified":false,"synchronization_verified":false,"physical_accuracy_qualified":false,"artifacts":artifacts});
         artifact(&partial,"manifest.json",work,|out|{serde_json::to_writer_pretty(out,&summary)?;Ok(())})?;
         File::open(&partial)?.sync_all()?;
         before_publish()?;work.check()?;
-        if !source_verification::verify(origin,sources,work)?.passed{return Err("source artifacts changed before publication".into());}
+        if !verify(sources)?.passed{return Err("source artifacts changed before publication".into());}
         work.check()?;publish(&partial,target)?;Ok(summary)
     })().map_err(|e|format!("{e}; incomplete project bundle retained at {}",partial.display()))?;
     let parent = target
@@ -197,6 +229,126 @@ mod tests {
             load_project(File::open(sources.join("project.orproj")).unwrap()).unwrap(),
             sources,
         )
+    }
+    // Synthetic byte-identity fixture, not semantically valid sensor recordings.
+    fn live_fixture(temp: &Temp) -> (Editor, std::path::PathBuf) {
+        use scancraft_geometry::{
+            live_references::LiveSession,
+            sequence_references::{Artifact, Frame},
+        };
+        let sources = temp.0.join("live-sources");
+        fs::create_dir(&sources).unwrap();
+        let artifacts = [
+            "calibration.rapcal",
+            "request.json",
+            "scan-request.json",
+            "left.raptor",
+            "right.raptor",
+            "report.json",
+            "points.ply",
+            "pair-0000.json",
+        ]
+        .into_iter()
+        .map(|name| {
+            let data = format!("synthetic retained bytes for {name}").into_bytes();
+            fs::write(sources.join(name), &data).unwrap();
+            Artifact {
+                name: name.into(),
+                bytes: data.len() as u64,
+                crc32: crc32fast::hash(&data),
+            }
+        })
+        .collect();
+        let mut editor = Editor::new(
+            scancraft_geometry::Cloud {
+                points: vec![scancraft_geometry::Point {
+                    position: [1., 2., 3.],
+                    color: None,
+                    normal: None,
+                }],
+            },
+            8,
+        )
+        .unwrap();
+        editor
+            .attach_live_session(LiveSession {
+                schema_version: 1,
+                directory_display: sources.display().to_string(),
+                session_id: "synthetic-copy".into(),
+                synthetic: true,
+                recorded_frames: [1, 1],
+                pairs: vec![Frame {
+                    id: 0,
+                    left_index: 0,
+                    right_index: 0,
+                    integrated: true,
+                }],
+                artifacts,
+                source_device_binding_verified: false,
+                synchronization_verified: false,
+                physical_accuracy_qualified: false,
+            })
+            .unwrap();
+        (editor, sources)
+    }
+    #[test]
+    fn live_export_preserves_histories_and_relocates_only_the_copied_references() {
+        let temp = Temp::new();
+        let (mut editor, sources) = live_fixture(&temp);
+        editor.trim(&[0], false).unwrap();
+        let original = encoded(&editor);
+        let target = temp.0.join("live-export");
+        let result = export(&editor, &sources, &target, &WorkControl::default()).unwrap();
+        assert_eq!(result["copied_source_artifacts"], 8);
+        assert_eq!(encoded(&editor), original);
+        let mut loaded = load_project(File::open(target.join("project.orproj")).unwrap()).unwrap();
+        assert_eq!(
+            loaded.live_session().unwrap().directory_display,
+            target.display().to_string()
+        );
+        assert!(loaded.undo());
+        assert_eq!(loaded.cloud.points.len(), 1);
+        let moved = temp.0.join("relocated-export");
+        fs::rename(target, &moved).unwrap();
+        assert!(
+            source_verification::verify_live(
+                loaded.live_session().unwrap(),
+                &moved,
+                &WorkControl::default()
+            )
+            .unwrap()
+            .passed
+        );
+        for a in &editor.live_session().unwrap().artifacts {
+            assert_eq!(
+                fs::read(sources.join(&a.name)).unwrap(),
+                fs::read(moved.join(&a.name)).unwrap()
+            );
+        }
+    }
+    #[test]
+    fn live_export_cancellation_and_source_mutation_never_publish() {
+        let temp = Temp::new();
+        let (editor, sources) = live_fixture(&temp);
+        let target = temp.0.join("cancelled-live");
+        let work = WorkControl::default();
+        assert!(
+            export_inner(&editor, &sources, &target, &work, &|| {
+                work.cancel();
+                Ok(())
+            })
+            .is_err()
+        );
+        assert!(!target.exists());
+        let target = temp.0.join("changed-live");
+        assert!(
+            export_inner(&editor, &sources, &target, &WorkControl::default(), &|| {
+                fs::write(sources.join("left.raptor"), b"changed")?;
+                Ok(())
+            })
+            .is_err()
+        );
+        assert!(!target.exists());
     }
     fn encoded(editor: &Editor) -> Vec<u8> {
         let mut bytes = Vec::new();

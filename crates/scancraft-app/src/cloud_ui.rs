@@ -45,13 +45,15 @@ pub struct CloudUi {
     reconstruction_open: bool,
     recording_files: [String; 5],
     recording_indices: [usize; 2],
-    recording_open: bool,
+    recording_open_requested: bool,
     source_directory: String,
     recording_reference_directory: String,
     bundle_target: String,
     package_after_open: Option<(PathBuf, PathBuf)>,
     source_open: bool,
     verify_after_open: Option<PathBuf>,
+    recorded_sequence_files: [String; 6],
+    recorded_sequence_open: bool,
     sequence_files: [String; 2],
     sequence_open: bool,
     import_after_save: bool,
@@ -103,19 +105,29 @@ impl Default for CloudUi {
             reconstruction_open: false,
             recording_files: Default::default(),
             recording_indices: [0; 2],
-            recording_open: false,
+            recording_open_requested: false,
             source_directory: String::new(),
             recording_reference_directory: String::new(),
             bundle_target: String::new(),
             package_after_open: None,
             source_open: false,
             verify_after_open: None,
+            recorded_sequence_files: Default::default(),
+            recorded_sequence_open: false,
             sequence_files: Default::default(),
             sequence_open: false,
         }
     }
 }
 impl CloudUi {
+    pub fn select_calibration(&mut self, path: &std::path::Path) {
+        let path = path.display().to_string();
+        self.reconstruction_files[0] = path.clone();
+        self.recording_files[0] = path.clone();
+        self.recorded_sequence_files[0] = path;
+        self.recording_open_requested = true;
+        self.message = "Calibration selected. Choose recordings and settings to reconstruct; the current model is unchanged.".into();
+    }
     pub fn open_cylinder_startup(&mut self, path: PathBuf, maximum_rms_mm: f64) {
         self.cylinder_rms_mm = maximum_rms_mm;
         self.cylinder_startup = Some(0);
@@ -160,6 +172,17 @@ impl CloudUi {
         self.statistical_after_open = Some((neighbors, sigma));
         self.open_startup(path);
     }
+    /// Completed live scans use the same unsaved-document guard as other imports.
+    pub fn request_open(&mut self, path: PathBuf) -> bool {
+        if self.is_busy() {
+            return false;
+        }
+        self.submit(Operation::Load {
+            path,
+            unit_scale: None,
+        });
+        true
+    }
     pub fn open_startup(&mut self, path: PathBuf) {
         self.path = path.to_string_lossy().into_owned();
         self.message = "Opening geometry file or verifying scan folder…".into();
@@ -168,6 +191,27 @@ impl CloudUi {
         self.start(Operation::Load {
             path,
             unit_scale: None,
+        });
+    }
+    pub fn recorded_sequence_startup(
+        &mut self,
+        inputs: scancraft_workflow::recording_reconstruction::Inputs,
+        settings: PathBuf,
+        output: PathBuf,
+    ) {
+        self.recorded_sequence_files = [
+            inputs.calibration.display().to_string(),
+            inputs.left.display().to_string(),
+            inputs.right.display().to_string(),
+            inputs.settings.display().to_string(),
+            settings.display().to_string(),
+            output.display().to_string(),
+        ];
+        self.recorded_sequence_open = true;
+        self.start(Operation::ReconstructRecordedSequence {
+            inputs,
+            settings,
+            output,
         });
     }
     pub fn sequence_startup(&mut self, settings: PathBuf, output: PathBuf) {
@@ -199,7 +243,7 @@ impl CloudUi {
             output.display().to_string(),
         ];
         self.recording_indices = [inputs.left_index, inputs.right_index];
-        self.recording_open = true;
+        self.recording_open_requested = true;
         self.start(Operation::ReconstructRecordings { inputs, output });
     }
     fn reconstruction_operation(&self) -> Operation {
@@ -294,6 +338,7 @@ impl CloudUi {
                     | Operation::Reconstruct { .. }
                     | Operation::ReconstructRecordings { .. }
                     | Operation::FuseSequence { .. }
+                    | Operation::ReconstructRecordedSequence { .. }
             )
         {
             self.pending_import = Some(operation);
@@ -338,6 +383,32 @@ impl CloudUi {
         let mut verify_directory = None;
         let mut verify_recordings = None;
         let mut export_bundle = None;
+        if let Some(live) = self.document.as_ref().and_then(|d|d.editor.as_ref()).and_then(|e|e.live_session()) {
+            egui::CollapsingHeader::new("Live session sources").default_open(self.source_open).show(ui, |ui| {
+                ui.label(format!("Session {} · {} candidate pairs · raw frames {}/{}", live.session_id, live.pairs.len(), live.recorded_frames[0], live.recorded_frames[1]));
+                ui.label(if live.synthetic { "Synthetic fixture session" } else { "Declared physical observations; binding unverified" });
+                ui.small(format!("Recorded folder: {}",live.directory_display));
+                ui.label("References survive edits. External bytes are not checked on load; synchronization and physical accuracy remain unqualified.");
+                ui.add_enabled_ui(self.job.is_none(), |ui| {
+                    ui.horizontal(|ui| {ui.label("Folder to verify:");ui.text_edit_singleline(&mut self.source_directory);if ui.button("Use recorded location").clicked(){self.source_directory=live.directory_display.clone();}});
+                    if ui.add_enabled(!self.source_directory.trim().is_empty(), egui::Button::new("Verify live session sources on disk")).clicked(){verify_directory=Some(PathBuf::from(&self.source_directory));}
+                    ui.horizontal(|ui| { ui.label("New bundle folder:");ui.text_edit_singleline(&mut self.bundle_target); });
+                    if ui.add_enabled(!self.source_directory.trim().is_empty()&&!self.bundle_target.trim().is_empty(), egui::Button::new("Export live project and raw session")).clicked(){export_bundle=Some((PathBuf::from(&self.source_directory),PathBuf::from(&self.bundle_target)));}
+                });
+            });
+        }
+        if let Some(sequence) = self.document.as_ref().and_then(|d|d.editor.as_ref()).and_then(|e|e.sequence()) {
+            egui::CollapsingHeader::new("Recorded sequence sources").default_open(self.source_open).show(ui, |ui| {
+                ui.label(format!("Session {} · {} selected pairs · {} retained artifact references",sequence.session_id,sequence.frames.len(),sequence.artifacts.len()));
+                ui.label(format!("Declared source: {} · Calibration: {}", sequence.source_kind, sequence.calibration_record_id));
+                ui.small(format!("Recorded folder: {}", sequence.directory_display));
+                ui.label("References survive edits and reopening. External bytes are not checked on load; binding, synchronization and physical accuracy remain unqualified.");
+                ui.add_enabled_ui(self.job.is_none(), |ui| {
+                    ui.horizontal(|ui| {ui.label("Folder to verify:");ui.text_edit_singleline(&mut self.source_directory);if ui.button("Use recorded location").clicked(){self.source_directory=sequence.directory_display.clone();}});
+                    if ui.add_enabled(!self.source_directory.trim().is_empty(), egui::Button::new("Verify sequence sources on disk")).clicked(){verify_directory=Some(PathBuf::from(&self.source_directory));}
+                });
+            });
+        }
         if let Some(origin) = self
             .document
             .as_ref()
@@ -418,8 +489,26 @@ impl CloudUi {
                 }
             });
         });
-        egui::CollapsingHeader::new("Reconstruct recorded stereo frames").default_open(self.recording_open).show(ui,|ui| {
-            ui.label("Explicit left/right frame selection with supplied calibration and settings. Exposure synchronization and physical calibration binding are not independently verified. Calibration remains deferred unless you supply a verified record.");
+        egui::CollapsingHeader::new("Reconstruct and fuse recorded stereo sequence").default_open(self.recorded_sequence_open).show(ui, |ui| {
+            ui.label("Offline explicit frame pairs with supplied calibration. Exposure timing and physical accuracy remain unqualified. Keep the complete result folder for frame provenance.");
+            ui.add_enabled_ui(idle, |ui| {
+                for (label, value) in ["Calibration file", "Left recording", "Right recording", "Reconstruction settings", "Sequence settings", "New result folder"].into_iter().zip(self.recorded_sequence_files.iter_mut()) {
+                    ui.horizontal(|ui| { ui.label(label); ui.add(egui::TextEdit::singleline(value).desired_width(450.)); });
+                }
+                if ui.add_enabled(self.recorded_sequence_files.iter().all(|s|!s.trim().is_empty()), egui::Button::new("Reconstruct, track, fuse and open")).clicked() {
+                    operation = Some(Operation::ReconstructRecordedSequence {
+                        inputs: scancraft_workflow::recording_reconstruction::Inputs {
+                            calibration:self.recorded_sequence_files[0].clone().into(),left:self.recorded_sequence_files[1].clone().into(),right:self.recorded_sequence_files[2].clone().into(),settings:self.recorded_sequence_files[3].clone().into(),left_index:0,right_index:0,
+                        }, settings:self.recorded_sequence_files[4].clone().into(),output:self.recorded_sequence_files[5].clone().into(),
+                    });
+                }
+            });
+        });
+        // Consume the explicit handoff once: default_open cannot override egui's
+        // persisted collapsed state, and a permanent override prevents manual collapse.
+        let recording_open = std::mem::take(&mut self.recording_open_requested).then_some(true);
+        egui::CollapsingHeader::new("Reconstruct recorded stereo frames").open(recording_open).show(ui,|ui| {
+            ui.label("Explicit left/right frame selection with supplied calibration and settings. Exposure synchronization and physical calibration binding are not independently verified. Supply an appropriate calibration record and verify its physical scale.");
             ui.add_enabled_ui(idle,|ui| {
                 for (label,value) in ["Calibration file","Left recording (interface 0)","Right recording (interface 2)","Reconstruction settings","New result folder"].into_iter().zip(self.recording_files.iter_mut()) {
                     ui.horizontal(|ui|{ui.label(label);ui.add(egui::TextEdit::singleline(value).desired_width(450.));});
@@ -979,11 +1068,11 @@ impl CloudUi {
         }
     }
 }
-struct View {
-    yaw: f32,
-    pitch: f32,
-    zoom: f32,
-    pan: egui::Vec2,
+pub(crate) struct View {
+    pub(crate) yaw: f32,
+    pub(crate) pitch: f32,
+    pub(crate) zoom: f32,
+    pub(crate) pan: egui::Vec2,
 }
 fn projection(preview: &Preview, rect: egui::Rect, view: &View) -> Option<OrthographicProjection> {
     OrthographicProjection::new(
@@ -1000,7 +1089,7 @@ fn projection(preview: &Preview, rect: egui::Rect, view: &View) -> Option<Orthog
     )
     .ok()
 }
-fn draw(
+pub(crate) fn draw(
     preview: &Preview,
     p: &egui::Painter,
     rect: egui::Rect,
@@ -1096,6 +1185,119 @@ fn normal_arrows(
 mod tests {
     use super::*;
     use crate::cloud_jobs::DisplayPoint;
+    #[test]
+    fn selecting_calibration_only_changes_future_reconstruction_inputs() {
+        let mut ui = CloudUi {
+            dirty: true,
+            path: "unsaved-model".into(),
+            ..Default::default()
+        };
+        ui.recording_files[1] = "left-recording".into();
+        ui.select_calibration(std::path::Path::new("candidate.rapcal"));
+        assert_eq!(ui.reconstruction_files[0], "candidate.rapcal");
+        assert_eq!(ui.recording_files[0], "candidate.rapcal");
+        assert_eq!(ui.recorded_sequence_files[0], "candidate.rapcal");
+        assert_eq!(ui.recording_files[1], "left-recording");
+        assert_eq!(ui.path, "unsaved-model");
+        assert!(ui.dirty && !ui.is_busy());
+    }
+    #[test]
+    fn selecting_calibration_reopens_visited_controls_without_forcing_them_open() {
+        let context = egui::Context::default();
+        context.style_mut(|style| style.animation_time = 0.);
+        let mut cloud = CloudUi {
+            dirty: true,
+            path: "unsaved-model".into(),
+            recording_files: [
+                "old.rapcal",
+                "left-recording",
+                "right-recording",
+                "settings",
+                "output",
+            ]
+            .map(String::from),
+            recording_indices: [3, 7],
+            ..Default::default()
+        };
+        cloud.document.as_mut().unwrap().editor = Some(
+            scancraft_geometry::Editor::new(
+                scancraft_geometry::Cloud {
+                    points: vec![scancraft_geometry::Point {
+                        position: [1., 2., 3.],
+                        color: None,
+                        normal: None,
+                    }],
+                },
+                8,
+            )
+            .unwrap(),
+        );
+        cloud.document.as_mut().unwrap().selection = vec![0];
+        let mut folder = String::new();
+        let mut frame = |cloud: &mut CloudUi, events| {
+            context.run(
+                egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(
+                        egui::Pos2::ZERO,
+                        egui::vec2(1150., 850.),
+                    )),
+                    events,
+                    ..Default::default()
+                },
+                |ctx| {
+                    egui::CentralPanel::default().show(ctx, |ui| cloud.ui(ui, &mut folder));
+                },
+            )
+        };
+        let label_position = |output: &egui::FullOutput, label: &str| {
+            output.shapes.iter().find_map(|shape| match &shape.shape {
+                egui::epaint::Shape::Text(text) if text.galley.text() == label => Some(text.pos),
+                _ => None,
+            })
+        };
+        // First visit stores the default collapsed state, as in an ordinary session.
+        let initial = frame(&mut cloud, vec![]);
+        assert!(label_position(&initial, "Reconstruct recorded stereo frames").is_some());
+        assert!(label_position(&initial, "Left recording (interface 0)").is_none());
+        for candidate in ["first.rapcal", "second.rapcal"] {
+            cloud.select_calibration(std::path::Path::new(candidate));
+            let selected = frame(&mut cloud, vec![]);
+            assert!(label_position(&selected, "Left recording (interface 0)").is_some());
+            assert_eq!(cloud.recording_files[0], candidate);
+            let pointer = label_position(&selected, "Reconstruct recorded stereo frames").unwrap()
+                + egui::vec2(10., 5.);
+            // Manual collapse must still work after the one-shot handoff.
+            for pressed in [true, false] {
+                frame(
+                    &mut cloud,
+                    vec![
+                        egui::Event::PointerMoved(pointer),
+                        egui::Event::PointerButton {
+                            pos: pointer,
+                            button: egui::PointerButton::Primary,
+                            pressed,
+                            modifiers: egui::Modifiers::default(),
+                        },
+                    ],
+                );
+            }
+            let collapsed = frame(&mut cloud, vec![]);
+            assert!(label_position(&collapsed, "Left recording (interface 0)").is_none());
+        }
+        assert_eq!(
+            &cloud.recording_files[1..],
+            ["left-recording", "right-recording", "settings", "output"]
+        );
+        assert_eq!(cloud.recording_indices, [3, 7]);
+        assert_eq!(cloud.path, "unsaved-model");
+        assert!(cloud.dirty && !cloud.is_busy());
+        let document = cloud.document.as_ref().unwrap();
+        assert_eq!(document.selection, [0]);
+        assert_eq!(
+            document.editor.as_ref().unwrap().cloud.points[0].position,
+            [1., 2., 3.]
+        );
+    }
     #[test]
     fn expanded_source_and_measurements_leave_viewport_inside_default_window() {
         let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -1389,6 +1591,30 @@ mod tests {
             cloud
         );
         ui.pending_import = None;
+        ui.submit(Operation::ReconstructRecordedSequence {
+            inputs: scancraft_workflow::recording_reconstruction::Inputs {
+                calibration: "missing".into(),
+                left: "left".into(),
+                right: "right".into(),
+                settings: "recon.json".into(),
+                left_index: 0,
+                right_index: 0,
+            },
+            settings: "sequence.json".into(),
+            output: "result".into(),
+        });
+        assert!(!ui.is_busy());
+        assert!(matches!(
+            ui.pending_import,
+            Some(Operation::ReconstructRecordedSequence { .. })
+        ));
+        assert_eq!(
+            ui.document.as_ref().unwrap().editor.as_ref().unwrap().cloud,
+            cloud
+        );
+        assert_eq!(ui.document.as_ref().unwrap().selection, [0]);
+        assert!(ui.dirty);
+        ui.pending_import = None;
         ui.submit(Operation::FuseSequence {
             settings: "sequence.json".into(),
             output: "result".into(),
@@ -1483,6 +1709,28 @@ mod tests {
             circles
                 .iter()
                 .all(|c| c.center.x.is_finite() && c.center.y.is_finite())
+        );
+    }
+    #[test]
+    fn completed_live_scan_import_keeps_unsaved_document_until_explicit_decision() {
+        let mut ui = CloudUi::default();
+        let cloud = scancraft_geometry::Cloud {
+            points: vec![scancraft_geometry::Point {
+                position: [1., 2., 3.],
+                color: None,
+                normal: None,
+            }],
+        };
+        ui.document.as_mut().unwrap().editor =
+            Some(scancraft_geometry::Editor::new(cloud.clone(), 32).unwrap());
+        ui.dirty = true;
+        assert!(ui.request_open("completed-scan/project.orproj".into()));
+        assert!(matches!(ui.pending_import, Some(Operation::Load { .. })));
+        assert!(ui.job.is_none());
+        assert!(ui.dirty);
+        assert_eq!(
+            ui.document.as_ref().unwrap().editor.as_ref().unwrap().cloud,
+            cloud
         );
     }
 }

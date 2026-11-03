@@ -1,5 +1,173 @@
 # Architecture
 
+`calibration::planar_pose` fits one six-parameter planar pose with a fixed lens,
+reusing native homography initialization, Brown derivatives and normal blocks.
+`workflow::planar_pose` and `validate-planar-pose` retain exact inputs and diagnostic
+outputs without assuming metric units or opening hardware. See
+[fixed-camera validation](docs/FIXED_CAMERA_POSE_VALIDATION.md).
+
+`board_session` composes existing observation and planar-fitting workflows. It
+processes poses sequentially, preserves per-pose bundles, checks common target/
+profiles and separates validation observations from camera fit requests. No
+new numerical solver or dependency is introduced. See
+[session data flow and limits](docs/BOARD_CALIBRATION_SESSION.md).
+
+`board_ui` adds a standalone offline preparation worker and camera/marker display.
+`calibration_observations::run_with_frames` transfers the exact selected frames and
+published measurements to that worker; existing manifest-only callers retain their
+output. Root close/cancel handling includes the worker. See
+[native board preparation](docs/NATIVE_BOARD_PREPARATION.md).
+
+`calibration_observations` composes guarded recording playback, native component
+shape measurement and target association, then publishes original-frame snapshots
+and explicit per-view fit inputs. Unit declarations and source lineage stay with
+the observations; hardware and numerical fitting remain separate. See
+[recorded target workflow](docs/RECORDED_TARGET_OBSERVATIONS.md).
+
+Finite CLI stereo acquisition now has a two-worker completion gate before either
+worker closes its camera. Ownership stays on the original threads; cancellation
+and termination remain explicit. Live IR/laser runners are separate and unchanged.
+See docs/FINITE_STEREO_COMPLETION.md. The first-scan integration branch preserves
+the existing architecture and all developer PR ancestry.
+
+`laser_stream::bundle::visit_pairs` adds sequential read-only access using the
+same pair-binding implementation as `load_pair`, with one Playback index per
+camera and two complete journal passes. Callbacks are provisional until final
+source/counter checks succeed; consumers must stage results. The CLI `--all`
+inspector publishes only a successful summary. See docs/LASER_CAPTURE_SEQUENCE.md.
+
+The diagnostic viewer routes existing single-pair and complete capture folders
+through `candidate_bundle::load_at`. New `laser_stream::bundle::load_pair` reuses
+guarded inventory/CRC, complete journal validation and raw Playback indexing, then
+returns one bounded stored pair and FrameViews. The existing GUI worker/renderer
+applies successful results transactionally outside Editor; no acquisition is
+started by opening data. See docs/SAVED_LASER_CAPTURES.md.
+
+Segmented pair journaling reuses the existing fixed-buffer record serializer
+before its bounded in-memory encoder. Cancellation is checked per resulting sink
+write; successful encoding still precedes file/index mutation and required flush
+precedes optional preview. Quotas, formats and fsync policy are unchanged. See
+docs/SEGMENTED_PAIR_ENCODING.md.
+
+Laser matching now binds a lazy first-camera epipolar constraint to one immutable
+model/pixel/configuration for one call. It reuses the exact line across cached
+second-camera traces and preserves per-trace cancellation/error ordering; no shared
+mutable cache or format change is introduced. See docs/CACHED_EPIPOLAR_QUERIES.md.
+
+Optional helper/device/workflow stderr notes now use a bounded, best-effort Rust
+core primitive. Private app state logs use checked directory descriptors, inherited
+active-file locks and bounded inactive retention. Supervisors keep exit status and
+append failure observations without changing ownership/reaping, required IPC or
+raw publication. See [failure isolation and limits](docs/HELPER_DIAGNOSTICS.md).
+
+Large eligible camera pairs detect concurrently using one scoped worker and the
+caller. Thread creation failure/single CPU/small images retain serial execution;
+results rejoin before ordered matching, journaling or previews. Source frames remain
+borrowed, scratch buffers can overlap, and progress is approximate. No algorithm,
+format or queue-limit change. See [execution and evidence](docs/PARALLEL_LASER_DETECTION.md).
+
+Schema-2 laser capture uses explicit raw/pair/record/segment/bundle quotas and a
+pre-device available-space snapshot. Whole pair records roll into bounded segments
+with durable checkpoints, versioned index/footer, streaming readback and read-only
+prefix inspection. Schema 1 retains its single-file layout. No reconstruction or
+raw-format change; structural completeness never proves durable capture/restoration.
+See [formats, boundaries and failure semantics](docs/SEGMENTED_LASER_JOURNAL.md).
+
+Laser preview handoff now copies bounded raw inputs/compact results into one
+Pending slot. The existing publisher owns full-frame statistics, thumbnails and
+wire encoding outside the mailbox lock. The parent still receives validated
+Snapshot DTOs; required raw/pair journals and numerical methods are unchanged.
+See [ownership, memory and validation](docs/ASYNC_LASER_PREVIEW.md).
+
+Required laser pair records now batch serializer fragments in a fixed 64 KiB
+buffer before the existing capped/checksummed writer. Complete records flush
+before optional previews; errors discard pending bytes without Drop retry. Raw
+recording, numerical methods and publication boundaries are unchanged. See
+[profiling and invariants](docs/LASER_STREAM_PROFILE.md).
+
+The laser candidate GUI now supervises a device-owning helper via bounded typed
+IPC, latest-only preview mailboxes and explicit Stop/Abort/cleanup state. It renders
+raw thumbnails and single-pair diagnostic coordinates separately from metric
+Cloud/Editor. See [live laser GUI contracts](docs/LIVE_LASER_GUI.md).
+
+Native laser capture now connects `scancraft-acquisition::laser::scan` and
+`scan-live-laser` to the bounded stream engine through verified capture bundles.
+Source/settings ownership and optional scoped line control remain in acquisition;
+workflow owns bounded journaling, verification and no-overwrite publication.
+See [native laser capture contracts](docs/NATIVE_LASER_CAPTURE.md).
+
+`scancraft_workflow::laser_stream::Pipeline` adds raw-journal-first bounded
+source-to-laser processing with explicit queue omissions and structured cleanup
+results. The native CLI adapter is connected; live GUI diagnostics are connected and fusion remains
+future integration. See
+[stream contracts and evidence](docs/BOUNDED_LASER_STREAM.md).
+
+Prepared epipolar traces now include conservative 64-segment bounds, retaining
+the scalar solver for short traces and numerical fallback. See
+[indexed trace contracts and measurements](docs/INDEXED_EPIPOLAR_TRACES.md).
+
+`scancraft_depth::laser_pair::Processor` processes borrowed raw frame pairs without
+files or JSON and returns bounded candidates, per-query outcomes and camera
+counters. Optional `Sink` events carry full diagnostics. Recording workflows supply
+provenance/CRC/source and publication policy through an owned streaming artifact
+writer. See [in-memory interfaces and evidence](docs/IN_MEMORY_LASER_PAIRS.md).
+
+`candidate_bundle::load` verifies recorded-candidate artifact integrity and retained
+frames, then returns bounded unverified coordinates. The app's `CandidateUi` uses
+the shared worker and renderer with a read-only `Preview`; metric `Cloud`/`Editor`
+state remains separate. Retained-frame feedback reuses the image crate's exact
+raw statistics and display-only contrast LUT; bounded original-orientation
+thumbnails never enter reconstruction. See [candidate viewport contracts](docs/CANDIDATE_VIEWER.md).
+
+`CandidateUi::process` runs the existing recording-backed automatic matcher via
+`cloud_jobs/candidates.rs`, publishes a diagnostic bundle, then verifies and opens
+it through the shared candidate loader. Publication and display failures remain
+distinct; a saved result is never hidden or deleted by display cancellation.
+See [native recorded-pair processing](docs/NATIVE_RECORDED_LASER_PROCESSING.md).
+
+After coarse work admission fails, recorded laser matching can prepare first-pixel
+sheet projections and prove a tighter bound before trace matching/staging. Borrowed
+`PreparedPixel` values reuse those exact roots without changing selection or caps.
+See [projected-root accounting](docs/PROJECTED_ROOT_WORK_BOUND.md).
+
+Laser background removal uses reusable block-prefix/suffix row extrema before
+the existing stripe detector. Exact border/clipping semantics are preserved; see
+[method provenance and measurements](docs/BLOCK_LASER_OPENING.md).
+
+`scancraft-workflow::recorded_traces::run_automatic` connects guarded recording
+selection, shared detection/continuity and sheet-supported matching. It streams
+full query diagnostics and preserves candidate/source lineage with explicit
+work/storage bounds; see [automatic recorded matching](docs/RECORDED_SHEET_MATCHING.md).
+Its `PreparedQueries` cache binds normalized trace vertices to immutable input
+geometry and is reused only within a frame pair; see
+[prepared trace contracts and measurements](docs/PREPARED_LASER_TRACES.md).
+
+`scancraft-calibration::laser_trace::PreparedMatcher` composes explicit quadratic
+sheet projections, full-trace epipolar crossings and stereo triangulation. It
+retains competing hypotheses and returns a unique candidate only under an explicit
+support policy; no recording/device binding or calibration activation is implied.
+See [sheet-supported traces](docs/SHEET_SUPPORTED_TRACES.md).
+
+`scancraft-workflow::recorded_traces` connects validated recording selection,
+native stripe detection/continuity and epipolar intersections into an offline
+candidate-correspondence bundle. It preserves input and interpolation lineage
+without activating calibration or exporting depth; see
+[recorded trace correspondence](docs/RECORDED_TRACE_CORRESPONDENCE.md).
+
+`scancraft-calibration::epipolar_trace` consumes explicit stereo geometry and
+image-trace vertices, returning all epipolar intersections and ambiguous segments.
+It interpolates in undistorted normalized coordinates and labels endpoint versus
+interior results. It does not select projector identities or install calibration;
+see [epipolar trace contracts](docs/EPIPOLAR_TRACE_INTERSECTIONS.md).
+
+Within-image stripe continuity now has a separate bounded module,
+`scancraft-image::laser_continuity`, consuming immutable row observations and
+returning index traces with explicit support/ambiguity diagnostics. The CLI
+`trace-stripes` adapter verifies the source recording and retains every raw
+observation. This is separate from temporal tracking, projector-line identity
+and calibrated depth; no live reconstruction default changes. See
+[stripe continuity](docs/STRIPE_CONTINUITY.md) for its contracts and evidence.
+
 - `scancraft-core`: sensor profiles, owned raw frames, UVC metadata validation.
 - `scancraft-device`: sysfs identity, Linux UAPI bindings, V4L2 mmap streams,
   exact-sequence metadata pairing, bounded startup retries and RAII cleanup.
@@ -363,3 +531,143 @@ normals, validates its millimeter delta, and retains independent Euclidean RMS,
 coverage and motion gates. Session normal handling and offline sequence settings
 share that method; default point-to-point and plain point-to-plane remain available.
 The independent SciPy nonlinear comparator is optional tooling, not app runtime.
+
+
+Capture completion recovery: `scancraft-app/src/capture_worker.rs` owns the one-shot
+result channel, pending outcome and thread handle. The GUI polls without joining
+an unfinished worker; disconnected senders and panics produce explicit terminal
+errors, and restart controls return only after the old thread finishes. A received
+result alone does not prove cleanup completed. App shutdown still joins owned
+capture cleanup synchronously; no driver-stall shutdown bound is established.
+Hardware-free regressions exercise panic/disconnection and partial-file retention.
+
+Ordinary window close uses `capture_close.rs`: a pure close-intent controller
+cancels the close event and signals capture cancellation while ownership remains
+with the active worker. The GUI keeps polling. Once the worker exits, a centralized
+request method explicitly rechecks busy/unsaved state before sending root Close;
+egui's root Close can directly shut down rather than deliver another cancellable
+event (egui 0.33.3 viewport.rs, ViewportCommand::Close). Capture errors cancel close
+intent and stay visible. A ten-second explanatory notice is not a shutdown deadline.
+Pending close disables replacement capture. This is a normal-window-path mitigation,
+not process isolation: forced teardown/App::drop can still wait on driver cleanup.
+
+Optional stereo refinement: matching/subpixel.rs fits supported ZNCC neighbors
+only after integer confidence/reverse checks. MatchConfig defaults to None, keeping
+legacy settings/results. PixelMatch exposes the fractional right coordinate;
+pipeline.rs maps it through rectification before original-camera triangulation.
+Requested unavailable/inconsistent fits are rejected with explicit reasons.
+Four additional patch reads per pair are included in the bounded work budget.
+See docs/SUBPIXEL_STEREO.md for provenance, units, compatibility and synthetic-only
+validation. Hardware timing and physical qualification flags remain unverified.
+
+Offline recorded sequences use workflow `RecordingProcessor` to retain validated
+left/right indexes and a shared `StereoProcessor` map set. Explicit increasing pair
+indices feed the unchanged image/matching/triangulation logic, then the existing
+`ScanSession` point-to-point tracker and voxel fusion. The sequence orchestrator
+writes per-frame raw selections/reports to staging, keeps only current frame
+geometry plus bounded session/fusion state, and atomically publishes the fused
+editable project and external provenance bundle. No timing heuristic selects pairs
+or qualifies geometry. See docs/RECORDED_STEREO_SEQUENCE.md for boundaries/limits.
+
+The native recorded-sequence panel submits an owned geometry-worker operation.
+Sequence `prepare` returns a staged bundle/cloud; the worker builds Editor/Preview
+before `publish_prepared` rechecks sources/cancellation and atomically publishes.
+Only then is the live document replaced. Existing dirty-document and busy guards
+apply. CLI run composes the same phases; no live acquisition is introduced.
+
+Recorded sequence publication now builds a reference-bearing Editor shared by saved
+and live GUI state. ORPROJ07 persists bounded initial sequence selections/decisions
+and retained-artifact fingerprints outside cloud edit history. Geometry-only and
+single-frame project versions retain their old schemas. Source verification remains
+explicit; the loader never follows external references. Root/project manifest cycles
+are avoided by excluding project/root-manifest fingerprints from embedded metadata.
+
+## Incremental live stereo CLI path
+
+The shared `live_stereo` processor/runner now bridge explicit raw Frame sources
+to cached stereo reconstruction and ScanSession tracking/fusion, with raw-first
+recording, bounded processing delivery and grouped cleanup before publication.
+The CLI supplies the native Capture adapter; the workflow has no device or GUI
+dependency and can serve later GUI integration. See [live stereo](docs/LIVE_STEREO_SCAN.md).
+This is a finite candidate-scan path, not hardware/calibration/throughput or
+bounded-driver-shutdown qualification. Existing offline workflows are preserved.
+
+## Experimental live GUI milestone
+
+The live GUI now shares native device/session ownership through the local
+`scancraft-acquisition` crate. It offers reconstruction pause/resume, graceful
+stop/save, abort, bounded camera/cloud previews and guarded editor handover.
+See [behavior and validation](docs/LIVE_STEREO_GUI.md). The frozen Rust gate
+passed 571 tests; actual release-GUI interaction and busy-window close passed
+with synthetic sources only. Real calibrated reconstruction, source binding,
+synchronization, accuracy and bounded kernel shutdown remain unqualified.
+
+## Live-session lineage persistence
+
+Live geometry projects now use ORPROJ08 to retain initial session/pair decisions
+and full raw/calibration/settings/report artifact fingerprints through edits and
+reopening. Legacy versions 02–07 remain readable. Explicit GUI/CLI verification supports
+user-chosen moved folders; loading never follows recorded paths. Raw bytes stay
+external and fusion weights are not resumable. See docs/LIVE_SESSION_REFERENCES.md.
+The full frozen gate passed 574 tests; actual release synthetic runner and CLI
+verification passed8artifacts and rejected a modified raw recording (exit 1).
+These are software/byte-identity checks, not hardware qualification.
+
+## Live-session project archive export
+
+The existing project exporter now packages edited live projects with all
+referenced raw/calibration/settings/report artifacts. Original data/state stay
+unchanged; copied references relocate to the export. Full-state replay and
+source rechecks precede atomic publication. Explicit GUI/CLI workflows passed
+synthetic runtime verification and both raw replays; 576-test gate passed.
+This is not resumable fusion or physical qualification. Automated independent
+review remains pending included service capacity.
+
+## Cooperative native stop policy
+
+Live acquisition now checks shared stop between video/metadata waits and caps
+poll timeouts by remaining frame deadline. Abandoned pre-metadata video buffers
+are counted separately; disconnect errors are retained. The 579-test gate passes,
+including 3 new injected-read policy tests. This cannot preempt synchronous ioctls
+or establish a shutdown deadline; SCAN-REV-005 remains Open. See docs/COOPERATIVE_CAPTURE_STOP.md.
+Actual scanner timing/driver-stall qualification remains unavailable.
+
+## Measured paired image preparation
+
+Large stereo maps now use one scoped helper when at least two CPUs are reported;
+small/one-CPU/resource-limited cases retain sequential processing. Sampling math
+is unchanged. On this workstation, the production API’s synthetic 1920×1200 pair
+median changed from 89.930 to 43.795 ms with bit-identical outputs/masks. The 583-test gate
+passes; single-CPU and thread-denied child fallbacks passed. This is not full
+scan throughput, accuracy or RSS qualification. See docs/PAIRED_REMAP_CONCURRENCY.md
+and docs/benchmarks/paired-remap-2026-10-27.json. Automated review remains pending.
+
+## Planar calibration initialization boundary
+
+`scancraft-calibration::planar` consumes supplied target-plane/pixel observations
+and returns diagnostic pinhole intrinsics, per-view metric poses and residuals.
+Normalized homography/absolute-conic SVD and SO(3) projection use existing
+nalgebra; no native runtime dependency is added. Its result type cannot directly
+be used as a capture calibration: distortion/domain, joint stereo estimation and
+physical binding remain separate work. No GUI/device initialization is changed.
+See docs/PLANAR_CALIBRATION_INITIALIZER.md for provenance and numerical policies.
+
+## Offline calibration refinement boundary
+
+`scancraft-calibration::refinement` fits supplied Brown5 camera parameters and
+target poses with analytic derivatives and per-view normal blocks. Fixed-size
+Schur elimination avoids an observations-by-all-parameters Jacobian. A cancellation
+callback keeps math independent of GUI/device or geometry WorkControl. Workflow
+planar_calibration owns bounded JSON and atomic no-overwrite diagnostic publication;
+the CLI supplies scoped termination. Results are not capture records; existing
+device/reconstruction behavior is unchanged. See docs/BROWN_CALIBRATION_REFINEMENT.md.
+
+## Fixed-lens stereo calibration boundary
+
+`scancraft-calibration::stereo_fit` estimates shared rig/target poses with fixed
+lenses. Mono/stereo share private projection_differential and normal_blocks kernels
+(6/10 global parameters); the normal blocks are checked against a dense reference.
+Workflow calibration_bundle shares atomic diagnostic publication while preserving
+the mono public type path. stereo_calibration and the CLI adapter own typed bounded
+input and cancellation. No device/GUI/reconstruction invocation or active calibration
+installation changes. See docs/STEREO_EXTRINSIC_CALIBRATION.md.

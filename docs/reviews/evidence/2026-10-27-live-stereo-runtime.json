@@ -1,0 +1,58 @@
+{
+  "kind": "synthetic_live_stereo_runner_release_proof",
+  "hardware_accessed": false,
+  "settings_restoration": "injected no-hardware callback, not driver qualification",
+  "output_files": 10,
+  "verified_manifest_artifacts": 9,
+  "fused_points": 3,
+  "analytic_points_mm": [
+    [
+      -57.5,
+      -27.5,
+      400.0
+    ],
+    [
+      22.5,
+      22.5,
+      400.0
+    ],
+    [
+      92.5,
+      42.5,
+      400.0
+    ]
+  ],
+  "point_tolerance_mm": 1e-07,
+  "source_inputs_sha256_unchanged": {
+    "calibration.rapcal": "c1cda1c482f5a248935fcea80a22619cc9f26d65ea2eef93d3453c14f83fa80f",
+    "request.json": "a6aa3f35c485ad27b89856335c0ecd5926f74f33601cb7853f92768a989ecaf6",
+    "left.png": "c867ed29c778d7a44797d7919029c9622d30cfaa9deee7894235e9002f333915",
+    "right.png": "da623cfd668baec5534af7eae2a097528182ea8c82eccf3323dee658b599d784"
+  },
+  "raw_release_cli_replays": [
+    {
+      "name": "left.raptor",
+      "exit_code": 0
+    },
+    {
+      "name": "right.raptor",
+      "exit_code": 0
+    }
+  ],
+  "source_binding_verified": false,
+  "synchronization_verified": false,
+  "physical_accuracy_qualified": false,
+  "native_entry_guard": {
+    "exit_code": 1,
+    "synthetic_rejected_before_capture": true,
+    "target_not_created": true,
+    "hardware_validation": "not performed"
+  },
+  "full_gate": {
+    "rust_tests_passed": 560,
+    "formatting": "passed",
+    "strict_clippy": "passed",
+    "release_build": "passed",
+    "log_sha256": "5185cafd63e3b72398f92cc90c5ab133cd8b63d8007bc5c11fb5f1dcabad7d20"
+  }
+}

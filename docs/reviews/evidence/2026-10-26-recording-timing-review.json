@@ -1,0 +1,47 @@
+{
+  "head": "b2d8417b58585623a574054d5729b7c14fc90ffd",
+  "tree": "725bbab74989477c039cc5a9c71bb62bd7ec36e1",
+  "base": "12fc3a2b8039d2e4e14aa2e56843002168cc2855",
+  "raw_report_sha256": "6cc86f4e734f3e528244b17dc8db575bc2767ff924cf6ac69f208f42a349760c",
+  "completion": {
+    "type": "complete",
+    "status": "review_completed",
+    "findings": 1,
+    "gate": {
+      "threshold": "major",
+      "status": "blocked",
+      "blockingFindings": 1
+    },
+    "reviewedFiles": [
+      "PROJECT_STATUS.md",
+      "crates/scancraft-cli/src/main.rs",
+      "crates/scancraft-cli/tests/recording_timing.rs",
+      "crates/scancraft-recording/src/indexed.rs",
+      "crates/scancraft-workflow/src/lib.rs",
+      "crates/scancraft-workflow/src/recording_playback.rs",
+      "crates/scancraft-workflow/src/recording_timing.rs",
+      "docs/RECORDING_TIMING.md",
+      "docs/STEREO_RECORDING.md",
+      "docs/reviews/REVIEW_RESPONSES.md",
+      "docs/reviews/evidence/2026-10-26-genuine-recording-timing.json"
+    ],
+    "outcome": "completed",
+    "message": "Review completed"
+  },
+  "exit_code": 2,
+  "finding_dispositions": [
+    {
+      "local_identifier": "CR-TIMING-PTS",
+      "severity": "major",
+      "title": "`IndexedRecording::build` now rejects frames without a sensor PTS. This breaks all indexed playback for such recordings.",
+      "decision": "disputed",
+      "reason": "Unchanged Reader::read_frame_inner already invokes core validate_frame and validate_order which require valid sensor PTS before indexing; isolated baseline regression confirms rejection for v1/v2 missing/malformed metadata. No compatibility regression demonstrated."
+    }
+  ],
+  "baseline_regression_log_sha256": "9cac8084aa8401f49d01b5897e7c10f048a956623ef31c9097fd75a7f3bbf89f",
+  "baseline_regression": "Isolated 12fc3a2 snapshot with only new adversarial regression inserted: one test passes; no production modification",
+  "unchanged_reader_blob": "d922042ce6724cd3fc8b9fdacdc1c491ab4dbd5f",
+  "billing": "Included capacity checked, billing inactive, no paid consent/flags",
+  "binding": "Operator-recorded immutable source observations; not server head attestation",
+  "limitation": "Raw major gate remains blocked; developer disposition does not change bot output or independent reviewer authority"
+}

@@ -1,0 +1,404 @@
+{
+  "scope": "synthetic paired image-remapping component; not hardware, physical accuracy or full scan throughput qualification",
+  "base_commit": "f5160e69520e12b5e6fa35ff276ef86fd59d036a",
+  "source_state": "uncommitted dev/paired-remap-benchmark; exact file hashes recorded",
+  "source_sha256": {
+    "crates/scancraft-image/src/stereo.rs": "583d5e3f301b96d74e0b896769a0281832b2a3e536954194bba5641c21a6179b",
+    "crates/scancraft-image/examples/paired_remap_benchmark.rs": "d771ffaea0291841e3c37eeec16592a33f3218fda6e887679d84499e30ce4430",
+    "crates/scancraft-image/src/lib.rs": "22894405e1588ae5a3c332af4dfb926eda3147dc6fedf24d36c8ee6431c6e4ed",
+    "crates/scancraft-calibration/src/rectification.rs": "945aa383a15eb56a92bbfb66c10677a0df4daeb734efc4e9ca92cb788c0ea65a",
+    "crates/scancraft-geometry/src/work.rs": "debae2b3efd760a80e90ec2f1d3f3d87b68146b0388e03699c98513e3e999df2",
+    "Cargo.lock": "0643f56fe16e0b9d0b0192138c4bb6ff3c913142ee045884a48add32f6615120"
+  },
+  "benchmark_binary_sha256": "198a2cdeb7fc7714fa140dbed54306c2c4a637e89e426919782a3c3e62bb81ac",
+  "cpu_model": "AMD Ryzen 9 6900HS with Radeon Graphics",
+  "kernel_release": "7.2.11-6900hs-lto",
+  "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+  "runs": {
+    "default": {
+      "measurement": {
+        "available_parallelism_hint": 16,
+        "cases": [
+          {
+            "adaptive_production": {
+              "max_ms": 0.075782,
+              "median_ms": 0.0704065,
+              "min_ms": 0.07036099999999999,
+              "p95_ms": 0.075722,
+              "runs": 20
+            },
+            "alternating_measurement_order": true,
+            "comparison_outside_timing": true,
+            "each_measured_pair_matches_reference_bits_and_masks": true,
+            "image_size": [
+              64,
+              32
+            ],
+            "map_build_ms": 0.278511,
+            "map_construction_excluded": true,
+            "map_coordinate_storage_bytes": 98304,
+            "output_allocation_and_thread_spawn_join_included": true,
+            "sequential": {
+              "max_ms": 0.129272,
+              "median_ms": 0.070407,
+              "min_ms": 0.07035100000000001,
+              "p95_ms": 0.082985,
+              "runs": 20
+            },
+            "warmups_per_mode": 1
+          },
+          {
+            "adaptive_production": {
+              "max_ms": 1.676746,
+              "median_ms": 1.5580889999999998,
+              "min_ms": 1.490127,
+              "p95_ms": 1.637864,
+              "runs": 20
+            },
+            "alternating_measurement_order": true,
+            "comparison_outside_timing": true,
+            "each_measured_pair_matches_reference_bits_and_masks": true,
+            "image_size": [
+              320,
+              240
+            ],
+            "map_build_ms": 9.556232,
+            "map_construction_excluded": true,
+            "map_coordinate_storage_bytes": 3686400,
+            "output_allocation_and_thread_spawn_join_included": true,
+            "sequential": {
+              "max_ms": 3.003978,
+              "median_ms": 2.8905205,
+              "min_ms": 2.809765,
+              "p95_ms": 2.964133,
+              "runs": 20
+            },
+            "warmups_per_mode": 1
+          },
+          {
+            "adaptive_production": {
+              "max_ms": 5.671456,
+              "median_ms": 5.59025,
+              "min_ms": 5.530794,
+              "p95_ms": 5.658643,
+              "runs": 20
+            },
+            "alternating_measurement_order": true,
+            "comparison_outside_timing": true,
+            "each_measured_pair_matches_reference_bits_and_masks": true,
+            "image_size": [
+              640,
+              480
+            ],
+            "map_build_ms": 38.055591,
+            "map_construction_excluded": true,
+            "map_coordinate_storage_bytes": 14745600,
+            "output_allocation_and_thread_spawn_join_included": true,
+            "sequential": {
+              "max_ms": 12.567223,
+              "median_ms": 10.626533000000002,
+              "min_ms": 10.572512,
+              "p95_ms": 11.374372000000001,
+              "runs": 20
+            },
+            "warmups_per_mode": 1
+          },
+          {
+            "adaptive_production": {
+              "max_ms": 46.551339999999996,
+              "median_ms": 43.7949205,
+              "min_ms": 40.542672,
+              "p95_ms": 46.537083,
+              "runs": 20
+            },
+            "alternating_measurement_order": true,
+            "comparison_outside_timing": true,
+            "each_measured_pair_matches_reference_bits_and_masks": true,
+            "image_size": [
+              1920,
+              1200
+            ],
+            "map_build_ms": 291.56345,
+            "map_construction_excluded": true,
+            "map_coordinate_storage_bytes": 110592000,
+            "output_allocation_and_thread_spawn_join_included": true,
+            "sequential": {
+              "max_ms": 93.62671999999999,
+              "median_ms": 89.929922,
+              "min_ms": 86.344271,
+              "p95_ms": 92.713251,
+              "runs": 20
+            },
+            "warmups_per_mode": 1
+          }
+        ],
+        "scope": "production StereoImageMaps synthetic paired remapping benchmark; not hardware, accuracy or live throughput qualification"
+      },
+      "raw_sha256": "6a7f063b9eea04b089f80c153a55dc2c08a2a3e33630c8a5a6eb7389a01d3e17"
+    },
+    "single-cpu": {
+      "measurement": {
+        "available_parallelism_hint": 1,
+        "cases": [
+          {
+            "adaptive_production": {
+              "max_ms": 0.085891,
+              "median_ms": 0.0704015,
+              "min_ms": 0.070322,
+              "p95_ms": 0.08472800000000001,
+              "runs": 20
+            },
+            "alternating_measurement_order": true,
+            "comparison_outside_timing": true,
+            "each_measured_pair_matches_reference_bits_and_masks": true,
+            "image_size": [
+              64,
+              32
+            ],
+            "map_build_ms": 0.276868,
+            "map_construction_excluded": true,
+            "map_coordinate_storage_bytes": 98304,
+            "output_allocation_and_thread_spawn_join_included": true,
+            "sequential": {
+              "max_ms": 0.075481,
+              "median_ms": 0.07043150000000001,
+              "min_ms": 0.07036099999999999,
+              "p95_ms": 0.070572,
+              "runs": 20
+            },
+            "warmups_per_mode": 1
+          },
+          {
+            "adaptive_production": {
+              "max_ms": 3.089949,
+              "median_ms": 3.0690045,
+              "min_ms": 3.045445,
+              "p95_ms": 3.08544,
+              "runs": 20
+            },
+            "alternating_measurement_order": true,
+            "comparison_outside_timing": true,
+            "each_measured_pair_matches_reference_bits_and_masks": true,
+            "image_size": [
+              320,
+              240
+            ],
+            "map_build_ms": 9.622627,
+            "map_construction_excluded": true,
+            "map_coordinate_storage_bytes": 3686400,
+            "output_allocation_and_thread_spawn_join_included": true,
+            "sequential": {
+              "max_ms": 2.9954009999999998,
+              "median_ms": 2.984296,
+              "min_ms": 2.9468810000000003,
+              "p95_ms": 2.993238,
+              "runs": 20
+            },
+            "warmups_per_mode": 1
+          },
+          {
+            "adaptive_production": {
+              "max_ms": 11.070143,
+              "median_ms": 10.958209,
+              "min_ms": 10.876311,
+              "p95_ms": 11.019378,
+              "runs": 20
+            },
+            "alternating_measurement_order": true,
+            "comparison_outside_timing": true,
+            "each_measured_pair_matches_reference_bits_and_masks": true,
+            "image_size": [
+              640,
+              480
+            ],
+            "map_build_ms": 38.673457,
+            "map_construction_excluded": true,
+            "map_coordinate_storage_bytes": 14745600,
+            "output_allocation_and_thread_spawn_join_included": true,
+            "sequential": {
+              "max_ms": 10.8816,
+              "median_ms": 10.821969,
+              "min_ms": 10.698338,
+              "p95_ms": 10.875888999999999,
+              "runs": 20
+            },
+            "warmups_per_mode": 1
+          },
+          {
+            "adaptive_production": {
+              "max_ms": 97.33586700000001,
+              "median_ms": 93.69085,
+              "min_ms": 93.272308,
+              "p95_ms": 96.39083,
+              "runs": 20
+            },
+            "alternating_measurement_order": true,
+            "comparison_outside_timing": true,
+            "each_measured_pair_matches_reference_bits_and_masks": true,
+            "image_size": [
+              1920,
+              1200
+            ],
+            "map_build_ms": 296.60085200000003,
+            "map_construction_excluded": true,
+            "map_coordinate_storage_bytes": 110592000,
+            "output_allocation_and_thread_spawn_join_included": true,
+            "sequential": {
+              "max_ms": 95.97992099999999,
+              "median_ms": 93.52867700000002,
+              "min_ms": 93.194723,
+              "p95_ms": 94.025355,
+              "runs": 20
+            },
+            "warmups_per_mode": 1
+          }
+        ],
+        "scope": "production StereoImageMaps synthetic paired remapping benchmark; not hardware, accuracy or live throughput qualification"
+      },
+      "raw_sha256": "5d8a6aa8911bb0453a93e5de9f04721efaf82f295daf07fd18a726b53e75c4d3"
+    },
+    "no-threads": {
+      "measurement": {
+        "available_parallelism_hint": 16,
+        "cases": [
+          {
+            "adaptive_production": {
+              "max_ms": 0.08621100000000001,
+              "median_ms": 0.070657,
+              "min_ms": 0.07054200000000001,
+              "p95_ms": 0.08528,
+              "runs": 20
+            },
+            "alternating_measurement_order": true,
+            "comparison_outside_timing": true,
+            "each_measured_pair_matches_reference_bits_and_masks": true,
+            "image_size": [
+              64,
+              32
+            ],
+            "map_build_ms": 0.266258,
+            "map_construction_excluded": true,
+            "map_coordinate_storage_bytes": 98304,
+            "output_allocation_and_thread_spawn_join_included": true,
+            "sequential": {
+              "max_ms": 0.089156,
+              "median_ms": 0.0706775,
+              "min_ms": 0.070572,
+              "p95_ms": 0.08708300000000001,
+              "runs": 20
+            },
+            "warmups_per_mode": 1
+          },
+          {
+            "adaptive_production": {
+              "max_ms": 3.107722,
+              "median_ms": 3.0502700000000003,
+              "min_ms": 3.03709,
+              "p95_ms": 3.080181,
+              "runs": 20
+            },
+            "alternating_measurement_order": true,
+            "comparison_outside_timing": true,
+            "each_measured_pair_matches_reference_bits_and_masks": true,
+            "image_size": [
+              320,
+              240
+            ],
+            "map_build_ms": 9.558406,
+            "map_construction_excluded": true,
+            "map_coordinate_storage_bytes": 3686400,
+            "output_allocation_and_thread_spawn_join_included": true,
+            "sequential": {
+              "max_ms": 2.9751339999999997,
+              "median_ms": 2.9428330000000003,
+              "min_ms": 2.9248,
+              "p95_ms": 2.9693330000000002,
+              "runs": 20
+            },
+            "warmups_per_mode": 1
+          },
+          {
+            "adaptive_production": {
+              "max_ms": 11.216007,
+              "median_ms": 10.846294499999999,
+              "min_ms": 10.76378,
+              "p95_ms": 10.940461,
+              "runs": 20
+            },
+            "alternating_measurement_order": true,
+            "comparison_outside_timing": true,
+            "each_measured_pair_matches_reference_bits_and_masks": true,
+            "image_size": [
+              640,
+              480
+            ],
+            "map_build_ms": 38.330985999999996,
+            "map_construction_excluded": true,
+            "map_coordinate_storage_bytes": 14745600,
+            "output_allocation_and_thread_spawn_join_included": true,
+            "sequential": {
+              "max_ms": 13.217789,
+              "median_ms": 10.653864500000001,
+              "min_ms": 10.596307,
+              "p95_ms": 10.727312,
+              "runs": 20
+            },
+            "warmups_per_mode": 1
+          },
+          {
+            "adaptive_production": {
+              "max_ms": 100.60488,
+              "median_ms": 92.6814225,
+              "min_ms": 92.243584,
+              "p95_ms": 94.617042,
+              "runs": 20
+            },
+            "alternating_measurement_order": true,
+            "comparison_outside_timing": true,
+            "each_measured_pair_matches_reference_bits_and_masks": true,
+            "image_size": [
+              1920,
+              1200
+            ],
+            "map_build_ms": 291.351104,
+            "map_construction_excluded": true,
+            "map_coordinate_storage_bytes": 110592000,
+            "output_allocation_and_thread_spawn_join_included": true,
+            "sequential": {
+              "max_ms": 93.745142,
+              "median_ms": 92.5377785,
+              "min_ms": 90.39693899999999,
+              "p95_ms": 93.227223,
+              "runs": 20
+            },
+            "warmups_per_mode": 1
+          }
+        ],
+        "scope": "production StereoImageMaps synthetic paired remapping benchmark; not hardware, accuracy or live throughput qualification"
+      },
+      "raw_sha256": "7ac341b498d21d014a1a0421676bcaa02af1cf17a6923ff76dd50e68936413f4"
+    }
+  },
+  "resource_denial_probe": {
+    "thread_creation_denied": true,
+    "rlimit_nproc_soft": 0,
+    "rlimit_nproc_hard": 0,
+    "scope": "owned child processes only; parent/user process limits unchanged"
+  },
+  "gate": {
+    "tests_passed": 583,
+    "formatting": "PASS",
+    "strict_clippy": "PASS",
+    "release": "PASS",
+    "exit_code": 0,
+    "log_sha256": "e9a20c065c3103c5b4a25ca87d99e3085f4e4def053b430b7fe2b7023e0e5360"
+  },
+  "limitations": [
+    "one workstation; no CPU frequency pinning",
+    "thread/resource scheduling affects timings",
+    "output comparison and deallocation excluded from timing",
+    "map construction excluded; allocation and thread spawn/join included",
+    "no RSS, long-run growth, SIMD, GPU or live-frame-rate measurement",
+    "no scanner device or calibration/mode changes"
+  ]
+}

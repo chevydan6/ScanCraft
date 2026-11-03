@@ -1,0 +1,47 @@
+{
+  "scope": "actual release GUI synthetic interaction; not hardware qualification",
+  "head_base": "84b89f42c977173bab580ca9d1d8eea90e81d3b2",
+  "source_state": "uncommitted developer worktree",
+  "binary_sha256": "129f50cec49834de25aab7f5b70896eda9b28f716d3d86484c226b34bf8582b1",
+  "recorded_frames": [
+    46,
+    46
+  ],
+  "candidate_pairs": 46,
+  "paused_pairs": 16,
+  "fused_points": 6,
+  "graceful_stop_requested": true,
+  "camera_fds": [],
+  "visually_inspected": [
+    "initial",
+    "paused",
+    "paused-later",
+    "resumed",
+    "complete",
+    "editor-open"
+  ],
+  "screenshots_sha256": {
+    "editor-open.png": "8ce21022f5def76710f48031fa1b92d97fc5413bcca535a807c24ec675a6d130",
+    "complete.png": "61b5e930dddd911b9fb359a90da7abbe325d2c60fbaf73795787bb0511d2a629",
+    "stop.png": "023d2ce77832f64614f8ee7bcd82413f18765b6023563f665b91da7e734a202a",
+    "resumed.png": "7d626d8050ba506f03d5ed3b4246b0b131749f2e81a556f683a564fee11d57ce",
+    "paused-later.png": "a1032ffe1636b9833ddc14a461f35a3648f0010aa7ff68da873e956535474612",
+    "paused.png": "92ed41c6bd3d2770dc68ed60711ced06998ef50d857346b4d8d17acceb1b4058",
+    "initial.png": "26aca5bc2bcc53ccfdfe30174e5752c2e1e9a933622647a619c1b2a65ee9a3d1"
+  },
+  "limitations": [
+    "synthetic fixture only",
+    "no hardware accuracy or timing qualification"
+  ],
+  "window_close": {
+    "scope": "synthetic private-display WM_DELETE_WINDOW during capture",
+    "exit": 0,
+    "published": true,
+    "elapsed_seconds": 0.5021451439824887,
+    "graceful_stop_requested": true,
+    "recorded_frames": [
+      5,
+      5
+    ]
+  }
+}

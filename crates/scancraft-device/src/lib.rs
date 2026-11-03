@@ -11,6 +11,10 @@ use std::{
     ptr::NonNull,
     time::{Duration, Instant},
 };
+mod cleanup_errors;
+mod paired_dequeue;
+mod wait_policy;
+use cleanup_errors::CleanupErrors;
 use v4l2_sys_mit as v;
 fn invalid(s: impl Into<String>) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidData, s.into())
@@ -235,6 +239,16 @@ impl Stream {
         b
     }
     fn dequeue(&mut self, timeout: Duration) -> io::Result<Packet> {
+        self.dequeue_then(timeout, Ok)
+    }
+    /// Copy into owned memory, complete dependent dequeue work, then requeue.
+    /// Keep this video slot unavailable until dependent metadata processing and
+    /// requeue finish, closing the observed gap between returning the two slots.
+    fn dequeue_then<T>(
+        &mut self,
+        timeout: Duration,
+        complete: impl FnOnce(Packet) -> io::Result<T>,
+    ) -> io::Result<T> {
         let mut p = libc::pollfd {
             fd: self.fd.as_raw_fd(),
             events: libc::POLLIN,
@@ -284,16 +298,13 @@ impl Stream {
                 data,
             })
         })();
-        ioctl(&self.fd, 15, 3, &mut b)?;
-        packet
+        paired_dequeue::complete_then_requeue(packet, complete, || ioctl(&self.fd, 15, 3, &mut b))
     }
     fn close(&mut self) -> io::Result<()> {
-        let mut error = None;
+        let mut errors = CleanupErrors::default();
         if self.streaming {
             let mut kind = self.kind;
-            if let Err(e) = ioctl(&self.fd, 19, 1, &mut kind) {
-                error = Some(e);
-            }
+            errors.record("stop streaming", ioctl(&self.fd, 19, 1, &mut kind));
             self.streaming = false;
         }
         self.maps.clear();
@@ -302,28 +313,25 @@ impl Stream {
             let mut r: v::v4l2_requestbuffers = unsafe { zeroed() };
             r.type_ = self.kind;
             r.memory = MMAP;
-            if let Err(e) = ioctl(&self.fd, 8, 3, &mut r) {
-                error = Some(e);
-            }
+            errors.record("release buffers", ioctl(&self.fd, 8, 3, &mut r));
             self.allocated = false;
         }
-        if let Some(mut f) = self.old_format.take()
-            && let Err(e) = ioctl(&self.fd, 5, 3, &mut f)
-        {
-            error = Some(e);
+        if let Some(mut f) = self.old_format.take() {
+            errors.record("restore format", ioctl(&self.fd, 5, 3, &mut f));
         }
-        if let Some(mut r) = self.old_rate.take()
-            && let Err(e) = ioctl(&self.fd, 22, 3, &mut r)
-        {
-            error = Some(e);
+        if let Some(mut r) = self.old_rate.take() {
+            errors.record("restore frame rate", ioctl(&self.fd, 22, 3, &mut r));
         }
-        error.map_or(Ok(()), Err)
+        errors.finish()
     }
 }
 impl Drop for Stream {
     fn drop(&mut self) {
         if let Err(e) = self.close() {
-            eprintln!("stream cleanup failed: {e}");
+            scancraft_core::diagnostics::note(format_args!(
+                "stream cleanup failed (buffer type {}): {e}",
+                self.kind
+            ));
         }
     }
 }
@@ -341,6 +349,8 @@ pub struct Capture {
     pub rejected_before_first_valid: u64,
     pub rejected_after_first_valid: u64,
     pub metadata_missing: u64,
+    /// Video buffers abandoned during an explicit stop before matching metadata.
+    pub stopped_incomplete_video_buffers: u64,
     pub sequence_drops: u64,
     last: Option<(u32, u64, u32)>,
     pub duplicate_sensor_pts: u64,
@@ -385,6 +395,7 @@ impl Capture {
             rejected_before_first_valid: 0,
             rejected_after_first_valid: 0,
             metadata_missing: 0,
+            stopped_incomplete_video_buffers: 0,
             sequence_drops: 0,
             last: None,
             duplicate_sensor_pts: 0,
@@ -393,28 +404,44 @@ impl Capture {
         })
     }
     pub fn next_frame(&mut self) -> io::Result<Frame> {
+        self.next_frame_until(|| false)?
+            .ok_or_else(|| invalid("capture stopped"))
+    }
+    /// Cooperative stop between driver calls. None means stopped, not device EOF.
+    /// Poll waits share the frame deadline; synchronous ioctls/cleanup remain unbounded.
+    pub fn next_frame_until(&mut self, stopped: impl Fn() -> bool) -> io::Result<Option<Frame>> {
         let deadline = Instant::now() + Duration::from_secs(8);
         while Instant::now() < deadline {
-            let v = self.video.dequeue(Duration::from_secs(2))?;
-            let mut meta = None;
-            for _ in 0..32 {
-                let m = if let Some(m) = self.pending.take() {
-                    m
-                } else {
-                    self.metadata.dequeue(Duration::from_millis(200))?
-                };
-                if m.sequence == v.sequence {
-                    meta = Some(m);
-                    break;
+            let metadata = &mut self.metadata;
+            let pending = &mut self.pending;
+            let Some((v, matched)) =
+                wait_policy::dequeue(deadline, Duration::from_secs(2), &stopped, |timeout| {
+                    self.video.dequeue_then(timeout, |v| {
+                        let matched =
+                            paired_dequeue::matching_metadata(v.sequence, pending, || {
+                                wait_policy::dequeue(
+                                    deadline,
+                                    Duration::from_millis(200),
+                                    &stopped,
+                                    |timeout| metadata.dequeue(timeout),
+                                )
+                            })?;
+                        Ok((v, matched))
+                    })
+                })?
+            else {
+                return Ok(None);
+            };
+            let m = match matched {
+                paired_dequeue::Metadata::Matched(packet) => packet,
+                paired_dequeue::Metadata::Missing => {
+                    self.metadata_missing += 1;
+                    continue;
                 }
-                if m.sequence.wrapping_sub(v.sequence) < 0x8000_0000 {
-                    self.pending = Some(m);
-                    break;
+                paired_dequeue::Metadata::Stopped => {
+                    self.stopped_incomplete_video_buffers += 1;
+                    return Ok(None);
                 }
-            }
-            let Some(m) = meta else {
-                self.metadata_missing += 1;
-                continue;
             };
             let metadata_flags = m.flags;
             let frame = Frame {
@@ -452,7 +479,7 @@ impl Capture {
                 self.sequence_drops += u64::from(delta - 1);
             }
             self.last = Some((frame.sequence, frame.host_timestamp_us, pts));
-            return Ok(frame);
+            return Ok(Some(frame));
         }
         Err(invalid("no validated frame within eight seconds"))
     }
@@ -471,9 +498,10 @@ impl Capture {
         );
     }
     pub fn close(mut self) -> io::Result<()> {
-        let a = self.video.close();
-        let b = self.metadata.close();
-        a.and(b)
+        let mut errors = CleanupErrors::default();
+        errors.record("video stream", self.video.close());
+        errors.record("metadata stream", self.metadata.close());
+        errors.finish()
     }
 }
 
@@ -542,3 +570,5 @@ pub mod stream_state;
 pub mod capture_observations;
 
 pub mod stream_group;
+
+pub mod scr_observations;

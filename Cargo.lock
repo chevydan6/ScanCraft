@@ -2194,6 +2194,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "scancraft-acquisition"
+version = "0.1.0"
+dependencies = [
+ "scancraft-core",
+ "scancraft-device",
+ "scancraft-geometry",
+ "scancraft-recording",
+ "scancraft-workflow",
+ "serde_json",
+]
+
+[[package]]
 name = "scancraft-app"
 version = "0.1.0"
 dependencies = [
@@ -2201,12 +2213,14 @@ dependencies = [
  "image",
  "libc",
  "nalgebra",
+ "scancraft-acquisition",
  "scancraft-core",
  "scancraft-device",
  "scancraft-geometry",
  "scancraft-image",
  "scancraft-recording",
  "scancraft-workflow",
+ "serde",
  "serde_json",
 ]
 
@@ -2227,6 +2241,7 @@ dependencies = [
  "crc32fast",
  "image",
  "libc",
+ "scancraft-acquisition",
  "scancraft-calibration",
  "scancraft-core",
  "scancraft-depth",
@@ -2251,6 +2266,7 @@ name = "scancraft-depth"
 version = "0.1.0"
 dependencies = [
  "scancraft-calibration",
+ "scancraft-core",
  "scancraft-geometry",
  "scancraft-image",
  "serde",
@@ -2285,6 +2301,7 @@ dependencies = [
  "scancraft-calibration",
  "scancraft-core",
  "scancraft-geometry",
+ "serde",
  "serde_json",
 ]
 

@@ -1,5 +1,70 @@
 # Benchmarks
 
+[Corrected sustained acquisition](docs/RAPTOR_SUSTAINED_METADATA_ORDER.md):
+18,000 accepted frames/camera over 600.275 seconds; all-rejection proxy 0.304625%
+FAIL, ongoing 0.038874%. Whole CLI: 652.71 s, 39.95 s user / 55.65 s system CPU,
+reported 14% CPU, maximum RSS 357,472 KiB. A partial 445.064 s acquisition sample
+averages 8.084224% of one core, RSS 333,732–338,644 KiB. These include a fixed
+308,800,000-byte prefaulted diagnostic buffer; do not compare RSS directly with
+smaller-tracer trials or call it application-only memory. No GUI rendering,
+reconstruction throughput or physical accuracy claim follows.
+
+[Finite stereo completion trials](docs/FINITE_STEREO_COMPLETION.md): counterbalanced
+new/old/old/new runs preserve 1,200 accepted frames per camera; new ongoing rejects
+7/8 and8/8, old9/8 and5/95. This isolates a finite teardown interaction, not a pass
+for <0.1% rejection, startup, sustained performance or physical reconstruction.
+
+[Sequential capture reader](docs/LASER_CAPTURE_SEQUENCE.md): exact reference checks
+cover 222 saved pairs / 391,481 points. Two single-observation comparisons with
+reference work included show less elapsed time than repeatedly opening individual
+pairs; these are not controlled throughput or sustained-memory benchmarks.
+Exploratory tracking acceptance is reported separately from physical accuracy.
+
+[Helper diagnostic validation](docs/HELPER_DIAGNOSTICS.md) adds failure-isolation
+evidence, not a performance claim: 808-test gate, successful synthetic/full-stderr
+processing and exact matches for 37 saved Raptor pair records. A finite healthy GUI trial processes
+24/32 (75%, below 90%); one root-close observation is 0.294 s. No sustained latency,
+whole-app memory, transport reliability or calibrated accuracy qualification follows.
+
+[Concurrent camera detection](docs/PARALLEL_LASER_DETECTION.md): same-executable
+old/new numerical medians are 40.1–40.9 / 32.3–33.2 ms on five saved native pairs;
+130 complete executions match. Alternating short native trials process 41–42/64
+serial and 47–50/64 concurrent, still below 90%, with startup/ongoing rejects
+retained. Neither the component timings nor finite trials establish preview
+FPS/p95, sustained throughput, physical accuracy or whole-app memory qualification.
+
+[Segmented journal capacity](docs/SEGMENTED_LASER_JOURNAL.md): a direct release test
+writes/verifies 9000 synthetic records / 1,182,790,236 bytes / 71 segments in one
+3.62 s observation, with 5740 KiB maximum RSS for that test process. It includes
+synthetic serialization, disk/cache I/O and reader validation, excludes compilation,
+and is neither whole-app memory nor sustained hardware throughput qualification.
+Native short rollover saves 32 raw frames/camera and processes 21 pairs (65.625%,
+below 90%); no controlled throughput gain or accuracy claim is made.
+
+[Bounded preview handoff](docs/ASYNC_LASER_PREVIEW.md): same-binary old/new complete
+Snapshot bytes match in 65 comparisons. Producer work changes from 6.665–6.710 ms
+to 0.186–0.224 ms by copying raw inputs; worker preparation still costs about
+6.7 ms and sequential total work increases slightly. No application-wide speedup,
+preview FPS/p95 or memory-soak qualification is claimed.
+
+[Laser stream profiling](docs/LASER_STREAM_PROFILE.md): same-binary alternating
+journal comparison on five saved pairs reduces encoding/flush medians from
+6.875–7.076 ms to 1.894–2.029 ms with exact output equality. Engine time remains
+42.788–46.298 ms; preview preparation adds 6.70–6.77 ms. These component timings
+are not an application-wide speedup or live-rate qualification.
+
+Native laser GUI diagnostics (2026-11-03) save all 32 raw frames/camera in one
+private renderer-limited trial but process only 19 pairs (59.375%, below 90%).
+Two default private software-renderer starts accept zero frames; rendering-load
+causality is unproven. No preview FPS/p95 or physical qualification is claimed.
+See [GUI observations and limits](docs/LIVE_LASER_GUI.md).
+
+Current acquisition-only repeatability evidence (2026-11-02): a source/binary-bound
+ten-minute stereo probe accepted 18,010 frames per camera at about 29.83 Hz,
+but ongoing rejected-buffer proxies were 0.54–0.56%. Resource accounting and
+limits are documented in [NATIVE_CAPTURE_REPEATABILITY.md](docs/NATIVE_CAPTURE_REPEATABILITY.md).
+This is not a full scanning throughput or accuracy benchmark.
+
 Initial experiments: AMD Ryzen 9 6900HS / Radeon 680M, Linux
 7.2.11-6900hs-lto, Raptor USB 3 (5000 Mbps), firmware 1.5.7.
 
@@ -8,8 +73,10 @@ left IR 100 frames / 2.161 s; right IR 100 frames / 2.157 s. Startup is
 included. These short experiments are not sustained throughput benchmarks.
 Raw sensor setting is 1920x1200 GREY at 50 fps. See evidence JSON for counters.
 
-Pending: release builds; ten-minute acquisition; thirty-minute live pipeline;
-sixty-minute memory stability; timing distribution and p95 latency; comparison
+Release compilation and ten-minute structural acquisition duration are now
+verified in the stated experiments; the buffer-rejection reliability gate still
+fails. Pending: thirty-minute live pipeline; sixty-minute memory stability;
+timing distribution and p95 latency; comparison
 against matched Creality Scan modes; calibrated geometry ground truth. No
 manufacturer accuracy or processing-throughput claims are made.
 
@@ -115,3 +182,72 @@ scanner accuracy, global convergence, robustness prevalence or speed qualificati
 Native example/runner hashes and Python/NumPy/SciPy versions are retained in
 evidence/huber-plane-reference/result.json. Method and scope: docs/POINT_TO_PLANE_ICP.md.
 No live/throughput/physical acceptance gate is advanced by these comparisons.
+
+## Repeated single-image undistortion baseline (2026-10-27 local date)
+
+Unchanged release undistort_benchmark on the Ryzen 6900HS: 1920×1200 synthetic
+GREY, 20 runs after 1 warmup, median 40.109 ms, p95 46.174 ms, maximum 49.208 ms; one map
+build 202.117 ms. Allocation included; mapbuilding excluded from apply timing.
+Coordinate storage 55,296,000 bytes, not processRSS. All 2,304,000 map pixels valid.
+Evidence docs/benchmarks/undistort-baseline-2026-10-27.json records source/example
+hashes and original output. This is a repeated component baseline, not a speedup,
+paired-camera measurement, full-pipeline FPS or hardware accuracy/latency gate.
+No optimized implementation is selected from this result alone.
+
+## Measured paired image preparation
+
+Large stereo maps now use one scoped helper when at least two CPUs are reported;
+small/one-CPU/resource-limited cases retain sequential processing. Sampling math
+is unchanged. On this workstation, the production API’s synthetic 1920×1200 pair
+median changed from 89.930 to 43.795 ms with bit-identical outputs/masks. The 583-test gate
+passes; single-CPU and thread-denied child fallbacks passed. This is not full
+scan throughput, accuracy or RSS qualification. See docs/PAIRED_REMAP_CONCURRENCY.md
+and docs/benchmarks/paired-remap-2026-10-27.json. Automated review remains pending.
+
+## Conservative epipolar block indexing
+
+Final same-binary production-library versus 72ea37c scalar/prepared comparison,
+real WorkControl callbacks, 13 iterations/first warmup/rotating order: expensive
+saved pose median86.610→32.485ms (median paired ratio2.672), box49.997→23.592ms
+(ratio2.117), small scalar-fallback pose1.502→1.524ms (ratio0.985). Every complete
+result equal outside timers. Matching only, excluding preparation/image/JSON/I/O;
+shared warm host, no live/accuracy/general speedup inference.
+See docs/INDEXED_EPIPOLAR_TRACES.md for exact scope, cancellation counts and limits.
+
+
+## Per-pixel epipolar constraint reuse
+
+Final production processor versus copied exact 6fc557d baseline geometry/pair
+processor, same release binary and decoded inputs, 13 alternating iterations/first
+warmup: five reported saved pair medians 35.176/32.421/35.381/32.288/32.153 ms become
+29.553/27.455/29.478/27.307/27.319 ms. Numerical engine only; JSON/I/O/display excluded.
+All 24 pairs / 63,436 full queries / 185,094,875 detail bytes match, as do 624 complete executions.
+Two short actual GUI trials reach 54/64 pairs each versus 49/64 and 47/64 baseline;
+84.375% remains below 90%. All raw integrity/state restoration checks pass, but
+startup and ongoing rejects persist. No sustained, latency, memory or accuracy
+qualification. See docs/CACHED_EPIPOLAR_QUERIES.md for scope and compiler-context limits.
+
+
+## Buffered segmented pair encoding
+
+Final actual production writer versus exact 285f191 baseline in separate namespaces
+of one release probe: five saved typed reports, thirteen alternating iterations,
+first warmup excluded, all segments/index bytes exact. Append medians with 2 MiB
+segments change from 5.590–6.018 ms to 4.623–5.256 ms; with a separate 16 MiB policy,
+2.680–2.852 ms to 1.623–2.083 ms. Final sealing is outside those medians (about
+3.0–3.6 / 6.9–7.5 ms respectively). Configuration and implementation effects are
+reported separately; fixed quotas/fsync policy for the same request are preserved.
+Native short trials process 57/64 and 58/64 versus 54/64 and 55/64 baseline;
+one separate 16 MiB trial reaches 61/64. No sustained-rate or physical pass follows.
+All 294 resulting pair records/558,364 candidate values reproduce old full bytes.
+See docs/SEGMENTED_PAIR_ENCODING.md for phase instrumentation, scope and limitations.
+
+
+## Saved capture reopening validation
+
+The new complete-capture loader is a correctness/usability milestone, not a speedup.
+It revalidates artifacts/journals and indexes full recordings for each selected view;
+I/O is linear in capture size. Nine older folders reproduce 18 selected views /
+26,750 positions and complete FrameViews; actual native close/restart/reopen and GUI
+pair/error handling pass. No large-capture latency, maximum-descriptor, RSS or live
+preview performance gate is advanced. See docs/SAVED_LASER_CAPTURES.md.
