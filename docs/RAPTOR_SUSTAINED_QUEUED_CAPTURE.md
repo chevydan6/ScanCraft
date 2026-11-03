@@ -123,8 +123,10 @@ compression, making explicit storage budgets important for longer sessions.
 The tracer records 72,002 recording writes, zero trace errors, and no injected
 delays. Maximum natural write duration was **107.200 ms**; 38 writes exceeded
 33.333 ms. One right-camera video dequeue occurred on a different thread during
-the longest write. Other long writes had no same-camera dequeue inside their
-intervals. This supports separation of acquisition from storage, not a universal
+the longest write. Across all 38 long writes, 26 contain 30 complete successful
+same-camera video dequeues on different threads; 12 contain none. Both dequeue
+start and end must fall inside the write interval for this count. This supports
+separation of acquisition from storage, not a universal
 service-latency guarantee or attribution of every pause to storage.
 
 An original private Rust analysis harness linked the existing production Reader,

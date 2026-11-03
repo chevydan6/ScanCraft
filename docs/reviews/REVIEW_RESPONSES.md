@@ -3937,3 +3937,23 @@ queue hypothesis. This is not a confirmed root cause: synchronous tracer writes
 are not independently timed and scheduling/faults remain possible. Queue/thread
 trace contexts are retained privately and the report now states this observer
 limitation. No acquisition change or independent-review closure is claimed.
+
+## SCAN-REV-026 — accepted documentation correction — 2026-11-03
+
+Accepted. The sentence "Other long writes had no same-camera dequeue inside
+their intervals" overgeneralized the inspected examples. A fresh developer
+streaming analysis of all 288,119 retained trace rows independently reproduces
+the reviewer's counts: 38 writes longer than 33.333333 ms, 26 containing 30
+complete successful same-camera video DQBUF intervals, 12 containing none.
+Both dequeue timestamps must lie inside the write interval and the camera and
+writer thread identifiers differ. The longest write still contains one dequeue.
+
+Correction: docs/RAPTOR_SUSTAINED_QUEUED_CAPTURE.md now gives these counts and
+the precise containment rule. This developer response records acceptance;
+the reviewer retains exclusive authority to verify and close the finding.
+Evidence: private sustained-queued-hln5i2yy/all-long-write-concurrency.json.
+Affected original evidence commit e6b8989a3af960c9cfa838ee26e2757c6cef9cd2;
+the wording remained in d3992a646720b807de18866427acc08b4879b50c before this fix.
+No application source or hardware change; no repeated hardware/Rust suite is
+needed for this evidence-only correction. Whitespace and publication secret
+checks apply. Causal, observer-overhead and qualification limitations remain.
