@@ -12,7 +12,6 @@ use std::{
 struct Encoded {
     bytes: Vec<u8>,
     maximum: usize,
-    checked: usize,
 }
 impl Write for Encoded {
     fn write(&mut self, b: &[u8]) -> io::Result<usize> {
@@ -117,22 +116,18 @@ impl Journal {
         let mut encoded = Encoded {
             bytes: Vec::new(),
             maximum: self.limits.maximum_record_bytes as usize,
-            checked: 0,
         };
-        // Check cancellation at bounded serializer-write intervals without copying history.
+        // Coalesce small serializer fragments with the existing fixed 64 KiB
+        // helper. Check cancellation before every resulting bounded-sink write.
+        // Encoding must finish before touching the required file/index prefix.
         struct Controlled<'a> {
             encoded: &'a mut Encoded,
             work: &'a WorkControl,
         }
         impl Write for Controlled<'_> {
             fn write(&mut self, b: &[u8]) -> io::Result<usize> {
-                if self.encoded.checked >= 65536 {
-                    self.work.check().map_err(|e| invalid(&e))?;
-                    self.encoded.checked = 0;
-                }
-                let n = self.encoded.write(b)?;
-                self.encoded.checked = self.encoded.checked.saturating_add(n);
-                Ok(n)
+                self.work.check().map_err(|e| invalid(&e))?;
+                self.encoded.write(b)
             }
             fn flush(&mut self) -> io::Result<()> {
                 Ok(())
@@ -142,8 +137,7 @@ impl Journal {
             encoded: &mut encoded,
             work,
         };
-        serde_json::to_writer(&mut out, value)?;
-        out.write_all(b"\n")?;
+        pair_record(&mut out, value)?;
         work.check().map_err(|e| invalid(&e))?;
         let n = encoded.bytes.len() as u64;
         let total = self

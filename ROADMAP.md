@@ -1,5 +1,13 @@
 # Roadmap
 
+Segmented encoding now reuses fixed-buffer serialization: complete output bytes
+remain identical and measured append cost decreases. Current short native trials
+reach 57–58/64 with 2 MiB segments, and one separate 16 MiB request reaches 61/64.
+Next validate practical explicit storage budgets/checkpoint tradeoffs and longer
+processing/preview/resource behavior while investigating startup rejects. These
+results do not replace genuine calibrated reconstruction, tracking/fusion or a
+complete usable scan/project workflow. See docs/SEGMENTED_PAIR_ENCODING.md.
+
 Per-pixel epipolar reuse reduces measured numerical processing to 27.3–29.6 ms
 on five reported saved pairs, with complete result equality. Current short native
 trials reach 54/64 (84.375%), still below 90%. Next isolate remaining dispatch,

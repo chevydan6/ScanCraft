@@ -62,4 +62,6 @@ fn invalid(message: &str) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidData, message)
 }
 #[cfg(test)]
+mod encoding_tests;
+#[cfg(test)]
 mod tests;

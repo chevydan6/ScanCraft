@@ -3287,3 +3287,69 @@ credits all lookup_failed. No review request/upload/paid flag/push/PR/merge or
 protection bypass. This is unavailable review, not a pass. Independent review of
 the cache and permanent regression is pending. Sustained processing, calibrated
 accuracy, tracking/fusion, full scan-to-editable-mesh and release remain incomplete.
+
+
+## Independent follow-up — SCAN-REV-025 regression verified
+
+Assignment 360 independently inspected and ran the permanent concurrent append
+regression at 285f1914e392ff0f48b62d158bf85ab20804d94d. Its pass supplies the
+recommended regression; the original fix remains 6fc557db5c1b6a46ec5531b7c1590a1cfbbe5563.
+This acknowledges the reviewer's existing Resolved decision. It does not assert
+independent review of the per-pixel cache, hardware performance or this new writer
+change. No findings file or severity/status/conclusion was modified.
+
+## Developer milestone — buffered schema-2 record encoding
+
+Developer optimization, not a new independent finding. Baseline commit:
+285f1914e392ff0f48b62d158bf85ab20804d94d. Changed `laser_stream/pair_journal/write.rs`
+to reuse existing `bundle/io.rs::pair_record` and check cancellation before every
+coalesced bounded-sink write. Removed the redundant byte counter. No quota,
+checkpoint/format, numerical method, frame admission, queue, preview ordering,
+source ownership, dependency or unsafe change. Added two regressions through
+`pair_journal.rs` / `pair_journal/encoding_tests.rs`. The final implementation
+commit/source/binary binding is retained in the developer recovery checkpoint.
+
+Private measurement preceded implementation. Final probe imports actual production
+write.rs, exact baseline writer and exact CappedFile body (scaffolding imports/type
+visibility adapted). Five saved typed reports, 13 iterations per path with first
+warmup excluded; every segment/index file matches. Final 2 MiB append medians are
+4.623–5.256 ms versus 5.590–6.018 ms; separate 16 MiB medians are 1.623–2.083 ms versus
+2.680–2.852 ms, with final sealing excluded and reported separately. Instrumented
+phase results distinguish encoding from checkpoint costs. No policy change is
+misrepresented as an implementation speedup. Same-host/compiler-context limits
+are explicit in docs/SEGMENTED_PAIR_ENCODING.md.
+
+Full gate: 814 tests pass, one deliberately ignored capacity test; fmt, strict
+frozen all-target Clippy and release builds pass. Explicit capacity test then
+passes 9,000 records above 1 GiB with complete readback (57.50 s debug, not a release
+benchmark). New tests cover Unicode/escapes across buffer boundaries, exact record
+limit/newline and one-byte-short rejection, poisoning, late serializer failure,
+mid-record cancellation and unchanged segment/index prefix. No Rust edits follow
+the final gate. Initial private harness Digest-field access failed and was corrected
+with a local type mirror; failed build and all prototype revisions are retained.
+
+Actual native GUI baseline/current/current/baseline with 2 MiB segments retains
+64 raw frames/camera and processes 54/57/58/55 pairs. Current 89.0625% / 90.625% do
+not establish the sustained 90% gate. Current drops 7/7 and 6/6, pending zero;
+startup rejects 2/101 and 91/1, ongoing 1/1 and 2/2 remain fully retained. A separate
+16 MiB request processes 61/64 (95.3125%), drops 3/3, startup 92/1, ongoing 0/0;
+it is a distinct checkpoint policy and a single short observation.
+
+Active root close saves 9 raw frames/camera and 9 pairs, zero drops/pending,
+startup 1/1, ongoing 0/0, one incomplete buffer/camera; close-to-exit 0.324523 s is
+one observation without a deadline. All six runs pass publication/raw integrity
+and full stream/illumination GET restoration; helpers own device FDs and GUI none,
+all observed processes exit, final accessible-FD inventory is empty. Authenticated
+private X11 readiness and LP_NUM_THREADS=2 remain explicit. Saved/active screenshots
+inspected. Frozen earlier engine/serializer reproduces all 294 records / 558,364
+candidate values, exact raw references and whole old record bytes. All six artifact
+manifests pass lengths/CRC. No firmware, physical calibration or installed geometry
+change. Private raw/models/probes/screenshots stay outside Git and review uploads.
+
+Fresh CodeRabbit quota/billing/credits lookup returns lookup_failed, exit 1.
+No review/upload, paid usage, push/PR, merge or protection bypass; unavailable is
+not a review pass. Independent review of this optimization remains pending.
+005/006/007/021 unchanged; 024 remains independently resolved only for schema-2
+capacity. Original native early-exit attribution, transport/startup reliability,
+physical geometry, tracking/fusion, preview latency/FPS, long sessions/memory,
+complete editable scan-to-mesh workflow and release remain incomplete.

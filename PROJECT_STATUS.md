@@ -1,5 +1,11 @@
 # Project status
 
+[Buffered segmented encoding](docs/SEGMENTED_PAIR_ENCODING.md) reuses the existing
+serializer helper and preserves complete journals. The 814-test gate and explicit
+>1 GiB storage regression pass. Short native 2 MiB-segment trials process 57/64
+and 58/64; a separate 16 MiB request reaches 61/64. These are diagnostic observations,
+not sustained or physical qualification; startup rejects and review remain open.
+
 [Per-pixel epipolar reuse](docs/CACHED_EPIPOLAR_QUERIES.md) removes repeated
 first-ray work without changing complete results. The 812-test gate and 216
 analytic cases pass. Short native trials process 54/64 pairs versus 47–49/64

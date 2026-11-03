@@ -1,5 +1,11 @@
 # Architecture
 
+Segmented pair journaling reuses the existing fixed-buffer record serializer
+before its bounded in-memory encoder. Cancellation is checked per resulting sink
+write; successful encoding still precedes file/index mutation and required flush
+precedes optional preview. Quotas, formats and fsync policy are unchanged. See
+docs/SEGMENTED_PAIR_ENCODING.md.
+
 Laser matching now binds a lazy first-camera epipolar constraint to one immutable
 model/pixel/configuration for one call. It reuses the exact line across cached
 second-camera traces and preserves per-trace cancellation/error ordering; no shared

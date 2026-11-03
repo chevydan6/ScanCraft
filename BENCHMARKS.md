@@ -206,3 +206,18 @@ Two short actual GUI trials reach 54/64 pairs each versus 49/64 and 47/64 baseli
 84.375% remains below 90%. All raw integrity/state restoration checks pass, but
 startup and ongoing rejects persist. No sustained, latency, memory or accuracy
 qualification. See docs/CACHED_EPIPOLAR_QUERIES.md for scope and compiler-context limits.
+
+
+## Buffered segmented pair encoding
+
+Final actual production writer versus exact 285f191 baseline in separate namespaces
+of one release probe: five saved typed reports, thirteen alternating iterations,
+first warmup excluded, all segments/index bytes exact. Append medians with 2 MiB
+segments change from 5.590–6.018 ms to 4.623–5.256 ms; with a separate 16 MiB policy,
+2.680–2.852 ms to 1.623–2.083 ms. Final sealing is outside those medians (about
+3.0–3.6 / 6.9–7.5 ms respectively). Configuration and implementation effects are
+reported separately; fixed quotas/fsync policy for the same request are preserved.
+Native short trials process 57/64 and 58/64 versus 54/64 and 55/64 baseline;
+one separate 16 MiB trial reaches 61/64. No sustained-rate or physical pass follows.
+All 294 resulting pair records/558,364 candidate values reproduce old full bytes.
+See docs/SEGMENTED_PAIR_ENCODING.md for phase instrumentation, scope and limitations.
