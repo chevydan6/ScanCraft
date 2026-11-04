@@ -1,3 +1,25 @@
+# Full-payload evidence confirms candidate pixel failure — 2026-11-04
+
+A fresh temporary-candidate capture saves 1,800 images per camera with no ongoing
+rejected buffers, yet seven accepted images contain partial duplicated strips.
+All 3,600 images match full-transfer USB monitor hashes. Four software requests
+remain outstanding throughout each affected frame; an empty queue does not explain
+these incidents. Scanner/link/controller/HCD/DMA attribution and a remedy remain
+unresolved. The original driver, scanner settings and services are restored.
+
+Two preceding live pilots validate the compact monitor against full PCAP. The first
+PCAP drops 1,009 events and correctly fails global admission; its affected pair is
+fully retained. The second matches all 92,202 events apart from per-reader timestamps,
+and all 240 native images equal literal PCAP bytes. All failures remain documented.
+See [method, results and evidence](docs/RAPTOR_LIVE_PAYLOAD_HASH_VALIDATION.md).
+
+Independent reviewer580 verified the historical audit below; these new observations
+await independent review. SCAN-REV-034 remains High/Open. Application source is
+unchanged from d91fc4f; no fix, firmware change, physical accuracy or complete scan
+is claimed. Rotation confirmation is pending. Next: discriminate upstream fault
+causes while preserving errors, then validate usable moving-object observations.
+The measured box dimensions remain held out from fitting and thresholds.
+
 # Existing driver candidate still has pixel duplication — 2026-11-04
 
 A read-only audit of 43,800 accepted images in ten original recordings finds 28

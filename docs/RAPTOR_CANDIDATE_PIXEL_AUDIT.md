@@ -1,5 +1,10 @@
 # Pixel audit of retained inline-copy trials
 
+Follow-up: [fresh enabled-path full-payload evidence](RAPTOR_LIVE_PAYLOAD_HASH_VALIDATION.md)
+finds seven partial-strip images in 3,600 accepted images, with full-transfer hash
+agreement and four requests outstanding throughout each affected frame. This report
+retains the separate historical flood-board results below.
+
 **Confirmed developer result:** the previously reported 610-second combined trial
 contains 19 accepted images with repeated full pixel blocks, despite zero startup
 or ongoing buffer rejections. The original rejection counters, CRC results and

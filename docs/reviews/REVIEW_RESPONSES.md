@@ -5747,3 +5747,49 @@ code is unchanged; this is software regression evidence, not fresh hardware proo
 CodeRabbit quota lookup in the repository returns `lookup_failed`; no substantive
 or paid review was performed. An initial invocation outside the repository also
 failed and is retained. Public source/diff privacy checks precede publication.
+
+## SCAN-REV-034 — accepted; live full-payload enabled-path evidence
+
+Accept assignment580's request for full-payload evidence on the enabled path and
+its outstanding causal/qualification requirements. The new report
+`docs/RAPTOR_LIVE_PAYLOAD_HASH_VALIDATION.md`, project status and two investigation
+cross-references document observations only. No application or kernel source change,
+heuristic repair, image exclusion, firmware change or claim of correction.
+
+Two baseline pilots validate the compact hash observer. First runner1385 correctly
+exits1 after its PCAP drops1,009events; all240hash comparisons pass and both affected
+images have complete literal original PCAP coverage. Second runner39960 exits0;
+verifier54787 checks all92,202non-timestamp headers/prefixes/full digests and all240
+literal native images. Per-reader timestamps differ0–62µs. Startup98 and paired
+ongoing short images remain. Native verification24925 passes. Original verifier
+index error and its correction remain in private evidence.
+
+Fresh temporary-candidate runner62635 exits0, captures1800images/camera, startup1/0,
+ongoing0/0, restores baseline module/parameters, services/formats and all21native
+state comparisons. Monitor1,354,538selectedevents, zero loss/I/O errors. Analyzer81920
+exits0: all3600acceptedimages match full-transferSHA/prefixes and188payload/oneFID/
+oneEOF framing; seven have partial duplicated strips, zero full-block signatures.
+Verifier65121 exits0: allseven affected plus two final native exports match original
+pixels; nine repeated runs and their neighbors checked. Four requests remain
+outstanding after every affected-frame completion; no empty-queue overlap, maximum
+completion gaps164–177µs. Request counts are not physical controller-ring occupancy.
+
+This localizes candidate-path duplication to the observed payload stream, not to a
+specific device/controller/HCD/DMA cause. Full hashes are not retained literal USB
+bodies. Different scene/mode/observer conditions prevent causal rate comparison
+against historical trials. Diagnostic false-positive/negative bounds, other failure
+types, startup/restart/load qualification, physical sync and all scan accuracy/
+coverage/end-to-end obligations remain. Only the reviewer can verify/close034.
+
+Pilot seal218files/2,287,094,321bytes SHA256
+6346426bedb10e02d618a805d7fc8f9f573172162f3534b04172ead9c4a4b09a;
+candidate seal127files/8,515,752,336bytes SHA256
+c0a3dad9bcb913050d57c43341ff08ce32f661d08079be2f396c4e3cbfdf82ea.
+Capture source remainsd91fc4f, documentation base00284ea; exact publication commit
+and software/privacy/review gate outcomes are recorded in the developer checkpoint.
+Reviewer-owned records remain untouched; raw images and device data remain private.
+
+Publication gate7105 exits0: formatting, strictClippy,935passed/0failed/1ignored,
+optimized workspace build. No source correction, hence no hardware qualification
+from that result. CodeRabbit usage89614 exits1 with all capacity/billing lookups
+unavailable; no substantive review or paid usage. Draft status is retained.

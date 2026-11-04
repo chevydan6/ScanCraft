@@ -1,5 +1,9 @@
 # Accepted-image duplication and current transport evidence
 
+Later experiment: [live observer validation and enabled-candidate capture](RAPTOR_LIVE_PAYLOAD_HASH_VALIDATION.md)
+extends the baseline evidence below to the existing temporary candidate. It retains
+all pilot failures and distinguishes original PCAP bytes from full-payload hashes.
+
 ## Finding and scope
 
 **Confirmed:** genuine Raptor recordings contain accepted, full-length images
