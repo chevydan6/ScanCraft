@@ -180,3 +180,91 @@ criterion must account for naturally repeated/constant imagery and prove its fal
 positive/negative limits. Reliable acquisition, physical scale, complete box
 coverage, repeated dimensional validation and native end-to-end scanning remain
 unfinished. No new generic editor feature or architecture rewrite is justified.
+
+## Calibration and reconstruction input audit
+
+The follow-up starts at documentation revision
+`9759e076345169a6794417d2e92aecd5f41d0f1c`, with unchanged application code.
+Independent assignment 570 reproduced the preceding evidence and opened
+**SCAN-REV-034, High/Open**. The developer accepts the finding. This input audit
+addresses one requested investigation; it does not locate or correct the fault
+and does not close the finding.
+
+The frozen box rig equals the retained corrected native stereo fit, including both
+fixed camera models and the transform. Its intrinsic/distortion values also equal
+the retained monocular fits. The audit follows the saved observation requests and
+source hashes to the three training poses and reserved pose described in
+[real-board calibration](REAL_BOARD_CALIBRATION.md). Separate source plans bind
+the near/far, projector-off/on board recordings used for sheet preparation. Box
+processing plans identify the original box pair and three repeatability trials.
+The 225 recovery pairs use their already sealed raw snapshots, checked against
+the earlier publication manifest. No source image, coefficient or threshold in
+the scanning pipeline changes.
+
+Two private diagnostics run on all 690 images in those 474 files:
+
+1. The original exact full aligned 12,276-byte block comparison.
+2. An additional partial-copy signature: byte-equal runs at displacement 24,552,
+   at least 128 bytes long and containing at least 16 distinct pixel values.
+   These settings were recorded before the input audit. They test the observed
+   displacement, not arbitrary image corruption. No anomaly is silently removed.
+
+| Source family | Images examined | Images with either signature | Selected inputs with signature |
+| --- | ---: | ---: | ---: |
+| Three camera-training recordings plus reserved pose, both cameras | 80 | 2 | 0 of 8 |
+| Near/far board, projector off/on, both cameras | 80 | 0 | 0 of 8 |
+| Original box pair plus three box trials, both cameras | 80 | 0 | 0 of 8 |
+| 225 recorded recovery pairs | 450 | 4 | 4 of 450 |
+
+All six flagged images contain **partial** repeated strips; none contains a
+repeated complete aligned block. This demonstrates a concrete blind spot in the
+original full-block comparison.
+
+The two training-recording images are left index 8 and right index 7 of the
+30 mm caliper scene. The actual selected training indices were 5/4. Their repeated
+runs are 3,400 and 3,044 bytes. They therefore do not enter the selected camera-fit
+observations. No signature is found in the selected six training images, the two
+reserved images or the eight sheet-preparation images. This limited negative
+result is **not** a comprehensive integrity or calibration-accuracy qualification.
+
+The four selected recovery images belong to original pairs **320 and 816**:
+
+| Pair / camera | First byte offset | Repeated offset | Equal run length |
+| --- | ---: | ---: | ---: |
+| 320 / first | 66,488 | 91,040 | 11,500 |
+| 320 / second | 66,488 | 91,040 | 10,721 |
+| 816 / first | 91,040 | 115,592 | 6,852 |
+| 816 / second | 91,040 | 115,592 | 3,448 |
+
+The native first-camera export for 816 visibly contains a displaced horizontal
+strip near the top of the image. Both pairs already have zero tracking points,
+no pose and `integrated: false` in the saved baseline and retained-reference
+recovery journals. They retain 1,409 and 364 local surface candidates respectively,
+but contribute no integrated geometry to those saved fused results. This audit
+did not cause their exclusion and does not qualify their unfused candidates.
+It also does not prove that every other input is free of a different anomaly.
+
+Validation uses independent RAPTOR02 header/frame CRC and footer parsing, all 474
+native replay commands covering 690 images, and native extraction of the six
+flagged images. All replays pass. Every exported raw snapshot and PNG is compared
+byte for byte with its original source frame; all input hashes remain unchanged.
+Diagnostic controls cover random data, a partial copy, a full-block copy, constant
+data, both earlier damaged images and two monitored images without the signature.
+The constant image deliberately triggers the full-block comparison while failing
+the partial diagnostic's diversity requirement. This proves why block repetition
+alone cannot serve as a universal corruption rejection gate. Neither diagnostic
+has a general optical false-positive/negative bound.
+
+Private evidence `calibration-image-integrity-20261104` retains `plan.json`,
+source hashes, `audit.py`, all 690 per-image rows, `check_diagnostic.py`, controls,
+`fusion-impact.json`, native exports, `native_verify.py` and replay receipts.
+The external `calibration-image-integrity-publication-20261104` holds manifests
+and publication bindings. No raw imagery or target coordinates are published.
+The unchanged Rust gate remains the independently verified 935-test revision;
+the new executions are recorded-data diagnostics, not a new Rust build gate.
+
+**Remaining action:** reproduce duplication with sufficient device-to-application
+boundary evidence, implement a justified correction and validate it independently.
+Exploratory rotating-box acquisition can collect missing coverage while retaining
+all originals and errors, but must not be presented as qualified metrology while
+SCAN-REV-034 and the earlier scale/coverage/accuracy requirements remain open.

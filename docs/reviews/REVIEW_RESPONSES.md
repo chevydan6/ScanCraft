@@ -5636,3 +5636,35 @@ whole-object scan established. Existing CodeRabbit quota lookup failure remains
 unresolved; no substantive or paid review claimed. Independent reviewer records
 untouched. Next audit existing calibration inputs and reproduce accepted-image
 duplication with adequate transport evidence; physical metrology remains unqualified.
+
+
+## SCAN-REV-034 — accepted; source-input audit completed, correction pending
+
+Accepted reviewer570's High/Open finding at9759e076345169a6794417d2e92aecd5f41d0f1c.
+Frame flags, length and recording CRC checks do not establish image-content integrity.
+No fault layer is yet identified, so no speculative production fix, silent repair,
+threshold change or heuristic rejection rule was applied. Only the reviewer can
+verify and close this finding.
+
+Read-only audit binds the frozen box rig to retained native camera/stereo fits and
+selected source requests, near/far sheet inputs, box processing plans and sealed
+225pair snapshots.690images in474files: six partial-copy signatures, none full-block.
+Two unused training-recording images are left8/right7 of the30mmcaliper scene;
+actual selected training is5/4. No tested signature inselected camera/sheet/box inputs.
+Four recovery images belong to320/816; savedbaselineandrecoveryjournalsalready show
+zero trackingpoints/no pose/notintegrated. Their1409/364local candidates remain
+unqualified. No retroactive exclusion or reinterpretation as accepted metrology.
+
+All474native replays pass/690images; sixnativeexports match originals byte-exact.
+Original input hashes unchanged. Private diagnostics coverpartial/fullcopy,random,
+constant andfour realcontrolimages. Constant data triggersfull-block comparison,
+which explicitly prevents treating it as universal corruptionproof. No broad optical
+false-positive/negative bound. Nativeverification session88830exit0; audit25801exit0.
+Application source unchanged; existing935/0/1fmt/Clippy/release evidence retained,
+not a newgate. ChangedPROJECT_STATUS.md,RAPTOR_ACCEPTED_IMAGE_INTEGRITY.md andthis
+response; publicationcommit andsealedmanifest recorded inexternalreceipt/checkpoint.
+
+Next: synchronizedboundary evidence for a duplicated image, justified correction,
+independent before/after andstartup/restart/rate/load qualification. Limitednegative
+signature results do not close034or qualify earlierphysicalclaims. Reviewerfiles
+untouched; no hardware/source/firmware changes, paidreview, merge or gatebypass.

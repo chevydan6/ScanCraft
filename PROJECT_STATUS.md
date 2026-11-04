@@ -1,3 +1,27 @@
+# Calibration input integrity audit — 2026-11-04
+
+Independent reviewer570 opened SCAN-REV-034 High/Open after reproducing accepted
+image duplication. The developer accepts it; no fix or closure is claimed.
+A source-bound audit now covers690images in474recordings/snapshots:80camera training/
+reserved-pose images,80sheet-preparation images,80box-trial images and450recovery
+images. Six contain partial repeated strips missed by the full aligned-block test.
+
+The two flagged camera-training recording frames were not the selected fit inputs.
+No tested signature appears in selected calibration/sheet/box inputs. Four flagged
+recovery images belong to pairs320/816; both already had no tracking pose and were
+not integrated in either saved fusion result. Negative signature results do not
+qualify image integrity, calibration accuracy or the remaining unfused candidates.
+
+All474native replays/690images pass; all6anomalous exports bind byte-exact tosource.
+Originals and coefficients remain unchanged. Diagnostic controls demonstrate that
+constant images can trigger full-block repetition, so no heuristic production
+rejection rule was installed. See the [source audit](docs/RAPTOR_ACCEPTED_IMAGE_INTEGRITY.md#calibration-and-reconstruction-input-audit).
+Next: locate and correct duplication with transport/buffer evidence, then verify
+independently. A current-binary900-frame diagnostic rotation capture is prepared;
+owner motion confirmation is pending. No recording or hardware operation this
+milestone. Full measurable scan, physical scale and end-to-end qualification remain
+incomplete. Existing935-test Rust gate applies to unchanged application source.
+
 # Accepted image integrity investigation — 2026-11-04
 
 Accepted-buffer and recording CRC success do not establish intact image content.
