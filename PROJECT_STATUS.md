@@ -1,23 +1,24 @@
 # Project status
 
-Latest reconstruction investigation: [native board/sheet preparation](docs/NATIVE_BOARD_SHEET_PREPARATION.md)
-now supports201 real stereo candidates along one box stripe using a provisional
-board-derived curved sheet.195 other queries remain unsupported. This is a narrow
-fragment, **not a complete or dimensionally validated object scan**. Owner dimensions
-remain held out. No physical units, correct stripe identity or accuracy claim yet.
+Latest integration result: [full native recorded-pair processing fails](docs/NATIVE_LASER_DOMAIN_FAILURES.md).
+The existing workflow retains all2,206query errors and produces zero candidates.
+Native diagnostics localize268first-ray,546sheet-projection and1,392second-trace
+failures. Invalid vertices in unrelated image traces abort otherwise usable queries.
+Immediate priority is explicit calibrated-domain rejection/valid-segment handling,
+with preserved errors/provenance and no lens-limit widening or bridging across gaps.
 
-Wider image-supported board coverage adds426 observations. The new straight-sheet
-fit fails the original limits; a separately planned30-pair linear/quadratic comparison
-with held-out image-row bands supports four provisional curved sheets. The new pair's
-held-out X-residual RMS improves0.2534 to0.0609RAW. No limits are loosened; all failed
-fits and709 candidate alternatives remain. Two-pose internal validation can share
-calibration errors and needs independent physical checks. Next: additional measured
-board coverage/held-out poses, sheet identity and broader real reconstruction.
+Additional saved-board evidence supports the four frozen curved-sheet hypotheses in
+a new pose after a documented stronger marker mask. Original anchor/support/mask
+failures remain; no sheet refit or physical-accuracy claim. One point misclassified
+as stripe came from a marker outline narrowed by preprocessing. Original-pixel masks
+fix that diagnostic exclusion without changing geometry or quality limits.
 
-Production source remains ebb77a2; private Rust probe fmt/Clippy/release and numerical
-crosschecks pass. The independently verified895-test application gate remains applicable.
-Independent519 reproduced the earlier native board experiment and failed planar transfer;
-the new wider-board/curvature evidence awaits review. CodeRabbit coverage is outstanding.
+The earlier private201-point box stripe remains a narrow experimental fragment, not
+an operational full-image/native-GUI or measured object scan. Owner dimensions stay
+held out. Production source remains ebb77a2; private probe fmt/Clippy/release and
+numerical/source checks pass. Independent522 verified prior2552411 evidence/CI, not
+this new integration failure. Full895-test source gate still applies. CodeRabbit
+substantive coverage is outstanding. No new hardware or calibration activation.
 
 Current physical readiness: the owner's measured yellow box was captured in both
 scanning cameras. [Scoped line + gain capture](docs/LINE_CAPTURE_GAIN.md) saves/replays

@@ -5068,3 +5068,35 @@ No repeated full Rust gate, metric export, measured dimensions, full surface, GU
 physical accuracy, reviewer closure or substantive CodeRabbit completion claimed.
 No new hardware, firmware, paid service, main merge or protection action. Immediate
 priority remains additional real sheet coverage/held-out poses and physical validation.
+
+
+## DEV-NATIVE-DOMAIN — held-out checks reveal full-image integration failure
+
+Developer-identified integration gap; no independent finding/status change. Accept
+independent522's scoped reproduction of2552411/201-point evidence and CI confirmation.
+New NATIVE_LASER_DOMAIN_FAILURES.md documents the subsequent evidence and limitations.
+
+Additional rotating-board sample1 supplies24 original unsaturated marker points;
+original four-anchor failures, sample0/8 insufficient support and one native inverse-
+domain rejection remain. Coarse opening is used only for identity. Three frozen sheets
+pass conservative held-out checks; the fourth fails its edge mask maximum. The initial
+small-component hypothesis is disproved and retained. Unioning every original shape-
+passing component outline with the opened masks removes two contaminated observations;
+allfour frozen checks pass without sheet refitting or threshold/domain changes. This
+mask correction is data-informed and not pristine physical qualification.
+
+Actual unchanged native full-image processing publishes zero candidates/2,206errors.
+All data/CRC/source/count checks pass; publication exit0 is not reconstruction success.
+Native audit explains268first-ray,546root-projection and1,392trace-domain failures,
+reconciling every error. Right traces0/2/49 have212/46/23invalid vertices; trace0also
+has170valid vertices. Strict whole-trace/root errors block otherwise valid hypotheses.
+Next implement explicit domain-rejection/contiguous-segment handling with full rejected
+source provenance, no bridging, no silent ambiguity loss, preserved resource/cancellation
+failures and strict legacy compatibility; replay this exact recording after changes.
+
+Only docs/NATIVE_LASER_DOMAIN_FAILURES.md, PROJECT_STATUS.md and this response change
+publicly. Source stays ebb77a2, independent895-test gate applies; no redundant fullgate.
+Private probes fmt/Clippy/release and numerical/raw reconciliation pass,223-file
+manifest/source refs in the document. New evidence awaits independent review. Exact
+publication commit follows in Git. No production fix, first scan, nativeGUI success,
+physical accuracy, paid review, merge or independent closure claimed.
