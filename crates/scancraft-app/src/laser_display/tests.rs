@@ -52,7 +52,7 @@ pub(crate) fn snapshot(origin: Origin, index: u64) -> Snapshot {
 fn display_validation_rejects_nonfinite_inconsistent_and_excessive_data() {
     for change in [
         |s: &mut Snapshot| s.positions[0][0] = f64::NAN,
-        |s: &mut Snapshot| s.positions = vec![[0.; 3]; 4097],
+        |s: &mut Snapshot| s.positions = vec![[0.; 3]; MAX_QUERIES + 1],
         |s: &mut Snapshot| s.queries = usize::MAX,
         |s: &mut Snapshot| s.without_unique = 1,
         |s: &mut Snapshot| s.frames[0].statistics.mean = f64::INFINITY,
@@ -74,7 +74,7 @@ fn display_validation_rejects_nonfinite_inconsistent_and_excessive_data() {
 #[test]
 fn decode_caps_precede_geometry_allocation_and_unknown_fields_are_rejected() {
     let mut v = serde_json::to_value(snapshot(Origin::RecordingReplay, 3)).unwrap();
-    v["positions"] = serde_json::json!(vec![[0.; 3]; 4097]);
+    v["positions"] = serde_json::json!(vec![[0.; 3]; MAX_QUERIES + 1]);
     assert!(
         serde_json::from_value::<Snapshot>(v.clone())
             .unwrap_err()
@@ -271,4 +271,16 @@ fn maximum_raw_payload_and_metadata_are_preserved_without_sampling() {
         assert_eq!(frame.statistics.mean, 17.);
         assert!(frame.pixels.iter().all(|&v| v == 17));
     }
+}
+
+#[test]
+fn dense_preview_accepts_exact_shared_capacity_without_promoting_geometry() {
+    let mut s = snapshot(Origin::RecordingReplay, 0);
+    s.positions = vec![[1., 2., 3.]; MAX_QUERIES];
+    s.queries = MAX_QUERIES;
+    s.validate().unwrap();
+    let decoded: Snapshot = serde_json::from_slice(&serde_json::to_vec(&s).unwrap()).unwrap();
+    assert_eq!(decoded, s);
+    s.queries += 1;
+    assert!(s.validate().is_err());
 }

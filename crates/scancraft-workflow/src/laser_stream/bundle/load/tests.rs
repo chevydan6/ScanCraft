@@ -222,7 +222,7 @@ fn selected_record_reference_counters_and_qualification_changes_fail_after_redig
             0 => r["frames"][0]["payload_crc32"] = json!(0),
             1 => r["raw_pts"] = json!(0),
             2 => r["result"]["Ok"]["physical_accuracy_qualified"] = json!(true),
-            3 => r["result"]["Ok"]["queries"] = json!(4097),
+            3 => r["result"]["Ok"]["queries"] = json!(scancraft_depth::laser_pair::MAX_QUERIES + 1),
             4 => {
                 r["result"]["Ok"]["outcomes"][0]["outcome"]["Candidate"]["candidate_index"] =
                     json!(4096)
@@ -352,7 +352,8 @@ fn selected_candidate_and_outcome_arrays_are_bounded_during_parsing() {
         redigest(&root, "stream-request.json");
         edit_pair(&root, 1, |r| {
             let item = r["result"]["Ok"][field][0].clone();
-            r["result"]["Ok"][field] = json!(vec![item; 4097]);
+            r["result"]["Ok"][field] =
+                json!(vec![item; scancraft_depth::laser_pair::MAX_QUERIES + 1]);
         });
         assert!(
             load_pair(&root, 1, &WorkControl::default())

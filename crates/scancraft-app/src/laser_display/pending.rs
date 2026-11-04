@@ -43,7 +43,7 @@ impl Pending {
         }
         let outcome = match input.outcome {
             Ok(r) => {
-                if r.candidates.len() > 4096 || r.queries > 4096 {
+                if r.candidates.len() > super::MAX_QUERIES || r.queries > super::MAX_QUERIES {
                     return Err("laser preview result exceeds its point/query budget".into());
                 }
                 Outcome {

@@ -8,8 +8,8 @@ pub use association::{Association, AssociationCounts, Camera, Pair, Sample};
 pub use runner::{Failure, Journal, ProgressSnapshot, SourceReport, StopToken, Summary};
 use scancraft_calibration::stereo::StereoCalibration;
 use scancraft_core::StreamProfile;
-pub use scancraft_depth::laser_pair::CameraSummary;
 use scancraft_depth::laser_pair::{self, Settings};
+pub use scancraft_depth::laser_pair::{CameraSummary, MAX_QUERIES};
 
 pub(crate) type Result<T> = std::result::Result<T, String>;
 pub const PROCESSING_QUEUE_CAPACITY: usize = 4;

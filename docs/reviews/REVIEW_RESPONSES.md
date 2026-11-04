@@ -5481,3 +5481,46 @@ Remaining limits: incorrect priors can reinforce errors; speed/occlusion/new geo
 can remove valid observations; no global recovery, measured scale, identity or full
 scan/edit/save/reopen/export qualification. Native option remains off by default.
 No new hardware capture, calibration change, firmware action or main merge.
+
+## DEV-DENSE-QUERY-CAPACITY — measured admission and integrated readers, 2026-11-04
+
+Developer milestone, not an independent finding or status change. Accept reviewer555's
+verification of parent14f3b23 and continued distinction between numerical consistency
+and physical qualification. Branch dev/recorded-query-capacity from14f3b23; final
+commit is bound in Git/publication receipts. No reviewer-owned records changed.
+
+Measured all225 predetermined stored pairs:71 exceed4096queries (max5305), four
+exceed100Mprojectedwork (max105941972). Implement explicit configurable ceilings8192/
+128M with the existing4096prepared-query cache bound; larger tight-admission pairs
+preflight/drop/recompute before any sink publication. Existing lower request budgets
+remain enforced. No optical threshold, model, physical unit or matcher change.
+
+Files: depth laser_pair.rs/tests.rs; workflow recorded_traces/automatic.rs,
+candidate_bundle.rs, laser_stream.rs and laser_stream/bundle/load/{record,tests}.rs;
+app laser_display.rs and laser_display/{pending,tests}.rs; method guide/status/docs.
+Initial full225 matching succeeded, but fusion caught stale candidate-loader4096
+validation. Retain original failure/partial output; aligned all producer/reader/
+preview bounds via shared constant and reran fullgate. No data omitted to make
+integration pass. Initial gate924passed; final gate925passed/0failed/1ignored plus
+fmt/strictClippy/release. Dense4500query regression covers strict/domain equivalence,
+all outcomes/candidates, refusal before sink side effects and ceiling checks;
+preview exact-capacity roundtrip and existing typed-reader overflow checks pass.
+
+All225 CLI outputs published;154 old successful scientific outputs byte-identical.
+All8 predeclared diagnostic fullquery results match, repeated with finalCLI. All
+artifactCRC/length/sourcebindings verified. Original71 query refusals still reproduce;
+four separately retained work refusals remain when onlyquerylimit changes. New71pairs
+add137207candidates independently triangulated within2.302e-9RAW. Total277704surface
+candidates,26488queryerrors,13empty pairs; no allqueries-success claim. Native225fusion
+matches independently verified sampled markerprototype,26integrated/13trackingonly/
+186unavailable,5785voxels, independent voxelmeanswithin1.137e-13RAW. Lastaccepted152;
+no globalrecovery. FinalGUI opens/inspected result and allcamera/outcome metadata.
+Private verifier initially confusedlocal/originalIDs then assumedacceptedfield on
+unavailable rows; bothscripts/errors retained, corrected explicit schema checks pass.
+
+CLI225runs observedmedian0.28s/max0.55s,peakRSS32444KiB onsharedhost. Not a controlled
+speedup, liveFPS, sustainedmemory or accuracy qualification. Physicalunits/marker
+identity/calibration/errorbound/fullobject and edit/save/reopen/export stillopen.
+CodeRabbit usage79028exit1lookup_failed, no upload/paidreview. Private evidence
+laser-query-capacity-20261104 and externalpublicationmanifest retain reproducibility.
+New implementation needs independent verification; developer does not close findings.

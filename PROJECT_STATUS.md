@@ -1,3 +1,23 @@
+# Dense real-pair processing integrated — 2026-11-04
+
+Native CLI now processes all225 predetermined pairs from the saved rotating-board
+sequence with explicit8192-query/128M-work budgets. All154 previously successful
+matching/candidate outputs remain byte-identical; all71 original lower-budget
+refusals and26488 per-query errors remain recorded. Caching stays bounded at4096
+prepared queries; dense pairs preflight then recompute. Persisted loaders and GUI
+preview share the ceiling. No physical or numerical acceptance gate changed.
+
+Final gate:925passed/0failed/1ignored,fmt/strictClippy/release. Independent camera
+math checks137207new candidates. Complete native225-frame fusion yields5785points
+from26integrated+13tracking-only frames;186later frames lack tracking observations,
+lastaccepted original152. GUI shows fragmented geometry, NOT a complete object or
+measured scan. Local CLI timingmedian0.28s/max0.55s,peak32444KiB,notlivequalification.
+See [capacity and evidence](docs/LASER_QUERY_CAPACITY.md). ParentPR45 independently
+verified by reviewer555; current implementation awaits its own review. CodeRabbit
+usage lookup unavailable. Box rotation confirmation still pending; no new capture.
+Next priority: object-associated tracking/global recovery, calibration units and
+repeatable measured coverage. No main merge or physical-accuracy claim.
+
 ## Experimental temporal marker support integrated — 2026-11-04
 
 An explicit recorded-workflow option now filters stereo alternatives against the
