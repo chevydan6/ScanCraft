@@ -5296,3 +5296,34 @@ exact documentation commits recorded on dev/flood-capture-gain/PR40. Next use sa
 consecutive rotating-board data for motion/recovery before integration into actual
 laser fusion. Physical scale, fullscan and accuracy still unqualified. Independent
 reviewer owns verification/closure. No paid CodeRabbit usage or merge performed.
+
+## DEV-SEPARATE-TRACKING-FUSION — accepted integration priority
+
+Real rotating-marker replay validates90 subsequent pose updates, but the existing
+session API required tracking samples to belong to the cloud being fused. Added
+`ScanSession::process_with_tracking_cloud` so marker observations guide pose while
+only actual surface geometry is integrated. Existing indexed entry point retains
+its contract and shares the atomic path. Empty surface explicitly supports accepted
+tracking-only records without advancing last_integrated or inventing points.
+
+Changed implementation: geometry/session.rs and session/separate_tests.rs. Five
+new regressions cover separation/transformation, rollback/retry/invalid/cancel,
+loss/recovery, normals and tracking-only gaps. Final909passed0failed1ignored,
+formatting/strictClippy/release PASS. Initial test exact-float assertion corrected
+at1e-10 after3e-14 roundoff; private adapter error-type correction retained separately.
+No production source edits after final gate. Development branch dev/separate-tracking-cloud
+frombb6cca83; exact implementation commit recorded in Git and publication binding.
+
+All31 real rotating pairs replayed, no hardware actions. All3 marker thresholds
+track30laterupdates; independent ICP agreement<=3.608e-12. Native camera checks
+2374acceptedmarkerpairs/218lasercandidates agree<=8.279e-10RAW. Six actualnewSession
+runs preserveallframes; boxpreset integrates10frames and tracks21emptyframes,
+boardpreset tracks31emptyframes. Allposesmatchmarker-onlyoutputs; onlyreal laser
+voxelmeansagree<=1.137e-13RAW. Outputs183/192/189sparsepoints, NOTcomplete scans or
+physicalaccuracy. See SEPARATE_TRACKING_FUSION.md and1618-file manifest.
+
+No new registration math/dependencies/formats, markergeometry mixing, calibration
+fit or saturation/domain/quality-gate relaxation. Physical units/identity/sync,
+GUI/live integration and full measured scans remain outstanding. CodeRabbit usage
+lookup_failed inrepository; no paid/substantivepass. Reviewer owns verification and
+closure; no independent finding ID invented or record modified. No auto merge.

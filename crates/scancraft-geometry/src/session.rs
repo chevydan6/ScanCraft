@@ -6,6 +6,8 @@ use crate::{
     work::WorkControl,
 };
 use std::collections::HashSet;
+#[cfg(test)]
+mod separate_tests;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SessionState {
     Ready,
@@ -16,7 +18,8 @@ pub enum SessionState {
 #[derive(Debug, Clone)]
 pub struct SessionFrame {
     pub tracking: TrackingUpdate,
-    /// None for a rejected alignment. Failed integration never publishes a record.
+    /// None for rejected alignment or an accepted tracking-only frame with no surface.
+    /// Failed integration never publishes a record.
     pub fusion: Option<FusionUpdate>,
 }
 pub struct ScanSession {
@@ -137,6 +140,38 @@ impl ScanSession {
         tracking_indices: &[usize],
         work: &WorkControl,
     ) -> Result<&SessionFrame, String> {
+        self.process_clouds(frame_id, cloud, None, tracking_indices, work)
+    }
+    /// Estimate pose from a separate bounded cloud, integrating only `surface`.
+    /// Both clouds must describe the same frame, coordinate system and units.
+    /// The caller is responsible for observation identity and synchronization;
+    /// accepting a pose does not certify either cloud's physical accuracy.
+    /// Tracking normals, when required, come from `observations`, not `surface`.
+    /// An empty surface records tracking only, without fabricating geometry or
+    /// advancing `last_integrated`. The original indexed `process` remains nonempty.
+    /// Errors and failed fusion preserve the tracker, fusion and history together.
+    pub fn process_with_tracking_cloud(
+        &mut self,
+        frame_id: u64,
+        surface: &Cloud,
+        observations: &Cloud,
+        work: &WorkControl,
+    ) -> Result<&SessionFrame, String> {
+        work.check()?;
+        if !(3..=512).contains(&observations.points.len()) {
+            return Err("separate tracking cloud requires 3..=512 points".into());
+        }
+        let indices: Vec<_> = (0..observations.points.len()).collect();
+        self.process_clouds(frame_id, surface, Some(observations), &indices, work)
+    }
+    fn process_clouds(
+        &mut self,
+        frame_id: u64,
+        cloud: &Cloud,
+        separate_tracking: Option<&Cloud>,
+        tracking_indices: &[usize],
+        work: &WorkControl,
+    ) -> Result<&SessionFrame, String> {
         work.check()?;
         if self.state != SessionState::Running {
             return Err("session must be running to process frames".into());
@@ -144,7 +179,7 @@ impl ScanSession {
         if self.history.len() == self.maximum_frames {
             return Err("session frame history capacity exceeded".into());
         }
-        if cloud.points.is_empty()
+        if (cloud.points.is_empty() && separate_tracking.is_none())
             || cloud.points.len() > 100_000
             || !(3..=512).contains(&tracking_indices.len())
         {
@@ -153,6 +188,10 @@ impl ScanSession {
             );
         }
         cloud.validate_with(work)?;
+        if let Some(observations) = separate_tracking {
+            observations.validate_with(work)?;
+        }
+        let tracking_cloud = separate_tracking.unwrap_or(cloud);
         let mut seen = HashSet::new();
         let mut samples = Vec::with_capacity(tracking_indices.len());
         for index in tracking_indices {
@@ -160,7 +199,7 @@ impl ScanSession {
                 return Err("duplicate tracking sample index".into());
             }
             samples.push(
-                cloud
+                tracking_cloud
                     .points
                     .get(*index)
                     .ok_or("tracking sample index out of bounds")?
@@ -173,7 +212,7 @@ impl ScanSession {
             let normals: Vec<_> = tracking_indices
                 .iter()
                 .map(|i| {
-                    cloud.points[*i]
+                    tracking_cloud.points[*i]
                         .normal
                         .ok_or("point-to-plane tracking sample is missing a normal")
                 })
@@ -182,7 +221,7 @@ impl ScanSession {
         } else {
             candidate.track(frame_id, &samples, work)?
         };
-        let fusion = if tracking.accepted {
+        let fusion = if tracking.accepted && !cloud.points.is_empty() {
             Some(self.fusion.integrate_tracked(cloud, &tracking, work)?)
         } else {
             work.check()?;

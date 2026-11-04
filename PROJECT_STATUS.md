@@ -1,3 +1,14 @@
+## Separate marker tracking and surface fusion — 2026-11-04
+
+The core session now accepts separate tracking observations and surface points,
+including explicit tracking-only frames when no laser geometry is available.
+Marker points are never fused into the surface. Five added regressions and the
+909-test/fmt/strictClippy/release gate pass. Real rotating replay validates90 pose
+updates across three thresholds and exercises all31frames through the new session.
+Only218 laser candidates were available, giving183/192/189 sparse fused points;
+this is not a complete measured scan. Native GUI/live wiring and usable full object
+coverage remain next requirements. See [SEPARATE_TRACKING_FUSION.md](docs/SEPARATE_TRACKING_FUSION.md).
+
 ## Latest real-data tracking check — 2026-11-04
 
 Existing native marker-cloud tracking accepts42 stationary frame transitions across
