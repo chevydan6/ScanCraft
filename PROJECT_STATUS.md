@@ -1,3 +1,16 @@
+## Native fused-result GUI inspection — 2026-11-04
+
+`--fused-candidates` and **Open fused scan** now load recorded multi-frame results
+with artifact/source snapshot checks, per-frame tracking outcomes and selected
+original camera images. All fused coordinates remain explicitly unverified and
+outside metric editing. Actual native GUI views inspected:2188 box candidates,
+192 rotating-board candidates,0 empty-surface candidates and changed-source error.
+All loaded coordinates/outcomes and independently checked thumbnails/statistics
+match retained evidence. Fullgate921passed/0failed/1ignored/fmt/Clippy/release.
+No new capture or physically qualified scan. Next: controlled rotating box,
+object-associated tracking and calibration/scale/accuracy validation. Details:
+[FUSED_SCAN_VIEW.md](docs/FUSED_SCAN_VIEW.md).
+
 ## Native recorded marker/laser workflow — 2026-11-04
 
 New `fuse-recorded-candidates` CLI connects verified raw frames, marker detection,

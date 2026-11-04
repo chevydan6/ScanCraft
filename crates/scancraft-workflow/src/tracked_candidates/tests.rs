@@ -1,9 +1,9 @@
 use super::*;
 use scancraft_core::{Frame as RawFrame, StreamProfile};
 use scancraft_recording::Writer;
-struct Temp(PathBuf);
+pub(super) struct Temp(pub(super) PathBuf);
 impl Temp {
-    fn new() -> Self {
+    pub(super) fn new() -> Self {
         Self(output::staging(&std::env::temp_dir().join("tracked-candidates-test")).unwrap())
     }
 }
@@ -12,10 +12,16 @@ impl Drop for Temp {
         let _ = fs::remove_dir_all(&self.0);
     }
 }
-fn write(path: &Path, v: &Value) {
+pub(super) fn write(path: &Path, v: &Value) {
     fs::write(path, serde_json::to_vec(v).unwrap()).unwrap();
 }
-fn fixture(root: &Path, index: usize, surface: bool, markers: bool, shift: i32) -> PathBuf {
+pub(super) fn fixture(
+    root: &Path,
+    index: usize,
+    surface: bool,
+    markers: bool,
+    shift: i32,
+) -> PathBuf {
     let path = root.join(format!("pair-{index}"));
     fs::create_dir(&path).unwrap();
     let camera = json!({"width":64,"height":64,"fx":100.,"fy":100.,"cx":32.,"cy":32.,"skew":0.,"valid_radius":2.,
@@ -113,7 +119,7 @@ fn fixture(root: &Path, index: usize, surface: bool, markers: bool, shift: i32) 
     );
     path
 }
-fn request(paths: &[PathBuf]) -> Value {
+pub(super) fn request(paths: &[PathBuf]) -> Value {
     json!({"schema_version":1,"session_id":"test","markers":{"threshold_exclusive":100,"minimum_area":5,"maximum_area":100,
         "maximum_components":1000,"maximum_shape_rms_px":0.5,"minimum_depth_model_units":1.,"maximum_depth_model_units":100.,
         "minimum_ray_angle_rad":0.0001,"maximum_ray_gap_model_units":0.01,"maximum_reprojection_error_px":0.1},

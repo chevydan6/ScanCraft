@@ -597,6 +597,10 @@ enum Startup {
         paths: Vec<PathBuf>,
         origin: laser_display::Origin,
     },
+    FusedCandidates {
+        path: PathBuf,
+        index: usize,
+    },
     Candidates {
         path: PathBuf,
         index: u64,
@@ -727,6 +731,12 @@ fn startup_args(args: Vec<std::ffi::OsString>) -> Result<Startup, String> {
         [flag,g,r,out] if flag=="--capture-laser"=>Ok(Startup::CaptureLaser {paths:vec![g.into(),r.into(),out.into()],origin:laser_display::Origin::Native}),
         [flag,g,r,a,b,out] if flag=="--replay-laser"=>Ok(Startup::CaptureLaser {paths:vec![g.into(),r.into(),a.into(),b.into(),out.into()],origin:laser_display::Origin::RecordingReplay}),
         [flag,path,index] if flag=="--laser-candidates" => Ok(Startup::Candidates { path:path.into(), index:index.to_str().ok_or("invalid candidate pair index")?.parse().map_err(|_|"invalid candidate pair index")? }),
+        [flag,path] if flag=="--fused-candidates" => Ok(Startup::FusedCandidates{path:path.into(),index:0}),
+        [flag,path,index] if flag=="--fused-candidates" => {
+            let index=index.to_str().ok_or("invalid fused frame index")?.parse::<usize>().map_err(|_|"invalid fused frame index")?;
+            if index>=256 { return Err("fused frame index must be 0..255".into()); }
+            Ok(Startup::FusedCandidates{path:path.into(),index})
+        }
         [flag,path] if flag=="--laser-candidates" => Ok(Startup::Candidates { path: path.into(), index: 0 }),
         [flag,geometry,first,fi,second,si,request,target] if flag=="--match-recorded-laser-traces" => {
             let index=|s:&std::ffi::OsString|s.to_str().ok_or("invalid recording index")?.parse::<usize>().map_err(|_|"invalid recording index");
@@ -766,7 +776,7 @@ fn startup_args(args: Vec<std::ffi::OsString>) -> Result<Startup, String> {
         [path] if !path.to_string_lossy().starts_with('-') => {
             Ok(Startup::File(PathBuf::from(path)))
         }
-        _ => Err("Usage: scancraft [PROJECT_OR_PLY_FILE] | --synthetic-live-scan NEW_SYNTHETIC_OUTPUT | --reconstruct CALIBRATION LEFT.PNG RIGHT.PNG SETTINGS NEW_RESULT_FOLDER | --reconstruct-recorded-sequence CAL LEFT_RECORDING RIGHT_RECORDING RECON_SETTINGS SEQUENCE_SETTINGS NEW_FOLDER | --fuse-sequence SETTINGS NEW_RESULT_FOLDER | --mesh MESH_JSON | --mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM | --mesh-boundaries MESH_OR_PROJECT | --fit-cylinder PROJECT_OR_PLY_FILE MAX_RMS_MM | --frame-document FRAME_FILE | --coordinate-frame PROJECT_OR_PLY_FILE | --measurement-outlines PROJECT_OR_PLY_FILE | --cloud-normals PROJECT_OR_PLY_FILE | --mesh-normals MESH_OR_PROJECT | --reconstruct-recordings CALIBRATION LEFT_RECORDING LEFT_INDEX RIGHT_RECORDING RIGHT_INDEX SETTINGS NEW_FOLDER | --statistical-preview PROJECT_OR_PLY K SIGMA_MULTIPLIER | --export-scan-project PROJECT SOURCE_BUNDLE LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --archive-recordings LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --export-project-bundle PROJECT SOURCE_BUNDLE NEW_DIRECTORY | --verify-source-bundle PROJECT DIRECTORY | --capture-laser GEOMETRY_JSON STREAM_REQUEST_JSON NEW_DIRECTORY | --replay-laser GEOMETRY_JSON STREAM_REQUEST_JSON FIRST_RECORDING SECOND_RECORDING NEW_DIRECTORY | --laser-candidates BUNDLE_DIRECTORY [PAIR_INDEX] | --match-recorded-laser-traces GEOMETRY FIRST_RECORDING FIRST_INDEX SECOND_RECORDING SECOND_INDEX REQUEST NEW_FOLDER | --fit-calibration-candidate REQUEST_JSON NEW_FOLDER | --observe-calibration-pair REQUEST_JSON NEW_FOLDER | --play-recording RECORDING | --recover-recording INPUT MAX_FRAMES NEW_FOLDER | --import-mesh FILE obj|stl mm|in|m separate|weld-exact NEW_FOLDER | --mesh-smooth-preview MESH_OR_PROJECT ITERATIONS RELAXATION MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG | --mesh-simplify-preview MESH_OR_PROJECT TARGET MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG MAX_COLLAPSES | --mesh-plane-preview MESH_JSON NX NY NZ OFFSET | --help | --smoke-test | --smoke-test-ir".into()),
+        _ => Err("Usage: scancraft [PROJECT_OR_PLY_FILE] | --synthetic-live-scan NEW_SYNTHETIC_OUTPUT | --reconstruct CALIBRATION LEFT.PNG RIGHT.PNG SETTINGS NEW_RESULT_FOLDER | --reconstruct-recorded-sequence CAL LEFT_RECORDING RIGHT_RECORDING RECON_SETTINGS SEQUENCE_SETTINGS NEW_FOLDER | --fuse-sequence SETTINGS NEW_RESULT_FOLDER | --mesh MESH_JSON | --mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM | --mesh-boundaries MESH_OR_PROJECT | --fit-cylinder PROJECT_OR_PLY_FILE MAX_RMS_MM | --frame-document FRAME_FILE | --coordinate-frame PROJECT_OR_PLY_FILE | --measurement-outlines PROJECT_OR_PLY_FILE | --cloud-normals PROJECT_OR_PLY_FILE | --mesh-normals MESH_OR_PROJECT | --reconstruct-recordings CALIBRATION LEFT_RECORDING LEFT_INDEX RIGHT_RECORDING RIGHT_INDEX SETTINGS NEW_FOLDER | --statistical-preview PROJECT_OR_PLY K SIGMA_MULTIPLIER | --export-scan-project PROJECT SOURCE_BUNDLE LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --archive-recordings LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --export-project-bundle PROJECT SOURCE_BUNDLE NEW_DIRECTORY | --verify-source-bundle PROJECT DIRECTORY | --capture-laser GEOMETRY_JSON STREAM_REQUEST_JSON NEW_DIRECTORY | --replay-laser GEOMETRY_JSON STREAM_REQUEST_JSON FIRST_RECORDING SECOND_RECORDING NEW_DIRECTORY | --fused-candidates BUNDLE_DIRECTORY [FRAME_INDEX] | --laser-candidates BUNDLE_DIRECTORY [PAIR_INDEX] | --match-recorded-laser-traces GEOMETRY FIRST_RECORDING FIRST_INDEX SECOND_RECORDING SECOND_INDEX REQUEST NEW_FOLDER | --fit-calibration-candidate REQUEST_JSON NEW_FOLDER | --observe-calibration-pair REQUEST_JSON NEW_FOLDER | --play-recording RECORDING | --recover-recording INPUT MAX_FRAMES NEW_FOLDER | --import-mesh FILE obj|stl mm|in|m separate|weld-exact NEW_FOLDER | --mesh-smooth-preview MESH_OR_PROJECT ITERATIONS RELAXATION MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG | --mesh-simplify-preview MESH_OR_PROJECT TARGET MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG MAX_COLLAPSES | --mesh-plane-preview MESH_JSON NX NY NZ OFFSET | --help | --smoke-test | --smoke-test-ir".into()),
     }
 }
 fn main() -> eframe::Result {
@@ -786,7 +796,7 @@ fn main() -> eframe::Result {
     let startup = match startup_args(std::env::args_os().skip(1).collect()) {
         Ok(Startup::Help) => {
             println!(
-                "Usage: scancraft [PROJECT_OR_PLY_FILE]\n       scancraft --synthetic-live-scan NEW_SYNTHETIC_OUTPUT\n       scancraft --reconstruct CALIBRATION LEFT.PNG RIGHT.PNG SETTINGS NEW_RESULT_FOLDER\n       scancraft --reconstruct-recorded-sequence CAL LEFT_RECORDING RIGHT_RECORDING RECON_SETTINGS SEQUENCE_SETTINGS NEW_FOLDER\n       scancraft --fuse-sequence SETTINGS NEW_RESULT_FOLDER\n       scancraft --mesh MESH_JSON\n       scancraft --mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM | --mesh-boundaries MESH_OR_PROJECT\n       scancraft --fit-cylinder PROJECT_OR_PLY_FILE MAX_RMS_MM | --frame-document FRAME_FILE | --coordinate-frame PROJECT_OR_PLY_FILE | --measurement-outlines PROJECT_OR_PLY_FILE | --cloud-normals PROJECT_OR_PLY_FILE\n       scancraft --mesh-normals MESH_OR_PROJECT\n       scancraft --reconstruct-recordings CALIBRATION LEFT_RECORDING LEFT_INDEX RIGHT_RECORDING RIGHT_INDEX SETTINGS NEW_FOLDER | --statistical-preview PROJECT_OR_PLY K SIGMA_MULTIPLIER | --export-scan-project PROJECT SOURCE_BUNDLE LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --archive-recordings LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --export-project-bundle PROJECT SOURCE_BUNDLE NEW_DIRECTORY | --verify-source-bundle PROJECT DIRECTORY | --capture-laser GEOMETRY_JSON STREAM_REQUEST_JSON NEW_DIRECTORY | --replay-laser GEOMETRY_JSON STREAM_REQUEST_JSON FIRST_RECORDING SECOND_RECORDING NEW_DIRECTORY | --laser-candidates BUNDLE_DIRECTORY [PAIR_INDEX] | --match-recorded-laser-traces GEOMETRY FIRST_RECORDING FIRST_INDEX SECOND_RECORDING SECOND_INDEX REQUEST NEW_FOLDER | --fit-calibration-candidate REQUEST_JSON NEW_FOLDER | --observe-calibration-pair REQUEST_JSON NEW_FOLDER | --play-recording RECORDING | --recover-recording INPUT MAX_FRAMES NEW_FOLDER | --import-mesh FILE obj|stl mm|in|m separate|weld-exact NEW_FOLDER | --mesh-smooth-preview MESH_OR_PROJECT ITERATIONS RELAXATION MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG | --mesh-simplify-preview MESH_OR_PROJECT TARGET MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG MAX_COLLAPSES | --mesh-plane-preview MESH_JSON NX NY NZ OFFSET\nOpening geometry never starts camera acquisition. The synthetic-live diagnostic opens no scanner. Files without units require an explicit choice in the import panel."
+                "Usage: scancraft [PROJECT_OR_PLY_FILE]\n       scancraft --synthetic-live-scan NEW_SYNTHETIC_OUTPUT\n       scancraft --reconstruct CALIBRATION LEFT.PNG RIGHT.PNG SETTINGS NEW_RESULT_FOLDER\n       scancraft --reconstruct-recorded-sequence CAL LEFT_RECORDING RIGHT_RECORDING RECON_SETTINGS SEQUENCE_SETTINGS NEW_FOLDER\n       scancraft --fuse-sequence SETTINGS NEW_RESULT_FOLDER\n       scancraft --mesh MESH_JSON\n       scancraft --mesh-section MESH_OR_PROJECT OX OY OZ NX NY NZ TOLERANCE_MM | --mesh-boundaries MESH_OR_PROJECT\n       scancraft --fit-cylinder PROJECT_OR_PLY_FILE MAX_RMS_MM | --frame-document FRAME_FILE | --coordinate-frame PROJECT_OR_PLY_FILE | --measurement-outlines PROJECT_OR_PLY_FILE | --cloud-normals PROJECT_OR_PLY_FILE\n       scancraft --mesh-normals MESH_OR_PROJECT\n       scancraft --reconstruct-recordings CALIBRATION LEFT_RECORDING LEFT_INDEX RIGHT_RECORDING RIGHT_INDEX SETTINGS NEW_FOLDER | --statistical-preview PROJECT_OR_PLY K SIGMA_MULTIPLIER | --export-scan-project PROJECT SOURCE_BUNDLE LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --archive-recordings LEFT_RECORDING RIGHT_RECORDING NEW_DIRECTORY | --export-project-bundle PROJECT SOURCE_BUNDLE NEW_DIRECTORY | --verify-source-bundle PROJECT DIRECTORY | --capture-laser GEOMETRY_JSON STREAM_REQUEST_JSON NEW_DIRECTORY | --replay-laser GEOMETRY_JSON STREAM_REQUEST_JSON FIRST_RECORDING SECOND_RECORDING NEW_DIRECTORY | --fused-candidates BUNDLE_DIRECTORY [FRAME_INDEX] | --laser-candidates BUNDLE_DIRECTORY [PAIR_INDEX] | --match-recorded-laser-traces GEOMETRY FIRST_RECORDING FIRST_INDEX SECOND_RECORDING SECOND_INDEX REQUEST NEW_FOLDER | --fit-calibration-candidate REQUEST_JSON NEW_FOLDER | --observe-calibration-pair REQUEST_JSON NEW_FOLDER | --play-recording RECORDING | --recover-recording INPUT MAX_FRAMES NEW_FOLDER | --import-mesh FILE obj|stl mm|in|m separate|weld-exact NEW_FOLDER | --mesh-smooth-preview MESH_OR_PROJECT ITERATIONS RELAXATION MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG | --mesh-simplify-preview MESH_OR_PROJECT TARGET MAX_MOVE_MM MAX_NORMAL_DEG CREASE_DEG MAX_COLLAPSES | --mesh-plane-preview MESH_JSON NX NY NZ OFFSET\nOpening geometry never starts camera acquisition. The synthetic-live diagnostic opens no scanner. Files without units require an explicit choice in the import panel."
             );
             return Ok(());
         }
@@ -816,6 +826,10 @@ fn main() -> eframe::Result {
                 Startup::CaptureLaser { paths, origin } => {
                     app.candidates_active = true;
                     app.candidates.start_capture(paths, origin);
+                }
+                Startup::FusedCandidates { path, index } => {
+                    app.candidates_active = true;
+                    app.candidates.open_fused(path, index);
                 }
                 Startup::Candidates { path, index } => {
                     app.candidates_active = true;
@@ -1764,5 +1778,35 @@ mod saved_capture_args_tests {
             ])
             .is_err()
         );
+    }
+}
+
+#[cfg(test)]
+mod fused_startup_tests {
+    use super::*;
+    fn args(a: &[&str]) -> Vec<std::ffi::OsString> {
+        a.iter().map(Into::into).collect()
+    }
+    #[test]
+    fn fused_startup_uses_explicit_readonly_mode_and_bounded_zero_based_source_index() {
+        assert_eq!(
+            startup_args(args(&["--fused-candidates", "scan folder"])).unwrap(),
+            Startup::FusedCandidates {
+                path: "scan folder".into(),
+                index: 0
+            }
+        );
+        assert_eq!(
+            startup_args(args(&["--fused-candidates", "scan folder", "2"])).unwrap(),
+            Startup::FusedCandidates {
+                path: "scan folder".into(),
+                index: 2
+            }
+        );
+        for bad in ["-1", "256", "x", "18446744073709551616"] {
+            assert!(startup_args(args(&["--fused-candidates", "scan", bad])).is_err());
+        }
+        assert!(startup_args(args(&["--fused-candidates"])).is_err());
+        assert!(startup_args(args(&["--fused-candidates", "scan", "2", "extra"])).is_err());
     }
 }

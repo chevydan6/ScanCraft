@@ -5360,3 +5360,38 @@ Latest assignment544 read before publication: reviewer independently reproduced
 parent2edb1e3 coreAPI,909-test gate, rotatingtracking/fusion, and verified parentCI
 success. No new finding/status change. This newCLI/workflow remains outside544's
 assigned scope and requires its own review. Accepted limitations remain unchanged.
+
+
+## DEV-FUSED-SCAN-VIEW — native read-only multi-frame display, 2026-11-04
+
+Developer milestone, not an independent finding ID or closure. Accept547's
+outstanding GUI integration/physical qualification distinction. New workflow
+tracked_candidates/bundle.rs and bundle/rows.rs validate artifact CRCs, typed
+outcomes and every retained source snapshot, returning fused coordinates plus
+selected camera thumbnails. App CandidateUi/cloud_jobs/startup integrate a bounded
+read-only view; no Editor mutation or metric promotion. Render checker gains the
+explicit fused mode. Test helpers become sibling-visible only under cfg(test).
+Branch dev/fused-scan-view from3063814; exact implementation commit in Git and
+private publication binding. Reviewer records never modified by developer.
+
+Four loader, three app and one missing-PTS regression added. Initial optional-PTS
+concern was disproved by32193 pre-changePASS: validate_frame already rejects
+missing timestamps throughGrayImage/Reader. No production pairing change; retain
+the regression and corrected conclusion. Initial loader compile64751 type mismatch
+corrected to compare Some(recorded_pts). Finalgate66127 exit0:921passed/0failed/
+1ignored; formatting/strictClippy/release pass. No source changes after this gate.
+
+ActualnativeGUI opens box2188points/source3, rotating192/source31, empty0/source31,
+and changed-sourceerror on authenticated private Xvfb withsoftware rendering.
+All screenshots inspected; no scannerFDs atcapturechecks. Adapter verifies exact
+coordinates/allframeoutcomes; independent PNG/NumPy verifies six originalpayload
+CRCs, thumbnails and allfullimage statistics. Changedcopy rejected despitefresh
+internalCRCs; originaldatahashesunchanged. See FUSED_SCAN_VIEW.md and private
+fused-scan-view-20261104 evidence. Does not establishFPS, physicalaccuracy or
+metricediting/export. Allsourcecamera data remains private.
+
+Parent3063814 independentlyverified547 withCIpassed. This new viewer stillrequires
+its own independent review. CodeRabbitusage24160 exit1lookup_failed; no paidusage
+or substantive review. No findingseverity/status altered, merge, firmware or
+hardwarecaptureaction. Nextpriority remains actual rotating-object coverage and
+physical qualification, not unrelated features.

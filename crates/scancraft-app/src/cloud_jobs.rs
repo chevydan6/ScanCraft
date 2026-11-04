@@ -41,6 +41,10 @@ pub struct Preview {
 }
 #[derive(Clone)]
 pub enum Operation {
+    ViewFusedCandidates {
+        path: PathBuf,
+        index: usize,
+    },
     ViewCandidates {
         path: PathBuf,
         index: u64,
@@ -180,6 +184,7 @@ pub enum Operation {
     },
 }
 pub struct Report {
+    pub candidate_session: Option<scancraft_workflow::tracked_candidates::bundle::SessionView>,
     pub candidate_frames: Option<[scancraft_workflow::candidate_bundle::FrameView; 2]>,
     pub coordinate_frame: Option<(String, scancraft_geometry::coordinate_frame::Frame)>,
     pub message: String,
@@ -319,6 +324,7 @@ pub fn build_preview(
 }
 fn report(message: impl Into<String>, preview: Option<Preview>) -> Report {
     Report {
+        candidate_session: None,
         candidate_frames: None,
         coordinate_frame: None,
         message: message.into(),
@@ -363,6 +369,9 @@ fn execute(
     work: &WorkControl,
 ) -> Result<Report, String> {
     match &operation {
+        Operation::ViewFusedCandidates { path, index } => {
+            return candidates::view_fused(path, *index, work);
+        }
         Operation::ViewCandidates { path, index } => {
             return candidates::view_at(path, *index, work);
         }
