@@ -1,3 +1,26 @@
+# Native session recovery core — 2026-11-04
+
+`ScanSession::process_with_reference_recovery` now owns the bounded reference bank
+and commits tracking, retention, fusion and history together. Five regressions cover
+recovery, contradictory poses, cancellation/late errors, failed fusion, reference
+eviction, tracking-only retention, invalid observations and monotonic frame capacity.
+Full gate: **930 passed, 0 failed, 1 ignored**, formatting, strict Clippy and release.
+
+A private adapter using this new session API reproduced all **225 frames / 1,135
+attempts** of the independently verified retained-reference experiment exactly,
+including every diagnostic, pose, reference selection and all **5,884 fused points**.
+44 accepted, 31 surface-integrated, 13 tracking-only; 181 unavailable frames remain.
+The prototype was independently checked in reviewer assignment561; this new native
+implementation still requires its own independent review. CodeRabbit quota lookup
+failed, so no substantive automated review is claimed.
+
+The recorded CLI/GUI still uses its existing path; this core API does not yet enable
+recovery there. Next: prepare hypotheses once and persist all recovery attempts in
+the recorded workflow, then verify reopening and native display. No physical units,
+full box reconstruction, dimensional accuracy or live recovery qualification. The
+owner has offered box rotation but has not confirmed it started; no new capture.
+See [native recovery contract](docs/SESSION_REFERENCE_RECOVERY.md).
+
 # Retained-reference recovery evidence — 2026-11-04
 
 A private Rust experiment recovers against the original reference at saved-board
