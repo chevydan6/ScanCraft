@@ -5138,3 +5138,31 @@ three-trial reconstruction, metric editing or full export workflow is claimed. E
 006/acquisition/cleanup findings remain unaffected. CodeRabbit usage returned all
 lookup_failed; no included-capacity/billing proof, review upload, paid service or
 substantive CodeRabbit completion. Independent verification of033 correction pending.
+
+
+## DEV-BOX-SURFACE — measured-object evidence, not a new independent finding
+
+Accepted follow-up to the first-scan qualification work. No production source
+changed from 37b8dd6cb3f5e26eeaa6aeeeca48af34289e8bdb. New documentation:
+`docs/BOX_SURFACE_VALIDATION.md`, `PROJECT_STATUS.md` and this response, on
+`dev/box-surface-evidence`. The associated documentation commit is recorded in Git.
+Private capture/probe/source bindings and the 524-file evidence-manifest hash are
+specified in the report; private images/models are not published.
+
+Three real line captures give 612/1030/593 diagnostic candidates, all 2235 independently
+numerically reconciled; selected inputs/CRCs/outcomes and restoration receipts pass.
+Actual native GUI opens the 1030-point result. Private native probes pass fmt/Clippy/
+release; surface residuals match NumPy SVD. One 199-point top patch passes provisional
+raw-unit gates; five other surface cases fail. Putative front selection may mix faces:
+calibration is not established as the sole cause. Retain original corner/refinement/
+edge-support failures, gain16000 rejection and high-gain ongoing transport rejection.
+The mistaken GREY-only absence interpretation was corrected by fresh color evidence.
+
+Assignment528 independently resolves SCAN-REV-033; this response acknowledges that
+reviewer decision without editing its record. The scoped fix and its independent
+904-test/fmt/Clippy/release gate do not close physical metrology or other findings.
+No complete object, qualified units/accuracy, three repeatable scans or native
+metric edit/export is claimed. Owner dimensions remain held out. CodeRabbit usage
+reports unavailable lookup data; no substantive review or paid upload is claimed.
+Next investigation must separate surface selection/correspondence from model error
+and establish independent scale, rather than forcing the box to known dimensions.

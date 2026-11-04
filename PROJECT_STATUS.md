@@ -1,5 +1,29 @@
 # Project status
 
+## Current measured-box investigation — 2026-11-04
+
+[New capture and surface evidence](docs/BOX_SURFACE_VALIDATION.md): the yellow box
+is visible in color. Three native line-mode captures produce 612 / 1,030 / 593
+candidate points, with the 1,030-point result opened in the native GUI. These are
+sparse fragments, not a complete measured scan. One 199-point putative top patch
+passes provisional raw-unit plane consistency; all three putative front patches
+fail. Mixed physical surfaces, correspondence and calibration remain competing
+explanations. Owner dimensions are held out; no scale/box fit was performed.
+
+All saved frames and selected-pair bindings reconcile; device states/formats/service
+are restored. The high-gain arm retains one ongoing rejection and one sequence gap
+per camera; these short samples do not qualify sustained acquisition. The initial
+GREY-only absence concern was incorrect; fresh color confirms the box is present.
+
+Independent assignment 528 resolves SCAN-REV-033 for the opt-in recorded-domain fix
+and independently passes 904 tests, formatting, strict Clippy and release. Physical
+metrology and full end-to-end qualification remain incomplete. CodeRabbit lookup
+is unavailable; no substantive automated-review pass is claimed. Next: resolve
+surface identity and calibration/scale evidence, then three measured scan trials.
+Keep the box stationary for the current consistency checks.
+
+## Prior milestones (historical status)
+
 Latest correction: [explicit domain-aware recorded matching](docs/DOMAIN_BOUNDED_LASER_MATCHING.md)
 now processes the exact previously failing full-image Raptor pair. An opt-in mode
 retains valid contiguous segments and records every excluded vertex/segment/root.
