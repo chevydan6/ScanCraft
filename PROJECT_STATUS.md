@@ -2,25 +2,31 @@
 
 ## Current measured-box investigation — 2026-11-04
 
-[New capture and surface evidence](docs/BOX_SURFACE_VALIDATION.md): the yellow box
-is visible in color. Three native line-mode captures produce 612 / 1,030 / 593
-candidate points, with the 1,030-point result opened in the native GUI. These are
-sparse fragments, not a complete measured scan. One 199-point putative top patch
-passes provisional raw-unit plane consistency; all three putative front patches
-fail. Mixed physical surfaces, correspondence and calibration remain competing
-explanations. Owner dimensions are held out; no scale/box fit was performed.
+[Face assignment and fresh trials](docs/BOX_FACE_REPEATABILITY.md) correct the
+previous mixed-face interpretation. Averaged ambient images reveal that lower
+stripe 0 lies on the left face; stripes 1/2 lie on the right. No calibration,
+scale, box dimension or orthogonality fitting was used to make this correction.
 
-All saved frames and selected-pair bindings reconcile; device states/formats/service
-are restored. The high-gain arm retains one ongoing rejection and one sequence gap
-per camera; these short samples do not qualify sustained acquisition. The initial
-GREY-only absence concern was incorrect; fresh color confirms the box is present.
+Three new identical-setting captures produce 1,051 / 1,046 / 1,059 full-image
+candidates. With grouping fixed before capture, top and right-face patches pass
+unchanged provisional raw-unit plane gates in all three trials. The left face
+still has only one supported stripe and fails coverage. These are sparse partial
+surfaces, not three complete dimensionally validated scans. Stationary-row point
+variation remains measurable; qualified units and accuracy are still unproven.
 
-Independent assignment 528 resolves SCAN-REV-033 for the opt-in recorded-domain fix
-and independently passes 904 tests, formatting, strict Clippy and release. Physical
-metrology and full end-to-end qualification remain incomplete. CodeRabbit lookup
-is unavailable; no substantive automated-review pass is claimed. Next: resolve
-surface identity and calibration/scale evidence, then three measured scan trials.
-Keep the box stationary for the current consistency checks.
+All 3,156 candidates reconcile numerically, original frames pass replay, and device
+states/formats/service are restored. Startup rejects reach 106 in one camera;
+short-sample zero ongoing rejections do not qualify sustained transport. Native GUI
+opens the full 1,051-point trial. Keep the box stationary for the next physical-edge
+measurement checks; owner dimensions remain held out.
+
+Assignment 530 reproduced the prior evidence and identified a historical corner
+source-hash mismatch. The original discrepancy remains; a new fully bound rebuild
+and execution reproduce its result byte-for-byte. No retrospective source identity
+is claimed. SCAN-REV-033 remains independently resolved in its narrow scope. The
+unchanged source has 904 passing tests, formatting/Clippy/release success. CodeRabbit
+review remains unavailable/draft-skipped. Full metrology and end-to-end scanning
+remain incomplete.
 
 ## Prior milestones (historical status)
 

@@ -5166,3 +5166,45 @@ metric edit/export is claimed. Owner dimensions remain held out. CodeRabbit usag
 reports unavailable lookup data; no substantive review or paid upload is claimed.
 Next investigation must separate surface selection/correspondence from model error
 and establish independent scale, rather than forcing the box to known dimensions.
+
+
+## Assignment530 provenance qualification — accepted; fresh reproduction supplied
+
+Accept the historical corner execution-binding discrepancy. The retained source
+hash a26ce845 differs from the receipt's c25b74ff; the transition is unknown, and we
+do not assert a formatting-only cause. Original receipt/source/results remain
+unchanged. New private `corner-provenance-reconciliation-20261104` records all
+inputs before a fresh isolated frozen-dependency strict Clippy/release build and
+execution; exit0 reproduces original results byte-for-byte and all input hashes
+remain unchanged. This is current-source reproduction, not historical attestation.
+See BOX_FACE_REPEATABILITY.md for full hashes and the new evidence manifest.
+Only the independent reviewer may assess this response or change finding status.
+
+## DEV-BOX-FACE-ASSIGNMENT — corrected interpretation and new capture evidence
+
+Image averaging for display reveals that the earlier lower group mixed the left
+face (sheet0) with the right face (sheets1/2). Original failures remain. All18pairwise
+plane hypotheses are retained, and native image-component comparisons support
+ambient/line image alignment without a warp. No original candidate or calibration
+coefficient changes. A new plan freezes corrected grouping and all old numerical
+gates BEFORE three fresh gain15000 line captures.
+
+All six top/right-face fits pass provisional raw-unit gates; all three single-stripe
+left-face cases fail coverage. Full native outputs1051/1046/1059 retain failures and
+other scene candidates; all3156 positions/source decisions reconcile numerically.
+All80rawframes replay, original device states/formats/service restored. Startup
+rejections remain; these short trials do not qualify sustained transport. Fixed-row
+repeatability has explicit missing keys and measured jitter, not millimeter accuracy.
+Actual native GUI opens1051points with unverified-unit/identity warnings.
+
+Changed public files: BOX_FACE_REPEATABILITY.md, BOX_SURFACE_VALIDATION.md,
+PROJECT_STATUS.md and this response; documentation commits on dev/box-surface-evidence
+(PR39) record exact hashes. No application source changed from37b8dd6. Recent904-test/
+fmt/strictClippy/release gate remains applicable; new native data/probe/reference
+checks pass. CodeRabbit lastlookup unavailable; no paid or substantive review claimed.
+
+Limitations: post-failure face diagnosis, sparse coverage, unverified metric units,
+physical correspondence/calibration uncertainty, same-pose short acquisitions only;
+not three qualified complete scans or metric edit/export. Owner dimensions remain
+held out. Additional independent calibration/scale and physical-edge evidence remain
+priorities; no new independent finding identifier or closure invented.

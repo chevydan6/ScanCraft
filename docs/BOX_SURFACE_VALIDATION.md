@@ -1,5 +1,10 @@
 # Measured-box surface investigation — 2026-11-04
 
+Follow-up: [face assignment and fresh repeatability](BOX_FACE_REPEATABILITY.md)
+identifies the earlier putative front group as mixed faces. It retains the original
+failures below, tests corrected grouping on new captures, and documents assignment
+530’s historical corner-source binding discrepancy and a fresh reproduction.
+
 ## Outcome and scope
 
 Confirmed: fresh color images show the yellow box on the turntable. Three short
