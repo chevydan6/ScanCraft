@@ -5608,3 +5608,188 @@ receipt/checkpoint. Persistent reads check consistency,notICP/opticalidentity or
 physicaltruth. Realwrong-reference robustness, globalrecovery, livepipeline,
 calibratedunits/accuracy/boxcoverage/repeats and all prior qualification remainopen.
 Only independentreviewer may verify/close findings; its records remain untouched.
+
+
+## DEV-ACCEPTED-IMAGE-INTEGRITY — hardware evidence, 2026-11-04
+
+Developer observation, not a reviewer finding or independent closure. Accept
+reviewer567's exact PR49 verification and its remaining acquisition/physical
+qualification requirements. Application source stays at d91fc4f; new changes are
+PROJECT_STATUS.md, RAPTOR_ACCEPTED_IMAGE_INTEGRITY.md and this response only.
+Publication commit and private manifest are retained in the recovery checkpoint.
+
+Original native accepted images visibly contain displaced strips; independent
+raw parsing and exact byte comparison find repeated full12276-byte blocks in
+12/980 unmonitored line images. This is a limited diagnostic, not a generalized
+corruption rate or production rejection rule. A first monitored120pair capture
+and three further120pair captures retain all errors: all960accepted images equal
+USBpayload bytes; the full aligned-block signature was not reproduced there.
+The later partial-strip follow-up below corrects the broader absence claim. All8ongoing-rejected
+images have exactly matching monitored short lengths. Startup bursts persist.
+No causal attribution, silent repair, threshold relaxation or driver change.
+
+All10native capture/replay receipts and5roots' planned input hashes/restoration
+checks pass;30native PNG exports equal original raw pixels and CRCs. Tests at
+unchangedsource remain935/0/1 independently verified567; no fresh Rust gate run
+claimed for documentation. Private analysis/capture scripts, failures, recordings
+and traces retained outside public Git. No actual rotating sequence or measured
+whole-object scan established. Existing CodeRabbit quota lookup failure remains
+unresolved; no substantive or paid review claimed. Independent reviewer records
+untouched. Next audit existing calibration inputs and reproduce accepted-image
+duplication with adequate transport evidence; physical metrology remains unqualified.
+
+
+## SCAN-REV-034 — accepted; source-input audit completed, correction pending
+
+Accepted reviewer570's High/Open finding at9759e076345169a6794417d2e92aecd5f41d0f1c.
+Frame flags, length and recording CRC checks do not establish image-content integrity.
+No fault layer is yet identified, so no speculative production fix, silent repair,
+threshold change or heuristic rejection rule was applied. Only the reviewer can
+verify and close this finding.
+
+Read-only audit binds the frozen box rig to retained native camera/stereo fits and
+selected source requests, near/far sheet inputs, box processing plans and sealed
+225pair snapshots.690images in474files: six partial-copy signatures, none full-block.
+Two unused training-recording images are left8/right7 of the30mmcaliper scene;
+actual selected training is5/4. No tested signature inselected camera/sheet/box inputs.
+Four recovery images belong to320/816; savedbaselineandrecoveryjournalsalready show
+zero trackingpoints/no pose/notintegrated. Their1409/364local candidates remain
+unqualified. No retroactive exclusion or reinterpretation as accepted metrology.
+
+All474native replays pass/690images; sixnativeexports match originals byte-exact.
+Original input hashes unchanged. Private diagnostics coverpartial/fullcopy,random,
+constant andfour realcontrolimages. Constant data triggersfull-block comparison,
+which explicitly prevents treating it as universal corruptionproof. No broad optical
+false-positive/negative bound. Nativeverification session88830exit0; audit25801exit0.
+Application source unchanged; existing935/0/1fmt/Clippy/release evidence retained,
+not a newgate. ChangedPROJECT_STATUS.md,RAPTOR_ACCEPTED_IMAGE_INTEGRITY.md andthis
+response; publicationcommit andsealedmanifest recorded inexternalreceipt/checkpoint.
+
+Next: synchronizedboundary evidence for a duplicated image, justified correction,
+independent before/after andstartup/restart/rate/load qualification. Limitednegative
+signature results do not close034or qualify earlierphysicalclaims. Reviewerfiles
+untouched; no hardware/source/firmware changes, paidreview, merge or gatebypass.
+
+
+## SCAN-REV-034 — accepted; original USB boundary evidence, correction pending
+
+Accept assignment573's verification and outstanding requirements. New developer
+analysis identifies two partial-strip images in the already retained restart PCAP,
+left117/right115 at common PTS2030305484. Direct original USB bytes equal both
+complete native images; distinct request identities contain the repeated runs.
+This localizes this incident upstream of ScanCraft image assembly/storage, without
+attributing device versus controller/HCD/DMA cause or all older anomalies.
+
+Both endpoints briefly have zero outstanding requests near the affected payloads;
+post-hoc comparison of all720images supports investigation, not causality or a
+rejection threshold. No production fix, silent repair or image exclusion. Corrected
+the preceding broad monitored non-reproduction statement to its full-block scope.
+Changed only PROJECT_STATUS.md, RAPTOR_ACCEPTED_IMAGE_INTEGRITY.md and this response.
+Exact publication commit and private evidence manifest are in the checkpoint and
+external publication receipt; prior audit commit0b43a986 remains unchanged.
+
+Direct verification3993exit0; original-PCAP/hash comparison99793exit0 and restart
+comparison31292exit0; corrected queue analysisexit0, initial syntax failure retained.
+The private monitor prototype passes strict C compilation, format/deadline/no-
+overwrite controls and a beyond-prefix corruption control. No live hash-monitor
+capture or performance qualification. Application code unchanged fromd91fc4f;
+existing independent935/0/1Rust gate is not new hardware evidence. No substantive
+CodeRabbit review obtained; previous quota lookup failure remains unresolved.
+
+Only the independent reviewer may verify/close034. It remains open pending cause,
+correction, independent before/after and broader acquisition qualification. The
+reviewer's records remain untouched. All original images/traces stay private.
+
+Fresh publication gate (session32396exit0): tools/check.sh passes fmt, strict
+all-target Clippy,935tests/0failed/1ignored and release build. No application change
+or new hardware qualification. Sealed54files/66,914,272bytes; manifest SHA256
+0366e76d890489debc1ef6c24caf3881a774278a4623c8a5cd47758c84bd0dbe. All19external
+bindings verify;16capture inputs match the previous sealed original manifest.
+
+
+## SCAN-REV-034 — accepted; retained candidate pixel audit
+
+Accept reviewer 575's boundary verification and outstanding causal/qualification
+requirements. New read-only audit covers all 43,800 images in ten recordings from
+existing inline-copy off/on/off, one-minute combined and 610-second combined trials.
+Original whole-file hashes match their sealed manifests. Twenty-eight images have
+either unchanged signature; 19 occur in the sustained run despite zero rejected
+buffers. These 19 nonconstant blocks have 9–10 values and unique hashes; 38 neighboring
+frames do not repeat at those positions. The partial test's diversity requirement
+misses these full-block copies. Neither negative test proves optical integrity.
+
+Sustained pair 173, raw PTS 1683900145: original USB prefixes match native pixels
+for 188 payloads per camera; repeated 6/8 prefixes have distinct request identities.
+Every completion leaves four requests outstanding, with no empty-queue overlap.
+Maximum within-frame gaps are 170/178 µs. This does not support an empty software
+queue as a universal cause. The prefix-only trace cannot prove full USB body equality;
+no device/controller/HCD/DMA attribution or correction is claimed.
+
+Changed the new candidate audit, project status, sustained-report cross-reference,
+accepted-image-report cross-reference and this response only. No application/kernel
+change, new capture, heuristic filter or repair. Exact publication commit is recorded
+in the checkpoint. Private 89 files / 59,261,429 bytes have manifest SHA-256
+3e6dbbd286ddad584d1504a2f850c87c91ebff97c78c9e0c1b5e0a9d86f63616.
+
+Audit 77588 exits 0: all ten original hashes and 43,800 rows checked. Nine A1/A2 native
+exports (21053) and sustained-left-173 export (70850) exit 0 and match original bytes.
+Characterization 43288 and prefix analysis 54123 exit 0. The original slow run was
+deliberately stopped with exit 143; all 2,400 saved rows match the bounded four-worker
+checker. Twelve comparison cases pass. A private timestamp field label was corrected
+to microseconds without changing values or outcomes; original outputs remain. An
+initial missing completed-arm filter stopped the native helper before extraction;
+corrected explicit filtering passes, with the initial failure preserved. Only the
+independent reviewer may verify/close 034. Reviewer records remain untouched.
+
+Publication gate: `tools/check.sh` passes formatting, strict all-target Clippy,
+935 tests / zero failures / one ignored, and optimized workspace build. Application
+code is unchanged; this is software regression evidence, not fresh hardware proof.
+CodeRabbit quota lookup in the repository returns `lookup_failed`; no substantive
+or paid review was performed. An initial invocation outside the repository also
+failed and is retained. Public source/diff privacy checks precede publication.
+
+## SCAN-REV-034 — accepted; live full-payload enabled-path evidence
+
+Accept assignment580's request for full-payload evidence on the enabled path and
+its outstanding causal/qualification requirements. The new report
+`docs/RAPTOR_LIVE_PAYLOAD_HASH_VALIDATION.md`, project status and two investigation
+cross-references document observations only. No application or kernel source change,
+heuristic repair, image exclusion, firmware change or claim of correction.
+
+Two baseline pilots validate the compact hash observer. First runner1385 correctly
+exits1 after its PCAP drops1,009events; all240hash comparisons pass and both affected
+images have complete literal original PCAP coverage. Second runner39960 exits0;
+verifier54787 checks all92,202non-timestamp headers/prefixes/full digests and all240
+literal native images. Per-reader timestamps differ0–62µs. Startup98 and paired
+ongoing short images remain. Native verification24925 passes. Original verifier
+index error and its correction remain in private evidence.
+
+Fresh temporary-candidate runner62635 exits0, captures1800images/camera, startup1/0,
+ongoing0/0, restores baseline module/parameters, services/formats and all21native
+state comparisons. Monitor1,354,538selectedevents, zero loss/I/O errors. Analyzer81920
+exits0: all3600acceptedimages match full-transferSHA/prefixes and188payload/oneFID/
+oneEOF framing; seven have partial duplicated strips, zero full-block signatures.
+Verifier65121 exits0: allseven affected plus two final native exports match original
+pixels; nine repeated runs and their neighbors checked. Four requests remain
+outstanding after every affected-frame completion; no empty-queue overlap, maximum
+completion gaps164–177µs. Request counts are not physical controller-ring occupancy.
+
+This localizes candidate-path duplication to the observed payload stream, not to a
+specific device/controller/HCD/DMA cause. Full hashes are not retained literal USB
+bodies. Different scene/mode/observer conditions prevent causal rate comparison
+against historical trials. Diagnostic false-positive/negative bounds, other failure
+types, startup/restart/load qualification, physical sync and all scan accuracy/
+coverage/end-to-end obligations remain. Only the reviewer can verify/close034.
+
+Pilot seal218files/2,287,094,321bytes SHA256
+6346426bedb10e02d618a805d7fc8f9f573172162f3534b04172ead9c4a4b09a;
+candidate seal127files/8,515,752,336bytes SHA256
+c0a3dad9bcb913050d57c43341ff08ce32f661d08079be2f396c4e3cbfdf82ea.
+Capture source remainsd91fc4f, documentation base00284ea; exact publication commit
+and software/privacy/review gate outcomes are recorded in the developer checkpoint.
+Reviewer-owned records remain untouched; raw images and device data remain private.
+
+Publication gate7105 exits0: formatting, strictClippy,935passed/0failed/1ignored,
+optimized workspace build. No source correction, hence no hardware qualification
+from that result. CodeRabbit usage89614 exits1 with all capacity/billing lookups
+unavailable; no substantive review or paid usage. Draft status is retained.

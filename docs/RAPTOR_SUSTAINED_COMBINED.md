@@ -1,5 +1,9 @@
 # Sustained combined acquisition: 610-second finite pass
 
+**Later pixel-content audit:** 19 of the 36,600 accepted images contain repeated
+full blocks. The zero-rejection and header/CRC results below remain scoped facts,
+not image-integrity qualification. See the [retained candidate pixel audit](RAPTOR_CANDIDATE_PIXEL_AUDIT.md).
+
 **Confirmed:** one temporary bounded-copy + paused-logger trial captures and saves
 18,300 frames per camera over more than 610 seconds, with **zero startup or ongoing
 rejected buffers and zero sequence gaps**. All 36,600 frames pass native replay and

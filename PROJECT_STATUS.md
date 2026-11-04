@@ -1,3 +1,126 @@
+# Full-payload evidence confirms candidate pixel failure — 2026-11-04
+
+A fresh temporary-candidate capture saves 1,800 images per camera with no ongoing
+rejected buffers, yet seven accepted images contain partial duplicated strips.
+All 3,600 images match full-transfer USB monitor hashes. Four software requests
+remain outstanding throughout each affected frame; an empty queue does not explain
+these incidents. Scanner/link/controller/HCD/DMA attribution and a remedy remain
+unresolved. The original driver, scanner settings and services are restored.
+
+Two preceding live pilots validate the compact monitor against full PCAP. The first
+PCAP drops 1,009 events and correctly fails global admission; its affected pair is
+fully retained. The second matches all 92,202 events apart from per-reader timestamps,
+and all 240 native images equal literal PCAP bytes. All failures remain documented.
+See [method, results and evidence](docs/RAPTOR_LIVE_PAYLOAD_HASH_VALIDATION.md).
+
+Independent reviewer580 verified the historical audit below; these new observations
+await independent review. SCAN-REV-034 remains High/Open. Application source is
+unchanged from d91fc4f; no fix, firmware change, physical accuracy or complete scan
+is claimed. Rotation confirmation is pending. Next: discriminate upstream fault
+causes while preserving errors, then validate usable moving-object observations.
+The measured box dimensions remain held out from fitting and thresholds.
+
+# Existing driver candidate still has pixel duplication — 2026-11-04
+
+A read-only audit of 43,800 accepted images in ten original recordings finds 28
+images with one of the two tested signatures. The earlier 610-second zero-rejection
+run contains 19 full-block repetitions: eight left, eleven right. Their varying
+pixel contents differ across incidents and are absent at the same offsets in
+38 neighboring frames. No image is repaired or excluded.
+
+For sustained pair 173, all 188 saved USB image prefixes per camera match native
+pixels; blocks 6/8 repeat with distinct request identities. Four requests remain
+outstanding after every completion, with no empty software queue overlapping either
+frame. This limits the earlier starvation hypothesis. Only 20 image bytes per USB
+payload were retained, so this does not prove full-body equality. Original CRC,
+header and rejection results remain valid within their scope, not as image-integrity
+qualification or a complete fix.
+
+All ten original SHA hashes match; the full audit and ten native exports pass.
+Comparison controls and 2,400 rows match the original checker exactly. See the
+[candidate audit](docs/RAPTOR_CANDIDATE_PIXEL_AUDIT.md). Independent reviewer 575
+verified the prior baseline USB localization; this new result awaits review.
+SCAN-REV-034 stays High/Open. No new hardware capture, driver, firmware or application
+change. Next: investigate the enabled-path USB payload boundary; do not promote the
+candidate based only on rejection counters. Rotation confirmation remains pending.
+
+# Accepted-image fault localized to USB payloads — 2026-11-04
+
+Two affected images at the same camera PTS are present in an existing full USB
+trace. Direct original-payload reconstruction equals both native recorded images;
+repeated partial strips precede ScanCraft assembly/storage. The earlier broad
+claim that monitored captures did not reproduce duplication is corrected: the
+initial full aligned-block test missed this partial incident. All originals remain.
+
+Both endpoints briefly had zero outstanding requests just before the affected
+payloads. This is post-hoc correlation, not a proven cause or remedy. Device,
+controller/HCD/DMA and other upstream causes remain unresolved. No firmware,
+kernel or application changes, fresh hardware capture or production filter.
+
+The compact payload-hash monitor passes offline fixtures and original-PCAP checks;
+its prepared hardware plan was not executed. No live performance claim. Independent
+reviewer573 verified the prior source-input audit; this new localization awaits
+independent review. SCAN-REV-034 remains High/Open. See the
+[boundary evidence](docs/RAPTOR_ACCEPTED_IMAGE_INTEGRITY.md#partial-duplication-localized-in-retained-usb-payloads).
+
+Next: controlled acquisition comparison with the same pixel-integrity checks,
+while retaining all errors. Rotation can add object coverage but is not confirmed
+started. Physical units, dimensional accuracy, full-object reconstruction and the
+complete native scanning workflow remain unqualified. The measured box dimensions
+remain held out from model fitting and thresholds.
+Fresh publication gate: fmt, strict Clippy, 935 passed / 0 failed / 1 ignored,
+and release build all pass; application source unchanged.
+
+# Calibration input integrity audit — 2026-11-04
+
+Independent reviewer570 opened SCAN-REV-034 High/Open after reproducing accepted
+image duplication. The developer accepts it; no fix or closure is claimed.
+A source-bound audit now covers690images in474recordings/snapshots:80camera training/
+reserved-pose images,80sheet-preparation images,80box-trial images and450recovery
+images. Six contain partial repeated strips missed by the full aligned-block test.
+
+The two flagged camera-training recording frames were not the selected fit inputs.
+No tested signature appears in selected calibration/sheet/box inputs. Four flagged
+recovery images belong to pairs320/816; both already had no tracking pose and were
+not integrated in either saved fusion result. Negative signature results do not
+qualify image integrity, calibration accuracy or the remaining unfused candidates.
+
+All474native replays/690images pass; all6anomalous exports bind byte-exact tosource.
+Originals and coefficients remain unchanged. Diagnostic controls demonstrate that
+constant images can trigger full-block repetition, so no heuristic production
+rejection rule was installed. See the [source audit](docs/RAPTOR_ACCEPTED_IMAGE_INTEGRITY.md#calibration-and-reconstruction-input-audit).
+Next: locate and correct duplication with transport/buffer evidence, then verify
+independently. A current-binary900-frame diagnostic rotation capture is prepared;
+owner motion confirmation is pending. No recording or hardware operation this
+milestone. Full measurable scan, physical scale and end-to-end qualification remain
+incomplete. Existing935-test Rust gate applies to unchanged application source.
+
+# Accepted image integrity investigation — 2026-11-04
+
+Accepted-buffer and recording CRC success do not establish intact image content.
+Current box recordings contain visible displaced strips and exact duplicate full
+12,276-byte blocks in 12 of 980 tested unmonitored line images. The diagnostic is
+not exhaustive and is not a new production filter. Four subsequent monitored
+captures initially showed no full aligned-block duplication: all 960 accepted
+images match USB payloads byte for byte. The subsequent partial-strip test found
+two affected images in those retained traces; see the latest status above. Truncation and startup failures remain; all eight ongoing
+rejected buffers already have matching short lengths in the monitored stream.
+Cause of the earlier duplication is unresolved. Lowering FPS did not cure rejection.
+
+All ten native capture commands complete and replay; checked device state, saved
+formats and media service restore. No application, driver or firmware change.
+Private raw evidence is retained; only sanitized documentation is published.
+The box is visible; rotation offered but not confirmed started. No new complete
+point cloud, physical-scale or dimensional-accuracy qualification.
+
+See [accepted image evidence and reproduction](docs/RAPTOR_ACCEPTED_IMAGE_INTEGRITY.md).
+Reviewer567 independently verified PR49 at d91fc4f:935 tests/0failed/1ignored,
+formatting/strictClippy/release, recorded replay/native GUI and both exact-head CI
+runs success. That does not qualify live scanning or these new hardware findings.
+Next: audit calibration/reconstruction inputs for repeated payloads and locate a
+reproduced duplication incident before claiming reliable rotating-object geometry.
+Full mission remains incomplete; no merge or review gate bypass.
+
 # Recorded recovery connected and reopened — 2026-11-04
 
 The recorded marker/laser workflow now calls the session recovery core when
