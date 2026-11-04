@@ -5,8 +5,8 @@
 **Confirmed:** genuine Raptor recordings contain accepted, full-length images
 with repeated pixel blocks and visible horizontal discontinuities. Successful
 V4L2 buffer validation and recording CRC replay therefore do not establish that
-the image content is intact. This is a developer observation, not an independently
-reviewed finding or a new production rejection rule.
+the image content is intact. Independent reviewer assignment 570 confirmed this
+finding as SCAN-REV-034, High/Open. No new production rejection rule is installed.
 
 All captures use application revision
 `d91fc4f696ee275e77145406ea55126475b515c6`, CLI SHA-256
@@ -112,10 +112,13 @@ session images ranked highest by exploratory adjacent-row difference were viewed
 and do not show the earlier pronounced discontinuities. This sampling/ranking
 does not visually qualify every image.
 
-The duplication was **not reproduced under these monitors**. Their timing cost,
-host activity and non-randomized order prevent attributing its absence to any one
-factor. Byte agreement for these later images cannot locate the earlier fault.
-usbmon observes software/HCD events, not the physical wire or sensor exposure.
+The initial full aligned-block comparison did not detect duplication under these
+monitors. **The later partial-strip test finds two affected images in the retained
+restart trace**, as documented below. This corrects the earlier broader statement
+that duplication was not reproduced. The original 0/960 full-block result remains
+true; it was an incomplete diagnostic. usbmon observes software/HCD events, not
+the physical wire or sensor exposure. Timing cost, host activity and the non-random
+order still prevent generalizing the frequency of the observed incidents.
 
 ### Truncation is already present in the monitored payload stream
 
@@ -172,8 +175,8 @@ privately bound local kernel source. The application source is unchanged, so the
 existing independently verified 935-test/fmt/Clippy/release gate applies to its
 revision; it is not a new test run or hardware-integrity qualification.
 
-**Next priority:** audit calibration/reconstruction source images for this signature
-and capture a duplication incident with enough transport evidence to locate it.
+**Initial priorities, addressed by the follow-ups below:** audit calibration/
+reconstruction source images and identify a monitored duplication incident.
 Keep observed anomalies visible in diagnostics and out of claimed metrology; do
 not repair, suppress or relabel them as passing measurements. A future integrity
 criterion must account for naturally repeated/constant imagery and prove its false
@@ -263,8 +266,108 @@ and publication bindings. No raw imagery or target coordinates are published.
 The unchanged Rust gate remains the independently verified 935-test revision;
 the new executions are recorded-data diagnostics, not a new Rust build gate.
 
-**Remaining action:** reproduce duplication with sufficient device-to-application
+**Remaining action after the source audit:** locate the fault with synchronized
 boundary evidence, implement a justified correction and validate it independently.
+The following investigation advances localization without claiming a correction.
 Exploratory rotating-box acquisition can collect missing coverage while retaining
 all originals and errors, but must not be presented as qualified metrology while
 SCAN-REV-034 and the earlier scale/coverage/accuracy requirements remain open.
+
+
+## Partial duplication localized in retained USB payloads
+
+**Confirmed developer evidence:** applying the same partial-strip diagnostic to
+both retained full traces identifies two affected images in restart series 1.
+All 240 images in the first trace and all 720 in the restart trace still match
+native saved bytes. The affected pair shares raw PTS **2030305484**; left accepted
+index 117 (sequence 118) and right index 115 (sequence 218) each contain 188 UVC
+payloads, one FID, one terminal EOF and exactly 2,304,000 image bytes.
+
+| Camera | First image offset | Repeated offset | Equal bytes | Distinct values |
+| --- | ---: | ---: | ---: | ---: |
+| Left | 1,281,812 | 1,306,364 | 3,076 | 48 |
+| Right | 1,281,812 | 1,306,364 | 917 | 47 |
+| Right, second run | 1,282,836 | 1,307,388 | 132 | 17 |
+
+Direct parsing of the **original** 278,540-event PCAP, rather than just derived
+hashes, reconstructs both complete images byte for byte. Native raw exports and
+PNG pixels also match. Both native images visibly contain a narrow displaced
+horizontal strip. The compared data belong to distinct submitted/completed USB
+requests, at payload indices 104 and 106. The first runs start at transfer-byte
+5120, including the 12-byte UVC header; the second right run starts at 6144.
+Completion separations between those two payloads are 157 µs left and 116 µs right.
+This is not duplicate logging of one completion identity.
+
+**Boundary interpretation:** this incident is already present in the USB monitor
+payloads, upstream of ScanCraft's mapped-buffer copy and recording serializer.
+The inspected local Linux 7.2.11 `drivers/usb/core/hcd.c`, function
+`__usb_hcd_giveback_urb`, calls `usbmon_urb_complete` after DMA unmapping and before
+`urb->complete`. `drivers/usb/mon/mon_bin.c`, `mon_bin_event`/`mon_bin_get_data`,
+copies transfer-buffer bytes into the monitor ring during that callback. Exact
+local files are privately hash-bound; their inspection is **not** an attestation
+that the resident kernel core binary was built from those precise sources.
+
+The evidence does not distinguish scanner/firmware production from physical link,
+controller, HCD or DMA behavior. It does not prove the cause of every earlier
+unmonitored discontinuity. No firmware extraction, write, kernel change, image
+repair or application fix was performed in this follow-up.
+
+### Request queue context: a hypothesis, not a demonstrated remedy
+
+A post-hoc count of submitted requests minus completions reaches zero on both
+camera endpoints just before the affected payloads: 342 µs left and 326 µs right,
+after payload 103 and before the refill preceding 104. Both affected images overlap
+these intervals. Of the other 718 accepted restart images, 10 also overlap a
+zero-outstanding interval, with a maximum overlap of 91 µs. Their largest observed
+completion gap is 917 µs, versus 670 µs across the two affected images.
+
+These are software request counts, not a physical controller-ring measurement.
+The comparison is neither randomized nor an exhaustive image-integrity test;
+a long gap alone does not predict corruption. It motivates a controlled comparison
+of acquisition scheduling with identical instrumentation and pixel checks. The
+previous inline-copy candidate's successful rejection counters do not retrospectively
+qualify its accepted image content. No candidate is loaded or declared a fix here.
+
+### Diagnostic tooling and reproducibility
+
+Private evidence `payload-hash-monitor-20261104` contains:
+
+- `verify_duplicate_usb.py` and `direct-duplicate-verification.json`: original
+  PCAP parsing, every affected frame's 188 transfer rows, raw/native comparisons.
+- `queue_context.py` and `queue-context.json`: all 720 accepted-frame queue
+  associations. The original helper syntax error and failed result are retained.
+- `compare.py`, `check_known_trace.py` and both `known-*-comparison.json` files:
+  full-image comparisons through a compact payload-hash representation.
+- `external-input-bindings.json`: original traces, recordings, source files and
+  executables; the external publication manifest binds the complete evidence.
+
+An original private C monitor prototype retains a full captured-payload SHA-256,
+64-byte usbmon header and 32-byte prefix in each 128-byte event. The bounded
+262,144-byte read buffer, selected bus/device, deadline, exclusive output creation
+and privilege drop are retained. It uses local OpenSSL SHA-256 and introduces no
+application dependency. Strict compiler warnings, four payload-size fixtures,
+deadline/no-overwrite checks and exact conversion of both original PCAPs pass.
+All 92,502 first-trace records independently reconcile to the original PCAP; a
+mutation beyond the retained prefix is detected at the correct transfer.
+
+**Offline validation only:** no live hash-monitor performance, drop rate or
+observer effect is qualified. A prepared three-arm 300-frame capture plan was
+not executed because the existing full trace supplied the incident. The current
+follow-up performs no hardware acquisition. Private captures and binaries remain
+outside Git; only methods and results are published.
+
+SCAN-REV-034 remains open pending independent verification, a justified correction
+and startup/restart/rate/load qualification. The earlier source-input audit was
+independently reproduced in assignment 573. No complete measured box, physical
+unit qualification or production image-integrity gate is established here.
+
+
+Publication validation reran `tools/check.sh` on the unchanged application code:
+formatting, strict all-target Clippy, 935 tests passed / 0 failed / 1 ignored, and
+optimized workspace build all passed. This is software regression evidence, not
+new hardware qualification. The private follow-up contains 54 files / 66,914,272
+bytes; external evidence manifest SHA-256 is
+`0366e76d890489debc1ef6c24caf3881a774278a4623c8a5cd47758c84bd0dbe`.
+All 19 external input bindings match current bytes; the 16 original capture inputs
+also match their previously sealed manifest. The other three bindings identify
+the inspected local kernel source and Makefile.

@@ -5623,7 +5623,8 @@ raw parsing and exact byte comparison find repeated full12276-byte blocks in
 12/980 unmonitored line images. This is a limited diagnostic, not a generalized
 corruption rate or production rejection rule. A first monitored120pair capture
 and three further120pair captures retain all errors: all960accepted images equal
-USBpayload bytes; duplicate signature not reproduced there. All8ongoing-rejected
+USBpayload bytes; the full aligned-block signature was not reproduced there.
+The later partial-strip follow-up below corrects the broader absence claim. All8ongoing-rejected
 images have exactly matching monitored short lengths. Startup bursts persist.
 No causal attribution, silent repair, threshold relaxation or driver change.
 
@@ -5668,3 +5669,39 @@ Next: synchronizedboundary evidence for a duplicated image, justified correction
 independent before/after andstartup/restart/rate/load qualification. Limitednegative
 signature results do not close034or qualify earlierphysicalclaims. Reviewerfiles
 untouched; no hardware/source/firmware changes, paidreview, merge or gatebypass.
+
+
+## SCAN-REV-034 — accepted; original USB boundary evidence, correction pending
+
+Accept assignment573's verification and outstanding requirements. New developer
+analysis identifies two partial-strip images in the already retained restart PCAP,
+left117/right115 at common PTS2030305484. Direct original USB bytes equal both
+complete native images; distinct request identities contain the repeated runs.
+This localizes this incident upstream of ScanCraft image assembly/storage, without
+attributing device versus controller/HCD/DMA cause or all older anomalies.
+
+Both endpoints briefly have zero outstanding requests near the affected payloads;
+post-hoc comparison of all720images supports investigation, not causality or a
+rejection threshold. No production fix, silent repair or image exclusion. Corrected
+the preceding broad monitored non-reproduction statement to its full-block scope.
+Changed only PROJECT_STATUS.md, RAPTOR_ACCEPTED_IMAGE_INTEGRITY.md and this response.
+Exact publication commit and private evidence manifest are in the checkpoint and
+external publication receipt; prior audit commit0b43a986 remains unchanged.
+
+Direct verification3993exit0; original-PCAP/hash comparison99793exit0 and restart
+comparison31292exit0; corrected queue analysisexit0, initial syntax failure retained.
+The private monitor prototype passes strict C compilation, format/deadline/no-
+overwrite controls and a beyond-prefix corruption control. No live hash-monitor
+capture or performance qualification. Application code unchanged fromd91fc4f;
+existing independent935/0/1Rust gate is not new hardware evidence. No substantive
+CodeRabbit review obtained; previous quota lookup failure remains unresolved.
+
+Only the independent reviewer may verify/close034. It remains open pending cause,
+correction, independent before/after and broader acquisition qualification. The
+reviewer's records remain untouched. All original images/traces stay private.
+
+Fresh publication gate (session32396exit0): tools/check.sh passes fmt, strict
+all-target Clippy,935tests/0failed/1ignored and release build. No application change
+or new hardware qualification. Sealed54files/66,914,272bytes; manifest SHA256
+0366e76d890489debc1ef6c24caf3881a774278a4623c8a5cd47758c84bd0dbe. All19external
+bindings verify;16capture inputs match the previous sealed original manifest.

@@ -1,3 +1,30 @@
+# Accepted-image fault localized to USB payloads — 2026-11-04
+
+Two affected images at the same camera PTS are present in an existing full USB
+trace. Direct original-payload reconstruction equals both native recorded images;
+repeated partial strips precede ScanCraft assembly/storage. The earlier broad
+claim that monitored captures did not reproduce duplication is corrected: the
+initial full aligned-block test missed this partial incident. All originals remain.
+
+Both endpoints briefly had zero outstanding requests just before the affected
+payloads. This is post-hoc correlation, not a proven cause or remedy. Device,
+controller/HCD/DMA and other upstream causes remain unresolved. No firmware,
+kernel or application changes, fresh hardware capture or production filter.
+
+The compact payload-hash monitor passes offline fixtures and original-PCAP checks;
+its prepared hardware plan was not executed. No live performance claim. Independent
+reviewer573 verified the prior source-input audit; this new localization awaits
+independent review. SCAN-REV-034 remains High/Open. See the
+[boundary evidence](docs/RAPTOR_ACCEPTED_IMAGE_INTEGRITY.md#partial-duplication-localized-in-retained-usb-payloads).
+
+Next: controlled acquisition comparison with the same pixel-integrity checks,
+while retaining all errors. Rotation can add object coverage but is not confirmed
+started. Physical units, dimensional accuracy, full-object reconstruction and the
+complete native scanning workflow remain unqualified. The measured box dimensions
+remain held out from model fitting and thresholds.
+Fresh publication gate: fmt, strict Clippy, 935 passed / 0 failed / 1 ignored,
+and release build all pass; application source unchanged.
+
 # Calibration input integrity audit — 2026-11-04
 
 Independent reviewer570 opened SCAN-REV-034 High/Open after reproducing accepted
@@ -28,8 +55,9 @@ Accepted-buffer and recording CRC success do not establish intact image content.
 Current box recordings contain visible displaced strips and exact duplicate full
 12,276-byte blocks in 12 of 980 tested unmonitored line images. The diagnostic is
 not exhaustive and is not a new production filter. Four subsequent monitored
-captures did not reproduce that duplication: all 960 accepted images match USB
-payloads byte for byte. Truncation and startup failures remain; all eight ongoing
+captures initially showed no full aligned-block duplication: all 960 accepted
+images match USB payloads byte for byte. The subsequent partial-strip test found
+two affected images in those retained traces; see the latest status above. Truncation and startup failures remain; all eight ongoing
 rejected buffers already have matching short lengths in the monitored stream.
 Cause of the earlier duplication is unresolved. Lowering FPS did not cure rejection.
 
