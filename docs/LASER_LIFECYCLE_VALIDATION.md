@@ -25,7 +25,8 @@ hard cleanup deadline: a blocked driver read can still delay retirement.
 
 ## SCAN-REV-035: gain restoration after format retries
 
-**Accepted reviewer finding; independent verification remains pending.** A failed
+**Accepted reviewer finding; independently resolved for the software defect in
+reviewer assignment595 at `a24f98944043280c6f578a479e6af391cbd75052`.** A failed
 format restoration could be retried after gain had already been restored and
 marked complete. The retry could reset gain, while cached gain restoration and
 Drop skipped the necessary rewrite. Previous hardware trials began with the
@@ -82,3 +83,53 @@ mesh is claimed. The owner's box dimensions remain held out from fitting.
 CodeRabbit's included-capacity, billing and credit lookups return `lookup_failed`.
 No substantive review or paid usage was initiated. Keep independent review and
 owner merge requirements; developer tests do not close reviewer-owned findings.
+
+## Follow-up: retained GUI startup evidence and tracing readiness
+
+Reviewer594 independently verified the retirement change; reviewer595 independently
+ran the 948-test gate and verified the gain correction. Exact-head PR CI run
+41889481790 completed successfully for `a24f989`. These attest software checks,
+not hardware reliability. SCAN-REV-034 and the physical scan requirements remain.
+
+An offline recheck of the two retained GUI failures binds their original JSON
+and wrapper event records. Each camera retains at most 32 rejection samples;
+these are a capped prefix, not the entire rejected-buffer population.
+
+| Trial / interface | Total startup rejects | Retained samples | Video-byte range | Missing metadata / PTS parse errors |
+| --- | ---: | ---: | ---: | ---: |
+| First GUI / 0 | 235 | 32 | 1,690,200–2,009,376 | 0 / 1 |
+| First GUI / 2 | 235 | 32 | 1,690,200–1,997,100 | 0 / 0 |
+| Second GUI / 0 | 318 | 32 | 12,033–73,471 | 8 / 15 |
+| Second GUI / 2 | 235 | 32 | 1,690,200–2,058,480 | 0 / 0 |
+
+All 128 samples have metadata-buffer error flags and video lengths below the
+2,304,000-byte profile requirement. The second trial's left sample prefix differs
+substantially from the other three prefixes. Do not treat all startup failures as
+one established cause or interpret these counts as lost physical exposures.
+
+The retained host kernel journal reports a failed video-URB resubmission 8.001352
+seconds after the second trial's first retained left rejection. The application's
+`Capture::next_frame_until` has an eight-second validated-frame budget. This
+proximity makes cleanup timing a necessary discriminator; it does not prove the
+kernel event caused the earlier malformed buffers. The kernel's subsequent USB
+disconnect occurs 735.179519265 seconds after the final retained trial wrapper
+ends, so that later disconnect does not explain these earlier GUI failures.
+
+`scancraft-app/src/main.rs::main` dispatches helper arguments before initializing
+eframe. `laser_process::run` starts that same executable with piped stdin/stdout;
+`helper::session` starts acquisition and the optional preview publisher. No valid
+pair reached preview in either failed GUI trial. Rendering load, inherited
+environment, startup timing and lower-level transport remain hypotheses requiring
+controlled discrimination, not established explanations.
+
+A Fedora-signed strace 7.3 package was downloaded from the configured Fedora
+repositories and its binary extracted into a private user cache. No system package,
+kernel or production dependency was changed. A device-free `/dev/null` probe
+verified named DQBUF/STREAMOFF decoding, descriptor paths and syscall timing.
+Future instrumented comparisons must retain both failures and successes, record
+wall/monotonic clock association, and distinguish ptrace timing perturbation from
+uninstrumented performance. This is preparation, not a captured camera trace.
+
+Private reproducible analysis and tool receipts: `gui-startup-discrimination-20261105`.
+Its verifier recomputes all 128 sample summaries, checks 12 input bindings and
+checks event ordering. No scanner or service action occurred in this follow-up.

@@ -5911,3 +5911,22 @@ docs/LASER_LIFECYCLE_VALIDATION.md. Independent verification/closure remains the
 reviewer's responsibility;034 and prior physical qualification gaps remain open.
 CodeRabbit usage18992exit1: allcapacity/billing/creditlookup_failed. No substantive
 or paid review. Preserve draft/owner merge requirements.
+
+## SCAN-REV-035 — acknowledge independent software verification
+
+Read reviewer595: the reviewer independently resolves035's software ordering/cache
+scope at a24f98944043280c6f578a479e6af391cbd75052, with948tests/0failed/1ignored,
+fmtstrictClippyrelease. Reviewer594 separately verifies0bb retirement. This entry
+acknowledges those decisions; it does not change reviewer-owned records or broaden
+closure to hardware reliability, hard cleanup deadlines or034pixel integrity.
+Exacta24 PR CI41889481790 is now independently queried completed/success.
+
+Documentation-only follow-up adds reproducible comparison of128 retained GUI
+rejection samples and kernel-event timing to LASER_LIFECYCLE_VALIDATION.md and
+PROJECT_STATUS.md. Private verifier checks12source/evidence bindings. No new capture,
+production code, threshold, algorithm, calibration or scanner-state change. Signed
+Fedora strace7.3 extracted user-locally; /dev/null DQBUF/STREAMOFF decoding smoke
+passes. Future traces must account for ptrace overhead and clock association.
+No repeated software gate or CodeRabbit request for unchanged production code;
+prior unavailable capacity/billing check remains a limitation. All prior failed
+hardware evidence remains, and independent physical validation is outstanding.
