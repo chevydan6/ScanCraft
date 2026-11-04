@@ -1,3 +1,21 @@
+# Retained-reference recovery evidence — 2026-11-04
+
+A private Rust experiment recovers against the original reference at saved-board
+frame880, then tracks the remaining four sampled frames.44/225accepted versus39;
+181intervening frames remain insufficient. All1360local/reference attempts checked
+with separate NumPy tracking mathematics. Native primitive fusion in the private
+adapter adds114genuine surface observations,5785→5884voxels,without resettingorigin.
+
+This is NOT yet native ScanSession/GUI recovery. Originalframe880 marker identities
+remain unlabelled by the independent pattern diagnostic; later888/896pattern checks
+support pose consistency, not physical accuracy. Conflict arbitration, cache eviction
+and atomic failure paths need regression coverage before production integration.
+See [experiment and integration requirements](docs/RETAINED_REFERENCE_RECOVERY.md).
+Production remainsf75685c/PR46; independentreview558verified925tests,all225native
+surfacepairs/fusion/GUI and completedCI. Newexperiment needs independentreview.
+Ownerboxrotationconfirmationstillpending;no newhardwarecapture. Next: transactional
+session-owned references and real object-associated coverage/units/accuracy.
+
 # Dense real-pair processing integrated — 2026-11-04
 
 Native CLI now processes all225 predetermined pairs from the saved rotating-board

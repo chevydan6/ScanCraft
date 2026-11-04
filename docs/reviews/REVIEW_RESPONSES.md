@@ -5524,3 +5524,38 @@ identity/calibration/errorbound/fullobject and edit/save/reopen/export stillopen
 CodeRabbit usage79028exit1lookup_failed, no upload/paidreview. Private evidence
 laser-query-capacity-20261104 and externalpublicationmanifest retain reproducibility.
 New implementation needs independent verification; developer does not close findings.
+
+## DEV-RETAINED-REFERENCE-EXPERIMENT — recovery evidence, 2026-11-04
+
+Developer investigation, not a new independent finding or closure. Accept reviewer558's
+verification of f75685c/PR46 and its remaining tracking/metrology limits. Current
+branch dev/reference-recovery-evidence changes only this response,PROJECT_STATUS and
+new docs/RETAINED_REFERENCE_RECOVERY.md; production code/dependencies untouched.
+
+Private Rust adapter reuses native Tracker and VoxelFusion, current marker support
+and frozen225sample inputs. Retain anchor plus up to15periodic accepted snapshots,
+cadence8; after local failure test every retained reference with unchangedgates,
+requirepassingposesagreewithinexistingRMS onselectedpointunion,chooseoldestconsistent.
+No reset, pattern labels, generated geometry, motion/coverage relaxation or truthfit.
+One trialpasses atoriginal880/reference0:19markers,RMS0.0530437RAW,coverage1.0/0.826087;
+tracks880..896.44accepted/181insufficient vs39/186baseline.1360attempts independently
+recomputed with NumPy (maxtracking1.180e-10/support1.137e-13); all failuresretained.
+Privatefusion31integrated/13trackingonly,5884voxels vsbaseline26/13/5785.114additional
+originalsurfacepoints;baselinepositionsnativeexact,independentvoxelmeans1.137e-13.
+
+All36 image masks independently checked; threewidthpatternconsensus gives25same-ID
+selectedpairs and59unlabelled across5returnframes. Firstrecovery880entirelyunlabelled,
+so no independentlyverifiedidentityclaimthere. Later888/896 commonpatternIDs14/15
+worldposeRMS0.07968/0.10766RAW andmax0.25067/0.29428, notmetrologyqualification.
+Onepassingtrialmeansambiguityhandlingnotrealdataexercised; cacheonlysixreferences,
+evictionuntested. Session atomicity/rollback/history/newformat integration notbuilt.
+Implementationrecommendation and requiredfailure/ambiguityregressions documented.
+
+Privatehelpersfmt/strictClippy/releasecompleted; math/identity/fusion checksPASS.
+No newproduction925testexecutionclaimed: unchangedcode independentlyverified558.
+Private string-edit attemptfailedassertionbeforewriting source; explicitpatch then
+built/executed, retainedinfusionplan. No physicalcapture/calibration/firmware/paid
+service or mainmerge. Boxrotationconfirmationstillpending. Private root
+retained-reference-recovery-20261104 and externalpublicationmanifestbindrawresults.
+Finalcommit and review availability recorded in publication receipts/recoverycheckpoint.
+Only independentreviewer may verify/close findings or assess this new evidence.
