@@ -4955,3 +4955,32 @@ unchanged implementation retains the 892-test/fmt/Clippy/release baseline. Relev
 source parent ba99e7b and exact documentation commit are retained in Git/publication
 metadata. No new independent finding, metric accuracy, first scan or mission
 completion is claimed. Next: actual independently measured object and physical scale.
+
+
+## DEV-LINE-GAIN — actual measured-object acquisition and sparse reconstruction
+
+Developer work, not a new independent finding or closure. Accepted practical need:
+combine existing scoped line illumination and raw gain so real object stripes are
+usable. `line_options.rs`, CLI dispatch and `stereo_probe.rs::record_line_gain`
+expose the already implemented dual-lease path without changing device-control,
+recording or geometry implementations. Regression file `native_laser_preflight.rs`
+adds actual malformed/unsupported CLI refusals; parser unit tests preserve defaults
+and reject ambiguity. Source parent 876c3af5e49214d466534cbcca25c24de67c7956;
+exact new commit is available in Git/publication metadata.
+
+Tests: full final gate 895 passed/0 failed/1 ignored, fmt, strict Clippy and release
+PASS. Initial chunks_exact Clippy failure retained and fixed with as_chunks. Actual
+10-frame/camera combined capture plus 3 color frames validates/replays; 0/97 startup
+and 0/0 ongoing rejects remain reported. Gain and line restore, seven native state
+comparisons/five format restores/original WirePlumber state pass. Matched indices5/3,
+equal sensorPTS and25us host difference do not establish exposure synchronization.
+Private verification and manifest are detailed in docs/LINE_CAPTURE_GAIN.md.
+
+Frozen existing native reconstruction passes produce only8/5/5 points; no credible
+surface, physical dimension, repeatability, metric export or first genuine scan is
+claimed. Owner dimensions are held out, no model/scale/acceptance fitting performed.
+Private probe code/data are not shipped. Source/lens domains remain unchanged.
+Immediate priority is robust real correspondence and coverage. CodeRabbit usage
+lookup exits1 with all quota/billing fields lookup_failed; no review/paid usage
+requested. Substantive review remains outstanding. Independent507's verification of
+prior caliper evidence and CI is preserved; reviewer-owned findings/statuses untouched.

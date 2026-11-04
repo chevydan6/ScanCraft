@@ -1,13 +1,13 @@
 # Project status
 
-Current physical readiness: [caliper/scene evidence](docs/CALIPER_SCALE_EVIDENCE.md)
-confirms the old 50 mm jaw guesses pass reprojection but cannot validate physical
-scale or accuracy. Fresh native images still show a board cropped in the right
-camera. Normal-driver short capture retains 98/1 startup rejects; 20 scanning frames
-and 3 color frames replay/decode, checked settings/formats/media service restore.
-The color extraction invocation failure and corrected existing export are retained.
-No first measured object or active metric calibration is claimed. Printed-object
-positioning and measured cooled dimensions are requested.
+Current physical readiness: the owner's measured yellow box is now visible in both
+scanning cameras. [Scoped line + gain capture](docs/LINE_CAPTURE_GAIN.md) saves/replays
+10 frames per camera and three color frames; original settings/formats/media service
+restore. Startup rejects remain 0/97; ongoing 0/0 in this short sample. Frozen native
+stereo diagnostics accept only 8, then 5 and 5 sparse points: no meaningful measured
+object scan or accuracy result yet. Correspondence/coverage is the immediate priority.
+The new CLI option reuses existing leases; final 895-test/fmt/Clippy/release gate passes.
+Owner dimensions are held out; calibration/scale was not fitted to the box.
 
 Independent assignment 501 resolves SCAN-REV-032 for the bound mandatory private
 reconciliation, and 506 confirms both ba99e7b CI runs passed. Original summary-only
