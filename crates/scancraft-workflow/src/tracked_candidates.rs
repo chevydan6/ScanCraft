@@ -2,6 +2,7 @@
 //! No metric project/PLY conversion; source bundles remain required for provenance.
 pub mod bundle;
 mod markers;
+mod recovery;
 #[cfg(test)]
 mod tests;
 use crate::{
@@ -76,6 +77,9 @@ struct Request {
     /// Experimental local consistency, not marker identification or relocalization.
     #[serde(default)]
     temporal_marker_support: bool,
+    /// Opt-in recovery against session-owned retained marker references.
+    #[serde(default)]
+    retained_reference_recovery: bool,
     frames: Items<Frame, 256>,
 }
 fn cloud(positions: Vec<[f64; 3]>) -> Cloud {
@@ -116,6 +120,7 @@ pub fn run(settings: &Path, target: &Path, work: &WorkControl) -> Result<Value, 
         || !(1..=1_000_000).contains(&request.maximum_voxels)
         || !request.markers.maximum_shape_rms_px.is_finite()
         || request.markers.maximum_shape_rms_px <= 0.
+        || (request.retained_reference_recovery && !request.temporal_marker_support)
     {
         return Err("invalid tracked candidate schema, order or resource/shape limits".into());
     }
@@ -135,7 +140,12 @@ pub fn run(settings: &Path, target: &Path, work: &WorkControl) -> Result<Value, 
         })?];
         let mut frames_out = ArtifactWriter::open(&partial, "frames.ndjson", work)?;
         let mut sources = ArtifactWriter::open(&partial, "sources.ndjson", work)?;
-        let mut markers = ArtifactWriter::open(&partial, "markers.ndjson", work)?;
+        let mut marker_file = ArtifactWriter::open(&partial, "markers.ndjson", work)?;
+        let mut markers = recovery::LimitedWriter::new(&mut marker_file, recovery::MARKER_BYTES);
+        let mut journal = request
+            .retained_reference_recovery
+            .then(|| ArtifactWriter::open(&partial, "recovery.ndjson", work))
+            .transpose()?;
         let mut budget = request.maximum_stereo_attempts;
         let mut reference_geometry = None;
         let mut reference_interfaces = None;
@@ -184,39 +194,60 @@ pub fn run(settings: &Path, target: &Path, work: &WorkControl) -> Result<Value, 
                 &mut markers,
                 &json!({"kind":"frame_start","frame_id":frame.id}),
             )?;
-            let observations = markers::reconstruct(
-                &pair.frames,
-                &pair.geometry,
-                &request.markers,
-                marker_prior
-                    .as_ref()
-                    .map(|prior| (prior, request.tracking.max_correspondence_model_units)),
-                &mut budget,
-                &mut markers,
-                work,
-            )?;
             let surface = cloud(pair.candidates.positions);
             surface_points += surface.points.len();
-            let mut row = json!({"frame_id":frame.id,"surface_points":surface.points.len(),
-                "tracking_points":observations.points.len(),"integrated":false});
-            if observations.points.len() < 3 {
-                unavailable += 1;
-                row["status"] = json!("insufficient_tracking_observations");
-                row["pose"] = Value::Null;
-                // The session did not observe a pose; retain its last accepted
-                // reference, never substitute it as this frame's measurement.
+            let mut row = json!({"frame_id":frame.id,"surface_points":surface.points.len(),"integrated":false});
+            let (step, points, error) = if let Some(journal) = &mut journal {
+                let prepared = markers::prepare(
+                    &pair.frames,
+                    &pair.geometry,
+                    &request.markers,
+                    &mut budget,
+                    &mut markers,
+                    work,
+                )?;
+                let processed = recovery::process(
+                    &mut session,
+                    frame.id,
+                    &surface,
+                    &prepared,
+                    &request,
+                    (&mut markers, journal),
+                    work,
+                )?;
+                row["recovery"] = processed.summary;
+                (processed.step, processed.points, processed.error)
             } else {
-                let step =
-                    session.process_with_tracking_cloud(frame.id, &surface, &observations, work)?;
-                let t = &step.tracking;
-                // Advance the local prior only after tracking AND any requested
-                // surface integration succeed. Unavailable/rejected frames retain it.
-                if request.temporal_marker_support && t.accepted {
-                    marker_prior = Some(markers::Prior {
-                        frame_id: frame.id,
-                        positions: observations.points.iter().map(|p| p.position).collect(),
-                    });
+                let observations = markers::reconstruct(
+                    &pair.frames,
+                    &pair.geometry,
+                    &request.markers,
+                    marker_prior
+                        .as_ref()
+                        .map(|prior| (prior, request.tracking.max_correspondence_model_units)),
+                    &mut budget,
+                    &mut markers,
+                    work,
+                )?;
+                let count = observations.points.len();
+                if count < 3 {
+                    (None, count, None)
+                } else {
+                    let step = session
+                        .process_with_tracking_cloud(frame.id, &surface, &observations, work)?
+                        .clone();
+                    if request.temporal_marker_support && step.tracking.accepted {
+                        marker_prior = Some(markers::Prior {
+                            frame_id: frame.id,
+                            positions: observations.points.iter().map(|p| p.position).collect(),
+                        });
+                    }
+                    (Some(step), count, None)
                 }
+            };
+            row["tracking_points"] = json!(points);
+            if let Some(step) = step {
+                let t = &step.tracking;
                 let pose=t.world_from_frame.as_ref().map(|p|json!({
                     "rotation":(0..3).map(|i|(0..3).map(|j|p.rotation[(i,j)]).collect::<Vec<_>>()).collect::<Vec<_>>(),
                     "translation_model_units":p.translation.as_slice()}));
@@ -242,12 +273,32 @@ pub fn run(settings: &Path, target: &Path, work: &WorkControl) -> Result<Value, 
                     json!(step.fusion.as_ref().map(
                         |f| json!({"input_points":f.input_points,"total_voxels":f.total_voxels})
                     ));
+            } else {
+                unavailable += 1;
+                row["status"] = json!(if points < 3 {
+                    "insufficient_tracking_observations"
+                } else {
+                    "tracking_error"
+                });
+                if points >= 3 {
+                    row["reason"] = json!(error);
+                }
+                row["pose"] = Value::Null;
+                // The session did not observe a pose; retain its last accepted
+                // reference, never substitute it as this frame's measurement.
             }
             row["last_integrated"] = json!(session.last_integrated());
             line(&mut frames_out, &row)?;
         }
         session.stop()?;
-        artifacts.extend([frames_out.finish()?, sources.finish()?, markers.finish()?]);
+        artifacts.extend([
+            frames_out.finish()?,
+            sources.finish()?,
+            marker_file.finish()?,
+        ]);
+        if let Some(journal) = journal {
+            artifacts.push(journal.finish()?);
+        }
         let fused = session.cloud(work)?;
         let positions: Vec<_> = fused.points.iter().map(|p| p.position).collect();
         artifacts.push(artifact(&partial,"fused-candidates.json",work,|out|{

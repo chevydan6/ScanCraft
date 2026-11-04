@@ -128,12 +128,105 @@ pub(super) fn request(paths: &[PathBuf]) -> Value {
         "voxel_model_units":0.25,"maximum_voxels":1000,"maximum_stereo_attempts":1000,
         "frames":paths.iter().enumerate().map(|(id,bundle)|json!({"id":id,"bundle":bundle})).collect::<Vec<_>>()})
 }
-fn rows(path: &Path) -> Vec<Value> {
+pub(super) fn rows(path: &Path) -> Vec<Value> {
     fs::read_to_string(path)
         .unwrap()
         .lines()
         .map(|s| serde_json::from_str(s).unwrap())
         .collect()
+}
+
+#[test]
+fn saved_reference_recovery_runs_from_images_and_reopens_without_reanchoring() {
+    let t = Temp::new();
+    let paths: Vec<_> = (0..12)
+        .map(|i| fixture(&t.0, i, true, true, if i == 11 { 0 } else { i as i32 }))
+        .collect();
+    let mut req = request(&paths);
+    req["temporal_marker_support"] = json!(true);
+    let settings = t.0.join("settings.json");
+    write(&settings, &req);
+    let baseline = run(&settings, &t.0.join("baseline"), &WorkControl::default()).unwrap();
+    assert_eq!(baseline["tracking_unavailable_frames"], 1);
+    req["retained_reference_recovery"] = json!(true);
+    write(&settings, &req);
+    let target = t.0.join("recovery");
+    let result = run(&settings, &target, &WorkControl::default()).unwrap();
+    assert_eq!(result["integrated_frames"], 12);
+    assert_eq!(result["stereo_attempts"], baseline["stereo_attempts"]);
+    let frames = rows(&target.join("frames.ndjson"));
+    assert_eq!(frames[11]["recovery"]["recovered_from"], 0);
+    assert_eq!(frames[11]["recovery"]["attempts"], 3);
+    for x in frames[11]["pose"]["translation_model_units"]
+        .as_array()
+        .unwrap()
+    {
+        assert!(x.as_f64().unwrap().abs() < 1e-9);
+    }
+    let journal = rows(&target.join("recovery.ndjson"));
+    assert_eq!(journal.len(), 12);
+    assert_eq!(
+        journal[11]["attempts"][0]["positions_model_units"],
+        json!([])
+    );
+    assert_eq!(journal[11]["attempts"][1]["reference_frame"], 0);
+    assert_eq!(journal[11]["attempts"][2]["reference_frame"], 7);
+    assert_eq!(journal[11]["retained_references"], json!([0, 7]));
+    let loaded = bundle::load(&target, 11, &WorkControl::default()).unwrap();
+    assert_eq!(loaded.session.integrated, 12);
+    assert_eq!(
+        loaded.session.frames[11]
+            .recovery
+            .as_ref()
+            .unwrap()
+            .recovered_from,
+        Some(0)
+    );
+    req["temporal_marker_support"] = json!(false);
+    write(&settings, &req);
+    let invalid = t.0.join("invalid");
+    assert!(run(&settings, &invalid, &WorkControl::default()).is_err());
+    assert!(!invalid.exists());
+}
+
+#[test]
+fn recovery_fusion_failure_preserves_partial_diagnostics_without_publishing_a_scan() {
+    let t = Temp::new();
+    let paths: Vec<_> = (0..3)
+        .map(|i| fixture(&t.0, i, true, true, i as i32))
+        .collect();
+    let mut req = request(&paths);
+    req["temporal_marker_support"] = json!(true);
+    req["retained_reference_recovery"] = json!(true);
+    req["maximum_voxels"] = json!(1);
+    let settings = t.0.join("settings.json");
+    write(&settings, &req);
+    let target = t.0.join("failed");
+    let error = run(&settings, &target, &WorkControl::default())
+        .unwrap_err()
+        .to_string();
+    assert!(error.contains("capacity"), "{error}");
+    assert!(!target.exists());
+    let partial = Path::new(
+        error
+            .split("incomplete output preserved at ")
+            .nth(1)
+            .unwrap(),
+    );
+    assert!(!partial.join("manifest.json").exists());
+    let frames = rows(&partial.join("frames.ndjson"));
+    let journal = rows(&partial.join("recovery.ndjson"));
+    assert_eq!(frames.len(), 1);
+    assert_eq!(journal.len(), 1);
+    assert_eq!(frames[0]["frame_id"], 0);
+    assert_eq!(journal[0]["retained_references"], json!([0]));
+    let markers = rows(&partial.join("markers.ndjson"));
+    assert!(
+        markers
+            .iter()
+            .any(|r| r["kind"] == "frame_start" && r["frame_id"] == 1)
+    );
+    assert!(bundle::load(partial, 0, &WorkControl::default()).is_err());
 }
 #[test]
 fn exact_retained_frames_track_but_only_surface_points_fuse_with_explicit_empty_frames() {

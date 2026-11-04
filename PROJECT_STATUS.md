@@ -1,3 +1,24 @@
+# Recorded recovery connected and reopened — 2026-11-04
+
+The recorded marker/laser workflow now calls the session recovery core when
+`retained_reference_recovery` and `temporal_marker_support` are explicitly enabled.
+Stereo hypotheses are prepared once. Complete bounded recovery journals preserve
+all attempts; reopening validates reference history, consensus, selection and frame
+agreement. The native GUI displays saved recovery outcomes and original images.
+
+Final validation: 935 tests, no failures, one ignored, formatting/strictClippy/release.
+Native225 replay exactly matches all1135 attempts and5884points from the prior
+independently verified core.44accepted/31integrated/13tracking-only/181unavailable;
+recovery880/reference0. Original28 recorded output files remain byte-identical.
+The native GUI opens all5884points and225sources. Geometry remains fragmented,
+not a complete object or physically validated scan. No acquisition this milestone.
+
+See [workflow contract, limits and evidence](docs/RECORDED_REFERENCE_RECOVERY.md).
+Reviewer564 independently verified the previous PR48 core and both successfulCI
+runs; this integration needs separate review. CodeRabbit quota lookup unavailable.
+Next: real box coverage and independently verified calibration units/accuracy;
+rotation has been offered but not confirmed started. Full mission remains incomplete.
+
 # Native session recovery core — 2026-11-04
 
 `ScanSession::process_with_reference_recovery` now owns the bounded reference bank

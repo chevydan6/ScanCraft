@@ -5580,3 +5580,31 @@ reviewer561-verified prototype recovery,44accepted/31integrated/13tracking-only/
 approval or physical accuracy. Recorded workflow/GUI integration, persistent attempt
 journaling/reopening and real box coverage/units remain unfinished. CodeRabbit quota
 lookup failed; no substantive/paid review. Independent records remain untouched.
+
+## DEV-RECORDED-REFERENCE-RECOVERY — workflow integration, 2026-11-04
+
+Developer milestone, not a new finding or independent closure. Accept reviewer564's
+verification of the PR48 geometry core and its remaining workflow requirements.
+Changed tracked_candidates main/markers/recovery and bundle/rows/recovery for
+prepare-once hypotheses, opt-in native session calls, bounded complete journals,
+source-bound reopen validation and selected outcome consistency. candidate_ui
+renders recovery summaries. Existing defaults remain byte-equivalent. Also aligned
+leftover fused/source4096limits with shared8192ceiling, covered at exactcapacity.
+No new dependency, geometry model, physical scale or threshold relaxation.
+
+Five new tests cover image recovery/reopen, corrupted/incomplete journal, bytequota,
+densecapacity and failedfusion partialjournal without finalpublication. Full gate
+935passed/0failed/1ignored plusfmt/strictClippy/release. Originaldrop_non_drop lint
+retained and corrected.225nativeCLI replay exactlymatches prior independently
+verified core:1135attempts/71770stereoattempts/5700supportrows/5884positions,
+44accepted/31integrated/13tracking-only/181unavailable,last896. Fourlegacyreplays
+preserve28files exactly. GUI opens genuine recovery result and original frame880
+cameras; fragmentedgeometry is notcompleteobject/metrology. Initialrender default
+Xvfb pathfailure retained; existingexplicitpath succeeds withoutinstallation.
+
+Quota lookup failed; no substantive CodeRabbit or paidreview. Private evidence root
+recorded-reference-recovery-20261104; exactcommit/publicationmanifest in external
+receipt/checkpoint. Persistent reads check consistency,notICP/opticalidentity or
+physicaltruth. Realwrong-reference robustness, globalrecovery, livepipeline,
+calibratedunits/accuracy/boxcoverage/repeats and all prior qualification remainopen.
+Only independentreviewer may verify/close findings; its records remain untouched.

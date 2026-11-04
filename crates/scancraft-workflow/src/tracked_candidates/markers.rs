@@ -16,15 +16,32 @@ pub(super) struct Prior {
 
 type Candidate = (usize, usize, [f64; 3]);
 
-fn select(
+pub(super) struct Prepared {
     accepted: Vec<Candidate>,
     dimensions: [usize; 2],
-    prior: Option<(&Prior, f64)>,
+    pub attempts: usize,
+}
+
+impl Prepared {
+    pub fn select(
+        &self,
+        prior: Option<(scancraft_geometry::session::recovery::Reference<'_>, f64)>,
+        out: &mut impl Write,
+        work: &WorkControl,
+    ) -> Result<Vec<[f64; 3]>, Error> {
+        select(&self.accepted, self.dimensions, prior, out, work)
+    }
+}
+
+fn select(
+    accepted: &[Candidate],
+    dimensions: [usize; 2],
+    prior: Option<(scancraft_geometry::session::recovery::Reference<'_>, f64)>,
     out: &mut impl Write,
     work: &WorkControl,
 ) -> Result<Vec<[f64; 3]>, Error> {
     let index = prior
-        .map(|(p, _)| SpatialIndex::build(&p.positions, work))
+        .map(|(p, _)| SpatialIndex::build(p.positions, work))
         .transpose()?;
     let mut counts = [vec![0; dimensions[0]], vec![0; dimensions[1]]];
     let mut eligible = Vec::with_capacity(accepted.len());
@@ -39,7 +56,7 @@ fn select(
             "motion_prediction_used":false,"marker_identity_verified":false}),
         )?;
     }
-    for (i, j, position) in accepted {
+    for &(i, j, position) in accepted {
         work.check()?;
         let supported = if let (Some(index), Some((_, limit))) = (&index, prior) {
             let neighbor = index.nearest(position, work)?;
@@ -123,15 +140,14 @@ fn observations(
     ))
 }
 
-pub(super) fn reconstruct(
+pub(super) fn prepare(
     frames: &[SelectedFrame; 2],
     rig: &StereoCalibration,
     config: &MarkerConfig,
-    prior: Option<(&Prior, f64)>,
     budget: &mut usize,
     out: &mut impl Write,
     work: &WorkControl,
-) -> Result<Cloud, Error> {
+) -> Result<Prepared, Error> {
     let (left, left_report) = observations(&frames[0], config, work)?;
     let (right, right_report) = observations(&frames[1], config, work)?;
     line(
@@ -169,11 +185,40 @@ pub(super) fn reconstruct(
             )?;
         }
     }
-    let points = select(accepted, [left.len(), right.len()], prior, out, work)?;
+    Ok(Prepared {
+        accepted,
+        dimensions: [left.len(), right.len()],
+        attempts,
+    })
+}
+
+pub(super) fn reconstruct(
+    frames: &[SelectedFrame; 2],
+    rig: &StereoCalibration,
+    config: &MarkerConfig,
+    prior: Option<(&Prior, f64)>,
+    budget: &mut usize,
+    out: &mut impl Write,
+    work: &WorkControl,
+) -> Result<Cloud, Error> {
+    let prepared = prepare(frames, rig, config, budget, out, work)?;
+    let points = prepared.select(
+        prior.map(|(p, d)| {
+            (
+                scancraft_geometry::session::recovery::Reference {
+                    frame_id: p.frame_id,
+                    positions: &p.positions,
+                },
+                d,
+            )
+        }),
+        out,
+        work,
+    )?;
     line(
         out,
         &json!({"kind":"tracking_observations","positions_model_units":points,
-        "stereo_attempts":attempts,"marker_identity_verified":false}),
+        "stereo_attempts":prepared.attempts,"marker_identity_verified":false}),
     )?;
     Ok(cloud(points))
 }
@@ -195,13 +240,19 @@ mod tests {
             (2, 3, [10., 0., 0.]),
         ];
         let work = WorkControl::default();
-        let baseline = select(candidates.clone(), [3, 4], None, &mut Vec::new(), &work).unwrap();
+        let baseline = select(&candidates, [3, 4], None, &mut Vec::new(), &work).unwrap();
         assert_eq!(baseline, vec![[0., 10., 0.], [10., 0., 0.]]);
         let mut bytes = Vec::new();
         let points = select(
-            candidates.clone(),
+            &candidates,
             [3, 4],
-            Some((&prior, 3.)),
+            Some((
+                scancraft_geometry::session::recovery::Reference {
+                    frame_id: prior.frame_id,
+                    positions: &prior.positions,
+                },
+                3.,
+            )),
             &mut bytes,
             &work,
         )
@@ -218,9 +269,15 @@ mod tests {
         let ambiguous = vec![(0, 0, [0., 0., 0.]), (0, 1, [1., 0., 0.])];
         assert!(
             select(
-                ambiguous,
+                &ambiguous,
                 [1, 2],
-                Some((&prior, 3.)),
+                Some((
+                    scancraft_geometry::session::recovery::Reference {
+                        frame_id: prior.frame_id,
+                        positions: &prior.positions
+                    },
+                    3.
+                )),
                 &mut Vec::new(),
                 &work
             )
@@ -230,9 +287,15 @@ mod tests {
         work.cancel();
         assert!(
             select(
-                candidates,
+                &candidates,
                 [3, 4],
-                Some((&prior, 3.)),
+                Some((
+                    scancraft_geometry::session::recovery::Reference {
+                        frame_id: prior.frame_id,
+                        positions: &prior.positions
+                    },
+                    3.
+                )),
                 &mut Vec::new(),
                 &work
             )
