@@ -2,6 +2,10 @@
 
 ## Scope and status
 
+Update: the [native session core](SESSION_REFERENCE_RECOVERY.md) now implements
+this policy and reproduces the recovery experiment. Recorded workflow/GUI wiring
+remains unfinished. The experiment and baseline details below describe PR47.
+
 **Confirmed:** a private Rust adapter recovers tracking against the original
 reference when the marked face returns in the existing recorded-board sequence.
 **Not implemented in the application:** ScanCraft's current recorded workflow still

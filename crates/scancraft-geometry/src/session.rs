@@ -6,6 +6,7 @@ use crate::{
     work::WorkControl,
 };
 use std::collections::HashSet;
+pub mod recovery;
 #[cfg(test)]
 mod separate_tests;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -29,6 +30,7 @@ pub struct ScanSession {
     fusion: VoxelFusion,
     history: Vec<SessionFrame>,
     maximum_frames: usize,
+    recovery: Option<recovery::RecoveryState>,
 }
 impl ScanSession {
     pub fn new(
@@ -71,6 +73,7 @@ impl ScanSession {
             fusion: VoxelFusion::new(voxel_mm, maximum_voxels)?,
             history: Vec::new(),
             maximum_frames,
+            recovery: None,
         })
     }
     pub fn id(&self) -> &str {
@@ -173,6 +176,11 @@ impl ScanSession {
         work: &WorkControl,
     ) -> Result<&SessionFrame, String> {
         work.check()?;
+        if self.recovery.is_some() {
+            return Err(
+                "reference-recovery sessions require the recovery processing method".into(),
+            );
+        }
         if self.state != SessionState::Running {
             return Err("session must be running to process frames".into());
         }

@@ -5559,3 +5559,24 @@ service or mainmerge. Boxrotationconfirmationstillpending. Private root
 retained-reference-recovery-20261104 and externalpublicationmanifestbindrawresults.
 Finalcommit and review availability recorded in publication receipts/recoverycheckpoint.
 Only independentreviewer may verify/close findings or assess this new evidence.
+
+## DEV-SESSION-REFERENCE-RECOVERY — native transaction core, 2026-11-04
+
+Developer implementation milestone, not a new independent finding or closure.
+Accept reviewer561's integration requirements. New `session/recovery.rs` owns a
+bounded reference bank, enforces global attempted IDs/capacity, stages candidate
+trackers/retention, checks all passing poses and commits only after successful
+fusion. `session.rs` adds optional state/mode isolation; `tracking.rs` exposes
+immutable reference/config accessors. No optical model or acceptance gate changed.
+Five tests cover actual recovery, contradictory passes, cancellation/late error,
+failed fusion and eviction rollback, tracking-only cadence/capacity, invalid points
+and monotonic IDs. Source commit is recorded in the publication receipt/checkpoint.
+
+Full gate930passed/0failed/1ignored plus fmt/strictClippy/release. Initial constructor
+syntax error and Clippy modulo lint retained and corrected. Private native adapter
+replays225 real recorded frames; all1135 attempts and complete output exactly equal
+reviewer561-verified prototype recovery,44accepted/31integrated/13tracking-only/
+181unavailable/5884voxels,last896. This is new core developer evidence, not independent
+approval or physical accuracy. Recorded workflow/GUI integration, persistent attempt
+journaling/reopening and real box coverage/units remain unfinished. CodeRabbit quota
+lookup failed; no substantive/paid review. Independent records remain untouched.

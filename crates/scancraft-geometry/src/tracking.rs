@@ -113,6 +113,14 @@ impl Tracker {
     pub fn last_accepted(&self) -> Option<u64> {
         self.last_accepted
     }
+    /// Immutable raw coordinates of the last accepted reference, at most512 points.
+    /// These are observations, not verified physical identities.
+    pub fn reference_points(&self) -> &[[f64; 3]] {
+        &self.reference
+    }
+    pub fn config(&self) -> TrackingConfig {
+        self.config
+    }
     /// Re-anchor deliberately; callers must treat the next frame as a new world/session.
     pub fn reset(&mut self) {
         self.reference.clear();
