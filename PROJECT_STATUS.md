@@ -1,3 +1,16 @@
+## Native recorded marker/laser workflow — 2026-11-04
+
+New `fuse-recorded-candidates` CLI connects verified raw frames, marker detection,
+stereo hypotheses, existing tracking and laser-only fusion. Complete diagnostics,
+bounded resources, cancellation, no overwrite and explicit unverified-unit JSON.
+913 tests pass (1 ignored), fmt/Clippy/release pass. Native31-pair rotating replay
+matches all35,853 archived attempts and yields192 sparse candidates; real zero-laser
+replay preserves31 tracking-only frames and zero points. Three saved stationary
+box trials fuse3,156 candidates into2,188, independently numerically reconciled.
+No complete isolated object, physical accuracy, GUI fusion loading or live scanning
+qualification. CodeRabbit quota unavailable; independent review pending. Details:
+[RECORDED_MARKER_FUSION.md](docs/RECORDED_MARKER_FUSION.md).
+
 ## Separate marker tracking and surface fusion — 2026-11-04
 
 The core session now accepts separate tracking observations and surface points,

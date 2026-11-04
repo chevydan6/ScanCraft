@@ -119,11 +119,33 @@ pub fn load_at(directory: &Path, pair_index: u64, work: &WorkControl) -> Result<
     Ok(loaded)
 }
 
+/// A validated single-pair snapshot for numerical processing. Full original raw
+/// frames are separate from display-only thumbnails. The retained manifest binds
+/// all seven source artifacts; it does not authenticate them or qualify geometry.
+pub struct RecordedPair {
+    pub candidates: Loaded,
+    pub frames: [scancraft_recording::selection::SelectedFrame; 2],
+    pub geometry: StereoCalibration,
+    pub manifest: Value,
+}
+
+pub fn load_recorded_pair(directory: &Path, work: &WorkControl) -> Result<RecordedPair, Error> {
+    load_recorded_inner(directory, work, &|| Ok(()))
+}
+
 fn load_inner(
     directory: &Path,
     work: &WorkControl,
     before_final: &dyn Fn() -> Result<(), Error>,
 ) -> Result<Loaded, Error> {
+    Ok(load_recorded_inner(directory, work, before_final)?.candidates)
+}
+
+fn load_recorded_inner(
+    directory: &Path,
+    work: &WorkControl,
+    before_final: &dyn Fn() -> Result<(), Error>,
+) -> Result<RecordedPair, Error> {
     work.check()?;
     let mut guard = Guard::default();
     guard.open(directory, true, 0)?;
@@ -344,11 +366,19 @@ fn load_inner(
         report["domain_rejections"] = serde_json::to_value(summary)?;
         report["uniqueness_scope"] = json!("retained_valid_domain_segments");
     }
-    Ok(Loaded {
-        positions,
-        first_observations: indices,
-        frames: frame_views,
-        report,
+    let frames = frames
+        .try_into()
+        .map_err(|_| "expected two retained frames")?;
+    Ok(RecordedPair {
+        candidates: Loaded {
+            positions,
+            first_observations: indices,
+            frames: frame_views,
+            report,
+        },
+        frames,
+        geometry,
+        manifest,
     })
 }
 
