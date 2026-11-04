@@ -4984,3 +4984,26 @@ Immediate priority is robust real correspondence and coverage. CodeRabbit usage
 lookup exits1 with all quota/billing fields lookup_failed; no review/paid usage
 requested. Substantive review remains outstanding. Independent507's verification of
 prior caliper evidence and CI is preserved; reviewer-owned findings/statuses untouched.
+
+
+## DEV-LINE-GAIN — publication and trace follow-up
+
+Implementation ebb77a2954f8563d15e28f2d0b02928da0835cd2 is pushed in draft PR37;
+both exact-head PR41787075489 and push41786941673 CI pass. Independent and CodeRabbit
+review of this change remain outstanding. No merge/protection changes.
+
+Additional private all-trace diagnostic preserves396queries/709candidate points,
+including321queries with two valid intersections. No best match, measured surface,
+physical units or dimension error is claimed. Native detector initial100000-observation
+cap failure retained; stronger contrast gates reduce noise without increasing caps.
+Existing native detector/continuity/epipolar/triangulation implementations are used
+unchanged; private probe Clippy/release and input/pair/count reconciliation pass.
+All known limits and remaining trace-identity requirement are documented in
+LINE_CAPTURE_GAIN.md. Next investigate native projector calibration from retained
+board data, preserving historical factory-coordinate distinctions and failed anchors.
+
+This follow-up changes only LINE_CAPTURE_GAIN.md, PROJECT_STATUS.md and this response.
+The895-test implementation gate remains applicable; no redundant Rust gate was run
+for prose. Exact documentation commit follows in Git. Findings/statuses belong to
+the reviewer and remain untouched. Current CodeRabbit lookup failure is already
+recorded; no repeated paid review or review success is inferred.

@@ -6,6 +6,9 @@ scanning cameras. [Scoped line + gain capture](docs/LINE_CAPTURE_GAIN.md) saves/
 restore. Startup rejects remain 0/97; ongoing 0/0 in this short sample. Frozen native
 stereo diagnostics accept only 8, then 5 and 5 sparse points: no meaningful measured
 object scan or accuracy result yet. Correspondence/coverage is the immediate priority.
+A full-trace follow-up retains709 candidate intersections from396 observations;
+321 have two plausible matches. Stripe identity remains unqualified. Retained board
+recordings are the next calibration-evidence lead; no new projector fit is established.
 The new CLI option reuses existing leases; final 895-test/fmt/Clippy/release gate passes.
 Owner dimensions are held out; calibration/scale was not fitted to the box.
 

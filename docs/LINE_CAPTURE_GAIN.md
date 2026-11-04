@@ -105,3 +105,49 @@ for included capacity/billing/credits, so no review was uploaded or paid usage
 requested. Substantive CodeRabbit review and independent examination of this new
 change remain outstanding; tests do not replace them. No main merge is authorized
 by these results. Independent reviewer records remain untouched.
+
+## Follow-up: full-trace correspondence ambiguity
+
+A subsequent offline diagnostic uses the existing native `trace-stripes` detector
+and continuity implementation on the same matched left5/right3 recordings. Initial
+contrast gates5/10 exceeded the unchanged100,000 observation cap; the failure is
+retained. A second, explicitly recorded12/24 contrast plan reduces noise admissions
+rather than increasing the cap. It retains6,309/7,022 whole-image observations.
+Within the image-defined box rectangles, three trace portions per camera each
+contain at least20 observations. This selection does not assign projector identities.
+
+A separate private Rust probe calls `epipolar_trace::PreparedTrace::intersections`
+for every left observation against every retained right trace, then the existing
+stereo triangulator for every intersection. Source camera models and original
+triangulation limits are unchanged. All alternatives/errors are retained; no
+winner is selected by depth, box dimensions or a desired surface shape.
+
+**396 observations yield709 geometrically accepted candidates:** eight have none,
+67 have one and321 have two. There are no trace/triangulation errors in these
+selected inputs. A unique candidate within a cropped trace set still does not
+prove physical identity, since weak/missing traces are not included. No candidate
+collection is presented as a qualified object cloud. This experiment demonstrates
+why triangulation checks alone are insufficient to choose between repeated stripes;
+it does not prove that every previous patch match was wrong.
+
+Private artifact `yellow-box-trace-correspondence-20261104` retains plans, both
+native detector outputs, the initial failure, request/probe source, build/Clippy
+logs, all candidate outcomes and verification. Its manifest binds20 files,
+4,987,339 bytes, excluding Cargo targets/caches. SHA256:
+`f1b1772b2363e45421d147718f43340cfdc5cda6b89249c2dce2cca992925d1c`.
+The initial wrapper aborted before writing command-event receipts; its stderr is
+preserved, and no completed initial detector output is claimed. The later detector
+invocations and pre-execution intersection bindings are retained and verified.
+
+Next investigation: determine whether retained calibration-board recordings can
+establish projector-plane/stripe identity with the frozen native camera model.
+Existing stationary board line-on and line-off captures are available, but one
+historical line-on association fails the exactly-four-anchor requirement. Do not
+reuse a line-off pose without testing inter-capture stability, reuse the historical
+factory-coordinate plane as native geometry, or fit the known box to choose sheets.
+No new projector-plane fit or physical accuracy result has yet been established.
+
+Source implementation remains `ebb77a2954f8563d15e28f2d0b02928da0835cd2`, published
+as draft PR37. Both exact-head CI runs41787075489 (PR) and41786941673 (push) passed.
+This follow-up changes documentation only; it does not imply completed independent
+or CodeRabbit review.
