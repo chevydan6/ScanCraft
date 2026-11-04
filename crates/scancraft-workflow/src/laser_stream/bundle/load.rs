@@ -321,7 +321,8 @@ impl PairReader<'_> {
             pair_count,
             profiles,
         } = self;
-        let display = selected.display(plan.interfaces())?;
+        let display =
+            selected.display(plan.interfaces(), plan.request.retain_valid_domain_segments)?;
         let mut frames = Vec::with_capacity(2);
         for (i, source) in sources.iter_mut().enumerate() {
             work.check()?;
@@ -368,7 +369,8 @@ impl PairReader<'_> {
             FrameView::from_frame(&frames[0].profile, &frames[0].frame, work)?,
             FrameView::from_frame(&frames[1].profile, &frames[1].frame, work)?,
         ];
-        Ok(Loaded {
+        let domain_rejections = display.domain_rejections;
+        let mut loaded = Loaded {
             positions: display.positions,
             first_observations: display.first_observations,
             frames: views,
@@ -380,7 +382,12 @@ impl PairReader<'_> {
             "bundled_recording_integrity_verified":true,"historical_original_recordings_verified":false,
             "numerical_recomputation_verified":false,"geometry_binding_verified":false,
             "source_restoration_reported":report.reported_source_restoration.as_deref() == Some("PASS"),"physical_accuracy_qualified":false,"units_verified":false}),
-        })
+        };
+        if let Some(summary) = domain_rejections {
+            loaded.report["domain_rejections"] = serde_json::to_value(summary)?;
+            loaded.report["uniqueness_scope"] = json!("retained_valid_domain_segments");
+        }
+        Ok(loaded)
     }
 }
 fn verify_artifacts(

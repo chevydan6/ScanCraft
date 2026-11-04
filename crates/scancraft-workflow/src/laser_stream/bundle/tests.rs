@@ -69,6 +69,94 @@ fn source(
     }
 }
 #[test]
+fn domain_option_reaches_capture_preview_journal_and_reopening_in_both_schemas() {
+    for schema in [1, 2] {
+        let f = Files::new();
+        if schema == 2 {
+            segmented(&f, 1);
+        }
+        let mut geometry: Value = serde_json::from_slice(&fs::read(&f.geometry).unwrap()).unwrap();
+        geometry["right"]["valid_radius"] = json!(0.16);
+        fs::write(&f.geometry, serde_json::to_vec(&geometry).unwrap()).unwrap();
+        let mut strict_record = None;
+        for (label, enabled) in [
+            ("omitted", None),
+            ("strict", Some(false)),
+            ("domain", Some(true)),
+        ] {
+            if let Some(enabled) = enabled {
+                f.change(|r| r["retain_valid_domain_segments"] = json!(enabled));
+            }
+            let target = f.root.join(label);
+            let mut previewed = false;
+            f.plan()
+                .capture(
+                    &target,
+                    &Arc::new(WorkControl::default()),
+                    &Arc::new(AtomicBool::new(false)),
+                    source(&f, Arc::new(AtomicUsize::new(0))),
+                    || Ok(()),
+                    |input| {
+                        let report = input.outcome.as_ref().unwrap();
+                        assert_eq!(report.queries, 5);
+                        assert_eq!(
+                            report.candidates.len(),
+                            if enabled == Some(true) { 3 } else { 0 }
+                        );
+                        assert_eq!(
+                            report.query_failures,
+                            if enabled == Some(true) { 0 } else { 5 }
+                        );
+                        assert_eq!(report.domain_rejections.is_some(), enabled == Some(true));
+                        previewed = true;
+                        PreviewStatus::Accepted
+                    },
+                )
+                .unwrap();
+            assert!(previewed);
+            let mut records = Vec::new();
+            visit_pairs(&target, &WorkControl::default(), |_, loaded| {
+                assert_eq!(loaded.positions.len(), if enabled == Some(true) { 3 } else { 0 });
+                if enabled == Some(true) {
+                    assert_eq!(loaded.report["domain_rejections"], json!({
+                        "rejected_trace_vertices":1,"rejected_trace_segments":1,"rejected_sheet_projections":2
+                    }));
+                    assert_eq!(loaded.report["uniqueness_scope"], "retained_valid_domain_segments");
+                } else {
+                    assert!(loaded.report.get("domain_rejections").is_none());
+                }
+                assert_eq!(loaded.report["units_verified"], false);
+                assert_eq!(loaded.report["physical_accuracy_qualified"], false);
+                Ok(())
+            }).unwrap();
+            super::super::pair_journal::visit(
+                &target,
+                super::super::pair_journal::Mode::Complete,
+                &WorkControl::default(),
+                |_, bytes, _| {
+                    records.push(bytes.to_vec());
+                    Ok(())
+                },
+            )
+            .unwrap();
+            if enabled.is_none() {
+                strict_record = Some(records);
+            } else if enabled == Some(false) {
+                assert_eq!(Some(records), strict_record);
+            }
+        }
+    }
+}
+
+#[test]
+fn domain_option_rejects_non_boolean_declarations_before_capture() {
+    for value in [Value::Null, json!(1), json!("true"), json!({})] {
+        let f = Files::new();
+        f.change(|r| r["retain_valid_domain_segments"] = value);
+        assert!(Plan::open(&f.geometry, &f.request, &WorkControl::default()).is_err());
+    }
+}
+#[test]
 fn bundle_verifies_raw_lineage_checksums_and_no_metric_exports_before_publication() {
     let f = Files::new();
     let plan = f.plan();

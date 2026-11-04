@@ -198,7 +198,7 @@ pub struct QueryOutcome {
     pub outcome: Outcome,
 }
 /// Explicit exclusions; numerical uniqueness is conditional on the retained domain.
-#[derive(Debug, Default, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct DomainSummary {
     pub rejected_trace_vertices: usize,

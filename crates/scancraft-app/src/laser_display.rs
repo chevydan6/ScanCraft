@@ -1,7 +1,7 @@
 //! Bounded display DTOs. These never create a metric Cloud or editable document.
 use scancraft_workflow::{
     candidate_bundle::FrameView,
-    laser_stream::{CameraSummary, MAX_QUERIES, ProgressSnapshot},
+    laser_stream::{CameraSummary, DomainSummary, MAX_QUERIES, ProgressSnapshot},
 };
 use serde::{Deserialize, Serialize};
 mod pending;
@@ -27,6 +27,8 @@ pub struct Snapshot {
     pub query_failures: usize,
     pub without_unique: usize,
     pub cameras: Option<[CameraSummary; 2]>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub domain_rejections: Option<DomainSummary>,
     pub processing_error: Option<String>,
     pub acquisition: ProgressSnapshot,
     pub helper_omissions: u64,
@@ -47,6 +49,14 @@ impl Snapshot {
             || self.frames[0].interface == self.frames[1].interface
         {
             return Err("invalid laser diagnostic preview".into());
+        }
+        if self.domain_rejections.is_some_and(|summary| {
+            self.processing_error.is_some()
+                || summary.rejected_trace_vertices > 65536
+                || summary.rejected_trace_segments > 65536
+                || summary.rejected_sheet_projections > self.queries * 256
+        }) {
+            return Err("invalid laser preview domain exclusions".into());
         }
         for (i, f) in self.frames.iter().enumerate() {
             f.validate_display()?;

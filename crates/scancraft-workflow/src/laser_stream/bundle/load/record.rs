@@ -1,6 +1,6 @@
 //! Bounded display subset of one complete stored pair; never a geometry import.
 use crate::bounded_json::Items;
-use scancraft_depth::laser_pair::MAX_QUERIES;
+use scancraft_depth::laser_pair::{DomainSummary, MAX_QUERIES};
 use serde::Deserialize;
 use std::collections::HashSet;
 #[derive(Deserialize)]
@@ -56,6 +56,8 @@ pub(super) struct StoredReport {
     queries: usize,
     query_failures: usize,
     queries_without_unique_match: usize,
+    #[serde(default)]
+    domain_rejections: Option<DomainSummary>,
     candidates: Items<Candidate, MAX_QUERIES>,
     outcomes: Items<Query, MAX_QUERIES>,
     raw_sensor_pts_equal: bool,
@@ -72,9 +74,14 @@ pub(super) struct Display {
     pub failures: usize,
     pub without_unique: usize,
     pub error: Option<String>,
+    pub domain_rejections: Option<DomainSummary>,
 }
 impl Record {
-    pub(super) fn display(&self, interfaces: [u8; 2]) -> Result<Display, String> {
+    pub(super) fn display(
+        &self,
+        interfaces: [u8; 2],
+        retain_valid_domain_segments: bool,
+    ) -> Result<Display, String> {
         if self.schema_version != 1 {
             return Err("unsupported stored pair version".into());
         }
@@ -88,6 +95,7 @@ impl Record {
                     failures: 0,
                     without_unique: 0,
                     error: Some(error.clone()),
+                    domain_rejections: None,
                 });
             }
             Err(_) => return Err("stored pair error exceeds display bound".into()),
@@ -111,6 +119,15 @@ impl Record {
             .any(|v| v)
         {
             return Err("invalid or falsely qualified stored pair report".into());
+        }
+        if report.domain_rejections.is_some() != retain_valid_domain_segments
+            || report.domain_rejections.is_some_and(|summary| {
+                summary.rejected_trace_vertices > 65536
+                    || summary.rejected_trace_segments > 65536
+                    || summary.rejected_sheet_projections > report.queries * 256
+            })
+        {
+            return Err("stored pair domain policy and exclusions disagree".into());
         }
         let mut used = HashSet::new();
         let mut candidate_indices = HashSet::new();
@@ -176,6 +193,7 @@ impl Record {
             failures,
             without_unique,
             error: None,
+            domain_rejections: report.domain_rejections,
         })
     }
 }
