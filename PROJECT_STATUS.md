@@ -1,5 +1,14 @@
 # Project status
 
+Latest reconstruction investigation: [native board/sheet preparation](docs/NATIVE_BOARD_SHEET_PREPARATION.md)
+uses two saved board poses and unchanged native camera geometry. A stricter saturation
+filter yields32/27 accepted marker points and944/703 observed stripe-plane intersections.
+All25 cross-pose plane fits are retained; three provisional hypotheses reject all709
+box candidates at the fixed consistency gate. No projector calibration or measurable
+object scan yet. Next: additional board views and sheet identity; no threshold widening.
+Production source unchanged, prior895-test gate retained. Independent516/518 verified
+preceding trace evidence and CI; this new experiment is not yet independently reviewed.
+
 Current physical readiness: the owner's measured yellow box is now visible in both
 scanning cameras. [Scoped line + gain capture](docs/LINE_CAPTURE_GAIN.md) saves/replays
 10 frames per camera and three color frames; original settings/formats/media service

@@ -5007,3 +5007,32 @@ The895-test implementation gate remains applicable; no redundant Rust gate was r
 for prose. Exact documentation commit follows in Git. Findings/statuses belong to
 the reviewer and remain untouched. Current CodeRabbit lookup failure is already
 recorded; no repeated paid review or review success is inferred.
+
+
+## DEV-NATIVE-BOARD-SHEETS — failed provisional transfer retained
+
+Developer investigation, not an independent finding/closure. Independent516 reproduced
+the prior396queries/709candidates and518 verified both5643105 CI runs; record their scope
+without changing reviewer records. New private board-plane/sheet work is documented in
+NATIVE_BOARD_SHEET_PREPARATION.md. It uses unchanged native detector, association,
+triangulation, plane fitting and ray-intersection APIs. Original anchor/stability
+failures and five far lens-domain rejections remain. Saturation exclusion strengthens
+quality checks; no limit is relaxed. Preparatory filtering/grouping is private,
+exploratory and not a production scanning feature.
+
+Evidence:80 actual GREY frames fully validated during native component measurements;
+all marker requests reproduce; private Rust Clippy/release passes; independent NumPy
+plane/projection comparisons agree numerically.32/27 native line-on marker points
+support board planes,944/703 stripe centroids intersect them. All25 cross-pose sheet
+hypotheses retained; three provisional models reject every prior709 box candidate at
+0.75RAW. Closest24.129303209RAW. No dimension fit, sheet activation, correct stripe
+identity or first genuine measured scan claimed. Additional board views/coverage and
+model assumptions remain the next task, with source units and physical accuracy
+unqualified. Manifest/source/procedure references are in the document.
+
+Only docs/NATIVE_BOARD_SHEET_PREPARATION.md, PROJECT_STATUS.md and this response change
+publicly. Production source remains ebb77a2; previous independent895-test/fmt/Clippy/
+release gate applies. No redundant full Rust run for prose. Exact documentation commit
+will be recorded by Git/publication metadata. Reviewer files untouched; no hardware,
+firmware, paid service, protection or merge action. New evidence awaits independent
+review; no substantive CodeRabbit completion inferred.
