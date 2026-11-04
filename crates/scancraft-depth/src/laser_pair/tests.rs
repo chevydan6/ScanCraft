@@ -460,3 +460,100 @@ fn concurrent_detection_observes_cancellation_before_starting_borrowed_work() {
             .contains("cancelled")
     );
 }
+
+#[test]
+fn domain_opt_in_retains_usable_segments_and_accounts_for_every_exclusion() {
+    let (mut geometry, settings, profiles, frames) = fixture();
+    geometry.right.valid_radius = 0.16;
+    let strict = Processor::new(&geometry, &settings)
+        .unwrap()
+        .process(inputs(&profiles, &frames), &WorkControl::default(), &mut ())
+        .unwrap();
+    assert_eq!(strict.query_failures, 5);
+    assert!(strict.domain_rejections.is_none());
+    #[derive(Default)]
+    struct Exclusions {
+        vertices: usize,
+        segments: usize,
+        roots: usize,
+    }
+    impl Sink for Exclusions {
+        fn begin(&mut self, info: PairInfo<'_>) -> Result<(), String> {
+            let rejected = info.domain_rejections.unwrap();
+            self.vertices = rejected.vertices.len();
+            self.segments = rejected.segments.len();
+            assert_eq!(rejected.vertices[0].vertex_index, 4);
+            Ok(())
+        }
+        fn query(&mut self, query: &Query) -> Result<(), String> {
+            self.roots += query.rejected_projections.as_ref().unwrap().len();
+            Ok(())
+        }
+    }
+    let mut journal = Exclusions::default();
+    let report = Processor::new(&geometry, &settings)
+        .unwrap()
+        .with_valid_domain_segments(true)
+        .process(
+            inputs(&profiles, &frames),
+            &WorkControl::default(),
+            &mut journal,
+        )
+        .unwrap();
+    assert_eq!(report.candidates.len(), 3);
+    assert_eq!(report.query_failures, 0);
+    assert_eq!(report.queries_without_unique_match, 2);
+    assert_eq!(
+        (journal.vertices, journal.segments, journal.roots),
+        (1, 1, 2)
+    );
+    let counts = report.domain_rejections.unwrap();
+    assert_eq!(
+        (
+            counts.rejected_trace_vertices,
+            counts.rejected_trace_segments,
+            counts.rejected_sheet_projections
+        ),
+        (1, 1, 2)
+    );
+    assert!(!report.units_verified && !report.physical_accuracy_qualified);
+}
+
+#[test]
+fn domain_admission_fallback_preserves_results_and_enforces_exact_work_bound() {
+    let (geometry, mut settings, profiles, frames) = fixture();
+    let plain = Processor::new(&geometry, &settings)
+        .unwrap()
+        .process(inputs(&profiles, &frames), &WorkControl::default(), &mut ())
+        .unwrap();
+    settings.maximum_total_work = 45;
+    let bounded = Processor::new(&geometry, &settings)
+        .unwrap()
+        .with_valid_domain_segments(true)
+        .process(inputs(&profiles, &frames), &WorkControl::default(), &mut ())
+        .unwrap();
+    assert_eq!(bounded.admission.conservative_total_work_bound, 45);
+    assert!(bounded.admission.uses_projected_roots);
+    assert_eq!(
+        serde_json::to_value(&plain.candidates).unwrap(),
+        serde_json::to_value(&bounded.candidates).unwrap()
+    );
+    assert_eq!(
+        serde_json::to_value(&plain.outcomes).unwrap(),
+        serde_json::to_value(&bounded.outcomes).unwrap()
+    );
+    settings.maximum_total_work = 44;
+    let mut journal = Journal::default();
+    assert!(
+        Processor::new(&geometry, &settings)
+            .unwrap()
+            .with_valid_domain_segments(true)
+            .process(
+                inputs(&profiles, &frames),
+                &WorkControl::default(),
+                &mut journal
+            )
+            .is_err()
+    );
+    assert!(!journal.began);
+}

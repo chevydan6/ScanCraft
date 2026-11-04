@@ -100,3 +100,11 @@ no process held scanner descriptors. Private data/screenshots remain local.
 No new numerical method, dependency, scanner control, calibration operation or
 firmware change accompanies this integration. Automated review and publication
 remain pending the unavailable CodeRabbit quota/billing lookup.
+
+## Explicit domain exclusions
+
+Requests may opt in with `"retain_valid_domain_segments": true`. This retains
+contiguous valid trace sections, records all excluded source vertices/segments and
+sheet roots, and displays exclusion counts. Unique candidates are conditional on
+the retained domain and supplied hypotheses. Missing/false keeps strict behavior.
+See [policy, compatibility and genuine-recording evidence](DOMAIN_BOUNDED_LASER_MATCHING.md).

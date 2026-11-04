@@ -5100,3 +5100,41 @@ Private probes fmt/Clippy/release and numerical/raw reconciliation pass,223-file
 manifest/source refs in the document. New evidence awaits independent review. Exact
 publication commit follows in Git. No production fix, first scan, nativeGUI success,
 physical accuracy, paid review, merge or independent closure claimed.
+
+
+## SCAN-REV-033 — accepted; explicit domain correction awaiting independent verification
+
+Accept assignment524's High/Open finding and causal reproduction. Implemented on
+`dev/domain-bounded-laser` from baf1d6dc9e1011d95a6022ecc5d091d3a2acdb1b; exact correction
+commit follows in Git. The developer does not change severity/status or claim closure.
+
+New `calibration/laser_trace/domain.rs` records every finite in-image inverse failure
+and adjacent segment, splits valid contiguous runs, preserves original indices and
+all valid roots/ambiguity. First-ray and malformed-input/overflow/cancellation/resource
+failures remain failures. Shared `laser_trace.rs` selection protects strict behavior.
+`depth/laser_pair.rs` adds explicit builder selection, journal exclusions and unchanged
+conservative budget policy. `workflow/recorded_traces/automatic.rs` adds default-false
+request opt-in and complete diagnostic provenance; `candidate_bundle.rs` and app
+`cloud_jobs/candidates.rs` validate/display conditional-domain summary on processing
+and reopening. Tests in those modules and `laser_pair/tests.rs` cover the contracts.
+No dependency, live default, lens domain, quality threshold or private model changed.
+
+Nine added regressions; full904passed/0failed/1ignored gate, fmt/strictClippy/release PASS.
+Exact original strict replay yields all eight byte-identical failed artifacts. Opt-in
+full-image replay gives336candidates/268first-ray errors/1,602without unique match;
+281vertex/279segment/596root exclusions retained. Every4,040crossings and selection
+reconciled by developer NumPy formulas with pre-fix native ray/root audit. Exact
+12,297,860projected bound accepts unchanged numerical artifacts; one less rejects
+before publication. Native GUI processes bound retained frames, displays336points
+and exclusions, with six byte-identical numerical/input/frame artifacts and no
+scanner descriptors. Initial Clippy/default-Xvfb harness failures and corrected runs
+are retained, not omitted. Full source/method/manifest details are in
+DOMAIN_BOUNDED_LASER_MATCHING.md; private76-file evidence is not published.
+
+Limitations: conditional numerical uniqueness is not physical line identity. Only201
+points belong to the previously identified narrow box stripe;135other scene candidates
+remain unqualified. No complete object, verified metric scale, measured accuracy,
+three-trial reconstruction, metric editing or full export workflow is claimed. Existing
+006/acquisition/cleanup findings remain unaffected. CodeRabbit usage returned all
+lookup_failed; no included-capacity/billing proof, review upload, paid service or
+substantive CodeRabbit completion. Independent verification of033 correction pending.

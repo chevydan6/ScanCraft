@@ -1,5 +1,9 @@
 # Held-out board evidence and native full-image integration failure
 
+Historical pre-fix evidence at baf1d6d. The subsequent opt-in production correction
+and exact-input replay are documented in [DOMAIN_BOUNDED_LASER_MATCHING.md](DOMAIN_BOUNDED_LASER_MATCHING.md).
+Original failed evidence below remains unchanged.
+
 Status: **experimental calibration evidence; the full native reconstruction fails**.
 Investigation starts at255241173db92620e421760898e670a0d50579eb. Production code remains
 ebb77a2954f8563d15e28f2d0b02928da0835cd2. No model activation, owner-dimension fitting,
