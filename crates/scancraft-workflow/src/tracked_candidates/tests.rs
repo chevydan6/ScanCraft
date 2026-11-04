@@ -257,3 +257,47 @@ fn changing_geometry_and_nonmonotonic_ids_cannot_form_a_mixed_scan() {
     );
     assert!(!t.0.join("mixed").exists());
 }
+
+#[test]
+fn temporal_prior_advances_on_tracking_only_but_not_rejection_or_missing_observations() {
+    let t = Temp::new();
+    let paths = vec![
+        fixture(&t.0, 0, true, true, 0),
+        fixture(&t.0, 1, false, true, 1),
+        fixture(&t.0, 2, true, true, 3),
+        fixture(&t.0, 3, true, true, 2),
+        fixture(&t.0, 4, true, false, 0),
+        fixture(&t.0, 5, true, true, 3),
+        fixture(&t.0, 6, true, true, 6),
+        fixture(&t.0, 7, true, true, 4),
+    ];
+    let mut req = request(&paths);
+    req["temporal_marker_support"] = json!(true);
+    req["tracking"]["max_step_translation_model_units"] = json!(0.3);
+    let settings = t.0.join("settings.json");
+    write(&settings, &req);
+    let target = t.0.join("out");
+    let report = run(&settings, &target, &WorkControl::default()).unwrap();
+    assert_eq!(report["integrated_frames"], 4);
+    assert_eq!(report["tracking_only_frames"], 1);
+    assert_eq!(report["tracking_rejected_frames"], 1);
+    assert_eq!(report["tracking_unavailable_frames"], 2);
+    let frames = rows(&target.join("frames.ndjson"));
+    assert_eq!(frames[2]["reason"], "motion exceeds step gate");
+    for i in [2, 4, 6] {
+        assert!(frames[i]["pose"].is_null());
+    }
+    assert_eq!(frames[2]["last_integrated"], 0);
+    assert_eq!(frames[6]["last_integrated"], 5);
+    let markers = rows(&target.join("markers.ndjson"));
+    let prior_ids: Vec<_> = markers
+        .iter()
+        .filter(|r| r["kind"] == "temporal_reference")
+        .map(|r| r["frame_id"].as_u64().unwrap())
+        .collect();
+    assert_eq!(prior_ids, vec![0, 1, 1, 3, 3, 5, 5]);
+    let loaded = bundle::load(&target, 7, &WorkControl::default()).unwrap();
+    assert_eq!(loaded.session.frames.len(), 8);
+    assert_eq!(loaded.session.integrated, 4);
+    assert!(run(&settings, &target, &WorkControl::default()).is_err());
+}

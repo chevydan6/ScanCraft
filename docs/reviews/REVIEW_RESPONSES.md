@@ -5433,3 +5433,51 @@ sealed5910files/4638158074bytes; externalmanifest SHA256
 No new capture in this offline investigation. The separately verified fresh box
 precheck remains stationary; prepared rotation recording still awaits owner
 confirmation. No production recommendation implemented or main merge performed.
+
+## DEV-TEMPORAL-MARKER-SUPPORT — explicit experimental native option, 2026-11-04
+
+Developer milestone, not a new independent finding or closure. Accept the prior
+review distinction between numerical validation and physical qualification. Current
+branch dev/temporal-marker-support from f024d17/PR44; implementation commit recorded
+in Git and publication binding. No reviewer record or finding status changed.
+
+Changed tracked_candidates.rs, markers.rs and tests.rs: optional request bool
+(default false), original geometric hypotheses supported by last accepted raw-camera
+marker cloud within the existing correspondence distance, then mutual uniqueness.
+Reuse SpatialIndex/Tracker/ScanSession; no new dependency or physical-unit promotion.
+Prior updates only after a successful accepted session step, including tracking-only;
+rejection, missing observations and integration failure never advance it. All original
+geometric outcomes and explicit support/uniqueness diagnostics remain recorded.
+
+Private image-pattern diagnostics independently reconcile 120 binary openings and
+map consensus labels back to original raw centroids. They support the ambiguity
+explanation but are not runtime inputs or certified physical identities. No mask
+centers, board dimensions, future frames or truth fitting enter the new algorithm.
+Private prototype baseline reproduces old outputs; separate NumPy checks verify
+652 baseline/experimental outcomes. Consecutive101 tracking rises70->101; sampled225
+rises18->39 but still has186 subsequent insufficient inputs and no recovery.
+
+Native101 baseline gives28 integrated/42 tracking-only/31 rejected,544 voxels;
+opt-in gives51/50/0,1176 voxels. Every marker cloud, pose and support decision matches
+prototype; all1325 original laser triangulations independently agree <=3.19e-12RAW,
+and independent voxel accumulation agrees <=1e-8. Actual private-display native GUI
+shows1176 points, source pair101 and exact frame counts; sparse fragments only.
+Three legacy replays reproduce all21 artifact files byte-for-byte. Four stationary
+box samples remain accepted:4161 source candidates->2698 voxels;83 marker hypotheses
+plus allsurface triangulations agree <=2.44e-9RAW, tracking <=1.17e-12 and voxels
+<=1.14e-13. Neither more points nor accepted poses establish dimensional accuracy.
+
+Two new regressions cover ambiguity/distance/original positions/cancellation and
+tracking-only/rejected/missing/reference-history/recovery/bundle loading. Initial
+missing bracket and missing test import compile failures retained and corrected.
+Focused41819 PASS; finalgate62815 exit0:923passed/0failed/1ignored, formatting,
+strict all-targetClippy and release build. No production source changes after gate.
+CodeRabbit usage84106 exit1lookup_failed; no review upload or paid usage.
+
+Evidence roots rotation-marker-identity-20261104, temporal-marker-candidates-20261104
+and temporal-marker-integration-20261104 sealed1391files/549331833bytes. External
+manifestSHA256977cb817ddf80c43478040c24fa6425583fe50ae5e7c06406449f1c63f986c61.
+Remaining limits: incorrect priors can reinforce errors; speed/occlusion/new geometry
+can remove valid observations; no global recovery, measured scale, identity or full
+scan/edit/save/reopen/export qualification. Native option remains off by default.
+No new hardware capture, calibration change, firmware action or main merge.

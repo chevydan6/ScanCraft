@@ -73,6 +73,9 @@ struct Request {
     voxel_model_units: f64,
     maximum_voxels: usize,
     maximum_stereo_attempts: usize,
+    /// Experimental local consistency, not marker identification or relocalization.
+    #[serde(default)]
+    temporal_marker_support: bool,
     frames: Items<Frame, 256>,
 }
 fn cloud(positions: Vec<[f64; 3]>) -> Cloud {
@@ -142,6 +145,7 @@ pub fn run(settings: &Path, target: &Path, work: &WorkControl) -> Result<Value, 
         let mut rejected = 0;
         let mut unavailable = 0;
         let mut surface_points = 0;
+        let mut marker_prior = None;
         let base = settings.parent().unwrap_or(Path::new("."));
         for frame in &request.frames.0 {
             work.check()?;
@@ -184,6 +188,9 @@ pub fn run(settings: &Path, target: &Path, work: &WorkControl) -> Result<Value, 
                 &pair.frames,
                 &pair.geometry,
                 &request.markers,
+                marker_prior
+                    .as_ref()
+                    .map(|prior| (prior, request.tracking.max_correspondence_model_units)),
                 &mut budget,
                 &mut markers,
                 work,
@@ -202,6 +209,14 @@ pub fn run(settings: &Path, target: &Path, work: &WorkControl) -> Result<Value, 
                 let step =
                     session.process_with_tracking_cloud(frame.id, &surface, &observations, work)?;
                 let t = &step.tracking;
+                // Advance the local prior only after tracking AND any requested
+                // surface integration succeed. Unavailable/rejected frames retain it.
+                if request.temporal_marker_support && t.accepted {
+                    marker_prior = Some(markers::Prior {
+                        frame_id: frame.id,
+                        positions: observations.points.iter().map(|p| p.position).collect(),
+                    });
+                }
                 let pose=t.world_from_frame.as_ref().map(|p|json!({
                     "rotation":(0..3).map(|i|(0..3).map(|j|p.rotation[(i,j)]).collect::<Vec<_>>()).collect::<Vec<_>>(),
                     "translation_model_units":p.translation.as_slice()}));

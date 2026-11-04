@@ -1,11 +1,79 @@
 //! Existing component/conic/stereo methods, with complete Cartesian diagnostics.
 use super::{Error, MarkerConfig, cloud, line};
 use scancraft_calibration::stereo::{StereoCalibration, TriangulationLimits};
-use scancraft_geometry::{Cloud, work::WorkControl};
+use scancraft_geometry::{Cloud, spatial::SpatialIndex, work::WorkControl};
 use scancraft_image::{GrayImage, components, shape};
 use scancraft_recording::selection::SelectedFrame;
 use serde_json::json;
 use std::io::Write;
+
+/// Raw first-camera coordinates from the last accepted tracking update.
+/// No world transform, extrapolation or claim of physical marker identity.
+pub(super) struct Prior {
+    pub frame_id: u64,
+    pub positions: Vec<[f64; 3]>,
+}
+
+type Candidate = (usize, usize, [f64; 3]);
+
+fn select(
+    accepted: Vec<Candidate>,
+    dimensions: [usize; 2],
+    prior: Option<(&Prior, f64)>,
+    out: &mut impl Write,
+    work: &WorkControl,
+) -> Result<Vec<[f64; 3]>, Error> {
+    let index = prior
+        .map(|(p, _)| SpatialIndex::build(&p.positions, work))
+        .transpose()?;
+    let mut counts = [vec![0; dimensions[0]], vec![0; dimensions[1]]];
+    let mut eligible = Vec::with_capacity(accepted.len());
+    if let Some((p, distance)) = prior {
+        if !(3..=512).contains(&p.positions.len()) || !distance.is_finite() || distance <= 0. {
+            return Err("invalid temporal marker support reference".into());
+        }
+        line(
+            out,
+            &json!({"kind":"temporal_reference","frame_id":p.frame_id,
+            "points":p.positions.len(),"maximum_distance_model_units":distance,
+            "motion_prediction_used":false,"marker_identity_verified":false}),
+        )?;
+    }
+    for (i, j, position) in accepted {
+        work.check()?;
+        let supported = if let (Some(index), Some((_, limit))) = (&index, prior) {
+            let neighbor = index.nearest(position, work)?;
+            let supported = neighbor.is_some_and(|n| n.distance_mm <= limit);
+            line(
+                out,
+                &json!({"kind":"temporal_support","first":i,"second":j,
+                "supported":supported,"nearest_prior_index":neighbor.map(|n|n.index),
+                "nearest_prior_distance_model_units":neighbor.map(|n|n.distance_mm)}),
+            )?;
+            supported
+        } else {
+            true
+        };
+        if supported {
+            counts[0][i] += 1;
+            counts[1][j] += 1;
+        }
+        eligible.push((i, j, position, supported));
+    }
+    let mut points = Vec::new();
+    for (i, j, position, supported) in eligible {
+        work.check()?;
+        let unique = supported && counts[0][i] == 1 && counts[1][j] == 1;
+        line(
+            out,
+            &json!({"kind":"uniqueness","first":i,"second":j,"mutual_unique":unique}),
+        )?;
+        if unique {
+            points.push(position);
+        }
+    }
+    Ok(points)
+}
 
 fn observations(
     frame: &SelectedFrame,
@@ -59,6 +127,7 @@ pub(super) fn reconstruct(
     frames: &[SelectedFrame; 2],
     rig: &StereoCalibration,
     config: &MarkerConfig,
+    prior: Option<(&Prior, f64)>,
     budget: &mut usize,
     out: &mut impl Write,
     work: &WorkControl,
@@ -81,16 +150,12 @@ pub(super) fn reconstruct(
         max_reprojection_error_px: config.maximum_reprojection_error_px,
     })?;
     let mut accepted = Vec::new();
-    let mut left_counts = vec![0; left.len()];
-    let mut right_counts = vec![0; right.len()];
     for (i, l) in left.iter().enumerate() {
         for (j, r) in right.iter().enumerate() {
             work.check()?;
             let result = stereo.triangulate(*l, *r);
             let report = match result {
                 Ok(p) => {
-                    left_counts[i] += 1;
-                    right_counts[j] += 1;
                     accepted.push((i, j, p.position_mm));
                     json!({"position_model_units":p.position_mm,"ray_gap_model_units":p.ray_gap_mm,
                         "ray_angle_rad":p.ray_angle_rad,"first_reprojection_px":p.left_reprojection_px,
@@ -104,21 +169,74 @@ pub(super) fn reconstruct(
             )?;
         }
     }
-    let mut points = Vec::new();
-    for (i, j, position) in accepted {
-        let unique = left_counts[i] == 1 && right_counts[j] == 1;
-        line(
-            out,
-            &json!({"kind":"uniqueness","first":i,"second":j,"mutual_unique":unique}),
-        )?;
-        if unique {
-            points.push(position);
-        }
-    }
+    let points = select(accepted, [left.len(), right.len()], prior, out, work)?;
     line(
         out,
         &json!({"kind":"tracking_observations","positions_model_units":points,
         "stereo_attempts":attempts,"marker_identity_verified":false}),
     )?;
     Ok(cloud(points))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::Value;
+    #[test]
+    fn prior_support_retains_distances_ambiguity_original_points_and_cancellation() {
+        let prior = Prior {
+            frame_id: 7,
+            positions: vec![[0., 0., 0.], [0., 10., 0.], [10., 0., 0.]],
+        };
+        let candidates = vec![
+            (0, 0, [0., 0., 0.]),
+            (0, 1, [0., 0., 100.]),
+            (1, 2, [0., 10., 0.]),
+            (2, 3, [10., 0., 0.]),
+        ];
+        let work = WorkControl::default();
+        let baseline = select(candidates.clone(), [3, 4], None, &mut Vec::new(), &work).unwrap();
+        assert_eq!(baseline, vec![[0., 10., 0.], [10., 0., 0.]]);
+        let mut bytes = Vec::new();
+        let points = select(
+            candidates.clone(),
+            [3, 4],
+            Some((&prior, 3.)),
+            &mut bytes,
+            &work,
+        )
+        .unwrap();
+        assert_eq!(points, prior.positions);
+        let rows: Vec<Value> = String::from_utf8(bytes)
+            .unwrap()
+            .lines()
+            .map(|s| serde_json::from_str(s).unwrap())
+            .collect();
+        assert_eq!(rows[0]["frame_id"], 7);
+        assert_eq!(rows[2]["supported"], false);
+        assert_eq!(rows[2]["nearest_prior_distance_model_units"], 100.);
+        let ambiguous = vec![(0, 0, [0., 0., 0.]), (0, 1, [1., 0., 0.])];
+        assert!(
+            select(
+                ambiguous,
+                [1, 2],
+                Some((&prior, 3.)),
+                &mut Vec::new(),
+                &work
+            )
+            .unwrap()
+            .is_empty()
+        );
+        work.cancel();
+        assert!(
+            select(
+                candidates,
+                [3, 4],
+                Some((&prior, 3.)),
+                &mut Vec::new(),
+                &work
+            )
+            .is_err()
+        );
+    }
 }
