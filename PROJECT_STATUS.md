@@ -1,3 +1,15 @@
+## Latest real-data tracking check — 2026-11-04
+
+Existing native marker-cloud tracking accepts42 stationary frame transitions across
+six baseline/experimental sequences, independently reproduced numerically. This is
+not rotation or metric-accuracy qualification. Cross-threshold consistency still
+allows a bad stereo hypothesis; all24 supporting-plane fits fail. No new production
+filter or rewrite is justified by this result. Next evaluate consecutive frames from
+the saved900-frame rotating-board recording before connecting pose estimates to
+actual laser fusion. See [MARKER_TRACKING_VALIDATION.md](docs/MARKER_TRACKING_VALIDATION.md).
+Application source remains56563c1 with the independently reproduced904-test gate;
+full measured scan, calibrated units and native end-to-end qualification remain open.
+
 # Project status
 
 ## Current acquisition improvement — 2026-11-04

@@ -5273,3 +5273,26 @@ preregistration. No raw data, statistics or acceptance outcomes changed. Assignm
 also independently verified56563c1's904-test gate and capture reproduction; no
 new finding closure or broader qualification is inferred. This documentation-only
 clarification requires diff/privacy checks, not another unchanged Rust build.
+
+## DEV-MARKER-TRACKING — evidence favors reusing existing tracking
+
+Developer investigation; no independent finding identifier/status change. Tested
+cross-threshold stereo consistency on all8 eligible genuine flood frame pairs.
+802accepted stereo results and all24 plane fits reconcile independently. All plane
+gates still fail; another bad hypothesis survives all3 thresholds. No justification
+to promote this experimental filter as physical identity or a necessary rewrite.
+
+Existing native Tracker accepts all42 later updates across6 stationary sequences;
+first anchors excluded from that count. Independent nearest-neighbor/SVD ICP
+reproduces RMS, bidirectional coverage and composed poses within1.365e-12. All point
+exclusions retained; accepted references still contain full input clouds, so pose
+acceptance does not certify every point. No marker points fused into object geometry.
+Private adapter fmt/strictClippy/release passes; application source unchanged56563c1,
+previous904-test gate applies. See MARKER_TRACKING_VALIDATION.md and its218-file
+manifest for exact sources/limits/results/private bindings. No new hardware action.
+
+Changed docs: MARKER_TRACKING_VALIDATION.md, PROJECT_STATUS.md and this response;
+exact documentation commits recorded on dev/flood-capture-gain/PR40. Next use saved
+consecutive rotating-board data for motion/recovery before integration into actual
+laser fusion. Physical scale, fullscan and accuracy still unqualified. Independent
+reviewer owns verification/closure. No paid CodeRabbit usage or merge performed.
