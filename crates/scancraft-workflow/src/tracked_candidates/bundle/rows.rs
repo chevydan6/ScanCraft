@@ -14,6 +14,7 @@ pub enum FrameStatus {
     TrackingOnly,
     TrackingRejected,
     InsufficientTrackingObservations,
+    TrackingError,
 }
 impl FrameStatus {
     pub(super) fn counter(self) -> usize {
@@ -21,7 +22,7 @@ impl FrameStatus {
             Self::Integrated => 0,
             Self::TrackingOnly => 1,
             Self::TrackingRejected => 2,
-            Self::InsufficientTrackingObservations => 3,
+            Self::InsufficientTrackingObservations | Self::TrackingError => 3,
         }
     }
     pub fn label(self) -> &'static str {
@@ -30,14 +31,15 @@ impl FrameStatus {
             Self::TrackingOnly => "Tracking only",
             Self::TrackingRejected => "Tracking rejected",
             Self::InsufficientTrackingObservations => "Tracking unavailable",
+            Self::TrackingError => "Tracking error",
         }
     }
 }
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, PartialEq)]
 #[serde(deny_unknown_fields)]
-struct Pose {
-    rotation: [[f64; 3]; 3],
-    translation_model_units: [f64; 3],
+pub(super) struct Pose {
+    pub rotation: [[f64; 3]; 3],
+    pub translation_model_units: [f64; 3],
 }
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -53,14 +55,15 @@ pub struct FrameOutcome {
     pub tracking_points: usize,
     pub status: FrameStatus,
     integrated: bool,
-    accepted: Option<bool>,
+    pub(super) accepted: Option<bool>,
     pub reason: Option<String>,
-    pose: Option<Pose>,
+    pub(super) pose: Option<Pose>,
     pub rms_model_units: Option<f64>,
-    source_overlap: Option<f64>,
-    target_overlap: Option<f64>,
+    pub(super) source_overlap: Option<f64>,
+    pub(super) target_overlap: Option<f64>,
     fusion: Option<Fusion>,
     last_integrated: Option<u64>,
+    pub recovery: Option<super::recovery::Summary>,
 }
 impl FrameOutcome {
     pub(super) fn validate(
@@ -71,7 +74,7 @@ impl FrameOutcome {
         voxels: &mut usize,
     ) -> Result<(), Error> {
         if self.frame_id != id
-            || self.surface_points > 4096
+            || self.surface_points > scancraft_depth::laser_pair::MAX_QUERIES
             || self.tracking_points > 512
             || self
                 .rms_model_units
@@ -88,17 +91,20 @@ impl FrameOutcome {
             self.status,
             FrameStatus::Integrated | FrameStatus::TrackingOnly
         );
-        let unavailable = self.status == FrameStatus::InsufficientTrackingObservations;
+        let error = self.status == FrameStatus::TrackingError;
+        let unavailable = self.status == FrameStatus::InsufficientTrackingObservations || error;
         if self.integrated != (self.status == FrameStatus::Integrated)
             || self.accepted != if unavailable { None } else { Some(accepted) }
             || self.pose.is_some() != accepted
             || self.fusion.is_some() != self.integrated
             || (unavailable
-                && (self.tracking_points >= 3
+                && ((self.tracking_points >= 3) != error
                     || self.rms_model_units.is_some()
                     || self.source_overlap.is_some()
                     || self.target_overlap.is_some()
-                    || self.reason.is_some()))
+                    || self.reason.is_some() != error))
+            || (error && !request.retained_reference_recovery)
+            || self.recovery.is_some() != request.retained_reference_recovery
             || (!unavailable
                 && (self.tracking_points < 3
                     || self.reason.is_none()
@@ -145,7 +151,7 @@ pub(super) struct Source {
     pub bundle: PathBuf,
     pub manifest: serde_json::Value,
     pub validation: serde_json::Value,
-    pub first_observations: Items<usize, 4096>,
+    pub first_observations: Items<usize, { scancraft_depth::laser_pair::MAX_QUERIES }>,
     pub frames: [SourceFrame; 2],
 }
 #[derive(Deserialize)]

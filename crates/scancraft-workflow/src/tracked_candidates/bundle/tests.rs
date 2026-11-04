@@ -33,6 +33,93 @@ fn redigest(root: &Path, name: &str) {
     a["crc32"] = json!(crc32fast::hash(&b));
     write(&path, &m);
 }
+
+#[test]
+fn fused_loader_accepts_the_shared_dense_candidate_capacity() {
+    let t = Temp::new();
+    let pair = fixture(&t.0, 0, true, true, 0);
+    let maximum = scancraft_depth::laser_pair::MAX_QUERIES;
+    let mut observations = read(&pair.join("observations.json"));
+    observations["first"]["observations"] = json!(vec![json!({}); maximum]);
+    write(&pair.join("observations.json"), &observations);
+    let mut points = read(&pair.join("candidate-points.json"));
+    points["points"]=json!((0..maximum).map(|i|json!({"first_observation":i,"position_in_supplied_geometry_units":[0.31,0.37,20.33]})).collect::<Vec<_>>());
+    write(&pair.join("candidate-points.json"), &points);
+    let mut manifest = read(&pair.join("manifest.json"));
+    manifest["queries"] = json!(maximum);
+    manifest["candidate_points"] = json!(maximum);
+    write(&pair.join("manifest.json"), &manifest);
+    redigest(&pair, "observations.json");
+    redigest(&pair, "candidate-points.json");
+    let settings = t.0.join("settings.json");
+    write(&settings, &request(&[pair]));
+    let target = t.0.join("result");
+    crate::tracked_candidates::run(&settings, &target, &WorkControl::default()).unwrap();
+    let loaded = load(&target, 0, &WorkControl::default()).unwrap();
+    assert_eq!(loaded.session.frames[0].surface_points, maximum);
+    assert_eq!(loaded.positions.len(), 1);
+}
+
+#[test]
+fn recovery_journal_rejects_missing_trials_wrong_references_and_rewritten_outcomes() {
+    let t = Temp::new();
+    let paths: Vec<_> = (0..12)
+        .map(|i| fixture(&t.0, i, true, true, if i == 11 { 0 } else { i as i32 }))
+        .collect();
+    let mut req = request(&paths);
+    req["temporal_marker_support"] = json!(true);
+    req["retained_reference_recovery"] = json!(true);
+    let settings = t.0.join("settings.json");
+    write(&settings, &req);
+    let root = t.0.join("result");
+    crate::tracked_candidates::run(&settings, &root, &WorkControl::default()).unwrap();
+    let path = root.join("recovery.ndjson");
+    let original = crate::tracked_candidates::tests::rows(&path);
+    for mode in 0..8 {
+        let mut modified = original.clone();
+        match mode {
+            0 => {
+                modified.pop();
+            }
+            1 => {
+                modified[11]["attempts"].as_array_mut().unwrap().pop();
+            }
+            2 => modified[11]["attempts"][1]["reference_frame"] = json!(1),
+            3 => {
+                modified[11]["attempts"][1]["tracking"]["Ok"]["pose"]["translation_model_units"]
+                    [0] = json!(1.)
+            }
+            4 => modified[11]["summary"]["selected_attempt"] = json!(2),
+            5 => modified[7]["retained_references"] = json!([7]),
+            6 => modified[11]["attempts"][1]["positions_model_units"] = json!(vec![[0.; 3]; 513]),
+            7 => modified[0]["attempts"][0]["reference_frame"] = json!(0),
+            _ => unreachable!(),
+        }
+        fs::write(
+            &path,
+            modified
+                .iter()
+                .map(|v| serde_json::to_string(v).unwrap() + "\n")
+                .collect::<String>(),
+        )
+        .unwrap();
+        redigest(&root, "recovery.ndjson");
+        assert!(
+            load(&root, 11, &WorkControl::default()).is_err(),
+            "mutation {mode}"
+        );
+    }
+    fs::write(
+        &path,
+        original
+            .iter()
+            .map(|v| serde_json::to_string(v).unwrap() + "\n")
+            .collect::<String>(),
+    )
+    .unwrap();
+    redigest(&root, "recovery.ndjson");
+    assert!(load(&root, 11, &WorkControl::default()).is_ok());
+}
 #[test]
 fn loads_fused_coordinates_all_outcomes_and_selected_original_camera_pair() {
     let t = Temp::new();

@@ -6,7 +6,8 @@ Confirmed implementation: `crates/scancraft-geometry/src/session/recovery.rs`,
 `ScanSession::process_with_reference_recovery`. It implements the bounded policy
 studied in [the retained-reference experiment](RETAINED_REFERENCE_RECOVERY.md).
 No new dependencies, optical coefficients, acceptance thresholds or world reset.
-The recorded workflow and GUI do not invoke this API yet. The existing session
+The [recorded workflow and GUI](RECORDED_REFERENCE_RECOVERY.md) now invoke this API
+when explicitly enabled. The existing session
 methods keep their default behavior; mixing them into a recovery session is refused.
 
 ## Contract and transactions
@@ -71,11 +72,12 @@ remain unverified. No calibrated accuracy, complete object, live throughput or
 sustained-memory claim follows. CodeRabbit usage lookup failed; no paid/substantive
 review ran. Independent findings remain reviewer-owned.
 
-## Required next integration
+## Recorded integration follow-up
 
 Prepare stereo hypotheses once per recorded frame, select them against each borrowed
 reference, retain all attempt diagnostics with bounded storage, and persist the
 selected outcome without omitting failures. Extend reader/reopen validation and
 native display, keeping the current disabled path reproducible. Measure real-object
-identity, coverage and repeated dimensional accuracy separately. These steps are
-unfinished; the core implementation is not an end-to-end scanning release.
+identity, coverage and repeated dimensional accuracy separately. These steps were unfinished at the PR48 core milestone and are now addressed in
+the linked recorded integration. Live operation and full measured scanning remain
+unqualified; the core implementation is not an end-to-end scanning release.

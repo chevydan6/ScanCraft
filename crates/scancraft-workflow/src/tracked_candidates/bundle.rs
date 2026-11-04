@@ -1,4 +1,5 @@
 //! Read-only fused diagnostics with artifact checks and original source snapshots.
+mod recovery;
 mod rows;
 #[cfg(test)]
 mod tests;
@@ -42,7 +43,7 @@ struct Manifest {
     projector_line_identity_verified: bool,
     marker_points_fused: bool,
     source_bundles_required: bool,
-    artifacts: Items<Artifact, 6>,
+    artifacts: Items<Artifact, 7>,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -96,7 +97,7 @@ fn load_inner(
         || index >= manifest.frames
         || manifest.fused_candidates > 1_000_000
         || manifest.stereo_attempts > 1_000_000
-        || manifest.surface_candidates > 256 * 4096
+        || manifest.surface_candidates > 256 * scancraft_depth::laser_pair::MAX_QUERIES
         || manifest.units != "unverified_supplied_geometry_units"
         || !manifest.source_bundles_required
         || [
@@ -136,6 +137,7 @@ fn load_inner(
             "frames.ndjson" => (2 * 1024 * 1024, false),
             "sources.ndjson" => (512 * 1024 * 1024, false),
             "markers.ndjson" => (1024 * 1024 * 1024, false),
+            "recovery.ndjson" => (super::recovery::JOURNAL_BYTES, false),
             "fused-candidates.json" => (128 * 1024 * 1024, true),
             _ => return Err("unexpected fused candidate artifact role/path".into()),
         };
@@ -153,9 +155,6 @@ fn load_inner(
             _ => {}
         }
     }
-    if seen.len() != 6 {
-        return Err("fused bundle requires exactly six artifacts".into());
-    }
     let request: Request = serde_json::from_slice(&request.ok_or("missing fused request")?)?;
     if request.schema_version != 1
         || request.frames.0.len() != manifest.frames
@@ -164,6 +163,14 @@ fn load_inner(
         || !(1..=1_000_000).contains(&request.maximum_voxels)
         || manifest.fused_candidates > request.maximum_voxels
         || manifest.stereo_attempts > request.maximum_stereo_attempts
+        || (request.retained_reference_recovery && !request.temporal_marker_support)
+        || seen.len()
+            != if request.retained_reference_recovery {
+                7
+            } else {
+                6
+            }
+        || seen.contains("recovery.ndjson") != request.retained_reference_recovery
     {
         return Err("fused request and manifest disagree".into());
     }
@@ -230,6 +237,18 @@ fn load_inner(
         || voxels != manifest.fused_candidates
     {
         return Err("fused frame outcomes and manifest totals disagree".into());
+    }
+    if request.retained_reference_recovery {
+        recovery::validate(
+            guard.open(
+                &directory.join("recovery.ndjson"),
+                false,
+                super::recovery::JOURNAL_BYTES,
+            )?,
+            &frames,
+            &request,
+            work,
+        )?;
     }
     let mut selected = None;
     let mut source_index = 0;

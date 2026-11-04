@@ -388,6 +388,18 @@ impl CandidateUi {
             "{} integrated · {} tracking only · {} rejected · {} unavailable",
             session.integrated, session.tracking_only, session.rejected, session.unavailable
         ));
+        if let Some(frame) = session.frames.get(session.selected_frame)
+            && let Some(recovery) = &frame.recovery
+        {
+            if let Some(reference) = recovery.recovered_from {
+                ui.label(format!(
+                    "Selected frame {}: recovered against frame {reference} ({} attempts)",
+                    frame.frame_id, recovery.attempts
+                ));
+            } else if recovery.conflicting_references {
+                ui.label("Selected frame: recovery refused because references disagree");
+            }
+        }
         egui::CollapsingHeader::new("Tracking and fusion outcomes").show(ui, |ui| {
             ui.small("RMS uses unverified model units. The first accepted pose is an identity anchor, not measured accuracy. No marker points enter the surface.");
             egui::ScrollArea::vertical().id_salt("fused-frame-outcomes").max_height(110.).show(ui, |ui| {
@@ -397,6 +409,15 @@ impl CandidateUi {
                         frame.status.label(), frame.surface_points, frame.tracking_points,
                         frame.rms_model_units.map_or_else(|| "unavailable".into(), |v| format!("{v:.6}"))));
                     if let Some(reason) = &frame.reason { ui.small(reason); }
+                    if let Some(recovery) = &frame.recovery {
+                        if let Some(reference) = recovery.recovered_from {
+                            ui.small(format!("Recovered against frame {reference} · {} attempts",recovery.attempts));
+                        } else if recovery.conflicting_references {
+                            ui.small("Recovery refused: retained references disagree");
+                        } else {
+                            ui.small(format!("{} tracking/recovery attempts",recovery.attempts));
+                        }
+                    }
                 }
             });
         });
