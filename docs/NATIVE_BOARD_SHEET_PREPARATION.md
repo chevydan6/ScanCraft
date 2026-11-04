@@ -132,3 +132,117 @@ confirmed both5643105 CI runs passed. They do **not** validate this new board/sh
 experiment. The prior independently verified895-test/fmt/Clippy/release gate remains
 applicable to unchanged production source. New private evidence requires independent
 review; substantive CodeRabbit coverage remains outstanding.
+
+
+## Wider board coverage and curved-sheet follow-up
+
+**Confirmed, exploratory:** independent assignment519 reproduced the preceding
+board preparation, all25 fits and failed planar transfer at87ce1f4. The following
+new experiment starts from that revision and is not covered by519. Production
+source remains unchanged. The original failed inputs/results are retained.
+
+A source-image inspection identifies an additional near-board rectangle
+x1128..1160, y200..850 inside the visible board face but outside the conservative
+marker hull. Adding its native detections, with unchanged off-marker exclusions,
+adds426 original observations. This assumes the marker-derived plane continues
+across that visible face; it does not enlarge camera lens validity. The patch was
+chosen from the board image, without using box dimensions or transfer residuals.
+This is an image-informed mask experiment, not independent physical qualification.
+
+All1,370 near and703 far samples feed the unchanged native ray/plane intersection.
+The unchanged gap/span/count rules yield six near and five far groups. All30
+native plane fits are retained. The original selection still admits only2/0,3/1
+and4/2. The new near5/far3 fit fails: total RMS0.245556814RAW and far maximum
+0.818292948RAW exceed0.2/0.5. No threshold is widened. Repeating the same three
+planes against the box would add no evidence, so that gate is not rerun.
+
+### Curvature diagnostic, before box transfer
+
+The existing native model in
+[laser_surface.rs](../crates/scancraft-calibration/src/laser_surface.rs),
+`QuadraticSheet`, represents X=aY²+bY+cZ+d. A private NumPy least-squares diagnostic
+compares this equation against X=bY+cZ+d for every one of the30 group pairs.
+Columns are centered/scaled before fitting; coefficients are transformed back.
+All points remain unweighted, with no outlier removal or box input. This is private
+analysis code using NumPy, not a newly integrated Rust calibration fitter.
+
+Before fitting, the plan declares twofold validation: alternate contiguous100-row
+image bands, train on one parity in both poses and test on the other, then reverse.
+Full-fit and each held-out fold require each pose's X-residual RMS<=0.2RAW and
+maximum<=0.5RAW, full rank, and mutual row/column minimum held-out RMS with margin
+>=0.25RAW. Every model, coefficient, fold, sample residual and rejection is saved.
+X residual is an upper bound on shortest distance to this graph; it differs from
+the earlier orthogonal plane-fit statistic. No physical uncertainty bound follows.
+
+| Near/far pair | Linear held-out RMS_X, RAW | Quadratic held-out RMS_X, RAW | Quadratic worst held-out residual_X, RAW |
+| --- | ---: | ---: | ---: |
+|2/0|0.160498206|0.047761604|0.162566728|
+|3/1|0.053404322|0.053303692|0.209638118|
+|4/2|0.173563321|0.053252688|0.180570726|
+|5/3|0.253399768|0.060876645|0.230127827|
+
+These four quadratic hypotheses pass all declared residual/margin checks. Linear
+3/1 and4/2 pass; linear2/0 fails a per-pose/fold maximum despite the lower aggregate
+RMS. Improvement for3/1 is negligible, not evidence of necessary curvature there.
+The added5/3 data show a systematic curved residual under the linear model.
+
+**Engineering inference:** curvature explains these observations better than the
+straight-sheet approximation. Two-image spatial validation does not validate an
+independent board pose, camera calibration, physical units, device-mode continuity
+or projector identity. Shared distortion/board-plane errors can mimic curvature.
+The inferred sheets remain provisional; no RAPCAL is activated.
+
+### Box consistency: one supported stripe fragment
+
+The four board-selected sheets are frozen before a new box test. A private Rust
+probe calls existing `PreparedCamera::ray` and `QuadraticSheet::intersect`, retaining
+all results for the previous709 stereo candidates/396 queries. It uses the original
+camera domains and depth interval. A candidate must have absolute X residual
+<=0.75RAW and a unique native ray intersection; a query survives only when exactly
+one candidate/sheet combination passes. This residual gate is conservatively
+stricter than a shortest-surface-distance gate with the same numeric limit.
+All roots, failures, alternatives and residuals remain recorded.
+
+**201 queries survive,195 have no supported candidate, none have multiple survivors.**
+All survivors connect left trace368/right662 to provisional near5/far3. Their
+coordinates remain the original stereo triangulations; they are not snapped onto
+the sheet. Median/maximum sheet X residuals are0.052112162/0.177723464RAW. The
+stereo points and separate ray-sheet points differ by median0.343708677 and maximum
+1.199378606RAW, retained as uncertainty evidence rather than suppressed.
+
+This is one narrow stripe fragment, not a recognizable complete object surface or
+verified physical correspondence. Missing/weak/out-of-ROI stripes can invalidate
+uniqueness among the tested alternatives. No owner dimension is used to select,
+scale or fit these points, and no dimensional error, metric PLY, mesh, three-trial
+repeatability or complete native-GUI scan is claimed.
+
+### Reproduction and limitations
+
+Private roots `native-board-edge-coverage-20261104` and
+`native-board-curvature-diagnostic-20261104` contain preparation/fit/verification
+sources, full requests/results, native-probe source/lock, fmt/Clippy/release evidence
+and a diagnostic plot. The edge experiment's original exit receipts were not
+retained; later recorded native reruns exit0 and reproduce both result files
+byte-for-byte. Exact source-index/mask reconciliation confirms426 added samples,
+all original near samples and unchanged far inputs. All30 plane fits agree with
+NumPy SVD to3.11e-15RAW RMS.
+
+Developer numerical crosschecks reconcile all2,836 candidate/sheet outcomes and
+query counts. Native roots satisfy the sheet equation within2.85e-14RAW, project
+back within3.22e-13pixels and agree with NumPy polynomial roots within1.71e-13RAW
+depth. These checks are not independent reviewer or physical-accuracy validation.
+Private Rust fmt, strict Clippy and release build pass. The previously independently
+verified895-test/fmt/Clippy/release gate applies to unchanged application source;
+no redundant full application gate is run for this documentation-only milestone.
+
+`native-board-curvature-milestone-20261104/evidence-manifest.json` binds36 files,
+10,486,104bytes, excluding Cargo targets/caches; the native executable is separately
+bound before execution. Manifest SHA256:
+`d2299ce54e80e3704e9018266b41de59038036a1f4ddaabd49440a228f7db341`.
+These are local private artifacts, not public repository contents. Existing sealed
+evidence remains unchanged. No new capture or device operation occurred.
+
+**Next:** obtain additional actual board-sheet coverage and independently held-out
+poses, verify camera/physical-scale and sheet identity, then reconstruct broader
+object geometry. Do not extrapolate absent sheets from a presumed projector origin,
+fit the supplied box dimensions, or treat this201-point fragment as mission success.

@@ -1,25 +1,31 @@
 # Project status
 
 Latest reconstruction investigation: [native board/sheet preparation](docs/NATIVE_BOARD_SHEET_PREPARATION.md)
-uses two saved board poses and unchanged native camera geometry. A stricter saturation
-filter yields32/27 accepted marker points and944/703 observed stripe-plane intersections.
-All25 cross-pose plane fits are retained; three provisional hypotheses reject all709
-box candidates at the fixed consistency gate. No projector calibration or measurable
-object scan yet. Next: additional board views and sheet identity; no threshold widening.
-Production source unchanged, prior895-test gate retained. Independent516/518 verified
-preceding trace evidence and CI; this new experiment is not yet independently reviewed.
+now supports201 real stereo candidates along one box stripe using a provisional
+board-derived curved sheet.195 other queries remain unsupported. This is a narrow
+fragment, **not a complete or dimensionally validated object scan**. Owner dimensions
+remain held out. No physical units, correct stripe identity or accuracy claim yet.
 
-Current physical readiness: the owner's measured yellow box is now visible in both
+Wider image-supported board coverage adds426 observations. The new straight-sheet
+fit fails the original limits; a separately planned30-pair linear/quadratic comparison
+with held-out image-row bands supports four provisional curved sheets. The new pair's
+held-out X-residual RMS improves0.2534 to0.0609RAW. No limits are loosened; all failed
+fits and709 candidate alternatives remain. Two-pose internal validation can share
+calibration errors and needs independent physical checks. Next: additional measured
+board coverage/held-out poses, sheet identity and broader real reconstruction.
+
+Production source remains ebb77a2; private Rust probe fmt/Clippy/release and numerical
+crosschecks pass. The independently verified895-test application gate remains applicable.
+Independent519 reproduced the earlier native board experiment and failed planar transfer;
+the new wider-board/curvature evidence awaits review. CodeRabbit coverage is outstanding.
+
+Current physical readiness: the owner's measured yellow box was captured in both
 scanning cameras. [Scoped line + gain capture](docs/LINE_CAPTURE_GAIN.md) saves/replays
-10 frames per camera and three color frames; original settings/formats/media service
-restore. Startup rejects remain 0/97; ongoing 0/0 in this short sample. Frozen native
-stereo diagnostics accept only 8, then 5 and 5 sparse points: no meaningful measured
-object scan or accuracy result yet. Correspondence/coverage is the immediate priority.
-A full-trace follow-up retains709 candidate intersections from396 observations;
-321 have two plausible matches. Stripe identity remains unqualified. Retained board
-recordings are the next calibration-evidence lead; no new projector fit is established.
-The new CLI option reuses existing leases; final 895-test/fmt/Clippy/release gate passes.
-Owner dimensions are held out; calibration/scale was not fitted to the box.
+10frames per camera and three color frames with original state restored. Startup
+rejects0/97 and ongoing0/0 remain short-sample observations. Initial frozen stereo
+diagnostics produced only8/5/5 sparse points; later all-trace diagnostics retained709
+candidates/396queries, with321two-alternative queries. The new board-sheet consistency
+test resolves only a subset experimentally, not the complete scanning workflow.
 
 Independent assignment 501 resolves SCAN-REV-032 for the bound mandatory private
 reconciliation, and 506 confirms both ba99e7b CI runs passed. Original summary-only

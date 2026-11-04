@@ -5036,3 +5036,35 @@ release gate applies. No redundant full Rust run for prose. Exact documentation 
 will be recorded by Git/publication metadata. Reviewer files untouched; no hardware,
 firmware, paid service, protection or merge action. New evidence awaits independent
 review; no substantive CodeRabbit completion inferred.
+
+
+## DEV-BOARD-CURVATURE — supported fragment, physical qualification incomplete
+
+Developer investigation, not an independent finding or closure. Accept independent519's
+verification of the prior87ce1f4 board-plane and failed transfer evidence and its stated
+limits. Reviewer findings/statuses remain exclusively reviewer-owned and untouched.
+
+New private experiment preserves that failure and adds426 actual edge-board observations.
+All30 native planar pair fits retain the same quality gates; added5/3 fails. A separately
+planned linear/quadratic comparison uses unweighted centered/scaled NumPy least squares,
+twofold100-row spatial holdouts in both poses, all samples and the declared per-pose
+X-residual/mutual-minimum gates. Four quadratic hypotheses pass; addedpair held-out RMS
+is0.060876645RAW versus0.253399768linear. Shared camera/board error and two-pose coverage
+remain limitations; this is not an independent physical validation or production fitter.
+
+The private Rust probe uses existing bounded PreparedCamera and QuadraticSheet APIs on
+all709 prior candidates.201queries have one candidate/sheet combination,195none,0multiple;
+all survivors form one stripe. Stereo geometry is preserved, no snapping or dimensionfit.
+Every2,836sheet result remains; independent numerical formulas reconcile roots/projection,
+residuals and all30 plane fits. Private fmt/strictClippy/release pass. Original edge exits
+were not recorded; later native reruns have exit0 receipts and byte-identical results.
+Full procedure, immutable36file manifest, sources and bounds are documented in
+NATIVE_BOARD_SHEET_PREPARATION.md. Raw evidence/private probe are not published.
+
+Public changes only PROJECT_STATUS.md, NATIVE_BOARD_SHEET_PREPARATION.md and this response.
+Application/dependencies unchanged from ebb77a2954f8563d15e28f2d0b02928da0835cd2; independent
+895-test/fmt/Clippy/release result applies. Exact documentation commit follows in Git.
+No repeated full Rust gate, metric export, measured dimensions, full surface, GUI scan,
+physical accuracy, reviewer closure or substantive CodeRabbit completion claimed.
+No new hardware, firmware, paid service, main merge or protection action. Immediate
+priority remains additional real sheet coverage/held-out poses and physical validation.
