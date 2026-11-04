@@ -1,3 +1,27 @@
+# Existing driver candidate still has pixel duplication — 2026-11-04
+
+A read-only audit of 43,800 accepted images in ten original recordings finds 28
+images with one of the two tested signatures. The earlier 610-second zero-rejection
+run contains 19 full-block repetitions: eight left, eleven right. Their varying
+pixel contents differ across incidents and are absent at the same offsets in
+38 neighboring frames. No image is repaired or excluded.
+
+For sustained pair 173, all 188 saved USB image prefixes per camera match native
+pixels; blocks 6/8 repeat with distinct request identities. Four requests remain
+outstanding after every completion, with no empty software queue overlapping either
+frame. This limits the earlier starvation hypothesis. Only 20 image bytes per USB
+payload were retained, so this does not prove full-body equality. Original CRC,
+header and rejection results remain valid within their scope, not as image-integrity
+qualification or a complete fix.
+
+All ten original SHA hashes match; the full audit and ten native exports pass.
+Comparison controls and 2,400 rows match the original checker exactly. See the
+[candidate audit](docs/RAPTOR_CANDIDATE_PIXEL_AUDIT.md). Independent reviewer 575
+verified the prior baseline USB localization; this new result awaits review.
+SCAN-REV-034 stays High/Open. No new hardware capture, driver, firmware or application
+change. Next: investigate the enabled-path USB payload boundary; do not promote the
+candidate based only on rejection counters. Rotation confirmation remains pending.
+
 # Accepted-image fault localized to USB payloads — 2026-11-04
 
 Two affected images at the same camera PTS are present in an existing full USB

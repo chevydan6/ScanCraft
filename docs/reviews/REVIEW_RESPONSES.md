@@ -5705,3 +5705,45 @@ all-target Clippy,935tests/0failed/1ignored and release build. No application ch
 or new hardware qualification. Sealed54files/66,914,272bytes; manifest SHA256
 0366e76d890489debc1ef6c24caf3881a774278a4623c8a5cd47758c84bd0dbe. All19external
 bindings verify;16capture inputs match the previous sealed original manifest.
+
+
+## SCAN-REV-034 — accepted; retained candidate pixel audit
+
+Accept reviewer 575's boundary verification and outstanding causal/qualification
+requirements. New read-only audit covers all 43,800 images in ten recordings from
+existing inline-copy off/on/off, one-minute combined and 610-second combined trials.
+Original whole-file hashes match their sealed manifests. Twenty-eight images have
+either unchanged signature; 19 occur in the sustained run despite zero rejected
+buffers. These 19 nonconstant blocks have 9–10 values and unique hashes; 38 neighboring
+frames do not repeat at those positions. The partial test's diversity requirement
+misses these full-block copies. Neither negative test proves optical integrity.
+
+Sustained pair 173, raw PTS 1683900145: original USB prefixes match native pixels
+for 188 payloads per camera; repeated 6/8 prefixes have distinct request identities.
+Every completion leaves four requests outstanding, with no empty-queue overlap.
+Maximum within-frame gaps are 170/178 µs. This does not support an empty software
+queue as a universal cause. The prefix-only trace cannot prove full USB body equality;
+no device/controller/HCD/DMA attribution or correction is claimed.
+
+Changed the new candidate audit, project status, sustained-report cross-reference,
+accepted-image-report cross-reference and this response only. No application/kernel
+change, new capture, heuristic filter or repair. Exact publication commit is recorded
+in the checkpoint. Private 89 files / 59,261,429 bytes have manifest SHA-256
+3e6dbbd286ddad584d1504a2f850c87c91ebff97c78c9e0c1b5e0a9d86f63616.
+
+Audit 77588 exits 0: all ten original hashes and 43,800 rows checked. Nine A1/A2 native
+exports (21053) and sustained-left-173 export (70850) exit 0 and match original bytes.
+Characterization 43288 and prefix analysis 54123 exit 0. The original slow run was
+deliberately stopped with exit 143; all 2,400 saved rows match the bounded four-worker
+checker. Twelve comparison cases pass. A private timestamp field label was corrected
+to microseconds without changing values or outcomes; original outputs remain. An
+initial missing completed-arm filter stopped the native helper before extraction;
+corrected explicit filtering passes, with the initial failure preserved. Only the
+independent reviewer may verify/close 034. Reviewer records remain untouched.
+
+Publication gate: `tools/check.sh` passes formatting, strict all-target Clippy,
+935 tests / zero failures / one ignored, and optimized workspace build. Application
+code is unchanged; this is software regression evidence, not fresh hardware proof.
+CodeRabbit quota lookup in the repository returns `lookup_failed`; no substantive
+or paid review was performed. An initial invocation outside the repository also
+failed and is retained. Public source/diff privacy checks precede publication.

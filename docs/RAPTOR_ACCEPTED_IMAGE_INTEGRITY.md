@@ -371,3 +371,12 @@ bytes; external evidence manifest SHA-256 is
 All 19 external input bindings match current bytes; the 16 original capture inputs
 also match their previously sealed manifest. The other three bindings identify
 the inspected local kernel source and Makefile.
+
+
+## Follow-up: existing candidate recordings
+
+The [candidate pixel audit](RAPTOR_CANDIDATE_PIXEL_AUDIT.md) checks 43,800 retained
+images. It finds 19 full-block repetitions in the earlier zero-rejection sustained
+trial. One paired incident has repeated observed USB prefixes with four requests
+still outstanding after every completion. The existing candidate remains
+unqualified; an empty software queue is not established as the universal cause.
