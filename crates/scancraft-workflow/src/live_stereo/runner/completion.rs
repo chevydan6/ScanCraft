@@ -10,14 +10,14 @@ struct Shared {
     changed: Condvar,
     stop: Arc<AtomicBool>,
 }
-pub(super) struct Participant {
+pub(crate) struct Participant {
     shared: Arc<Shared>,
     bit: u8,
     arrived: bool,
 }
 /// Unique, non-cloneable slots exist before spawning. Dropping an unstarted slot
 /// releases its peer, including when a thread builder drops a failed spawn closure.
-pub(super) fn participants(stop: Arc<AtomicBool>) -> [Participant; 2] {
+pub(crate) fn participants(stop: Arc<AtomicBool>) -> [Participant; 2] {
     let shared = Arc::new(Shared {
         finished: Mutex::new(0),
         changed: Condvar::new(),
@@ -30,7 +30,7 @@ pub(super) fn participants(stop: Arc<AtomicBool>) -> [Participant; 2] {
     })
 }
 impl Participant {
-    pub(super) fn acquisition_finished(&mut self) {
+    pub(crate) fn acquisition_finished(&mut self) {
         let mut finished = self
             .shared
             .finished
@@ -47,6 +47,23 @@ impl Participant {
                 .changed
                 .wait(finished)
                 .unwrap_or_else(|e| e.into_inner());
+        }
+    }
+}
+#[cfg(test)]
+impl Participant {
+    pub(crate) fn arrival_observer(&self) -> impl FnOnce() -> bool + Send + 'static {
+        let shared = self.shared.clone();
+        let bit = self.bit;
+        move || {
+            let lock = shared.finished.lock().unwrap();
+            let (lock, _) = shared
+                .changed
+                .wait_timeout_while(lock, std::time::Duration::from_secs(5), |mask| {
+                    *mask & bit == 0
+                })
+                .unwrap();
+            *lock & bit != 0
         }
     }
 }

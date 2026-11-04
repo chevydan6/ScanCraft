@@ -25,7 +25,7 @@ use std::{
     thread,
     time::Duration,
 };
-mod completion;
+pub(crate) mod completion;
 mod pair_log;
 mod recording;
 use recording::record_controlled;

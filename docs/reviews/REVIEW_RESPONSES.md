@@ -5861,3 +5861,25 @@ SCAN-REV-034 and all physicalunits/accuracy/coverage/endtoend requirements remai
 
 CodeRabbit usage50819 exits1 with capacity/billing/credit lookups unavailable.
 No substantive or paid review. Keep the change draft; no owner merge is requested.
+
+## Developer-identified correction — coordinate laser source retirement
+
+Accepted source-lifetime correction, separate from SCAN-REV-034 and new035.
+Read assignments587 and591. Reuse the existing live-stereo two-participant guard
+in laser_stream::runner::produce/run_progress. Both sources finish acquisition
+before either closes; failures signal stop before waiting. Unstarted/open-failed
+worker slots retire through Drop. No error-counter or pixel-validation changes.
+
+Files: workflow laser_stream/runner.rs and new runner/retirement_tests.rs;
+live_stereo/runner.rs and runner/completion.rs (shared visibility/test observer).
+Base973fbc1eeeceb0bc18bc6a716941e7213460160e. Deterministic regression fails before
+correction (68418exit101, premature close mode0), passes after (9118exit0) across
+nine read/journal/stop/statistics outcomes. Full gate13220exit0:942passed,0failed,
+1ignored; formatting, strict Clippy and optimized release pass. Evidence retained
+privately under live-camera-retirement-20261104. Final hash in developer checkpoint.
+
+This proves source ordering in tests, not a hardware rejection-rate improvement.
+The prior111 tail rejections have no measured STREAMOFF timestamp; causality remains
+unproven. GUI zero-frame startup and034accepted-image corruption remain unresolved.
+Hardware comparison pending035gain retry/drop correction. CodeRabbit review pending
+the complete lifecycle milestone; no independent finding is closed by this entry.

@@ -2,7 +2,7 @@ use super::{
     Association, AssociationCounts, Camera, PROCESSING_QUEUE_CAPACITY, Pair, Pipeline, Result,
     Sample,
 };
-use crate::live_stereo::runner::Source;
+use crate::live_stereo::runner::{Source, completion};
 use scancraft_core::{Frame, StreamProfile};
 use scancraft_depth::laser_pair::{FrameInput, Report};
 use scancraft_geometry::work::WorkControl;
@@ -20,6 +20,9 @@ use std::{
     thread,
     time::Duration,
 };
+
+#[cfg(test)]
+mod retirement_tests;
 
 /// Required raw retention. push must complete before processing admission.
 /// finish must flush/validate/finalize its output or return a truthful error.
@@ -119,7 +122,7 @@ impl Progress {
     }
 }
 struct Signals {
-    stop: AtomicBool,
+    stop: Arc<AtomicBool>,
     requested: Arc<AtomicBool>,
     work: Arc<WorkControl>,
     progress: Progress,
@@ -144,11 +147,12 @@ fn produce<S: Source, J: Journal>(
     camera: Camera,
     profile: StreamProfile,
     maximum: u64,
-    signals: &Signals,
+    ownership: (&Signals, &mut completion::Participant),
     sender: SyncSender<Event>,
     open: impl FnOnce() -> Result<S>,
     journal: impl FnOnce(CaptureContext) -> Result<J>,
 ) -> SourceReport {
+    let (signals, completion) = ownership;
     let mut report = SourceReport {
         camera_index: camera.index(),
         interface: profile.interface,
@@ -208,6 +212,12 @@ fn produce<S: Source, J: Journal>(
     let stats = caught(|| Ok(source.statistics())).map(|s| {
         report.statistics = s;
     });
+    if result.is_err() || stats.is_err() {
+        signals.stop.store(true, Ordering::Relaxed);
+    }
+    // A finished source must stay open while its peer may still be acquiring.
+    // Cancellation is not proof that a peer's in-flight driver call returned.
+    completion.acquisition_finished();
     let cleanup = caught(|| source.close());
     report.cleanup_confirmed = cleanup.is_ok();
     report.outcome = combine(combine(result, stats), cleanup);
@@ -285,7 +295,7 @@ impl Pipeline<'_> {
             Association::new(self.profiles.clone(), maximum, self.maximum_host_delta_us)
                 .map_err(early)?;
         let signals = Arc::new(Signals {
-            stop: AtomicBool::new(false),
+            stop: Arc::new(AtomicBool::new(false)),
             requested: stop.clone(),
             work: work.clone(),
             progress: Progress::default(),
@@ -298,7 +308,8 @@ impl Pipeline<'_> {
         let open = Arc::new(open);
         let journal = Arc::new(journal);
         let mut spawn_error = None;
-        for camera in [Camera::First, Camera::Second] {
+        let slots = completion::participants(signals.stop.clone());
+        for (camera, mut slot) in [Camera::First, Camera::Second].into_iter().zip(slots) {
             let signals = signals.clone();
             let sender = sender.clone();
             let open = open.clone();
@@ -311,7 +322,7 @@ impl Pipeline<'_> {
                         camera,
                         profile.clone(),
                         maximum,
-                        &signals,
+                        (&signals, &mut slot),
                         sender,
                         || open(camera, profile.clone(), StopToken(signals.clone())),
                         |context| journal(camera, profile.clone(), context),
