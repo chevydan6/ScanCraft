@@ -1,5 +1,35 @@
 # Project status
 
+## Current measured-box investigation — 2026-11-04
+
+[Face assignment and fresh trials](docs/BOX_FACE_REPEATABILITY.md) correct the
+previous mixed-face interpretation. Averaged ambient images reveal that lower
+stripe 0 lies on the left face; stripes 1/2 lie on the right. No calibration,
+scale, box dimension or orthogonality fitting was used to make this correction.
+
+Three new identical-setting captures produce 1,051 / 1,046 / 1,059 full-image
+candidates. With grouping fixed before capture, top and right-face patches pass
+unchanged provisional raw-unit plane gates in all three trials. The left face
+still has only one supported stripe and fails coverage. These are sparse partial
+surfaces, not three complete dimensionally validated scans. Stationary-row point
+variation remains measurable; qualified units and accuracy are still unproven.
+
+All 3,156 candidates reconcile numerically, original frames pass replay, and device
+states/formats/service are restored. Startup rejects reach 106 in one camera;
+short-sample zero ongoing rejections do not qualify sustained transport. Native GUI
+opens the full 1,051-point trial. Keep the box stationary for the next physical-edge
+measurement checks; owner dimensions remain held out.
+
+Assignment 530 reproduced the prior evidence and identified a historical corner
+source-hash mismatch. The original discrepancy remains; a new fully bound rebuild
+and execution reproduce its result byte-for-byte. No retrospective source identity
+is claimed. SCAN-REV-033 remains independently resolved in its narrow scope. The
+unchanged source has 904 passing tests, formatting/Clippy/release success. CodeRabbit
+review remains unavailable/draft-skipped. Full metrology and end-to-end scanning
+remain incomplete.
+
+## Prior milestones (historical status)
+
 Latest correction: [explicit domain-aware recorded matching](docs/DOMAIN_BOUNDED_LASER_MATCHING.md)
 now processes the exact previously failing full-image Raptor pair. An opt-in mode
 retains valid contiguous segments and records every excluded vertex/segment/root.
