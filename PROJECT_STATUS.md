@@ -1,5 +1,18 @@
 # Project status
 
+Current physical readiness: [caliper/scene evidence](docs/CALIPER_SCALE_EVIDENCE.md)
+confirms the old 50 mm jaw guesses pass reprojection but cannot validate physical
+scale or accuracy. Fresh native images still show a board cropped in the right
+camera. Normal-driver short capture retains 98/1 startup rejects; 20 scanning frames
+and 3 color frames replay/decode, checked settings/formats/media service restore.
+The color extraction invocation failure and corrected existing export are retained.
+No first measured object or active metric calibration is claimed. Printed-object
+positioning and measured cooled dimensions are requested.
+
+Independent assignment 501 resolves SCAN-REV-032 for the bound mandatory private
+reconciliation, and 506 confirms both ba99e7b CI runs passed. Original summary-only
+admission remains insufficient. CodeRabbit substantive review remains unavailable.
+
 Latest review correction: [sustained evidence reconciliation](docs/RAPTOR_ADMISSION_RECONCILIATION.md)
 addresses accepted SCAN-REV-032 in private diagnostic tooling. Fresh full raw/USB
 revalidation passes, with 95 new mutation cases, 54 retained cases and 5 fail-closed

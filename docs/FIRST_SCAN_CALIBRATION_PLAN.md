@@ -16,12 +16,16 @@ units and physical scale still require independent confirmation. Existing fixed
 factory-model experiments produced plausible board correspondences across several
 views, but this is neither calibrated application state nor accuracy qualification.
 
-The earlier 30 mm and 50 mm caliper images do not establish a measured opening:
-the two camera views did not reliably identify the same jaw surfaces, and existing
-reprojection checks rejected candidate correspondences. Do not relax those checks,
-fit scale to force the displayed distance, or count the display itself as a 3D
-measurement. Occluded board circles also produced biased centroids with low
-reprojection residuals; preserve that failure evidence.
+The earlier caliper images do not establish a measured opening: the two camera
+views did not reliably identify the same jaw contact surfaces. Earlier wording
+that described both the 30 mm and 50 mm candidates as reprojection failures was too
+broad. The retained 50 mm refined observations pass the geometric checks, including
+under the corrected native candidate, but point identity and raw-unit scale remain
+unverified. See [caliper scale evidence](CALIPER_SCALE_EVIDENCE.md) for the frozen
+observations, numerical results and limits. Do not fit scale to force the display
+setting or count the display itself as a reconstructed 3D measurement. Occluded
+board circles also produced biased centroids with low reprojection residuals;
+preserve that failure evidence.
 
 ## Calibration procedure
 
@@ -75,11 +79,12 @@ reprojection residuals; preserve that failure evidence.
 ## Authorization and physical readiness are separate
 
 The authorization gate is lifted. The owner returned and repositioned the board;
-the complete pattern is now visible in both scanning cameras. Two new stereo
+the complete pattern was visible in both scanning cameras for that earlier pose. Two new stereo
 captures passed native replay with reported stream/illumination states restored.
 Native fitting and held-out diagnostics are documented in
 [real-board calibration](REAL_BOARD_CALIBRATION.md). Diverse poses, independent
-dimensions and measurement uncertainty remain required.
+dimensions and measurement uncertainty remain required. A later fresh scene check
+again shows the right edge cropped; see [current physical readiness](CALIPER_SCALE_EVIDENCE.md).
 
 Continue existing-recording analysis and integration work while physical setup is
 pending. Do not claim a first independently validated scan until the physical
