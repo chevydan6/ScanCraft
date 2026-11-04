@@ -11,6 +11,7 @@ use std::path::PathBuf;
 
 enum Action {
     Open,
+    Fused,
     Process,
 }
 
@@ -23,6 +24,7 @@ pub struct CandidateUi {
     view: View,
     message: String,
     frames: Option<[FrameView; 2]>,
+    session: Option<scancraft_workflow::tracked_candidates::bundle::SessionView>,
     cameras: [Option<egui::TextureHandle>; 2],
     stretch_display: bool,
     processing: processing::Processing,
@@ -44,8 +46,9 @@ impl Default for CandidateUi {
                 zoom: 1.,
                 pan: egui::Vec2::ZERO,
             },
-            message: "Open a saved laser capture or recorded-pair result folder.".into(),
+            message: "Open a saved capture, recorded-pair result or fused scan folder.".into(),
             frames: None,
+            session: None,
             cameras: Default::default(),
             stretch_display: false,
             processing: Default::default(),
@@ -116,6 +119,7 @@ impl CandidateUi {
                     index,
                 });
             }
+            self.session = None;
             self.preview = preview;
             self.frames = Some(snapshot.frames);
             self.cameras = Default::default();
@@ -201,6 +205,19 @@ impl CandidateUi {
             Operation::ViewCandidates { path, index },
         ));
     }
+    pub fn open_fused(&mut self, path: PathBuf, index: usize) {
+        if self.is_busy() {
+            return;
+        }
+        self.path = path.display().to_string();
+        self.pair_number = (index as u64).saturating_add(1);
+        self.action = Action::Fused;
+        self.message = "Checking fused artifacts and original source pairs…".into();
+        self.job = Some(Job::start(
+            Document::default(),
+            Operation::ViewFusedCandidates { path, index },
+        ));
+    }
     pub fn process(
         &mut self,
         inputs: scancraft_workflow::recorded_traces::Inputs,
@@ -227,6 +244,7 @@ impl CandidateUi {
         self.job = None;
         match output.result {
             Ok(report) => {
+                self.session = report.candidate_session;
                 self.frames = report.candidate_frames;
                 self.cameras = Default::default();
                 if let Some(preview) = report.preview {
@@ -240,6 +258,10 @@ impl CandidateUi {
                 };
                 self.message = report.message;
                 self.loaded_path = match self.action {
+                    Action::Fused => format!(
+                        "{} · fused scan · camera frame {}",
+                        self.path, self.pair_number
+                    ),
                     Action::Open => format!("{} · pair {}", self.path, self.pair_number),
                     Action::Process => self.path.clone(),
                 };
@@ -249,6 +271,7 @@ impl CandidateUi {
                     "{}: {error}",
                     match self.action {
                         Action::Open => "Could not open candidates",
+                        Action::Fused => "Could not open fused scan",
                         Action::Process => "Recorded-pair processing failed",
                     }
                 )
@@ -259,13 +282,13 @@ impl CandidateUi {
     pub fn ui(&mut self, ui: &mut egui::Ui, can_capture: bool) {
         ui.heading("Laser candidates");
         ui.label("Diagnostic coordinates · model units and physical accuracy unverified");
-        ui.horizontal(|ui| {
+        ui.horizontal_wrapped(|ui| {
             ui.label("Result folder:");
             ui.add_enabled(
                 !self.is_busy(),
                 egui::TextEdit::singleline(&mut self.path).desired_width(520.),
             );
-            ui.label("Pair:");
+            ui.label("Frame / pair:");
             let enabled = !self.is_busy();
             ui.add_enabled(
                 enabled,
@@ -276,6 +299,15 @@ impl CandidateUi {
                 .clicked()
             {
                 self.open_pair(self.path.clone().into(), self.pair_number.saturating_sub(1));
+            }
+            if ui
+                .add_enabled(!self.is_busy(), egui::Button::new("Open fused scan"))
+                .clicked()
+            {
+                self.open_fused(
+                    self.path.clone().into(),
+                    self.pair_number.saturating_sub(1) as usize,
+                );
             }
             if ui
                 .add_enabled(self.job.is_some(), egui::Button::new("Cancel operation"))
@@ -313,6 +345,7 @@ impl CandidateUi {
             }
             ui.label(format!("{} candidate points", self.preview.total));
         });
+        self.session_panel(ui);
         self.frame_panel(ui);
         let size = egui::vec2(
             ui.available_width().max(1.),
@@ -346,6 +379,27 @@ impl CandidateUi {
             None,
             None,
         );
+    }
+    fn session_panel(&self, ui: &mut egui::Ui) {
+        let Some(session) = &self.session else {
+            return;
+        };
+        ui.label(format!(
+            "{} integrated · {} tracking only · {} rejected · {} unavailable",
+            session.integrated, session.tracking_only, session.rejected, session.unavailable
+        ));
+        egui::CollapsingHeader::new("Tracking and fusion outcomes").show(ui, |ui| {
+            ui.small("RMS uses unverified model units. The first accepted pose is an identity anchor, not measured accuracy. No marker points enter the surface.");
+            egui::ScrollArea::vertical().id_salt("fused-frame-outcomes").max_height(110.).show(ui, |ui| {
+                for (index, frame) in session.frames.iter().enumerate() {
+                    ui.label(format!("{}Frame {} (id {}) · {} · {} surface / {} marker candidates · RMS {}",
+                        if index == session.selected_frame { "► " } else { "" }, index+1, frame.frame_id,
+                        frame.status.label(), frame.surface_points, frame.tracking_points,
+                        frame.rms_model_units.map_or_else(|| "unavailable".into(), |v| format!("{v:.6}"))));
+                    if let Some(reason) = &frame.reason { ui.small(reason); }
+                }
+            });
+        });
     }
     fn frame_panel(&mut self, ui: &mut egui::Ui) {
         let Some(frames) = &self.frames else {
@@ -630,5 +684,73 @@ mod tests {
         assert_eq!(view.path, "synthetic replay");
         assert_eq!(view.pair_number, 7);
         assert!(view.message.contains("Saved capture"));
+    }
+    #[test]
+    fn fused_open_button_dispatches_and_keeps_the_prior_view_after_failure() {
+        let mut view = CandidateUi {
+            path: std::env::temp_dir()
+                .join(format!("missing-fused-{}", std::process::id()))
+                .display()
+                .to_string(),
+            loaded_path: "prior checked result".into(),
+            preview: Preview {
+                total: 7,
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+        let context = egui::Context::default();
+        let draw = |view: &mut CandidateUi, time: f64, click: Option<egui::Pos2>| {
+            let mut input = egui::RawInput {
+                time: Some(time),
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO,
+                    egui::vec2(1500., 1000.),
+                )),
+                ..Default::default()
+            };
+            if let Some(pos) = click {
+                input.events = vec![
+                    egui::Event::PointerMoved(pos),
+                    egui::Event::PointerButton {
+                        pos,
+                        button: egui::PointerButton::Primary,
+                        pressed: true,
+                        modifiers: Default::default(),
+                    },
+                    egui::Event::PointerButton {
+                        pos,
+                        button: egui::PointerButton::Primary,
+                        pressed: false,
+                        modifiers: Default::default(),
+                    },
+                ];
+            }
+            context.run(input, |ctx| {
+                egui::CentralPanel::default().show(ctx, |ui| view.ui(ui, true));
+            })
+        };
+        let output = draw(&mut view, 0., None);
+        let button = output
+            .shapes
+            .iter()
+            .find_map(|s| match &s.shape {
+                egui::epaint::Shape::Text(t) if t.galley.job.text == "Open fused scan" => {
+                    Some(t.pos + t.galley.size() * 0.5)
+                }
+                _ => None,
+            })
+            .unwrap();
+        let _ = draw(&mut view, 1., Some(button));
+        assert!(view.is_busy());
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
+        while view.is_busy() {
+            view.tick();
+            assert!(std::time::Instant::now() < deadline);
+            std::thread::yield_now();
+        }
+        assert!(view.message.contains("Could not open fused scan"));
+        assert_eq!(view.loaded_path, "prior checked result");
+        assert_eq!(view.preview.total, 7);
     }
 }

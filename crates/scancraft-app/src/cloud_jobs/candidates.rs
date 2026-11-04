@@ -81,6 +81,48 @@ pub(super) fn view_at(path: &Path, index: u64, work: &WorkControl) -> Result<Rep
     Ok(result)
 }
 
+pub(super) fn view_fused(path: &Path, index: usize, work: &WorkControl) -> Result<Report, String> {
+    let loaded = scancraft_workflow::tracked_candidates::bundle::load(path, index, work)
+        .map_err(|e| e.to_string())?;
+    let mut preview = Preview {
+        total: loaded.positions.len(),
+        ..Preview::default()
+    };
+    let stride = loaded.positions.len().div_ceil(50000).max(1);
+    for (index, position) in loaded.positions.into_iter().enumerate() {
+        work.check()?;
+        if let Some((min, max)) = &mut preview.bounds {
+            for axis in 0..3 {
+                min[axis] = min[axis].min(position[axis]);
+                max[axis] = max[axis].max(position[axis]);
+            }
+        } else {
+            preview.bounds = Some((position, position));
+        }
+        if index % stride == 0 {
+            preview.points.push(DisplayPoint {
+                normal: None,
+                position,
+                color: [101, 190, 226],
+                selected: false,
+                index,
+            });
+        }
+    }
+    let message = format!(
+        "Fused scan · displaying {} of {} candidates from all {} frames. Camera images show source frame {}. Artifact integrity and retained source snapshots checked; numerical results were not recomputed. Units, physical identity and accuracy remain unverified.",
+        preview.points.len(),
+        preview.total,
+        loaded.session.frames.len(),
+        index + 1
+    );
+    let mut result = report(message, Some(preview));
+    result.reset_view = true;
+    result.candidate_frames = Some(loaded.cameras);
+    result.candidate_session = Some(loaded.session);
+    Ok(result)
+}
+
 pub(super) fn process(
     inputs: &Inputs,
     target: &Path,
@@ -321,6 +363,50 @@ mod tests {
                 .unwrap()
                 .total,
             4
+        );
+    }
+    #[test]
+    fn fused_view_worker_verifies_sources_without_modifying_the_editable_document() {
+        let t = Temp::new();
+        let inputs = fixture(&t);
+        let pair = t.0.join("pair");
+        recorded_traces::run_automatic(&inputs, &pair, &WorkControl::default()).unwrap();
+        let request = serde_json::json!({"schema_version":1,"session_id":"view-test",
+            "markers":{"threshold_exclusive":100,"minimum_area":1,"maximum_area":50,"maximum_components":100,
+                "maximum_shape_rms_px":0.5,"minimum_depth_model_units":1.,"maximum_depth_model_units":100.,
+                "minimum_ray_angle_rad":0.0001,"maximum_ray_gap_model_units":1.,"maximum_reprojection_error_px":2.},
+            "tracking":{"max_correspondence_model_units":3.,"max_rms_model_units":0.25,"minimum_overlap":0.7,
+                "max_step_translation_model_units":15.,"max_step_rotation_rad":0.05,"iterations":30,"tolerance_model_units":1e-8},
+            "voxel_model_units":0.25,"maximum_voxels":1000,"maximum_stereo_attempts":1000,
+            "frames":[{"id":7,"bundle":pair}]});
+        let settings = t.0.join("fuse.json");
+        fs::write(&settings, serde_json::to_vec(&request).unwrap()).unwrap();
+        let target = t.0.join("fused");
+        scancraft_workflow::tracked_candidates::run(&settings, &target, &WorkControl::default())
+            .unwrap();
+        let mut document = super::super::Document {
+            selection: vec![19],
+            ..Default::default()
+        };
+        let operation = super::super::Operation::ViewFusedCandidates {
+            path: target,
+            index: 0,
+        };
+        let report =
+            super::super::execute(&mut document, operation, &WorkControl::default()).unwrap();
+        assert!(document.editor.is_none());
+        assert_eq!(document.selection, vec![19]);
+        assert!(!report.edited && !report.project_saved && report.opened_path.is_none());
+        assert_eq!(report.preview.unwrap().total, 0);
+        assert_eq!(report.candidate_session.unwrap().unavailable, 1);
+        assert_eq!(
+            report.candidate_frames.unwrap().map(|f| f.interface),
+            [0, 2]
+        );
+        assert!(
+            report
+                .message
+                .contains("numerical results were not recomputed")
         );
     }
 }

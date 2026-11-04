@@ -2,7 +2,9 @@
 
 Status: experimental, unverified model units. This extends the separate tracking
 API in [SEPARATE_TRACKING_FUSION.md](SEPARATE_TRACKING_FUSION.md) into a native CLI
-workflow. It is not a qualified object scan, metric export, or live GUI integration.
+workflow. It is not a qualified object scan or metric export. Read-only native result viewing
+is now documented in [FUSED_SCAN_VIEW.md](FUSED_SCAN_VIEW.md); live GUI fusion remains
+outstanding.
 
 ## Invocation and boundaries
 
@@ -170,9 +172,9 @@ laser identity, exposure synchronization, calibration validity, verified scale,
 dimensional accuracy and full coverage remain unqualified. Known box dimensions
 were not used to tune coordinates, scale, association or selection.
 
-Next: native diagnostic GUI loading of this explicit multi-frame format, followed
-by a controlled rotating-box recording to test object-associated tracking and
-surface coverage. Preserve failed frames and competing hypotheses. Then validate
+The native diagnostic viewer now loads this explicit multi-frame format with
+source verification (see FUSED_SCAN_VIEW.md). Next: a controlled rotating-box
+recording to test object-associated tracking and surface coverage. Preserve failed frames and competing hypotheses. Then validate
 physical scale and dimensions independently before permitting metric edit/export.
 No new dependencies or geometry algorithms were introduced. CodeRabbit 0.9.2 quota
 lookup returned `lookup_failed`/exit 1; no review upload, paid usage or substantive

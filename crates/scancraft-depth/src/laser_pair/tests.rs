@@ -557,3 +557,32 @@ fn domain_admission_fallback_preserves_results_and_enforces_exact_work_bound() {
     );
     assert!(!journal.began);
 }
+
+#[test]
+fn missing_pts_on_both_cameras_is_not_equal_sensor_timing() {
+    let (geometry, settings, profiles, original) = fixture();
+    let processor = Processor::new(&geometry, &settings).unwrap();
+    for empty in [true, false] {
+        let mut frames = original.clone();
+        for f in &mut frames {
+            f.metadata = if empty {
+                Vec::new()
+            } else {
+                let mut metadata = vec![0; 12];
+                metadata[10] = 2;
+                metadata
+            };
+        }
+        let mut journal = Journal::default();
+        assert!(
+            processor
+                .process(
+                    inputs(&profiles, &frames),
+                    &WorkControl::default(),
+                    &mut journal
+                )
+                .is_err()
+        );
+        assert!(!journal.began);
+    }
+}

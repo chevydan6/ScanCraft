@@ -1,5 +1,6 @@
 //! Experimental recorded marker tracking and laser-only fusion in unverified units.
 //! No metric project/PLY conversion; source bundles remain required for provenance.
+pub mod bundle;
 mod markers;
 #[cfg(test)]
 mod tests;
