@@ -4915,3 +4915,43 @@ gap. Final same() comparison preserves JSON types. Full raw/USB validation-2 and
 95-case regressions pass after that correction. Initial CodeRabbit usage was run
 outside Git and failed; the corrected repository-scoped lookup also exits 1 with
 all quota/billing fields lookup_failed. Neither invocation uploads a review.
+
+
+## SCAN-REV-032 — independent verification follow-up
+
+Independent assignment 501 marks 032 Resolved within the mandatory private
+reconciliation scope at ba99e7bcda45ab16874353fce56c0520931114ed. It independently
+rebuilds the helper byte-identically, rereads actual recordings/USB and verifies
+95+54 regressions, original counterexamples and five CLI refusals. Assignment 506
+confirms both publication CI runs passed. The original summary-only assessment
+remains insufficient alone. Development has not modified the reviewer's records.
+Substantive CodeRabbit review and broader physical qualification remain outstanding.
+
+## DEV-PHYSICAL-SCALE — frozen caliper interpretation and current scene
+
+Developer evidence, not an independent finding or closure: docs/CALIPER_SCALE_EVIDENCE.md
+corrects the earlier overbroad claim that 50 mm caliper observations failed reprojection.
+Historical refined factory reference reproduces exactly; corrected native frozen
+refined guesses yield 49.492247260 RAW units and pass reprojection. No physical point,
+contact-plane or unit qualification follows. Frozen ±1/±5-pixel sensitivity retains
+all 32 cases and 8 rejections; no endpoint selection, refit or scale correction.
+52 source, 11 analysis and 3 extraction bindings verify unchanged. Actual original
+10-frame/side recordings were fully validated and selected manifests/images match.
+Same-scene board training prevents claiming complete capture holdout independence.
+Private caliper probe calls existing StereoCalibration::prepare/triangulate only.
+
+Fresh baseline-driver scene inspection retains an initial WirePlumber-consumer refusal,
+then saves 10 scanning frames/side and 3 color frames after idle-media pause. Native
+stereo replays pass, startup 98/1 and ongoing 0/0; nine equalPTS associations, matched
+indices 5/6 differ 22 microseconds. Existing extract-frame refuses MJPG, causing collector exit1;
+cleanup still restores seven native comparisons, formats and WirePlumber. Existing
+export-image then validates/decodes all 3 color frames successfully. No code fix or
+clean collector success is fabricated. Images show the board/right-camera cropping;
+no measured-object reconstruction. All private inputs/captures remain outside Git.
+
+Files changed: docs/CALIPER_SCALE_EVIDENCE.md,docs/FIRST_SCAN_CALIBRATION_PLAN.md,
+PROJECT_STATUS.md and this response. No production/kernel/dependency changes;
+unchanged implementation retains the 892-test/fmt/Clippy/release baseline. Relevant
+source parent ba99e7b and exact documentation commit are retained in Git/publication
+metadata. No new independent finding, metric accuracy, first scan or mission
+completion is claimed. Next: actual independently measured object and physical scale.
