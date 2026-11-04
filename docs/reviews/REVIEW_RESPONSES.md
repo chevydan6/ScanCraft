@@ -5105,8 +5105,8 @@ physical accuracy, paid review, merge or independent closure claimed.
 ## SCAN-REV-033 — accepted; explicit domain correction awaiting independent verification
 
 Accept assignment524's High/Open finding and causal reproduction. Implemented on
-`dev/domain-bounded-laser` from baf1d6dc9e1011d95a6022ecc5d091d3a2acdb1b; exact correction
-commit follows in Git. The developer does not change severity/status or claim closure.
+`dev/domain-bounded-laser` from baf1d6dc9e1011d95a6022ecc5d091d3a2acdb1b; correction
+commit 8e2826052a8f323e49a8008b9d02ee822807b56c. The developer does not change severity/status or claim closure.
 
 New `calibration/laser_trace/domain.rs` records every finite in-image inverse failure
 and adjacent segment, splits valid contiguous runs, preserves original indices and
