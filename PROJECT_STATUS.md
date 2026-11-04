@@ -1,3 +1,24 @@
+# Camera lifecycle corrections pass software checks — 2026-11-05
+
+Laser acquisition now coordinates both camera owners before either closes. A
+separate correction addresses SCAN-REV-035: stream-format retries and destruction
+finish before original gains are reapplied and read back, including failure paths.
+The full Rust gate passes 948 tests, zero failures and one ignored, formatting,
+strict Clippy and optimized builds. Reviewer594 verifies source retirement;
+reviewer595 resolves SCAN-REV-035's software defect. Exact implementation commit
+`a24f989` also passes PR CI. Physical reliability remains unqualified.
+
+The planned before/after hardware trial stopped in preflight: no Creality USB
+device was enumerated. No scanner settings or services were changed. Await
+reconnection while preparing review. Rotation remains unconfirmed. Accepted-image
+corruption, GUI startup, metric calibration and the first complete measured scan
+remain unresolved. See [lifecycle evidence and limits](docs/LASER_LIFECYCLE_VALIDATION.md).
+
+Offline analysis verifies 128 retained GUI rejection samples and correlates the
+kernel resubmission/disconnect events without assigning causality. A signed,
+user-local tracing tool passes a device-free ioctl-decoding smoke check, ready
+to measure actual camera read/STREAMOFF ordering after reconnection. No new capture.
+
 # Native live gain integrated; GUI acquisition still fails — 2026-11-05
 
 Live capture can now explicitly request the same temporary IR gain as the existing

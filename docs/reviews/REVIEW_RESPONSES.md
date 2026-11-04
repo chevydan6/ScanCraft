@@ -5861,3 +5861,72 @@ SCAN-REV-034 and all physicalunits/accuracy/coverage/endtoend requirements remai
 
 CodeRabbit usage50819 exits1 with capacity/billing/credit lookups unavailable.
 No substantive or paid review. Keep the change draft; no owner merge is requested.
+
+## Developer-identified correction — coordinate laser source retirement
+
+Accepted source-lifetime correction, separate from SCAN-REV-034 and new035.
+Read assignments587 and591. Reuse the existing live-stereo two-participant guard
+in laser_stream::runner::produce/run_progress. Both sources finish acquisition
+before either closes; failures signal stop before waiting. Unstarted/open-failed
+worker slots retire through Drop. No error-counter or pixel-validation changes.
+
+Files: workflow laser_stream/runner.rs and new runner/retirement_tests.rs;
+live_stereo/runner.rs and runner/completion.rs (shared visibility/test observer).
+Base973fbc1eeeceb0bc18bc6a716941e7213460160e. Deterministic regression fails before
+correction (68418exit101, premature close mode0), passes after (9118exit0) across
+nine read/journal/stop/statistics outcomes. Full gate13220exit0:942passed,0failed,
+1ignored; formatting, strict Clippy and optimized release pass. Evidence retained
+privately under live-camera-retirement-20261104. Final hash in developer checkpoint.
+
+This proves source ordering in tests, not a hardware rejection-rate improvement.
+The prior111 tail rejections have no measured STREAMOFF timestamp; causality remains
+unproven. GUI zero-frame startup and034accepted-image corruption remain unresolved.
+Hardware comparison pending035gain retry/drop correction. CodeRabbit review pending
+the complete lifecycle milestone; no independent finding is closed by this entry.
+
+## SCAN-REV-035 — accepted: coordinate stream retries and gain restoration
+
+Reviewed assignment591. The cached-gain retry/drop defect is legitimate.
+Changed acquisition laser.rs and new laser/cleanup.rs with cleanup/tests.rs;
+device ir_gain.rs and stream_group.rs. Snapshot gain before mutation, own both
+leases before applying gain, invalidate/reapply/read back both originals after
+stream attempts, consume final stream ownership before gain restoration, and
+retain stream/control errors. Drop uses the same order. Successful callback
+cleanup causes no extra writes after publication. Existing CLI apply API remains.
+
+Base0bb9f63 (the separate retirement correction, parent973fbc1). Final implementation
+commit is recorded in checkpoint/publication receipt. Five coordinator tests and
+one actual gain-loop test cover non-default originals8000/9000, resetting formats,
+first failure/successful retry, repeated failure, Drop/unwind, either gain failure,
+error retention, no extra writes after success and omitted gain. Full gate79685
+exit0:948passed/0failed/1ignored, fmtstrictClippyrelease. Earlier90365exit101 stopped
+on a test-only needless-range-loop lint; preserved and corrected. Focused90928
+exit0 covers the initial five coordinator and one device test.
+
+Private evidence gain-cleanup-retry-20261105 includes complete tested public source,
+source hashes, build logs and planned ABBA helper trial. Hardware preflight exits1
+before any device/service action because USB4-1 is absent; fresh sysfs inventory
+finds no Creality device. No new hardware correction/rate/accuracy claim. See
+docs/LASER_LIFECYCLE_VALIDATION.md. Independent verification/closure remains the
+reviewer's responsibility;034 and prior physical qualification gaps remain open.
+CodeRabbit usage18992exit1: allcapacity/billing/creditlookup_failed. No substantive
+or paid review. Preserve draft/owner merge requirements.
+
+## SCAN-REV-035 — acknowledge independent software verification
+
+Read reviewer595: the reviewer independently resolves035's software ordering/cache
+scope at a24f98944043280c6f578a479e6af391cbd75052, with948tests/0failed/1ignored,
+fmtstrictClippyrelease. Reviewer594 separately verifies0bb retirement. This entry
+acknowledges those decisions; it does not change reviewer-owned records or broaden
+closure to hardware reliability, hard cleanup deadlines or034pixel integrity.
+Exacta24 PR CI41889481790 is now independently queried completed/success.
+
+Documentation-only follow-up adds reproducible comparison of128 retained GUI
+rejection samples and kernel-event timing to LASER_LIFECYCLE_VALIDATION.md and
+PROJECT_STATUS.md. Private verifier checks12source/evidence bindings. No new capture,
+production code, threshold, algorithm, calibration or scanner-state change. Signed
+Fedora strace7.3 extracted user-locally; /dev/null DQBUF/STREAMOFF decoding smoke
+passes. Future traces must account for ptrace overhead and clock association.
+No repeated software gate or CodeRabbit request for unchanged production code;
+prior unavailable capacity/billing check remains a limitation. All prior failed
+hardware evidence remains, and independent physical validation is outstanding.

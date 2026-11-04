@@ -12,6 +12,7 @@ struct Entry {
 pub struct SettingsLease {
     entries: Vec<Entry>,
     restored: bool,
+    restore_on_drop: bool,
 }
 fn restore_plan(
     count: usize,
@@ -89,7 +90,15 @@ impl SettingsLease {
         Ok(Self {
             entries,
             restored: false,
+            restore_on_drop: true,
         })
+    }
+    /// Final explicit attempt, with no subsequent format/rate mutation on Drop.
+    /// The caller must retain this result and restore dependent controls afterward.
+    pub fn finish(mut self) -> io::Result<()> {
+        let result = self.restore();
+        self.restore_on_drop = false;
+        result
     }
     pub fn restore(&mut self) -> io::Result<()> {
         if self.restored {
@@ -123,7 +132,9 @@ impl SettingsLease {
 }
 impl Drop for SettingsLease {
     fn drop(&mut self) {
-        if let Err(e) = self.restore() {
+        if self.restore_on_drop
+            && let Err(e) = self.restore()
+        {
             scancraft_core::diagnostics::note(format_args!("{e}"));
         }
     }
