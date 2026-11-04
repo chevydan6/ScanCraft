@@ -5239,3 +5239,37 @@ no model/scale/boxdimension fit or threshold relaxation. Next measure actual pla
 or better-supported physicaledges with uncertainty; no complete scan or accuracy
 claim. Reviewer alone verifies findings and any closure. Paid review, merge and
 protection changes remain unused; CodeRabbit availability recorded at publication.
+
+## DEV-SUPPORT-PLANE — experimental physical-evidence follow-up
+
+Developer diagnostic, not a new independent finding or closure. Accepted the need
+for actual supporting-plane evidence before treating stationary top geometry as
+measurable height. Application source remains56563c1; changed documentation:
+BOX_SUPPORT_PLANE.md and this response. Exact documentation commit is recorded in
+Git on dev/flood-capture-gain (PR40).
+
+Private native adapters reuse existing component, shape, stereo and plane methods;
+fmt/strict release Clippy/build pass. Saved real flood frames yield19/18/18 mutual
+unique table hypotheses at thresholds80/100/120. All three planes fail original
+0.2RMS/0.5maximumRAW gate. All101 accepted stereo pairs reconcile independently
+(maximum2.378e-9RAW), native plane residual differences<=1.422e-13RAW. Full errors,
+alternatives, initial work-limit failures and summary-serialization failure remain
+in the90-file manifest linked from the report. No application source or original sensor input edited.
+
+Conditional top distances and no-warp image proximity are explicitly unqualified;
+no metric height, scale fit, correspondence certification or complete scan claim.
+All thresholds/trials retained, no point trimming or best-truth selection. Next
+address marker identity/centroid uncertainty and independent physical calibration,
+then complete coverage/tracking. Reviewer exclusively verifies/closes findings;
+reviewer files untouched. No hardware actions or new production changes this turn.
+
+### Assignment536 provenance clarification — accepted
+
+The capture plan did not bind the photometry patch list/script. Accept the
+reviewer's distinction between reproducible fixed-patch statistics and independently
+proved selection chronology. FLOOD_CAPTURE_GAIN.md now labels this exploratory and
+identifies the before-inspection claim as developer-reported, not proved
+preregistration. No raw data, statistics or acceptance outcomes changed. Assignment536
+also independently verified56563c1's904-test gate and capture reproduction; no
+new finding closure or broader qualification is inferred. This documentation-only
+clarification requires diff/privacy checks, not another unchanged Rust build.

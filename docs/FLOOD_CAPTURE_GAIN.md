@@ -66,7 +66,10 @@ and the existing host-window test do not establish synchronized exposure.
 
 All ten frames are averaged per camera for photometric inspection, without frame
 selection or alignment. Original frames remain intact. Fixed interior patches
-were chosen from the earlier face image before inspecting this capture:
+were reported by the developer as chosen from the earlier face image before
+inspection. Independent assignment536 confirms reproducibility, but the capture
+plan does not bind the patch list or photometry script; that selection chronology
+is not independently established. Treat these fixed patches as exploratory:
 
 | Camera / patch | Ambient A mean | Flood mean | Ambient B mean |
 | --- | ---: | ---: | ---: |
