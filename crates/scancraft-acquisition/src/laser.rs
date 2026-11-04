@@ -27,6 +27,7 @@ use std::{
         atomic::{AtomicBool, Ordering},
     },
 };
+mod cleanup;
 struct Native {
     capture: Capture,
     stop: StopToken,
@@ -81,28 +82,24 @@ pub fn scan(
         return Err("laser capture stopped before acquiring device ownership".into());
     }
     let lock = SessionLock::acquire().map_err(|e| e.to_string())?;
-    let mut lease = SettingsLease::capture(&plan.interfaces()).map_err(|e| e.to_string())?;
-    let mut gain = match options
+    let gain = options
         .ir_gain_raw
-        .map(|raw| ScopedIrGain::apply(&lock, raw))
+        .map(|raw| ScopedIrGain::capture(&lock, raw))
         .transpose()
+        .map_err(|e| e.to_string())?;
+    let lease = SettingsLease::capture(&plan.interfaces()).map_err(|e| e.to_string())?;
+    let mut settings = cleanup::Settings::new(lease, gain);
+    if let Some(gain) = settings.gain.as_mut()
+        && let Err(e) = gain.apply_requested()
     {
-        Ok(gain) => gain,
-        Err(e) => {
-            return combine(
-                Err(e.to_string()),
-                lease.restore().map_err(|e| e.to_string()),
-            );
-        }
-    };
+        return combine(Err(e.to_string()), settings.finish());
+    }
     let mut line = match options.illumination {
         Illumination::Preserve => None,
         Illumination::LineBooleanTrial => match ScopedLine::enable(&lock) {
             Ok(line) => Some(line),
             Err(e) => {
-                let stream_restore = lease.restore().map_err(|e| e.to_string());
-                let gain_restore = restore_gain(&mut gain);
-                return combine(combine(Err(e.to_string()), gain_restore), stream_restore);
+                return combine(Err(e.to_string()), settings.finish());
             }
         },
     };
@@ -150,15 +147,10 @@ pub fn scan(
                 .transpose()
                 .map(|_| ())
                 .map_err(|e| e.to_string());
-            let stream_restore = lease.restore().map_err(|e| e.to_string());
-            // Restore gain after formats/rates: setup may affect camera controls.
-            let gain_restore = restore_gain(&mut gain);
+            let settings_restore = settings.restore();
             combine(
-                combine(
-                    combine(combine(verified, gain_verified), line_restore),
-                    gain_restore,
-                ),
-                stream_restore,
+                combine(combine(verified, gain_verified), line_restore),
+                settings_restore,
             )
         },
         preview,
@@ -169,20 +161,7 @@ pub fn scan(
         .transpose()
         .map(|_| ())
         .map_err(|e| e.to_string());
-    let stream_restore = lease.restore().map_err(|e| e.to_string());
-    let gain_restore = restore_gain(&mut gain);
-    combine(
-        combine(combine(result, line_restore), gain_restore),
-        stream_restore,
-    )
-}
-
-fn restore_gain(gain: &mut Option<ScopedIrGain<'_>>) -> Result<()> {
-    gain.as_mut()
-        .map(|g| g.restore())
-        .transpose()
-        .map(|_| ())
-        .map_err(|e| e.to_string())
+    combine(combine(result, line_restore), settings.finish())
 }
 
 fn gain_observation(interface: u8, requested: i32, observed: i32) -> Result<Value> {

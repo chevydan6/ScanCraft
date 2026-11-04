@@ -5883,3 +5883,31 @@ The prior111 tail rejections have no measured STREAMOFF timestamp; causality rem
 unproven. GUI zero-frame startup and034accepted-image corruption remain unresolved.
 Hardware comparison pending035gain retry/drop correction. CodeRabbit review pending
 the complete lifecycle milestone; no independent finding is closed by this entry.
+
+## SCAN-REV-035 — accepted: coordinate stream retries and gain restoration
+
+Reviewed assignment591. The cached-gain retry/drop defect is legitimate.
+Changed acquisition laser.rs and new laser/cleanup.rs with cleanup/tests.rs;
+device ir_gain.rs and stream_group.rs. Snapshot gain before mutation, own both
+leases before applying gain, invalidate/reapply/read back both originals after
+stream attempts, consume final stream ownership before gain restoration, and
+retain stream/control errors. Drop uses the same order. Successful callback
+cleanup causes no extra writes after publication. Existing CLI apply API remains.
+
+Base0bb9f63 (the separate retirement correction, parent973fbc1). Final implementation
+commit is recorded in checkpoint/publication receipt. Five coordinator tests and
+one actual gain-loop test cover non-default originals8000/9000, resetting formats,
+first failure/successful retry, repeated failure, Drop/unwind, either gain failure,
+error retention, no extra writes after success and omitted gain. Full gate79685
+exit0:948passed/0failed/1ignored, fmtstrictClippyrelease. Earlier90365exit101 stopped
+on a test-only needless-range-loop lint; preserved and corrected. Focused90928
+exit0 covers the initial five coordinator and one device test.
+
+Private evidence gain-cleanup-retry-20261105 includes complete tested public source,
+source hashes, build logs and planned ABBA helper trial. Hardware preflight exits1
+before any device/service action because USB4-1 is absent; fresh sysfs inventory
+finds no Creality device. No new hardware correction/rate/accuracy claim. See
+docs/LASER_LIFECYCLE_VALIDATION.md. Independent verification/closure remains the
+reviewer's responsibility;034 and prior physical qualification gaps remain open.
+CodeRabbit usage18992exit1: allcapacity/billing/creditlookup_failed. No substantive
+or paid review. Preserve draft/owner merge requirements.

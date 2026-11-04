@@ -117,6 +117,13 @@ pub fn read(interface: u8) -> io::Result<i32> {
 impl<'lock> ScopedIrGain<'lock> {
     /// Requires the session lock for the whole capture/restoration lifetime.
     pub fn apply(lock: &'lock SessionLock, raw: i32) -> io::Result<Self> {
+        let mut lease = Self::capture(lock, raw)?;
+        lease.apply_requested()?;
+        Ok(lease)
+    }
+    /// Validate and snapshot both controls without changing either. Separating
+    /// acquisition from mutation lets a caller own dependent cleanup first.
+    pub fn capture(lock: &'lock SessionLock, raw: i32) -> io::Result<Self> {
         let mut lease = Self {
             _lock: lock,
             fds: Vec::new(),
@@ -140,8 +147,10 @@ impl<'lock> ScopedIrGain<'lock> {
                 restored: true,
             });
         }
-        apply_all(&mut lease.changes, |i, value| set(&lease.fds[i], value))?;
         Ok(lease)
+    }
+    pub fn apply_requested(&mut self) -> io::Result<()> {
+        apply_all(&mut self.changes, |i, value| set(&self.fds[i], value))
     }
     pub fn changes(&self) -> Vec<GainChange> {
         self.changes.clone()
@@ -150,6 +159,20 @@ impl<'lock> ScopedIrGain<'lock> {
     pub fn restore(&mut self) -> io::Result<()> {
         restore_all(&mut self.changes, |i, value| set(&self.fds[i], value))
     }
+    /// Formats/rates may have changed either control since a successful restore.
+    /// Reapply and read back both saved gains regardless of cached success.
+    pub fn restore_after_settings(&mut self) -> io::Result<()> {
+        restore_after_settings(&mut self.changes, |i, value| set(&self.fds[i], value))
+    }
+}
+fn restore_after_settings(
+    changes: &mut [GainChange],
+    write: impl FnMut(usize, i32) -> io::Result<()>,
+) -> io::Result<()> {
+    for change in changes.iter_mut() {
+        change.restored = false;
+    }
+    restore_all(changes, write)
 }
 impl Drop for ScopedIrGain<'_> {
     fn drop(&mut self) {
@@ -212,6 +235,35 @@ mod tests {
         assert_eq!(actual, [1000, 8000]);
         assert!(changes[0].restored);
         assert!(!changes[1].restored);
+    }
+    #[test]
+    fn settings_retry_invalidates_both_cached_gain_restorations() {
+        for failing in [None, Some(0), Some(1)] {
+            let mut changes = changes();
+            changes[0].original_raw = 8000;
+            changes[1].original_raw = 9000;
+            let mut actual = [1000; 2];
+            let mut attempted = Vec::new();
+            let result = restore_after_settings(&mut changes, |i, value| {
+                attempted.push(i);
+                if failing == Some(i) {
+                    return Err(invalid("injected readback failure"));
+                }
+                actual[i] = value;
+                Ok(())
+            });
+            assert_eq!(result.is_err(), failing.is_some());
+            assert_eq!(attempted, [1, 0]);
+            for (i, change) in changes.iter().enumerate() {
+                assert_eq!(change.restored, failing != Some(i));
+            }
+            restore_all(&mut changes, |i, value| {
+                actual[i] = value;
+                Ok(())
+            })
+            .unwrap();
+            assert_eq!(actual, [8000, 9000]);
+        }
     }
     #[test]
     fn gain_trial_honors_raw_range_steps_and_unavailable_flags() {

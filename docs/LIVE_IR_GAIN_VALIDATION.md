@@ -94,3 +94,11 @@ or reliable end-to-end scanning. Raw scans/device data remain outside Git.
 
 CodeRabbit capacity, billing and credit lookup returned `lookup_failed`. No
 substantive review or paid usage occurred; the change remains a draft for review.
+
+## Subsequent lifecycle correction
+
+The source-retirement and gain-restoration behavior above describes the original
+PR52 baseline. The [lifecycle follow-up](LASER_LIFECYCLE_VALIDATION.md) coordinates
+retirement and corrects SCAN-REV-035's format-retry/gain-cache interaction. It
+passes the 948-test software gate; new hardware comparison remains pending because
+the scanner was absent at preflight. Earlier hardware failures remain evidence.
