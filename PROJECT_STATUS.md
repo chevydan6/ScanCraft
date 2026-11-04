@@ -1,3 +1,22 @@
+## Experimental temporal marker support integrated — 2026-11-04
+
+An explicit recorded-workflow option now filters stereo alternatives against the
+last accepted marker cloud before checking uniqueness. Default behavior and the
+21 retained legacy-result files remain byte-identical. Existing geometry, coverage,
+residual and motion gates are preserved; all unsupported hypotheses stay visible.
+
+The real first-101-frame board replay improves from 70 to 101 accepted tracking
+updates, giving 51 integrated/50 tracking-only frames and 1,176 sparse candidates.
+The native GUI opens that result. Four stationary yellow-box samples also pass
+with independently checked tracking, geometry and fusion. Full source gate:
+923 passed, zero failed, one ignored; formatting/Clippy/release pass.
+
+The longer sampled rotation still loses tracking; this is not relocalization,
+verified physical marker identity, dimensional accuracy or a complete object scan.
+The option remains experimental and off by default. Independent review and
+substantive CodeRabbit review remain pending; no paid review was used. Details:
+[TEMPORAL_MARKER_SUPPORT.md](docs/TEMPORAL_MARKER_SUPPORT.md).
+
 ## Longer rotation replay exposes tracking loss — 2026-11-04
 
 The saved 900-frame board capture now has a full-interval diagnostic: 225 uniformly

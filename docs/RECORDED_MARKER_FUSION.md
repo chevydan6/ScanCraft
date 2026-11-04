@@ -179,3 +179,10 @@ physical scale and dimensions independently before permitting metric edit/export
 No new dependencies or geometry algorithms were introduced. CodeRabbit 0.9.2 quota
 lookup returned `lookup_failed`/exit 1; no review upload, paid usage or substantive
 review pass is claimed. Independent reviewer verification remains separate.
+## Optional temporal marker support
+
+The request may include `"temporal_marker_support": true` to test local support
+against the last accepted raw-camera marker cloud before mutual uniqueness.
+Omitting the field preserves previous results. All original geometry and tracking
+gates remain active; this is not marker identification or relocalization. See
+[implementation and real-data limits](TEMPORAL_MARKER_SUPPORT.md).
