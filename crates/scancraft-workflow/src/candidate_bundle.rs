@@ -151,6 +151,21 @@ fn load_inner(
     if candidates + failures + unmatched != queries {
         return Err("candidate query counters disagree".into());
     }
+    let domain_rejections = manifest
+        .get("domain_rejections")
+        .map(|value| {
+            let summary: scancraft_depth::laser_pair::DomainSummary =
+                serde_json::from_value(value.clone())?;
+            if manifest["uniqueness_scope"] != "retained_valid_domain_segments"
+                || summary.rejected_trace_vertices > 65536
+                || summary.rejected_trace_segments > 65536
+                || summary.rejected_sheet_projections > queries * 256
+            {
+                return Err(Error::from("invalid domain exclusion summary"));
+            }
+            Ok(summary)
+        })
+        .transpose()?;
     let artifacts = manifest["artifacts"]
         .as_array()
         .filter(|a| a.len() == 7)
@@ -199,6 +214,16 @@ fn load_inner(
     let geometry: StereoCalibration = serde_json::from_slice(&geometry.ok_or("missing geometry")?)?;
     geometry.validate()?;
     let request: Value = serde_json::from_slice(&request.ok_or("missing request")?)?;
+    let domain_requested = match request.get("retain_valid_domain_segments") {
+        None | Some(Value::Bool(false)) => false,
+        Some(Value::Bool(true)) => true,
+        _ => return Err("invalid domain policy in retained request".into()),
+    };
+    if domain_requested != domain_rejections.is_some()
+        || (!domain_requested && manifest.get("uniqueness_scope").is_some())
+    {
+        return Err("candidate domain policy and summary disagree".into());
+    }
     let observations: ObservationSummary =
         serde_json::from_slice(&observations.ok_or("missing observations")?)?;
     let points: CandidateData = serde_json::from_slice(&points.ok_or("missing points")?)?;
@@ -310,15 +335,20 @@ fn load_inner(
     before_final()?;
     guard.check()?;
     work.check()?;
+    let mut report = json!({"queries":queries,"candidate_points":candidates,
+        "query_failures":failures,"queries_without_unique_match":unmatched,"artifact_integrity_verified":true,
+        "retained_frame_bindings_verified":true,"historical_original_recordings_verified":false,
+        "numerical_recomputation_verified":false,"geometry_binding_verified":false,
+        "physical_accuracy_qualified":false,"units_verified":false});
+    if let Some(summary) = domain_rejections {
+        report["domain_rejections"] = serde_json::to_value(summary)?;
+        report["uniqueness_scope"] = json!("retained_valid_domain_segments");
+    }
     Ok(Loaded {
         positions,
         first_observations: indices,
         frames: frame_views,
-        report: json!({"queries":queries,"candidate_points":candidates,
-        "query_failures":failures,"queries_without_unique_match":unmatched,"artifact_integrity_verified":true,
-        "retained_frame_bindings_verified":true,"historical_original_recordings_verified":false,
-        "numerical_recomputation_verified":false,"geometry_binding_verified":false,
-        "physical_accuracy_qualified":false,"units_verified":false}),
+        report,
     })
 }
 

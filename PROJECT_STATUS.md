@@ -1,24 +1,23 @@
 # Project status
 
-Latest integration result: [full native recorded-pair processing fails](docs/NATIVE_LASER_DOMAIN_FAILURES.md).
-The existing workflow retains all2,206query errors and produces zero candidates.
-Native diagnostics localize268first-ray,546sheet-projection and1,392second-trace
-failures. Invalid vertices in unrelated image traces abort otherwise usable queries.
-Immediate priority is explicit calibrated-domain rejection/valid-segment handling,
-with preserved errors/provenance and no lens-limit widening or bridging across gaps.
+Latest correction: [explicit domain-aware recorded matching](docs/DOMAIN_BOUNDED_LASER_MATCHING.md)
+now processes the exact previously failing full-image Raptor pair. An opt-in mode
+retains valid contiguous segments and records every excluded vertex/segment/root.
+Strict replay remains byte-identical. No camera-domain expansion or box-dimension fit.
 
-Additional saved-board evidence supports the four frozen curved-sheet hypotheses in
-a new pose after a documented stronger marker mask. Original anchor/support/mask
-failures remain; no sheet refit or physical-accuracy claim. One point misclassified
-as stripe came from a marker outline narrowed by preprocessing. Original-pixel masks
-fix that diagnostic exclusion without changing geometry or quality limits.
+The native CLI and GUI produce336 diagnostic candidates, including the earlier201-point
+box stripe;135 other scene candidates are unqualified. All268 first-ray errors remain,
+with281 rejected trace vertices,279 segments and596 root projections. The native preview
+shows sparse fragments, not a complete measurable box. Physical units/calibration,
+object coverage, three measured trials and end-to-end editing/export remain unproven.
 
-The earlier private201-point box stripe remains a narrow experimental fragment, not
-an operational full-image/native-GUI or measured object scan. Owner dimensions stay
-held out. Production source remains ebb77a2; private probe fmt/Clippy/release and
-numerical/source checks pass. Independent522 verified prior2552411 evidence/CI, not
-this new integration failure. Full895-test source gate still applies. CodeRabbit
-substantive coverage is outstanding. No new hardware or calibration activation.
+Full gate:904passed,0failed,1ignored; fmt/strictClippy/release PASS. Developer numerical
+checks reconcile all4,040 crossings and every candidate. Exact projected-root budget
+boundary and original eight-artifact strict compatibility pass. No new hardware or
+calibration activation. SCAN-REV-033 accepted and submitted for independent verification;
+only the reviewer may close it. CodeRabbit included quota/billing lookup fails, so no
+paid review or substantive automated completion is claimed. Immediate priority is
+calibrated physical scale and wider genuine object coverage, not editing features.
 
 Current physical readiness: the owner's measured yellow box was captured in both
 scanning cameras. [Scoped line + gain capture](docs/LINE_CAPTURE_GAIN.md) saves/replays

@@ -83,6 +83,16 @@ pub struct Matches {
     pub work: usize,
 }
 
+pub mod domain;
+
+struct MatchingInput {
+    first_pixel: [f64; 2],
+    trace_count: usize,
+    vertices: usize,
+    projections: Vec<SheetProjection>,
+    config: Config,
+}
+
 pub struct PreparedMatcher<'a> {
     geometry: &'a StereoCalibration,
     first: PreparedCamera<'a>,
@@ -283,22 +293,56 @@ impl<'a> PreparedMatcher<'a> {
             None => self.project_sheets(first_pixel, sheets, cancelled)?,
         };
         let constraint = self.epipolar.for_pixel(first_pixel, config.intersection);
-        let mut results = Vec::with_capacity(traces.len());
+        self.match_intersections(
+            MatchingInput {
+                first_pixel,
+                trace_count: traces.len(),
+                vertices,
+                projections,
+                config,
+            },
+            |trace_index, cancelled| match cache {
+                Some(cache) => constraint.intersections_cached(&cache[trace_index], cancelled),
+                None => self.epipolar.intersections(
+                    first_pixel,
+                    &traces[trace_index],
+                    config.intersection,
+                    cancelled,
+                ),
+            },
+            cancelled,
+        )
+    }
+
+    // Shared selection/accounting for strict traces and explicitly rejected domain segments.
+    fn match_intersections<C: FnMut() -> bool>(
+        &self,
+        input: MatchingInput,
+        mut intersections: impl FnMut(usize, &mut C) -> Result<epipolar_trace::Intersections, String>,
+        cancelled: &mut C,
+    ) -> Result<Matches, String> {
+        fn check(cancelled: &mut impl FnMut() -> bool) -> Result<(), String> {
+            if cancelled() {
+                Err("laser trace matching cancelled".into())
+            } else {
+                Ok(())
+            }
+        }
+        let MatchingInput {
+            first_pixel,
+            trace_count,
+            vertices,
+            projections,
+            config,
+        } = input;
+        let mut results = Vec::with_capacity(trace_count);
         let mut work = vertices;
         let mut supported_combinations = 0;
         let mut selected = None;
         let mut ambiguous = false;
-        for (trace_index, trace) in traces.iter().enumerate() {
+        for trace_index in 0..trace_count {
             check(cancelled)?;
-            let intersections = match cache {
-                Some(cache) => constraint.intersections_cached(&cache[trace_index], cancelled)?,
-                None => self.epipolar.intersections(
-                    first_pixel,
-                    trace,
-                    config.intersection,
-                    cancelled,
-                )?,
-            };
+            let intersections = intersections(trace_index, cancelled)?;
             ambiguous |= !intersections.ambiguous_segments.is_empty();
             let mut crossings = Vec::with_capacity(intersections.intersections.len());
             for (crossing_index, intersection) in
@@ -413,7 +457,7 @@ mod tests {
     use super::*;
     use crate::{Brown5, CameraModel, stereo::RigidPose};
 
-    fn fixture() -> (
+    pub(super) fn fixture() -> (
         StereoCalibration,
         TriangulationLimits,
         Config,

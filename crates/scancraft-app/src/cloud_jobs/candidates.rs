@@ -44,6 +44,12 @@ pub(super) fn view_at(path: &Path, index: u64, work: &WorkControl) -> Result<Rep
         ),
         Some(preview),
     );
+    if let Some(exclusions) = loaded.report.get("domain_rejections") {
+        result.message.push_str(&format!(
+            " Domain exclusions: {} trace vertices, {} segments, {} sheet projections. Uniqueness applies only within the retained domain; physical identity remains unverified.",
+            exclusions["rejected_trace_vertices"], exclusions["rejected_trace_segments"],
+            exclusions["rejected_sheet_projections"]));
+    }
     if let Some(total) = loaded.report["pair_count"].as_u64() {
         result.message = format!(
             "Saved capture · pair {} of {total} · {}",
@@ -194,6 +200,55 @@ mod tests {
             second_index: 0,
             request: t.0.join("request.json"),
         }
+    }
+    #[test]
+    fn domain_diagnostics_are_visible_and_reopen_without_metric_promotion() {
+        let t = Temp::new();
+        let inputs = fixture(&t);
+        let mut request: Value =
+            serde_json::from_slice(&fs::read(&inputs.request).unwrap()).unwrap();
+        request["retain_valid_domain_segments"] = json!(true);
+        fs::write(&inputs.request, serde_json::to_vec(&request).unwrap()).unwrap();
+        let mut geometry: Value =
+            serde_json::from_slice(&fs::read(&inputs.geometry).unwrap()).unwrap();
+        geometry["right"]["valid_radius"] = json!(0.16);
+        fs::write(&inputs.geometry, serde_json::to_vec(&geometry).unwrap()).unwrap();
+        let target = t.0.join("domain");
+        let result = process(&inputs, &target, &WorkControl::default()).unwrap();
+        assert_eq!(result.preview.unwrap().total, 3);
+        assert!(
+            result
+                .message
+                .contains("Domain exclusions: 1 trace vertices, 1 segments, 2 sheet projections")
+        );
+        assert!(
+            result
+                .message
+                .contains("Uniqueness applies only within the retained domain")
+        );
+        let reopened = view(&target, &WorkControl::default()).unwrap();
+        assert_eq!(reopened.preview.unwrap().total, 3);
+        assert!(
+            reopened
+                .message
+                .contains("physical identity remains unverified")
+        );
+        // A missing/malformed summary must not hide the partial-domain policy.
+        let path = target.join("manifest.json");
+        let manifest: Value = serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
+        for bad in [
+            Value::Null,
+            json!({"rejected_trace_vertices":65537,"rejected_trace_segments":1,"rejected_sheet_projections":2}),
+        ] {
+            let mut value = manifest.clone();
+            value["domain_rejections"] = bad;
+            fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
+            assert!(view(&target, &WorkControl::default()).is_err());
+        }
+        let mut value = manifest;
+        value.as_object_mut().unwrap().remove("domain_rejections");
+        fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
+        assert!(view(&target, &WorkControl::default()).is_err());
     }
     #[test]
     fn processing_publishes_verified_diagnostics_and_keeps_editable_state_untouched() {

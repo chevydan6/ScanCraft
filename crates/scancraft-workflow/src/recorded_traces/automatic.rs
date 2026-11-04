@@ -27,6 +27,8 @@ use std::{
 #[serde(deny_unknown_fields)]
 struct Request {
     schema_version: u32,
+    #[serde(default)]
+    retain_valid_domain_segments: bool,
     expected_frames: [ExpectedFrame; 2],
     reflect_x: [bool; 2],
     maximum_host_delta_us: u64,
@@ -90,7 +92,7 @@ impl Diagnostics<'_> {
                 &self.frames[1],
             )?,
         ];
-        let report = json!({"schema_version":1,"kind":"recorded_sheet_supported_matching","sources":sources,
+        let mut report = json!({"schema_version":1,"kind":"recorded_sheet_supported_matching","sources":sources,
             "first":observation_report(&info.sides[0]),"second":observation_report(&info.sides[1]),
             "first_query_observation_indices":info.first_query_observation_indices,"second_matcher_trace_ids":info.second_matcher_trace_ids,
             "second_matcher_trace_pixels":info.second_matcher_trace_pixels,"reflect_x":self.settings.reflect_x,
@@ -100,6 +102,10 @@ impl Diagnostics<'_> {
             "signal_units":if self.settings.detection.opening_radius.is_some(){"raw minus row morphological opening, 8-bit contrast"}else{"original raw 8-bit intensity"},
             "saturation_units":"original raw 8-bit intensity","raw_sensor_pts_equal":true,"clock_domains_verified":false,"synchronization_verified":false,
             "geometry_binding_verified":false,"geometry_translation_units_verified":false,"physical_accuracy_qualified":false,"projector_line_identity_verified":false,"calibration_activated":false});
+        if let Some(rejections) = info.domain_rejections {
+            report["domain_rejections"] = serde_json::to_value(rejections)?;
+            report["uniqueness_scope"] = json!("retained_valid_domain_segments");
+        }
         self.work.check()?;
         let partial = staging(self.target)?;
         self.partial = Some(partial.clone());
@@ -163,6 +169,10 @@ impl Diagnostics<'_> {
             },
         )?);
         let mut manifest = json!({"schema_version":1,"kind":"recorded_sheet_supported_matching","queries":report.queries,"candidate_points":report.candidates.len(),"query_failures":report.query_failures,"queries_without_unique_match":report.queries_without_unique_match,"conservative_total_work_bound":report.admission.conservative_total_work_bound,"artifacts":self.artifacts,"physical_accuracy_qualified":false,"units_verified":false,"geometry_binding_verified":false,"projector_line_identity_verified":false,"calibration_activated":false});
+        if let Some(summary) = report.domain_rejections {
+            manifest["domain_rejections"] = serde_json::to_value(summary)?;
+            manifest["uniqueness_scope"] = json!("retained_valid_domain_segments");
+        }
         if report.admission.uses_projected_roots {
             manifest["coarse_total_work_bound"] = json!(report.admission.coarse_total_work_bound);
             manifest["work_bound_method"] = json!("per_pixel_projected_roots");
@@ -191,7 +201,12 @@ impl Sink for Diagnostics<'_> {
             .matches
             .as_mut()
             .ok_or("missing diagnostic match writer")?;
-        serde_json::to_writer(&mut *out,&json!({"first_observation":query.first_observation,"first_calibration_pixel":query.first_calibration_pixel,"result":query.result})).map_err(|e|e.to_string())?;
+        let mut record = json!({"first_observation":query.first_observation,"first_calibration_pixel":query.first_calibration_pixel,"result":query.result});
+        if let Some(rejections) = &query.rejected_projections {
+            record["rejected_projections"] =
+                serde_json::to_value(rejections).map_err(|e| e.to_string())?;
+        }
+        serde_json::to_writer(&mut *out, &record).map_err(|e| e.to_string())?;
         out.write_all(b"\n").map_err(|e| e.to_string())
     }
 }
@@ -237,7 +252,8 @@ pub fn run(inputs: &Inputs, target: &Path, work: &WorkControl) -> Result<Value, 
         maximum_queries: request.maximum_queries,
         maximum_total_work: request.maximum_total_work,
     };
-    let processor = laser_pair::Processor::new(&geometry, &settings)?;
+    let processor = laser_pair::Processor::new(&geometry, &settings)?
+        .with_valid_domain_segments(request.retain_valid_domain_segments);
     let mut sources = [
         Playback::open(&inputs.first_recording, work)?,
         Playback::open(&inputs.second_recording, work)?,
@@ -343,6 +359,48 @@ mod tests {
             .lines()
             .map(|l| serde_json::from_str(l).unwrap())
             .collect()
+    }
+    #[test]
+    fn explicit_domain_policy_preserves_valid_results_and_persists_diagnostics() {
+        let temp = Temp::new();
+        let (inputs, mut request) = fixture(&temp);
+        let strict = temp.0.join("strict");
+        let baseline = run(&inputs, &strict, &WorkControl::default()).unwrap();
+        assert!(baseline.get("domain_rejections").is_none());
+        request["retain_valid_domain_segments"] = json!(true);
+        fs::write(&inputs.request, serde_json::to_vec(&request).unwrap()).unwrap();
+        let target = temp.0.join("domain");
+        let manifest = run(&inputs, &target, &WorkControl::default()).unwrap();
+        assert_eq!(
+            manifest["domain_rejections"],
+            json!({"rejected_trace_vertices":0,"rejected_trace_segments":0,"rejected_sheet_projections":0})
+        );
+        assert_eq!(manifest["candidate_points"], baseline["candidate_points"]);
+        assert_eq!(
+            fs::read(strict.join("candidate-points.json")).unwrap(),
+            fs::read(target.join("candidate-points.json")).unwrap()
+        );
+        let observed = read(target.join("observations.json"));
+        assert_eq!(
+            observed["domain_rejections"]["valid_runs"],
+            json!([{"trace_index":0,"first_vertex":0,"vertex_count":32}])
+        );
+        for (a, mut b) in lines(strict.join("matches.ndjson"))
+            .into_iter()
+            .zip(lines(target.join("matches.ndjson")))
+        {
+            assert_eq!(
+                b.as_object_mut().unwrap().remove("rejected_projections"),
+                Some(json!([]))
+            );
+            assert_eq!(a, b);
+        }
+        let loaded = crate::candidate_bundle::load(&target, &WorkControl::default()).unwrap();
+        assert_eq!(
+            loaded.report["domain_rejections"],
+            manifest["domain_rejections"]
+        );
+        assert_eq!(loaded.report["numerical_recomputation_verified"], false);
     }
     #[test]
     fn whole_recordings_produce_known_geometry_and_complete_lineage_without_seeds() {

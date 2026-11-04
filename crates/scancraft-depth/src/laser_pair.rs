@@ -132,6 +132,7 @@ pub struct PairInfo<'a> {
     pub second_matcher_trace_ids: &'a [usize],
     pub second_matcher_trace_pixels: &'a [Vec<[f64; 2]>],
     pub admission: Admission,
+    pub domain_rejections: Option<&'a laser_trace::domain::TraceRejections>,
 }
 #[derive(Debug, Clone, Copy, Serialize)]
 pub struct Admission {
@@ -144,6 +145,7 @@ pub struct Query {
     pub first_observation: usize,
     pub first_calibration_pixel: [f64; 2],
     pub result: Result<Matches, String>,
+    pub rejected_projections: Option<Vec<laser_trace::domain::RejectedProjection>>,
 }
 /// A required journal may return an error; the processing call stops without
 /// cancelling WorkControl or touching a device. Optional display consumers should
@@ -187,6 +189,14 @@ pub struct QueryOutcome {
     pub first_calibration_pixel: [f64; 2],
     pub outcome: Outcome,
 }
+/// Explicit exclusions; numerical uniqueness is conditional on the retained domain.
+#[derive(Debug, Default, Clone, Copy, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct DomainSummary {
+    pub rejected_trace_vertices: usize,
+    pub rejected_trace_segments: usize,
+    pub rejected_sheet_projections: usize,
+}
 #[derive(Debug, Serialize)]
 pub struct Report {
     pub cameras: [CameraSummary; 2],
@@ -194,6 +204,8 @@ pub struct Report {
     pub query_failures: usize,
     pub queries_without_unique_match: usize,
     pub admission: Admission,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub domain_rejections: Option<DomainSummary>,
     pub candidates: Vec<Candidate>,
     /// One outcome per query. Full crossings/supports are streamed to Sink;
     /// using () explicitly discards those details, not these errors/counters.
@@ -228,6 +240,7 @@ pub struct Processor<'a> {
     settings: &'a Settings,
     matcher: PreparedMatcher<'a>,
     parallel_detection: bool,
+    retain_valid_domain_segments: bool,
 }
 impl<'a> Processor<'a> {
     pub fn new(geometry: &'a StereoCalibration, settings: &'a Settings) -> Result<Self, String> {
@@ -236,8 +249,15 @@ impl<'a> Processor<'a> {
             geometry,
             settings,
             matcher: PreparedMatcher::new(geometry, settings.triangulation)?,
+            retain_valid_domain_segments: false,
             parallel_detection: std::thread::available_parallelism().is_ok_and(|n| n.get() > 1),
         })
+    }
+    /// Opt in to explicitly journaled domain exclusions. Strict matching remains
+    /// the default. Excluded observations never become inferred geometry.
+    pub fn with_valid_domain_segments(mut self, enabled: bool) -> Self {
+        self.retain_valid_domain_segments = enabled;
+        self
     }
     /// Validate both raw GREY frames, PTS equality and host window; compute all
     /// supported observations with bounded output. Per-query numerical errors
@@ -332,7 +352,25 @@ impl<'a> Processor<'a> {
         if vertices > 65536 {
             return Err("automatic trace vertex limit exceeded".into());
         }
-        let prepared_queries = if traces.is_empty() {
+        let domain_queries = if self.retain_valid_domain_segments && !traces.is_empty() {
+            Some(self.matcher.prepare_domain_traces(
+                &traces,
+                &self.settings.sheets,
+                self.settings.matching,
+                &mut || work.check().is_err(),
+            )?)
+        } else {
+            None
+        };
+        let mut domain_rejections = self.retain_valid_domain_segments.then(|| {
+            let rejected = domain_queries.as_ref().map(|q| q.rejections());
+            DomainSummary {
+                rejected_trace_vertices: rejected.map_or(0, |r| r.vertices.len()),
+                rejected_trace_segments: rejected.map_or(0, |r| r.segments.len()),
+                rejected_sheet_projections: 0,
+            }
+        });
+        let prepared_queries = if traces.is_empty() || self.retain_valid_domain_segments {
             None
         } else {
             Some(self.matcher.prepare_traces(
@@ -350,8 +388,29 @@ impl<'a> Processor<'a> {
         // inputs. When it rejects, count actual projected roots before any matching.
         let mut total_work_bound = coarse_work_bound;
         let mut prepared_pixels = None;
+        let mut domain_pixels = None;
         let mut projection_failures = 0usize;
-        if coarse_work_bound > self.settings.maximum_total_work {
+        if coarse_work_bound > self.settings.maximum_total_work
+            && let Some(prepared) = &domain_queries
+        {
+            total_work_bound = 0;
+            let mut pixels = Vec::with_capacity(first_indices.len());
+            for (query, &index) in first_indices.iter().enumerate() {
+                work.update(Stage::Validating, query, first_indices.len())?;
+                let pixel = map_pixel(0, sides[0].detections.observations[index].pixel)?;
+                let prepared = prepared.prepare_pixel(pixel, &mut || work.check().is_err());
+                work.check()?;
+                projection_failures += usize::from(prepared.preparation_failed());
+                total_work_bound = total_work_bound
+                    .checked_add(prepared.work_bound())
+                    .ok_or("automatic work bound overflow")?;
+                if total_work_bound > self.settings.maximum_total_work {
+                    return Err("automatic total work budget exceeded before matching".into());
+                }
+                pixels.push(prepared);
+            }
+            domain_pixels = Some(pixels.into_iter());
+        } else if coarse_work_bound > self.settings.maximum_total_work {
             let Some(Ok(prepared)) = &prepared_queries else {
                 return Err("automatic total work budget exceeded before matching".into());
             };
@@ -382,7 +441,7 @@ impl<'a> Processor<'a> {
         let admission = Admission {
             coarse_total_work_bound: coarse_work_bound,
             conservative_total_work_bound: total_work_bound,
-            uses_projected_roots: prepared_pixels.is_some(),
+            uses_projected_roots: prepared_pixels.is_some() || domain_pixels.is_some(),
             projected_root_preparation_failures: projection_failures,
         };
         sink.begin(PairInfo {
@@ -391,6 +450,7 @@ impl<'a> Processor<'a> {
             second_matcher_trace_ids: &trace_ids,
             second_matcher_trace_pixels: &traces,
             admission,
+            domain_rejections: domain_queries.as_ref().map(|q| q.rejections()),
         })?;
         work.check()?;
         let mut candidates = Vec::new();
@@ -400,18 +460,43 @@ impl<'a> Processor<'a> {
         for (query, &index) in first_indices.iter().enumerate() {
             work.update(Stage::Matching, query, first_indices.len())?;
             let pixel = map_pixel(0, sides[0].detections.observations[index].pixel)?;
-            let result = match &mut prepared_pixels {
-                Some(pixels) => match pixels.next().ok_or("inconsistent prepared query count")? {
-                    Ok(pixel) => pixel.execute(&mut || work.check().is_err()),
-                    Err(error) => Err(error),
-                },
-                None => match &prepared_queries {
-                    None => Err("no supported second-camera traces".into()),
-                    Some(Err(error)) => Err(error.clone()),
-                    Some(Ok(prepared)) => {
-                        prepared.match_pixel(pixel, &mut || work.check().is_err())
-                    }
-                },
+            let domain_result = if let Some(pixels) = &mut domain_pixels {
+                Some(
+                    pixels
+                        .next()
+                        .ok_or("inconsistent prepared domain query count")?
+                        .execute(&mut || work.check().is_err()),
+                )
+            } else {
+                domain_queries.as_ref().map(|q| {
+                    q.prepare_pixel(pixel, &mut || work.check().is_err())
+                        .execute(&mut || work.check().is_err())
+                })
+            };
+            let (result, rejected_projections) = if let Some(output) = domain_result {
+                if let Some(summary) = &mut domain_rejections {
+                    summary.rejected_sheet_projections += output.rejected_projections.len();
+                }
+                (output.result, Some(output.rejected_projections))
+            } else {
+                (
+                    match &mut prepared_pixels {
+                        Some(pixels) => {
+                            match pixels.next().ok_or("inconsistent prepared query count")? {
+                                Ok(pixel) => pixel.execute(&mut || work.check().is_err()),
+                                Err(error) => Err(error),
+                            }
+                        }
+                        None => match &prepared_queries {
+                            None => Err("no supported second-camera traces".into()),
+                            Some(Err(error)) => Err(error.clone()),
+                            Some(Ok(prepared)) => {
+                                prepared.match_pixel(pixel, &mut || work.check().is_err())
+                            }
+                        },
+                    },
+                    self.retain_valid_domain_segments.then(Vec::new),
+                )
             };
             work.check()?;
             let outcome = match &result {
@@ -462,6 +547,7 @@ impl<'a> Processor<'a> {
                 first_observation: index,
                 first_calibration_pixel: pixel,
                 result,
+                rejected_projections,
             })?;
             work.check()?;
             outcomes.push(QueryOutcome {
@@ -504,6 +590,7 @@ impl<'a> Processor<'a> {
             query_failures: failures,
             queries_without_unique_match: no_unique,
             admission,
+            domain_rejections,
             candidates,
             outcomes,
             raw_sensor_pts_equal: true,

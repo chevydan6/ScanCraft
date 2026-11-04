@@ -1,5 +1,11 @@
 # Architecture
 
+`laser_trace::domain` adds explicit contiguous-domain preparation around existing
+numerical matching. `laser_pair::Processor` selects it via an opt-in builder; the
+recorded adapter persists all excluded vertices/segments/roots and the candidate
+viewer displays their counts. Strict APIs and live defaults remain unchanged. See
+[contracts, resource bounds and real-data evidence](docs/DOMAIN_BOUNDED_LASER_MATCHING.md).
+
 `calibration::planar_pose` fits one six-parameter planar pose with a fixed lens,
 reusing native homography initialization, Brown derivatives and normal blocks.
 `workflow::planar_pose` and `validate-planar-pose` retain exact inputs and diagnostic
