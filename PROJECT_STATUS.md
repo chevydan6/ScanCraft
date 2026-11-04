@@ -1,3 +1,28 @@
+# Accepted image integrity investigation — 2026-11-04
+
+Accepted-buffer and recording CRC success do not establish intact image content.
+Current box recordings contain visible displaced strips and exact duplicate full
+12,276-byte blocks in 12 of 980 tested unmonitored line images. The diagnostic is
+not exhaustive and is not a new production filter. Four subsequent monitored
+captures did not reproduce that duplication: all 960 accepted images match USB
+payloads byte for byte. Truncation and startup failures remain; all eight ongoing
+rejected buffers already have matching short lengths in the monitored stream.
+Cause of the earlier duplication is unresolved. Lowering FPS did not cure rejection.
+
+All ten native capture commands complete and replay; checked device state, saved
+formats and media service restore. No application, driver or firmware change.
+Private raw evidence is retained; only sanitized documentation is published.
+The box is visible; rotation offered but not confirmed started. No new complete
+point cloud, physical-scale or dimensional-accuracy qualification.
+
+See [accepted image evidence and reproduction](docs/RAPTOR_ACCEPTED_IMAGE_INTEGRITY.md).
+Reviewer567 independently verified PR49 at d91fc4f:935 tests/0failed/1ignored,
+formatting/strictClippy/release, recorded replay/native GUI and both exact-head CI
+runs success. That does not qualify live scanning or these new hardware findings.
+Next: audit calibration/reconstruction inputs for repeated payloads and locate a
+reproduced duplication incident before claiming reliable rotating-object geometry.
+Full mission remains incomplete; no merge or review gate bypass.
+
 # Recorded recovery connected and reopened — 2026-11-04
 
 The recorded marker/laser workflow now calls the session recovery core when

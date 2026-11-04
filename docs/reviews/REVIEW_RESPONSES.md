@@ -5608,3 +5608,31 @@ receipt/checkpoint. Persistent reads check consistency,notICP/opticalidentity or
 physicaltruth. Realwrong-reference robustness, globalrecovery, livepipeline,
 calibratedunits/accuracy/boxcoverage/repeats and all prior qualification remainopen.
 Only independentreviewer may verify/close findings; its records remain untouched.
+
+
+## DEV-ACCEPTED-IMAGE-INTEGRITY — hardware evidence, 2026-11-04
+
+Developer observation, not a reviewer finding or independent closure. Accept
+reviewer567's exact PR49 verification and its remaining acquisition/physical
+qualification requirements. Application source stays at d91fc4f; new changes are
+PROJECT_STATUS.md, RAPTOR_ACCEPTED_IMAGE_INTEGRITY.md and this response only.
+Publication commit and private manifest are retained in the recovery checkpoint.
+
+Original native accepted images visibly contain displaced strips; independent
+raw parsing and exact byte comparison find repeated full12276-byte blocks in
+12/980 unmonitored line images. This is a limited diagnostic, not a generalized
+corruption rate or production rejection rule. A first monitored120pair capture
+and three further120pair captures retain all errors: all960accepted images equal
+USBpayload bytes; duplicate signature not reproduced there. All8ongoing-rejected
+images have exactly matching monitored short lengths. Startup bursts persist.
+No causal attribution, silent repair, threshold relaxation or driver change.
+
+All10native capture/replay receipts and5roots' planned input hashes/restoration
+checks pass;30native PNG exports equal original raw pixels and CRCs. Tests at
+unchangedsource remain935/0/1 independently verified567; no fresh Rust gate run
+claimed for documentation. Private analysis/capture scripts, failures, recordings
+and traces retained outside public Git. No actual rotating sequence or measured
+whole-object scan established. Existing CodeRabbit quota lookup failure remains
+unresolved; no substantive or paid review claimed. Independent reviewer records
+untouched. Next audit existing calibration inputs and reproduce accepted-image
+duplication with adequate transport evidence; physical metrology remains unqualified.
