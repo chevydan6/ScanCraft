@@ -5208,3 +5208,91 @@ physical correspondence/calibration uncertainty, same-pose short acquisitions on
 not three qualified complete scans or metric edit/export. Owner dimensions remain
 held out. Additional independent calibration/scale and physical-edge evidence remain
 priorities; no new independent finding identifier or closure invented.
+
+
+## DEV-FLOOD-GAIN — accepted acquisition priority, scoped implementation
+
+Weak box-edge contrast prevented reliable corner measurement. The earlier flood
+capture usedgain1000 while recentambient used15000; add an explicit optional gain
+for a controlled equal-gain comparison. `capture_options.rs` renames/reuses the line
+parser; `main.rs` shares it across line/flood; `stereo_probe::record_flood_gain`
+delegates to the existing scoped gain+flood path. Existing device bounds/readbacks,
+restoration, defaults, formats and reconstruction remain unchanged. No new dependency.
+
+Changed source: CLI capture_options (renamed line_options), main, stereo_probe and
+native_laser_preflight tests. Documentation: FLOOD_CAPTURE_GAIN.md, LINE_CAPTURE_GAIN.md
+source-path update, PROJECT_STATUS and this response. Development branch
+dev/flood-capture-gain from6fa18dc; exact implementation/publication hashes follow in
+Git and the private commit binding. No independent finding identifier is invented.
+
+Focused preflight passes bothcommands/14invalid-option-or-rate cases beforehardware.
+Full904passed/0failed/1ignored,fmt/strictClippy/release PASS. ActualABA capture atgain15000
+saves/replays60frames and restores7GETstates/formats/media service. Flood improves
+rawpatch brightness and visibleedgecontrast;18scalar photometric checks pass. Final
+ambientongoing1/1rejects/gaps retained; no transportqualification claimed. All original
+capture/probe/source/binary bindings and harness failures are in the449-file manifest
+linked by FLOOD_CAPTURE_GAIN.md. No source changes after the verified build.
+
+Corner diagnostic still fails: no complete radius5or10 refinededge, rawseedheight
+41.305892RAW is not physical metrology. Three acceptedpairs reproduce numerically;
+no model/scale/boxdimension fit or threshold relaxation. Next measure actual planes
+or better-supported physicaledges with uncertainty; no complete scan or accuracy
+claim. Reviewer alone verifies findings and any closure. Paid review, merge and
+protection changes remain unused; CodeRabbit availability recorded at publication.
+
+## DEV-SUPPORT-PLANE — experimental physical-evidence follow-up
+
+Developer diagnostic, not a new independent finding or closure. Accepted the need
+for actual supporting-plane evidence before treating stationary top geometry as
+measurable height. Application source remains56563c1; changed documentation:
+BOX_SUPPORT_PLANE.md and this response. Exact documentation commit is recorded in
+Git on dev/flood-capture-gain (PR40).
+
+Private native adapters reuse existing component, shape, stereo and plane methods;
+fmt/strict release Clippy/build pass. Saved real flood frames yield19/18/18 mutual
+unique table hypotheses at thresholds80/100/120. All three planes fail original
+0.2RMS/0.5maximumRAW gate. All101 accepted stereo pairs reconcile independently
+(maximum2.378e-9RAW), native plane residual differences<=1.422e-13RAW. Full errors,
+alternatives, initial work-limit failures and summary-serialization failure remain
+in the90-file manifest linked from the report. No application source or original sensor input edited.
+
+Conditional top distances and no-warp image proximity are explicitly unqualified;
+no metric height, scale fit, correspondence certification or complete scan claim.
+All thresholds/trials retained, no point trimming or best-truth selection. Next
+address marker identity/centroid uncertainty and independent physical calibration,
+then complete coverage/tracking. Reviewer exclusively verifies/closes findings;
+reviewer files untouched. No hardware actions or new production changes this turn.
+
+### Assignment536 provenance clarification — accepted
+
+The capture plan did not bind the photometry patch list/script. Accept the
+reviewer's distinction between reproducible fixed-patch statistics and independently
+proved selection chronology. FLOOD_CAPTURE_GAIN.md now labels this exploratory and
+identifies the before-inspection claim as developer-reported, not proved
+preregistration. No raw data, statistics or acceptance outcomes changed. Assignment536
+also independently verified56563c1's904-test gate and capture reproduction; no
+new finding closure or broader qualification is inferred. This documentation-only
+clarification requires diff/privacy checks, not another unchanged Rust build.
+
+## DEV-MARKER-TRACKING — evidence favors reusing existing tracking
+
+Developer investigation; no independent finding identifier/status change. Tested
+cross-threshold stereo consistency on all8 eligible genuine flood frame pairs.
+802accepted stereo results and all24 plane fits reconcile independently. All plane
+gates still fail; another bad hypothesis survives all3 thresholds. No justification
+to promote this experimental filter as physical identity or a necessary rewrite.
+
+Existing native Tracker accepts all42 later updates across6 stationary sequences;
+first anchors excluded from that count. Independent nearest-neighbor/SVD ICP
+reproduces RMS, bidirectional coverage and composed poses within1.365e-12. All point
+exclusions retained; accepted references still contain full input clouds, so pose
+acceptance does not certify every point. No marker points fused into object geometry.
+Private adapter fmt/strictClippy/release passes; application source unchanged56563c1,
+previous904-test gate applies. See MARKER_TRACKING_VALIDATION.md and its218-file
+manifest for exact sources/limits/results/private bindings. No new hardware action.
+
+Changed docs: MARKER_TRACKING_VALIDATION.md, PROJECT_STATUS.md and this response;
+exact documentation commits recorded on dev/flood-capture-gain/PR40. Next use saved
+consecutive rotating-board data for motion/recovery before integration into actual
+laser fusion. Physical scale, fullscan and accuracy still unqualified. Independent
+reviewer owns verification/closure. No paid CodeRabbit usage or merge performed.

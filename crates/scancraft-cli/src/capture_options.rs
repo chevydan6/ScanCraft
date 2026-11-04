@@ -1,4 +1,4 @@
-//! Optional line-capture controls. Device-reported gain bounds remain authoritative.
+//! Shared optional illumination-capture controls. Device gain bounds remain authoritative.
 pub fn parse(args: &[String]) -> Result<(u32, Option<i32>), String> {
     let mut fps = None;
     let mut gain = None;
@@ -15,7 +15,7 @@ pub fn parse(args: &[String]) -> Result<(u32, Option<i32>), String> {
         }
     }
     if !remainder.is_empty() {
-        return Err("line capture option requires a value".into());
+        return Err("capture option requires a value".into());
     }
     Ok((fps.unwrap_or(50), gain))
 }

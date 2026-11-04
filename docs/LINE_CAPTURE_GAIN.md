@@ -8,7 +8,7 @@ unchanged, including default 50 FPS. Both flag orders are accepted; duplicate,
 unknown, missing and malformed flags are rejected. Raw gain is not a physical gain
 unit, laser energy setting or projector-mode selection.
 
-Sources: `crates/scancraft-cli/src/line_options.rs::parse`, the command dispatch in
+Sources: `crates/scancraft-cli/src/capture_options.rs::parse`, the command dispatch in
 `main.rs`, and `stereo_probe.rs::record_line_gain`/`record_trial`. The wrapper passes
 `Some(gain)` with `IlluminationTrial::Line` to the existing capture implementation.
 `scancraft-device::ir_gain::ScopedIrGain` and `control::line_trial::ScopedLine`

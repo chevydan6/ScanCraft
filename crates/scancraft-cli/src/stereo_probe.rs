@@ -371,6 +371,15 @@ pub fn record_gain(
 pub fn record_flood(count: usize, fps: u32, target: &Path) -> Result<Value, String> {
     record_trial(count, fps, target, None, IlluminationTrial::Flood)
 }
+/// Combine scoped flood and gain leases; both restore before publication.
+pub fn record_flood_gain(
+    count: usize,
+    fps: u32,
+    target: &Path,
+    gain: i32,
+) -> Result<Value, String> {
+    record_trial(count, fps, target, Some(gain), IlluminationTrial::Flood)
+}
 pub fn record_line(count: usize, fps: u32, target: &Path) -> Result<Value, String> {
     record_trial(count, fps, target, None, IlluminationTrial::Line)
 }

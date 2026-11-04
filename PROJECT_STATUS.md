@@ -1,6 +1,32 @@
+## Latest real-data tracking check — 2026-11-04
+
+Existing native marker-cloud tracking accepts42 stationary frame transitions across
+six baseline/experimental sequences, independently reproduced numerically. This is
+not rotation or metric-accuracy qualification. Cross-threshold consistency still
+allows a bad stereo hypothesis; all24 supporting-plane fits fail. No new production
+filter or rewrite is justified by this result. Next evaluate consecutive frames from
+the saved900-frame rotating-board recording before connecting pose estimates to
+actual laser fusion. See [MARKER_TRACKING_VALIDATION.md](docs/MARKER_TRACKING_VALIDATION.md).
+Application source remains56563c1 with the independently reproduced904-test gate;
+full measured scan, calibrated units and native end-to-end qualification remain open.
+
 # Project status
 
-## Current measured-box investigation — 2026-11-04
+## Current acquisition improvement — 2026-11-04
+
+[Scoped flood + gain capture](docs/FLOOD_CAPTURE_GAIN.md) now permits an equal-gain
+illumination comparison through the native CLI. The new explicit `--gain` option
+reuses existing bounded/restored controls; default flood behavior is preserved.
+Full904-test/fmt/strict-Clippy/release gate passes, including expanded CLI preflight.
+
+Actual ambient/flood/ambient captures at gain15000 make the box faces/edges clearer;
+all60frames replay and original states/formats/service restore. The final ambient
+arm retains one ongoing rejection/gap per camera; reliability remains unqualified.
+Corner refinement still produces no complete usable edge. No rough seed distance
+is claimed as a verified dimension. Next: examine genuine top/turntable planes as
+an alternative height measurement, with explicit correspondence/scale uncertainty.
+
+## Measured-box face evidence — 2026-11-04
 
 [Face assignment and fresh trials](docs/BOX_FACE_REPEATABILITY.md) correct the
 previous mixed-face interpretation. Averaged ambient images reveal that lower
