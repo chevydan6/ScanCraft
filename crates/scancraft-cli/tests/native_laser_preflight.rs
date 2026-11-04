@@ -57,24 +57,30 @@ fn native_laser_cli_rejects_existing_targets_and_invalid_fps_before_hardware() {
 }
 
 #[test]
-fn line_gain_cli_rejects_ambiguous_options_and_invalid_rate_before_capture() {
+fn illumination_gain_cli_rejects_ambiguous_options_and_invalid_rate_before_capture() {
     let root = std::env::temp_dir().join(format!("scancraft-line-gain-cli-{}", std::process::id()));
     fs::create_dir(&root).unwrap();
     let target = root.join("capture");
-    for (options, expected) in [
-        (vec!["--gain", "8000", "--gain", "9000"], "expected unique"),
-        (vec!["--energy", "8000"], "expected unique"),
-        (vec!["--fps", "31", "--gain", "8000"], "enumerated IR rate"),
-    ] {
-        let output = Command::new(env!("CARGO_BIN_EXE_scancraft-cli"))
-            .args(["stereo-line-capture", "10"])
-            .arg(&target)
-            .args(options)
-            .output()
-            .unwrap();
-        assert_eq!(output.status.code(), Some(1));
-        assert!(String::from_utf8_lossy(&output.stderr).contains(expected));
-        assert_eq!(fs::read_dir(&root).unwrap().count(), 0);
+    for command in ["stereo-line-capture", "stereo-flood-capture"] {
+        for (options, expected) in [
+            (vec!["--gain", "8000", "--gain", "9000"], "expected unique"),
+            (vec!["--fps", "30", "--fps", "40"], "expected unique"),
+            (vec!["--energy", "8000"], "expected unique"),
+            (vec!["--gain"], "requires a value"),
+            (vec!["--gain", "2147483648"], "invalid raw gain"),
+            (vec!["--fps", "31", "--gain", "8000"], "enumerated IR rate"),
+            (vec!["--gain", "8000", "--fps", "31"], "enumerated IR rate"),
+        ] {
+            let output = Command::new(env!("CARGO_BIN_EXE_scancraft-cli"))
+                .args([command, "10"])
+                .arg(&target)
+                .args(options)
+                .output()
+                .unwrap();
+            assert_eq!(output.status.code(), Some(1));
+            assert!(String::from_utf8_lossy(&output.stderr).contains(expected));
+            assert_eq!(fs::read_dir(&root).unwrap().count(), 0);
+        }
     }
     fs::remove_dir_all(root).unwrap();
 }

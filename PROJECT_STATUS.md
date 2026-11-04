@@ -1,6 +1,20 @@
 # Project status
 
-## Current measured-box investigation — 2026-11-04
+## Current acquisition improvement — 2026-11-04
+
+[Scoped flood + gain capture](docs/FLOOD_CAPTURE_GAIN.md) now permits an equal-gain
+illumination comparison through the native CLI. The new explicit `--gain` option
+reuses existing bounded/restored controls; default flood behavior is preserved.
+Full904-test/fmt/strict-Clippy/release gate passes, including expanded CLI preflight.
+
+Actual ambient/flood/ambient captures at gain15000 make the box faces/edges clearer;
+all60frames replay and original states/formats/service restore. The final ambient
+arm retains one ongoing rejection/gap per camera; reliability remains unqualified.
+Corner refinement still produces no complete usable edge. No rough seed distance
+is claimed as a verified dimension. Next: examine genuine top/turntable planes as
+an alternative height measurement, with explicit correspondence/scale uncertainty.
+
+## Measured-box face evidence — 2026-11-04
 
 [Face assignment and fresh trials](docs/BOX_FACE_REPEATABILITY.md) correct the
 previous mixed-face interpretation. Averaged ambient images reveal that lower

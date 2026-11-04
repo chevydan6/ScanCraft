@@ -5208,3 +5208,34 @@ physical correspondence/calibration uncertainty, same-pose short acquisitions on
 not three qualified complete scans or metric edit/export. Owner dimensions remain
 held out. Additional independent calibration/scale and physical-edge evidence remain
 priorities; no new independent finding identifier or closure invented.
+
+
+## DEV-FLOOD-GAIN — accepted acquisition priority, scoped implementation
+
+Weak box-edge contrast prevented reliable corner measurement. The earlier flood
+capture usedgain1000 while recentambient used15000; add an explicit optional gain
+for a controlled equal-gain comparison. `capture_options.rs` renames/reuses the line
+parser; `main.rs` shares it across line/flood; `stereo_probe::record_flood_gain`
+delegates to the existing scoped gain+flood path. Existing device bounds/readbacks,
+restoration, defaults, formats and reconstruction remain unchanged. No new dependency.
+
+Changed source: CLI capture_options (renamed line_options), main, stereo_probe and
+native_laser_preflight tests. Documentation: FLOOD_CAPTURE_GAIN.md, LINE_CAPTURE_GAIN.md
+source-path update, PROJECT_STATUS and this response. Development branch
+dev/flood-capture-gain from6fa18dc; exact implementation/publication hashes follow in
+Git and the private commit binding. No independent finding identifier is invented.
+
+Focused preflight passes bothcommands/14invalid-option-or-rate cases beforehardware.
+Full904passed/0failed/1ignored,fmt/strictClippy/release PASS. ActualABA capture atgain15000
+saves/replays60frames and restores7GETstates/formats/media service. Flood improves
+rawpatch brightness and visibleedgecontrast;18scalar photometric checks pass. Final
+ambientongoing1/1rejects/gaps retained; no transportqualification claimed. All original
+capture/probe/source/binary bindings and harness failures are in the449-file manifest
+linked by FLOOD_CAPTURE_GAIN.md. No source changes after the verified build.
+
+Corner diagnostic still fails: no complete radius5or10 refinededge, rawseedheight
+41.305892RAW is not physical metrology. Three acceptedpairs reproduce numerically;
+no model/scale/boxdimension fit or threshold relaxation. Next measure actual planes
+or better-supported physicaledges with uncertainty; no complete scan or accuracy
+claim. Reviewer alone verifies findings and any closure. Paid review, merge and
+protection changes remain unused; CodeRabbit availability recorded at publication.
