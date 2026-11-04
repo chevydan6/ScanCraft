@@ -5327,3 +5327,36 @@ fit or saturation/domain/quality-gate relaxation. Physical units/identity/sync,
 GUI/live integration and full measured scans remain outstanding. CodeRabbit usage
 lookup_failed inrepository; no paid/substantivepass. Reviewer owns verification and
 closure; no independent finding ID invented or record modified. No auto merge.
+
+
+## DEV-RECORDED-MARKER-FUSION — native integrated replay, 2026-11-04
+
+Developer milestone, not an independent finding ID or closure. Accept the existing
+review distinction between numerical replay and physical reconstruction. Add
+`tracked_candidates.rs`, `tracked_candidates/markers.rs`, workflow tests, raw
+snapshot API in `candidate_bundle.rs`, workflow module registration and CLI dispatch.
+Reuse existing components/conic/stereo/ScanSession; marker points never enter
+surface fusion. All Cartesian attempts and frame failures retained, no physical
+unit promotion. New branch dev/recorded-marker-fusion from2edb1e3; exact change commit
+is recorded in Git and private publication binding.
+
+Four new regressions pass; final gate13912 exit0:913passed/0failed/1ignored,
+formatting, strict all-targetClippy and release. Real31pair replay exactmatches
+prior35,853pair outcomes, markerclouds/poses/192voxels; independent893triangulations
+<=8.177e-10RAW and voxelmeans<=5.685e-14. Real31empty-surface replay returnszero
+points. RealSIGINT exits1/no target/partial retained; no-overwrite preserveshashes.
+Three actualstationarybox trials produce2,188voxels from3,156candidatepoints;
+independent ICP<=4.548e-13, geometry<=2.440e-9RAW, voxelmeans<=1.137e-13.
+See RECORDED_MARKER_FUSION.md and private recorded-marker-fusion-20261104 evidence.
+
+No new capture, model fit, scale fit or physical qualification; plot still sparse
+and includes distant candidates. Object/marker identity, exposure, units, complete
+coverage, GUI/live workflow and metric end-to-end scan remain outstanding.
+CodeRabbit0.9.2 usage19751 exit1 lookup_failed; no reviewupload orpaidusage.
+No independent finding severity/status changed; developer did not modify reviewer
+records. Reviewer alone verifies and closes findings. No automatic merge.
+
+Latest assignment544 read before publication: reviewer independently reproduced
+parent2edb1e3 coreAPI,909-test gate, rotatingtracking/fusion, and verified parentCI
+success. No new finding/status change. This newCLI/workflow remains outside544's
+assigned scope and requires its own review. Accepted limitations remain unchanged.
