@@ -1,7 +1,7 @@
 //! Bounded display DTOs. These never create a metric Cloud or editable document.
 use scancraft_workflow::{
     candidate_bundle::FrameView,
-    laser_stream::{CameraSummary, ProgressSnapshot},
+    laser_stream::{CameraSummary, MAX_QUERIES, ProgressSnapshot},
 };
 use serde::{Deserialize, Serialize};
 mod pending;
@@ -34,9 +34,9 @@ pub struct Snapshot {
 impl Snapshot {
     pub fn validate(&self) -> Result<(), String> {
         if self.schema_version != 1
-            || self.positions.len() > 4096
+            || self.positions.len() > MAX_QUERIES
             || self.positions.iter().flatten().any(|v| !v.is_finite())
-            || self.queries > 4096
+            || self.queries > MAX_QUERIES
             || self.query_failures > self.queries
             || self.without_unique > self.queries
             || self.positions.len() + self.query_failures + self.without_unique != self.queries
@@ -88,7 +88,7 @@ fn read_positions<'de, D: serde::Deserializer<'de>>(d: D) -> Result<Vec<[f64; 3]
     impl<'de> serde::de::Visitor<'de> for Positions {
         type Value = Vec<[f64; 3]>;
         fn expecting(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-            write!(f, "at most 4096 positions")
+            write!(f, "at most {MAX_QUERIES} positions")
         }
         fn visit_seq<A: serde::de::SeqAccess<'de>>(
             self,
@@ -96,7 +96,7 @@ fn read_positions<'de, D: serde::Deserializer<'de>>(d: D) -> Result<Vec<[f64; 3]
         ) -> Result<Self::Value, A::Error> {
             let mut out = Vec::new();
             while let Some(v) = a.next_element()? {
-                if out.len() == 4096 {
+                if out.len() == MAX_QUERIES {
                     return Err(serde::de::Error::custom("laser preview point cap exceeded"));
                 }
                 out.push(v);

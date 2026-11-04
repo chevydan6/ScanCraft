@@ -34,8 +34,8 @@ Geometry uses `StereoCalibration` JSON. The request has these fields:
 | `sheets` | 1–128 first-camera `QuadraticSheet` objects |
 | `triangulation` | Existing `TriangulationLimits` fields |
 | `matching` | `intersection` limits, `maximum_sheet_distance_px`, `maximum_work` |
-| `maximum_queries` | Explicit cap, 1–4096 supported first observations |
-| `maximum_total_work` | Conservative matching bound, at most 100 million; projected-root fallback when coarse admission fails |
+| `maximum_queries` | Explicit cap, 1–8192 supported first observations |
+| `maximum_total_work` | Conservative matching bound, at most 128 million; projected-root fallback when coarse admission fails |
 | `maximum_report_bytes` | Maximum `matches.ndjson` bytes, at most 128 MiB |
 
 The seeded schema's `seeds`, `seed_radius_px` and top-level `intersection` are
@@ -120,3 +120,7 @@ or live frame-rate/latency qualification.
 No new capture, physical calibration, installed setting, firmware or GUI scanning
 behavior changed. Data uses provisional geometry and a fixed scene. Dimensional
 accuracy, cross-pose reliability, occlusion handling and live scanning remain unqualified.
+
+See [dense-pair capacity](LASER_QUERY_CAPACITY.md) for measured justification,
+whole-pair preflight with bounded caching above4096queries, loader compatibility,
+and complete sampled replay evidence. Existing lower request budgets are unchanged.

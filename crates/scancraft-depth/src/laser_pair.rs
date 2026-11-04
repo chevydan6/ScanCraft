@@ -16,6 +16,14 @@ use scancraft_image::{
 use serde::{Deserialize, Serialize};
 mod detection;
 
+/// Explicit request ceilings; callers retain their chosen lower limits.
+/// Dense real Raptor pairs exceed 4096 queries; see LASER_QUERY_CAPACITY.md.
+pub const MAX_QUERIES: usize = 8192;
+pub const MAX_TOTAL_WORK: usize = 128_000_000;
+// Keep the existing prepared-query cache bound. Larger pairs preflight every
+// root, drop it, then recompute each query only after whole-pair admission.
+const MAX_CACHED_QUERIES: usize = 4096;
+
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Detection {
@@ -106,8 +114,8 @@ impl Settings {
         if !matches!(self.interfaces, [0, 2] | [2, 0])
             || self.maximum_host_delta_us > 1_000_000
             || !(1..=128).contains(&self.sheets.len())
-            || !(1..=4096).contains(&self.maximum_queries)
-            || !(1..=100_000_000).contains(&self.maximum_total_work)
+            || !(1..=MAX_QUERIES).contains(&self.maximum_queries)
+            || !(1..=MAX_TOTAL_WORK).contains(&self.maximum_total_work)
             || self.sheets.iter().any(|s| {
                 ![s.quadratic_y, s.linear_y, s.linear_z, s.offset]
                     .iter()
@@ -390,11 +398,12 @@ impl<'a> Processor<'a> {
         let mut prepared_pixels = None;
         let mut domain_pixels = None;
         let mut projection_failures = 0usize;
+        let cache_pixels = first_indices.len() <= MAX_CACHED_QUERIES;
         if coarse_work_bound > self.settings.maximum_total_work
             && let Some(prepared) = &domain_queries
         {
             total_work_bound = 0;
-            let mut pixels = Vec::with_capacity(first_indices.len());
+            let mut pixels = Vec::with_capacity(if cache_pixels { first_indices.len() } else { 0 });
             for (query, &index) in first_indices.iter().enumerate() {
                 work.update(Stage::Validating, query, first_indices.len())?;
                 let pixel = map_pixel(0, sides[0].detections.observations[index].pixel)?;
@@ -407,15 +416,19 @@ impl<'a> Processor<'a> {
                 if total_work_bound > self.settings.maximum_total_work {
                     return Err("automatic total work budget exceeded before matching".into());
                 }
-                pixels.push(prepared);
+                if cache_pixels {
+                    pixels.push(prepared);
+                }
             }
-            domain_pixels = Some(pixels.into_iter());
+            if cache_pixels {
+                domain_pixels = Some(pixels.into_iter());
+            }
         } else if coarse_work_bound > self.settings.maximum_total_work {
             let Some(Ok(prepared)) = &prepared_queries else {
                 return Err("automatic total work budget exceeded before matching".into());
             };
             total_work_bound = 0;
-            let mut pixels = Vec::with_capacity(first_indices.len());
+            let mut pixels = Vec::with_capacity(if cache_pixels { first_indices.len() } else { 0 });
             for (query, &index) in first_indices.iter().enumerate() {
                 work.update(Stage::Validating, query, first_indices.len())?;
                 let pixel = map_pixel(0, sides[0].detections.observations[index].pixel)?;
@@ -433,15 +446,19 @@ impl<'a> Processor<'a> {
                 if total_work_bound > self.settings.maximum_total_work {
                     return Err("automatic total work budget exceeded before matching".into());
                 }
-                pixels.push(prepared);
+                if cache_pixels {
+                    pixels.push(prepared);
+                }
             }
-            prepared_pixels = Some(pixels.into_iter());
+            if cache_pixels {
+                prepared_pixels = Some(pixels.into_iter());
+            }
         }
 
         let admission = Admission {
             coarse_total_work_bound: coarse_work_bound,
             conservative_total_work_bound: total_work_bound,
-            uses_projected_roots: prepared_pixels.is_some() || domain_pixels.is_some(),
+            uses_projected_roots: coarse_work_bound > self.settings.maximum_total_work,
             projected_root_preparation_failures: projection_failures,
         };
         sink.begin(PairInfo {

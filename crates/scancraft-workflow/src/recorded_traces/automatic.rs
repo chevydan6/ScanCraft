@@ -229,8 +229,8 @@ pub fn run(inputs: &Inputs, target: &Path, work: &WorkControl) -> Result<Value, 
             [0, 2] | [2, 0]
         )
         || !(1..=128).contains(&request.sheets.len())
-        || !(1..=4096).contains(&request.maximum_queries)
-        || !(1..=100_000_000).contains(&request.maximum_total_work)
+        || !(1..=laser_pair::MAX_QUERIES).contains(&request.maximum_queries)
+        || !(1..=laser_pair::MAX_TOTAL_WORK).contains(&request.maximum_total_work)
         || !(1..=134_217_728).contains(&request.maximum_report_bytes)
         || request.sheets.iter().any(|s| {
             ![s.quadratic_y, s.linear_y, s.linear_z, s.offset]
@@ -477,6 +477,8 @@ mod tests {
         let mut cases = Vec::new();
         for (key, value) in [
             ("maximum_queries", json!(31)),
+            ("maximum_queries", json!(laser_pair::MAX_QUERIES + 1)),
+            ("maximum_total_work", json!(laser_pair::MAX_TOTAL_WORK + 1)),
             ("maximum_total_work", json!(2015)),
             ("maximum_report_bytes", json!(134217729)),
             ("sheets", json!([])),

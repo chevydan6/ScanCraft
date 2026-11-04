@@ -1,5 +1,6 @@
 //! Bounded display subset of one complete stored pair; never a geometry import.
 use crate::bounded_json::Items;
+use scancraft_depth::laser_pair::MAX_QUERIES;
 use serde::Deserialize;
 use std::collections::HashSet;
 #[derive(Deserialize)]
@@ -55,8 +56,8 @@ pub(super) struct StoredReport {
     queries: usize,
     query_failures: usize,
     queries_without_unique_match: usize,
-    candidates: Items<Candidate, 4096>,
-    outcomes: Items<Query, 4096>,
+    candidates: Items<Candidate, MAX_QUERIES>,
+    outcomes: Items<Query, MAX_QUERIES>,
     raw_sensor_pts_equal: bool,
     synchronization_verified: bool,
     geometry_binding_verified: bool,
@@ -91,7 +92,7 @@ impl Record {
             }
             Err(_) => return Err("stored pair error exceeds display bound".into()),
         };
-        if report.queries > 4096
+        if report.queries > MAX_QUERIES
             || report.outcomes.0.len() != report.queries
             || report
                 .cameras

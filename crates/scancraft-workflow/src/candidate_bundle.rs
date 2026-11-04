@@ -5,6 +5,7 @@ use crate::bounded_json::Items;
 use crate::{Error, recording_playback::Playback, scan_project_load::Guard};
 pub use frame_view::FrameView;
 use scancraft_calibration::stereo::StereoCalibration;
+use scancraft_depth::laser_pair::MAX_QUERIES;
 use scancraft_geometry::work::WorkControl;
 use serde::{Deserialize, de::IgnoredAny};
 use serde_json::{Value, json};
@@ -53,7 +54,7 @@ struct CandidateData {
     physical_accuracy_qualified: bool,
     projector_line_identity_verified: bool,
     cross_observation_uniqueness_verified: bool,
-    points: Items<CandidatePoint, 4096>,
+    points: Items<CandidatePoint, MAX_QUERIES>,
 }
 
 #[derive(Debug)]
@@ -166,7 +167,7 @@ fn load_recorded_inner(
             "calibration_activated",
         ],
     )?;
-    let queries = count(&manifest, "queries", 4096)?;
+    let queries = count(&manifest, "queries", MAX_QUERIES as u64)?;
     let candidates = count(&manifest, "candidate_points", queries as u64)?;
     let failures = count(&manifest, "query_failures", queries as u64)?;
     let unmatched = count(&manifest, "queries_without_unique_match", queries as u64)?;
@@ -559,7 +560,7 @@ mod tests {
         for (key, value) in [
             ("physical_accuracy_qualified", json!(true)),
             ("units_verified", json!(true)),
-            ("queries", json!(4097)),
+            ("queries", json!(MAX_QUERIES + 1)),
             ("candidate_points", json!(0)),
         ] {
             let mut m = original.clone();
@@ -628,10 +629,12 @@ mod tests {
         let point = r#"{"first_observation":0,"position_in_supplied_geometry_units":[1,2,3]}"#;
         let oversized_points = format!(
             "[{}]",
-            std::iter::repeat_n(point, 4097)
+            std::iter::repeat_n(point, MAX_QUERIES + 1)
                 .collect::<Vec<_>>()
                 .join(",")
         );
-        assert!(serde_json::from_str::<Items<CandidatePoint, 4096>>(&oversized_points).is_err());
+        assert!(
+            serde_json::from_str::<Items<CandidatePoint, MAX_QUERIES>>(&oversized_points).is_err()
+        );
     }
 }

@@ -1,6 +1,116 @@
 use super::*;
 use scancraft_calibration::{Brown5, CameraModel, stereo::RigidPose};
 
+#[test]
+fn dense_queries_recompute_after_preflight_without_dropping_outcomes_or_bounds() {
+    let (mut geometry, mut settings, mut profiles, mut frames) = fixture();
+    for camera in [&mut geometry.left, &mut geometry.right] {
+        camera.height = 1500;
+        camera.fy = 1500.;
+        camera.cy += 747.5;
+    }
+    for (side, (profile, frame)) in profiles.iter_mut().zip(&mut frames).enumerate() {
+        profile.height = 1500;
+        frame.data = vec![0; 15000];
+        for y in 0..1500 {
+            for x in [4, 6, 8] {
+                frame.data[y * 10 + x - side] = 80;
+            }
+        }
+    }
+    settings.detection.maximum_observations = 5000;
+    settings.maximum_queries = 4500;
+    settings.matching.maximum_work = 100_000;
+    settings.maximum_total_work = MAX_TOTAL_WORK;
+    #[derive(Default)]
+    struct DenseJournal {
+        began: bool,
+        bytes: Vec<u8>,
+    }
+    impl Sink for DenseJournal {
+        fn begin(&mut self, _: PairInfo<'_>) -> Result<(), String> {
+            self.began = true;
+            Ok(())
+        }
+        fn query(&mut self, q: &Query) -> Result<(), String> {
+            serde_json::to_writer(&mut self.bytes, &serde_json::json!({"index":q.first_observation,"result":q.result,"rejections":q.rejected_projections})).map_err(|e|e.to_string())
+        }
+    }
+    for domain in [false, true] {
+        settings.maximum_queries = 4500;
+        settings.maximum_total_work = MAX_TOTAL_WORK;
+        let mut baseline = DenseJournal::default();
+        let a = Processor::new(&geometry, &settings)
+            .unwrap()
+            .with_valid_domain_segments(domain)
+            .process(
+                inputs(&profiles, &frames),
+                &WorkControl::default(),
+                &mut baseline,
+            )
+            .unwrap();
+        assert_eq!(a.queries, 4500);
+        assert_eq!(a.outcomes.len(), 4500);
+        assert!(!a.admission.uses_projected_roots);
+        settings.maximum_total_work = 40_000_000;
+        let mut tight = DenseJournal::default();
+        let b = Processor::new(&geometry, &settings)
+            .unwrap()
+            .with_valid_domain_segments(domain)
+            .process(
+                inputs(&profiles, &frames),
+                &WorkControl::default(),
+                &mut tight,
+            )
+            .unwrap();
+        assert!(b.admission.uses_projected_roots);
+        assert_eq!(baseline.bytes, tight.bytes);
+        assert_eq!(
+            serde_json::to_value(&a.candidates).unwrap(),
+            serde_json::to_value(&b.candidates).unwrap()
+        );
+        assert_eq!(
+            serde_json::to_value(&a.outcomes).unwrap(),
+            serde_json::to_value(&b.outcomes).unwrap()
+        );
+        settings.maximum_total_work = b.admission.conservative_total_work_bound - 1;
+        let mut refused = DenseJournal::default();
+        assert!(
+            Processor::new(&geometry, &settings)
+                .unwrap()
+                .with_valid_domain_segments(domain)
+                .process(
+                    inputs(&profiles, &frames),
+                    &WorkControl::default(),
+                    &mut refused
+                )
+                .is_err()
+        );
+        assert!(!refused.began);
+        settings.maximum_total_work = MAX_TOTAL_WORK;
+        settings.maximum_queries = 4499;
+        assert!(
+            Processor::new(&geometry, &settings)
+                .unwrap()
+                .with_valid_domain_segments(domain)
+                .process(
+                    inputs(&profiles, &frames),
+                    &WorkControl::default(),
+                    &mut refused
+                )
+                .is_err()
+        );
+        assert!(!refused.began);
+    }
+    settings.maximum_queries = MAX_QUERIES;
+    assert!(settings.validate().is_ok());
+    settings.maximum_queries += 1;
+    assert!(settings.validate().is_err());
+    settings.maximum_queries = MAX_QUERIES;
+    settings.maximum_total_work = MAX_TOTAL_WORK + 1;
+    assert!(settings.validate().is_err());
+}
+
 fn fixture() -> (StereoCalibration, Settings, [StreamProfile; 2], [Frame; 2]) {
     let camera = CameraModel {
         width: 10,
