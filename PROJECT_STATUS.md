@@ -1,3 +1,19 @@
+# Live matcher integration verified on real recordings — 2026-11-05
+
+The existing domain-aware matcher now reaches live capture/replay, preview and
+saved-bundle inspection through an explicit optional request field. Default strict
+behavior remains byte-compatible in replay. Six real Raptor pairs reproduce all
+6,006 candidate records and all query outcomes exactly. GUI preview/reopening
+retain exclusion warnings. The full offline Rust gate passes 939 tests, zero
+failures, one ignored, formatting, strict Clippy and release compilation.
+
+See [implementation and validation](docs/LIVE_DOMAIN_MATCHING_VALIDATION.md).
+This corrects an integration gap, not a complete or accurately measured scan.
+No new hardware capture occurred. Image corruption, physical units, calibration
+coverage and moving-object reconstruction remain unqualified. The owner offers
+rotation; actual motion is not confirmed. Box measurements remain held out.
+CodeRabbit capacity/billing lookup is unavailable; no substantive/paid review.
+
 # Full-payload evidence confirms candidate pixel failure — 2026-11-04
 
 A fresh temporary-candidate capture saves 1,800 images per camera with no ongoing

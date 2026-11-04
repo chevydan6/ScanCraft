@@ -45,6 +45,35 @@ fn read(path: &Path) -> Value {
 }
 
 #[test]
+fn domain_policy_and_bounded_exclusions_must_agree_after_redigest() {
+    for kind in 0..6 {
+        let (_f, root) = capture(1);
+        if kind != 0 {
+            let mut request = read(&root.join("stream-request.json"));
+            request["retain_valid_domain_segments"] = json!(true);
+            write(&root.join("stream-request.json"), &request);
+            redigest(&root, "stream-request.json");
+        }
+        if kind != 1 {
+            edit_pair(&root, 0, |r| {
+                r["result"]["Ok"]["domain_rejections"] = json!({
+                    "rejected_trace_vertices": if kind == 2 {65537} else {0},
+                    "rejected_trace_segments": if kind == 3 {65537} else {0},
+                    "rejected_sheet_projections": if kind == 4 {1281} else {0}
+                });
+                if kind == 5 {
+                    r["result"]["Ok"]["domain_rejections"]["extra"] = json!(0);
+                }
+            });
+        }
+        assert!(
+            load_pair(&root, 0, &WorkControl::default()).is_err(),
+            "kind {kind}"
+        );
+    }
+}
+
+#[test]
 fn sequential_pairs_equal_individual_views_in_both_formats() {
     for schema in [1, 2] {
         let (_f, root) = capture(schema);

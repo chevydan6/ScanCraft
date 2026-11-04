@@ -23,6 +23,7 @@ pub struct CandidateUi {
     preview: Preview,
     view: View,
     message: String,
+    live_domain: Option<scancraft_workflow::laser_stream::DomainSummary>,
     frames: Option<[FrameView; 2]>,
     session: Option<scancraft_workflow::tracked_candidates::bundle::SessionView>,
     cameras: [Option<egui::TextureHandle>; 2],
@@ -47,6 +48,7 @@ impl Default for CandidateUi {
                 pan: egui::Vec2::ZERO,
             },
             message: "Open a saved capture, recorded-pair result or fused scan folder.".into(),
+            live_domain: None,
             frames: None,
             session: None,
             cameras: Default::default(),
@@ -120,6 +122,7 @@ impl CandidateUi {
                 });
             }
             self.session = None;
+            self.live_domain = snapshot.domain_rejections;
             self.preview = preview;
             self.frames = Some(snapshot.frames);
             self.cameras = Default::default();
@@ -244,6 +247,7 @@ impl CandidateUi {
         self.job = None;
         match output.result {
             Ok(report) => {
+                self.live_domain = None;
                 self.session = report.candidate_session;
                 self.frames = report.candidate_frames;
                 self.cameras = Default::default();
@@ -317,6 +321,14 @@ impl CandidateUi {
             }
         });
         ui.label(&self.message);
+        if let Some(domain) = self.live_domain {
+            ui.label(format!(
+                "Displayed pair domain exclusions: {} trace vertices, {} segments, {} sheet projections. Uniqueness applies only within the retained domain; physical identity remains unverified.",
+                domain.rejected_trace_vertices,
+                domain.rejected_trace_segments,
+                domain.rejected_sheet_projections
+            ));
+        }
         if !self.loaded_path.is_empty() {
             ui.label(format!("Showing: {}", self.loaded_path));
         }
@@ -684,7 +696,17 @@ mod tests {
     #[test]
     fn completed_capture_presets_saved_folder_and_last_display_pair() {
         let mut view = CandidateUi::default();
-        view.test_capture(|_| {
+        view.test_capture(|control| {
+            let mut snapshot = crate::laser_display::tests::snapshot(
+                crate::laser_display::Origin::RecordingReplay,
+                6,
+            );
+            snapshot.domain_rejections = Some(scancraft_workflow::laser_stream::DomainSummary {
+                rejected_trace_vertices: 1,
+                rejected_trace_segments: 2,
+                rejected_sheet_projections: 3,
+            });
+            control.offer(snapshot)?;
             Ok(crate::laser_process::Completion {
                 schema_version: 1,
                 origin: crate::laser_display::Origin::RecordingReplay,
@@ -705,6 +727,31 @@ mod tests {
         assert_eq!(view.path, "synthetic replay");
         assert_eq!(view.pair_number, 7);
         assert!(view.message.contains("Saved capture"));
+        assert_eq!(view.live_domain.unwrap().rejected_sheet_projections, 3);
+        let context = egui::Context::default();
+        let output = context.run(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO,
+                    egui::vec2(1280., 900.),
+                )),
+                ..Default::default()
+            },
+            |ctx| {
+                egui::CentralPanel::default().show(ctx, |ui| view.ui(ui, true));
+            },
+        );
+        let text = output
+            .shapes
+            .iter()
+            .filter_map(|s| match &s.shape {
+                egui::epaint::Shape::Text(t) => Some(t.galley.job.text.as_str()),
+                _ => None,
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+        assert!(text.contains("1 trace vertices, 2 segments, 3 sheet projections"));
+        assert!(text.contains("Uniqueness applies only within the retained domain"));
     }
     #[test]
     fn fused_open_button_dispatches_and_keeps_the_prior_view_after_failure() {

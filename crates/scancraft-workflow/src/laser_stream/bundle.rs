@@ -56,6 +56,8 @@ struct Request {
     maximum_recording_bytes_per_camera: u64,
     maximum_pair_log_bytes: u64,
     processing: Settings,
+    #[serde(default)]
+    retain_valid_domain_segments: bool,
     #[serde(default, deserialize_with = "optional_quota")]
     pair_log_segment_bytes: Option<u64>,
     #[serde(default, deserialize_with = "optional_quota")]
@@ -150,7 +152,8 @@ impl Plan {
             return Err("invalid laser capture schema/frame/byte limits".into());
         }
         let segmented = log::limits(&request).map_err(|e| e.to_string())?.is_some();
-        let pipeline = Pipeline::new(&geometry, &request.processing, request.fps)?;
+        let pipeline = Pipeline::new(&geometry, &request.processing, request.fps)?
+            .with_valid_domain_segments(request.retain_valid_domain_segments);
         Association::new(
             pipeline.profiles().clone(),
             request.maximum_frames_per_camera,
@@ -250,7 +253,8 @@ impl Plan {
                     .map_err(|e| e.to_string())?,
             ];
             let pipeline =
-                Pipeline::new(&self.geometry, &self.request.processing, self.request.fps)?;
+                Pipeline::new(&self.geometry, &self.request.processing, self.request.fps)?
+                    .with_valid_domain_segments(self.request.retain_valid_domain_segments);
             let mut pairs = log::Log::open(&directory, &self.request).map_err(|e| e.to_string())?;
             let raw_digests: RawDigests = Arc::new(Mutex::new([None, None]));
             let slots = raw_digests.clone();

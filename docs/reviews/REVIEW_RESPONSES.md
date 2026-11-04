@@ -5793,3 +5793,33 @@ Publication gate7105 exits0: formatting, strictClippy,935passed/0failed/1ignored
 optimized workspace build. No source correction, hence no hardware qualification
 from that result. CodeRabbit usage89614 exits1 with all capacity/billing lookups
 unavailable; no substantive review or paid usage. Draft status is retained.
+
+## Developer-identified integration gap — live domain matcher propagation
+
+Accepted correction, not a new independent finding or change to SCAN-REV-033/034's
+reviewer-controlled scope/status. Reviewed assignment584 first; 034 remains open.
+Recorded processing already offered domain-aware matching, while live requests
+rejected the option. Same genuine pair reproduced 983 recorded candidates versus
+zero live-replay candidates/all2576 query errors. Existing algorithm is unchanged.
+
+Changed workflow `laser_stream.rs`, `laser_stream/bundle.rs`, bundle `load.rs` and
+`load/record.rs`; app `laser_display.rs`, `laser_display/pending.rs`, `candidate_ui.rs`;
+depth `laser_pair.rs` only adds equality derives to the domain-summary DTO. Added
+regressions in app `laser_display/tests.rs`, bundle `tests.rs`, `load/tests.rs` and
+extended GUI completion coverage. Optional boolean defaults false, summaries are
+bounded and policy-checked, preview/reopened views preserve conditional-uniqueness
+warnings. Documentation: `docs/LIVE_DOMAIN_MATCHING_VALIDATION.md` and native guide.
+
+Base commit9de19880506b690dfe4243281e373d1945fb70ec; exact implementation commit is
+recorded in the developer checkpoint/publication receipt. Gate60208 exits0:
+939passed/0failed/1ignored, fmt/strictClippy/release. Genuine helper replay54819
+exits0: all6006candidate records and every query outcome/domain count equal the
+six recorded references; strict baseline request/model/rawrecordings/pairlog remain
+byte-identical. GUI replay92669 and saved reopening86697 exit0; screenshots inspected
+with983points and explicit exclusions. Raw input hashes preserved before/after.
+
+No physical qualification, fresh capture, pixel correction, gain change, complete
+object or metric export. Calibration/transport/identity/units limitations remain.
+Private evidence label `live-domain-integration-20261104` retains commands/results.
+CodeRabbit usage94805 exits1: allcapacity/billing/creditlookups unavailable; no
+substantive or paid review. Keep draft and independent review requirements intact.

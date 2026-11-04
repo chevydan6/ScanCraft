@@ -6,7 +6,7 @@ use scancraft_image::GrayImage;
 use scancraft_workflow::{
     candidate_bundle::FrameView,
     laser_stream::{
-        CameraSummary, MAX_FRAME_METADATA_BYTES, Pair, ProgressSnapshot, Sample,
+        CameraSummary, DomainSummary, MAX_FRAME_METADATA_BYTES, Pair, ProgressSnapshot, Sample,
         bundle::PreviewInput,
     },
 };
@@ -16,6 +16,7 @@ struct Outcome {
     query_failures: usize,
     without_unique: usize,
     cameras: Option<[CameraSummary; 2]>,
+    domain_rejections: Option<DomainSummary>,
     processing_error: Option<String>,
 }
 pub(crate) struct Pending {
@@ -56,6 +57,7 @@ impl Pending {
                     query_failures: r.query_failures,
                     without_unique: r.queries_without_unique_match,
                     cameras: Some(r.cameras),
+                    domain_rejections: r.domain_rejections,
                     processing_error: None,
                 }
             }
@@ -65,6 +67,7 @@ impl Pending {
                 query_failures: 0,
                 without_unique: 0,
                 cameras: None,
+                domain_rejections: None,
                 processing_error: Some(e.chars().take(1024).collect()),
             },
         };
@@ -111,6 +114,7 @@ impl Pending {
             query_failures: self.outcome.query_failures,
             without_unique: self.outcome.without_unique,
             cameras: self.outcome.cameras,
+            domain_rejections: self.outcome.domain_rejections,
             processing_error: self.outcome.processing_error,
             acquisition: self.progress,
             helper_omissions: 0,

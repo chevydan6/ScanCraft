@@ -36,12 +36,21 @@ The capture-request schema is:
 | `maximum_recording_bytes_per_camera` | At most 1 TiB, enough for a maximum header plus one full frame/metadata/footer; exhaustion fails capture with retained diagnostics |
 | `maximum_pair_log_bytes` | 4096 through 1 GiB; required compact-pair journal cap |
 | `processing` | Existing `laser_pair::Settings`: ordered interfaces, reflection, host window, detector/continuity, supplied sheets, triangulation, matching and work/query limits |
+| `retain_valid_domain_segments` | Optional boolean in schemas 1 and 2, default `false`; numerical uniqueness applies only inside retained valid support when enabled |
 | `source_options` | Optional backend declaration, retained unchanged; native accepted values described below |
 
 See [in-memory processing](IN_MEMORY_LASER_PAIRS.md) and
 [bounded streaming](BOUNDED_LASER_STREAM.md). The existing settings DTOs are now
 serializable as well as deserializable, so applications can construct requests
 without duplicating their schema.
+
+`retain_valid_domain_segments: true` selects the existing domain-aware matcher.
+Successful pair reports, previews and reopened results retain bounded exclusion
+counts and conditional-uniqueness warnings. Raw frames and query errors remain
+saved; full exclusions can be recomputed through recorded-pair processing. This
+does not expand calibration coverage, repair pixels or verify units or physical
+identity. Omitted/false preserves strict processing; null/non-booleans fail
+preflight. See [integration validation](LIVE_DOMAIN_MATCHING_VALIDATION.md).
 
 Omitted/null `source_options`, or `{"illumination":"preserve"}`, leaves illumination
 unchanged. `{"illumination":"line_boolean_trial"}` explicitly requests the existing

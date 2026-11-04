@@ -1,5 +1,36 @@
 use super::*;
 use scancraft_image::diagnostics::GrayStatistics;
+
+#[test]
+fn domain_preview_roundtrip_retains_exclusions_and_rejects_unbounded_or_failed_counts() {
+    let mut original = snapshot(Origin::RecordingReplay, 0);
+    let legacy = serde_json::to_value(&original).unwrap();
+    assert!(legacy.get("domain_rejections").is_none());
+    original.domain_rejections = Some(DomainSummary {
+        rejected_trace_vertices: 1,
+        rejected_trace_segments: 2,
+        rejected_sheet_projections: 3,
+    });
+    original.validate().unwrap();
+    let value = serde_json::to_value(&original).unwrap();
+    let copy: Snapshot = serde_json::from_value(value).unwrap();
+    assert_eq!(copy, original);
+    for kind in 0..4 {
+        let mut candidate: Snapshot =
+            serde_json::from_value(serde_json::to_value(&original).unwrap()).unwrap();
+        let summary = candidate.domain_rejections.as_mut().unwrap();
+        match kind {
+            0 => summary.rejected_trace_vertices = 65537,
+            1 => summary.rejected_trace_segments = 65537,
+            2 => summary.rejected_sheet_projections = 257,
+            _ => {
+                candidate.processing_error = Some("failed".into());
+                candidate.cameras = None;
+            }
+        }
+        assert!(candidate.validate().is_err());
+    }
+}
 pub(crate) fn snapshot(origin: Origin, index: u64) -> Snapshot {
     Snapshot {
         schema_version: 1,
@@ -41,6 +72,7 @@ pub(crate) fn snapshot(origin: Origin, index: u64) -> Snapshot {
             continuity_comparisons: 3,
         })),
         processing_error: None,
+        domain_rejections: None,
         acquisition: ProgressSnapshot {
             journaled_frames: [index + 1; 2],
             processing_queue_drops: [0; 2],

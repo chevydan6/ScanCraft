@@ -9,7 +9,7 @@ pub use runner::{Failure, Journal, ProgressSnapshot, SourceReport, StopToken, Su
 use scancraft_calibration::stereo::StereoCalibration;
 use scancraft_core::StreamProfile;
 use scancraft_depth::laser_pair::{self, Settings};
-pub use scancraft_depth::laser_pair::{CameraSummary, MAX_QUERIES};
+pub use scancraft_depth::laser_pair::{CameraSummary, DomainSummary, MAX_QUERIES};
 
 pub(crate) type Result<T> = std::result::Result<T, String>;
 pub const PROCESSING_QUEUE_CAPACITY: usize = 4;
@@ -51,6 +51,12 @@ impl<'a> Pipeline<'a> {
             profile.interface = settings.interfaces[i];
         }
         Ok(pipeline)
+    }
+    /// Opt in to the existing domain-aware matcher. Excluded segments and sheet
+    /// projections remain reported; uniqueness is conditional on retained data.
+    pub fn with_valid_domain_segments(mut self, enabled: bool) -> Self {
+        self.processor = self.processor.with_valid_domain_segments(enabled);
+        self
     }
     pub fn profiles(&self) -> &[StreamProfile; 2] {
         &self.profiles
