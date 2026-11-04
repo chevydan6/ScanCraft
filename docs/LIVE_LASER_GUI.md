@@ -1,6 +1,10 @@
 # Live laser diagnostic GUI
 
 Status: experimental functional integration, not calibrated scanning qualification.
+Current hardware checks with explicit gain are documented in
+[native live gain validation](LIVE_IR_GAIN_VALIDATION.md): saved results reopen,
+but two isolated-display live captures fail at startup. Preserve these failures
+alongside the historical results below; this is not reliable GUI qualification.
 Base implementation: `c223a7d26af005c1e49fff0af6d18a22d67aa87e`.
 Implementation: `a570c783111c1b6f25d64af8fb08c0f569e23d17`; the documentation binding is a later commit.
 

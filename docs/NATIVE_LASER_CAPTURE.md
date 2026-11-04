@@ -54,13 +54,23 @@ preflight. See [integration validation](LIVE_DOMAIN_MATCHING_VALIDATION.md).
 
 Omitted/null `source_options`, or `{"illumination":"preserve"}`, leaves illumination
 unchanged. `{"illumination":"line_boolean_trial"}` explicitly requests the existing
-scoped SDK property-151 boolean trial. No other source-option fields are accepted
-by this native adapter. It validates the boolean range, enables/readbacks the
+scoped SDK property-151 boolean trial. It validates the boolean range, enables/readbacks the
 fixed property before camera setup, checks it after capture and restores/readbacks
 the original value before publication. It never guesses mode, energy, master-laser,
-gain or other unsupported property values. A successful SDK readback does not
+or other unsupported property values. A successful SDK readback does not
 verify physical emission, wavelength, projector identity or calibration binding.
 Existing illumination prerequisites and cold-start behavior remain unqualified.
+
+The native adapter also accepts explicit `ir_gain_raw` alongside the required
+illumination declaration, for example
+`{"illumination":"line_boolean_trial","ir_gain_raw":15000}`. Omission preserves
+gain. The integer must be 1000 through 15000 and satisfy both cameras' reported
+range/step/availability checks. Null, fractional, string, boolean, unknown-key and
+out-of-range values are rejected. `ScopedIrGain` snapshots both originals before
+writes; startup readbacks are saved per camera, both end values are checked, and
+originals are restored/read back after stream formats, including failure paths.
+Raw gain has no verified physical-unit conversion or per-frame exposure guarantee.
+See [hardware results and unresolved failures](LIVE_IR_GAIN_VALIDATION.md).
 
 Ctrl-C requests graceful stop, followed by queue draining, source cleanup, property
 and stream-settings restoration, recording verification and publication. Driver

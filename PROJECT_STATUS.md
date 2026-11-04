@@ -1,3 +1,21 @@
+# Native live gain integrated; GUI acquisition still fails — 2026-11-05
+
+Live capture can now explicitly request the same temporary IR gain as the existing
+diagnostic capture command, with startup/end readbacks and restoration. The full
+Rust gate passes 941 tests, zero failures, one ignored, formatting, strict Clippy
+and release compilation. Headless live capture and the actual native helper each
+save 16 frames per camera and reconstruct 13/11 pairs. Raw gain metadata, recording
+integrity, all saved-pair inspections and helper preview IPC verify. A deliberate
+journal-budget failure restores controls and retains its raw prefixes.
+
+Two real GUI capture attempts fail before a valid frame, with camera poll timeouts
+and truncated startup buffers. All original scanner settings are restored. Saved
+native-helper results reopen in the GUI, but this is not reliable live GUI capture
+or a complete measured scan. Source retirement differs between live laser and the
+older coordinated capture paths; investigate that separately from startup faults.
+See [results, failures and limits](docs/LIVE_IR_GAIN_VALIDATION.md). Rotation remains
+unconfirmed; do not assume the turntable started. No firmware/module change.
+
 # Live matcher integration verified on real recordings — 2026-11-05
 
 The existing domain-aware matcher now reaches live capture/replay, preview and

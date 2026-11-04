@@ -1,10 +1,14 @@
 //! Native source/settings ownership for unqualified laser candidate diagnostics.
 //! Preserves illumination by default; fixed line-boolean trial is explicit and
-//! restored. No mode/energy/gain/mirror/firmware/installed-calibration writes.
+//! restored. Optional standard IR gain is also scoped and read back. No
+//! mode/energy/mirror/firmware/installed-calibration writes.
 use super::{Result, capture_context, capture_statistics, combine};
 use scancraft_core::Frame;
 use scancraft_device::{
-    Capture, SessionLock, control::line_trial::ScopedLine, stream_group::SettingsLease,
+    Capture, SessionLock,
+    control::line_trial::ScopedLine,
+    ir_gain::{self, ScopedIrGain},
+    stream_group::SettingsLease,
 };
 use scancraft_geometry::work::WorkControl;
 use scancraft_recording::CaptureContext;
@@ -54,8 +58,8 @@ impl Source for Native {
     }
 }
 /// Geometry declarations are accepted as unqualified numerical hypotheses. This
-/// only enables a fixed line boolean when explicitly requested, never exports
-/// metric geometry. A live caller must run
+/// only changes the fixed line boolean or standard IR gain when explicitly
+/// requested, never exports metric geometry. A live caller must run
 /// the complete operation in its device-owning helper and supervise it honestly.
 pub fn scan(
     geometry: &Path,
@@ -70,7 +74,7 @@ pub fn scan(
     if ![5, 10, 15, 20, 25, 30, 40, 50].contains(&plan.fps()) {
         return Err("native laser capture requires an enumerated IR frame rate".into());
     }
-    let illumination = illumination(plan.source_options())?;
+    let options = source_options(plan.source_options())?;
     plan.admit_target(target, work)?;
     work.check()?;
     if stop.load(Ordering::Relaxed) {
@@ -78,15 +82,27 @@ pub fn scan(
     }
     let lock = SessionLock::acquire().map_err(|e| e.to_string())?;
     let mut lease = SettingsLease::capture(&plan.interfaces()).map_err(|e| e.to_string())?;
-    let mut line = match illumination {
+    let mut gain = match options
+        .ir_gain_raw
+        .map(|raw| ScopedIrGain::apply(&lock, raw))
+        .transpose()
+    {
+        Ok(gain) => gain,
+        Err(e) => {
+            return combine(
+                Err(e.to_string()),
+                lease.restore().map_err(|e| e.to_string()),
+            );
+        }
+    };
+    let mut line = match options.illumination {
         Illumination::Preserve => None,
         Illumination::LineBooleanTrial => match ScopedLine::enable(&lock) {
             Ok(line) => Some(line),
             Err(e) => {
-                return combine(
-                    Err(e.to_string()),
-                    lease.restore().map_err(|e| e.to_string()),
-                );
+                let stream_restore = lease.restore().map_err(|e| e.to_string());
+                let gain_restore = restore_gain(&mut gain);
+                return combine(combine(Err(e.to_string()), gain_restore), stream_restore);
             }
         },
     };
@@ -100,13 +116,23 @@ pub fn scan(
         work,
         stop,
         move |_, profile, token| {
-            Capture::open_recording(profile)
-                .map(|capture| Native {
-                    capture,
-                    stop: token,
-                    declaration: declaration.clone(),
-                })
-                .map_err(|e| e.to_string())
+            let interface = profile.interface;
+            let capture = Capture::open_recording(profile).map_err(|e| e.to_string())?;
+            let mut declaration = declaration.clone();
+            if let Some(requested) = options.ir_gain_raw {
+                let observed = ir_gain::read(interface)
+                    .map_err(|e| e.to_string())
+                    .and_then(|value| gain_observation(interface, requested, value));
+                match observed {
+                    Ok(value) => declaration["ir_gain_trial"] = value,
+                    Err(e) => return combine(Err(e), capture.close().map_err(|e| e.to_string())),
+                }
+            }
+            Ok(Native {
+                capture,
+                stop: token,
+                declaration,
+            })
         },
         || {
             let verified = line
@@ -115,6 +141,9 @@ pub fn scan(
                 .transpose()
                 .map(|_| ())
                 .map_err(|e| e.to_string());
+            let gain_verified = verify_gain(options.ir_gain_raw, |interface| {
+                ir_gain::read(interface).map_err(|e| e.to_string())
+            });
             let line_restore = line
                 .as_mut()
                 .map(|v| v.restore())
@@ -122,7 +151,15 @@ pub fn scan(
                 .map(|_| ())
                 .map_err(|e| e.to_string());
             let stream_restore = lease.restore().map_err(|e| e.to_string());
-            combine(combine(verified, line_restore), stream_restore)
+            // Restore gain after formats/rates: setup may affect camera controls.
+            let gain_restore = restore_gain(&mut gain);
+            combine(
+                combine(
+                    combine(combine(verified, gain_verified), line_restore),
+                    gain_restore,
+                ),
+                stream_restore,
+            )
         },
         preview,
     );
@@ -133,44 +170,120 @@ pub fn scan(
         .map(|_| ())
         .map_err(|e| e.to_string());
     let stream_restore = lease.restore().map_err(|e| e.to_string());
-    combine(combine(result, line_restore), stream_restore)
+    let gain_restore = restore_gain(&mut gain);
+    combine(
+        combine(combine(result, line_restore), gain_restore),
+        stream_restore,
+    )
 }
 
-#[derive(Debug, PartialEq)]
+fn restore_gain(gain: &mut Option<ScopedIrGain<'_>>) -> Result<()> {
+    gain.as_mut()
+        .map(|g| g.restore())
+        .transpose()
+        .map(|_| ())
+        .map_err(|e| e.to_string())
+}
+
+fn gain_observation(interface: u8, requested: i32, observed: i32) -> Result<Value> {
+    if observed != requested {
+        return Err(format!(
+            "interface {interface} gain readback differs: requested {requested}, observed {observed}"
+        ));
+    }
+    Ok(
+        serde_json::json!({"interface":interface,"requested_raw":requested,
+        "observed_after_stream_start_raw":observed,"units":"vendor raw; physical conversion unverified"}),
+    )
+}
+
+fn verify_gain(requested: Option<i32>, mut read: impl FnMut(u8) -> Result<i32>) -> Result<()> {
+    if let Some(requested) = requested {
+        let mut errors = Vec::new();
+        for interface in [0, 2] {
+            if let Err(e) =
+                read(interface).and_then(|value| gain_observation(interface, requested, value))
+            {
+                errors.push(format!("end-of-capture gain verification: {e}"));
+            }
+        }
+        if !errors.is_empty() {
+            return Err(errors.join("; "));
+        }
+    }
+    Ok(())
+}
+
+#[derive(Debug, PartialEq, Clone, Copy)]
 enum Illumination {
     Preserve,
     LineBooleanTrial,
 }
-fn illumination(value: &Value) -> Result<Illumination> {
+#[derive(Debug, PartialEq, Clone, Copy)]
+struct SourceOptions {
+    illumination: Illumination,
+    ir_gain_raw: Option<i32>,
+}
+fn source_options(value: &Value) -> Result<SourceOptions> {
     if value.is_null() {
-        return Ok(Illumination::Preserve);
+        return Ok(SourceOptions {
+            illumination: Illumination::Preserve,
+            ir_gain_raw: None,
+        });
     }
     let object = value
         .as_object()
-        .filter(|v| v.len() == 1)
-        .ok_or("native laser source_options requires only an illumination declaration")?;
-    match object.get("illumination").and_then(Value::as_str) {
-        Some("preserve") => Ok(Illumination::Preserve),
-        Some("line_boolean_trial") => Ok(Illumination::LineBooleanTrial),
-        _ => Err(
-            "native laser source_options illumination must be preserve or line_boolean_trial"
-                .into(),
-        ),
-    }
+        .filter(|v| v.keys().all(|k| k == "illumination" || k == "ir_gain_raw"))
+        .ok_or("native laser source_options permits illumination and optional ir_gain_raw only")?;
+    let illumination =
+        match object.get("illumination").and_then(Value::as_str) {
+            Some("preserve") => Illumination::Preserve,
+            Some("line_boolean_trial") => Illumination::LineBooleanTrial,
+            _ => return Err(
+                "native laser source_options illumination must be preserve or line_boolean_trial"
+                    .into(),
+            ),
+        };
+    let ir_gain_raw = object
+        .get("ir_gain_raw")
+        .map(|value| {
+            value
+                .as_i64()
+                .filter(|v| (1000..=15000).contains(v))
+                .map(|v| v as i32)
+                .ok_or_else(|| "ir_gain_raw must be an integer from 1000 through 15000".to_string())
+        })
+        .transpose()?;
+    Ok(SourceOptions {
+        illumination,
+        ir_gain_raw,
+    })
 }
 #[cfg(test)]
 mod tests {
     use super::*;
     #[test]
-    fn only_explicit_fixed_line_trial_can_request_a_property_change() {
-        assert_eq!(illumination(&Value::Null).unwrap(), Illumination::Preserve);
+    fn native_source_options_preserve_defaults_and_require_explicit_known_controls() {
         assert_eq!(
-            illumination(&serde_json::json!({"illumination":"preserve"})).unwrap(),
-            Illumination::Preserve
+            source_options(&Value::Null).unwrap(),
+            SourceOptions {
+                illumination: Illumination::Preserve,
+                ir_gain_raw: None
+            }
         );
         assert_eq!(
-            illumination(&serde_json::json!({"illumination":"line_boolean_trial"})).unwrap(),
-            Illumination::LineBooleanTrial
+            source_options(&serde_json::json!({"illumination":"preserve"})).unwrap(),
+            SourceOptions {
+                illumination: Illumination::Preserve,
+                ir_gain_raw: None
+            }
+        );
+        assert_eq!(
+            source_options(&serde_json::json!({"illumination":"line_boolean_trial"})).unwrap(),
+            SourceOptions {
+                illumination: Illumination::LineBooleanTrial,
+                ir_gain_raw: None
+            }
         );
         for value in [
             serde_json::json!({}),
@@ -179,7 +292,55 @@ mod tests {
             serde_json::json!({"illumination":"line_boolean_trial","gain":100}),
             serde_json::json!({"property_id":151,"value":1}),
         ] {
-            assert!(illumination(&value).is_err());
+            assert!(source_options(&value).is_err());
         }
+    }
+    #[test]
+    fn explicit_gain_rejects_invalid_values_and_retains_exact_raw_declaration() {
+        for mode in ["preserve", "line_boolean_trial"] {
+            for raw in [1000, 8000, 15000] {
+                let options =
+                    source_options(&serde_json::json!({"illumination":mode,"ir_gain_raw":raw}))
+                        .unwrap();
+                assert_eq!(options.ir_gain_raw, Some(raw));
+            }
+            for value in [
+                Value::Null,
+                serde_json::json!(999),
+                serde_json::json!(15001),
+                serde_json::json!(8000.0),
+                serde_json::json!("8000"),
+                serde_json::json!(true),
+                serde_json::json!(-1),
+                serde_json::json!(u64::MAX),
+            ] {
+                assert!(
+                    source_options(&serde_json::json!({"illumination":mode,"ir_gain_raw":value}))
+                        .is_err()
+                );
+            }
+        }
+        assert!(source_options(&serde_json::json!({"ir_gain_raw":8000})).is_err());
+    }
+    #[test]
+    fn gain_readback_mismatch_is_rejected_and_end_check_checks_both_interfaces() {
+        let observation = gain_observation(2, 15000, 15000).unwrap();
+        assert_eq!(observation["observed_after_stream_start_raw"], 15000);
+        assert_eq!(observation["interface"], 2);
+        assert!(gain_observation(0, 15000, 1000).is_err());
+        verify_gain(None, |_| panic!("preserve must not read a gain control")).unwrap();
+        let mut read_interfaces = Vec::new();
+        let error = verify_gain(Some(15000), |interface| {
+            read_interfaces.push(interface);
+            if interface == 0 {
+                Err("disconnected".into())
+            } else {
+                Ok(1000)
+            }
+        })
+        .unwrap_err();
+        assert_eq!(read_interfaces, [0, 2]);
+        assert!(error.contains("disconnected") && error.contains("requested 15000, observed 1000"));
+        verify_gain(Some(15000), |_| Ok(15000)).unwrap();
     }
 }

@@ -1,7 +1,7 @@
 //! Native capture/session/settings ownership shared by desktop and CLI.
 //! Processing stays device-independent in scancraft-workflow. The laser entry
-//! supports an explicit scoped line-boolean trial; firmware, mode, energy, mirror,
-//! gain and installed calibration are not changed.
+//! supports explicit scoped line-boolean and standard IR gain trials; firmware,
+//! mode, energy, mirror and installed calibration are not changed.
 pub mod laser;
 use scancraft_core::Frame;
 use scancraft_device::{Capture, SessionLock, stream_group::SettingsLease};
