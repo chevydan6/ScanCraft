@@ -5823,3 +5823,41 @@ object or metric export. Calibration/transport/identity/units limitations remain
 Private evidence label `live-domain-integration-20261104` retains commands/results.
 CodeRabbit usage94805 exits1: allcapacity/billing/creditlookups unavailable; no
 substantive or paid review. Keep draft and independent review requirements intact.
+
+## Developer-identified integration gap — explicit native live IR gain
+
+Accepted scoped integration; no new independent finding/status change. Read587
+before implementation. Existing diagnostic CLI supports scoped IRgain15000 but
+the native laser adapter previously rejected it. Changed only production files
+`crates/scancraft-acquisition/src/laser.rs` and `lib.rs`; no math/calibration/firmware
+or dependency change. Reuse `ScopedIrGain`, default-preserving option parsing,
+post-start/end readbacks, per-camera retained declaration and explicit cleanup.
+Restore gains after stream formats/rates and attempt all cleanup despite errors.
+Existing scoped-control rollback tests remain; new option/readback regressions
+pass. Baseb50fe07369e39ca7f1df715d4ff6556685130497; final commit recorded in checkpoint.
+
+Gate41336 exit0:941passed/0failed/1ignored,fmtstrictClippyrelease. Actual GUI21806
+fails with235/235startup rejects, noframes; repeatedGUI66716 fails318/235, noframes.
+Both camera timeout/failure reports and harness observation-timeout failures remain.
+Headless comparison23460 exits0: liveadapter16/16raw,13pairs,2/2processing drops,
+startup100/1,ongoing1/0; existingprobe16/16startup98/0ongoing0/0. Directapphelper/
+quota wrapper28423 exits0: nativehelper16/16raw,11pairs,3/3processingdrops,
+startup1/94,ongoing0/111; required4096bytejournal fails as intended, retains3/2raw.
+Buffer rejection counts are not physical-exposure counts. No causal GUI attribution.
+
+Verifier37582 exit0 checks full rawCRC/footer/gainmetadata, all24native pair
+inspections, elevennativeIPCpreview/journal matches and completion, seven external
+state comparisons before outer safeguards for headless/helper/quota, allfourwrapper
+finalrestorations. Reopening48672 exit0; screenshotinspected1009points/rawimages/
+exclusionwarnings. ActualGUIcapture stillunqualified. Private evidence label
+`live-ir-gain-integration-20261104`; details `docs/LIVE_IR_GAIN_VALIDATION.md`.
+
+Source inspection finds independent early retirement in `laser_stream::runner::produce`
+versus existing coordinated live-stereo/CLI completion. All32retained right-side
+rejection samples occur after left's last accepted timestamp; no actualclose-time
+measurement or causal conclusion. Prioritize a controlled retirement correction/
+comparison next; it cannot explain zero-frame GUI failures. No retirementchange here.
+SCAN-REV-034 and all physicalunits/accuracy/coverage/endtoend requirements remain.
+
+CodeRabbit usage50819 exits1 with capacity/billing/credit lookups unavailable.
+No substantive or paid review. Keep the change draft; no owner merge is requested.
