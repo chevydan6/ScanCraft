@@ -5395,3 +5395,41 @@ its own independent review. CodeRabbitusage24160 exit1lookup_failed; no paidusag
 or substantive review. No findingseverity/status altered, merge, firmware or
 hardwarecaptureaction. Nextpriority remains actual rotating-object coverage and
 physical qualification, not unrelated features.
+## DEV-ROTATION-COVERAGE — longer real replay and loss control, 2026-11-04
+
+Developer investigation, not a new independent finding identifier or closure.
+Accept assignment550's distinction between a verified read-only viewer and a
+qualified scanning pipeline. Reviewer independently verified parent037d67e and
+both CI runs. No reviewer finding severity/status/conclusion changed.
+
+New branch dev/rotation-coverage-evidence from037d67e; this publication changes
+PROJECT_STATUS.md, ROTATION_COVERAGE_LIMITS.md and this response only. Exact commit
+is recorded in Git and the private publication binding. Production code, models,
+numerical gates and private original captures remain unchanged.
+
+Native full validation of the retained900-frame recordings and predetermined
+indices0,4,...896 yields225 valid diagnostic pairs across30.003703seconds. Matching
+produces154 successes/71query-budget failures;140,497 unfused candidates. No fused
+sequence is published after these failures. Native marker-only diagnostics retain
+18 accepted,97 rejected and110 insufficient-point inputs; no automatic reset or
+recovery. Consecutive frames0..100 independently reproduce initial loss:70accepted,
+8coverage failures and23ICP-overlap failures. Frame70 has16unique pairs versus24
+reference points, targetcoverage0.6667<0.7 despite RMS0.0432583unverifiedmodelunits.
+
+Separate NumPy checks reproduce all326tracking outcomes with maximum differences
+1.34e-12/3.50e-12;6,305accepted marker stereo hypotheses reconcile within2.36e-9RAW
+coordinates/1.71e-9px reprojection. All652PNG payload CRCs and successful laser
+artifact lengths/CRCs/counts checked. The140,497laser coordinates were not all
+independently recomputed here. Fullrate900-frame recovery and physical identities,
+units, accuracy, object coverage and native end-to-end qualification remain open.
+
+Private probes pass formatting/strictClippy/release. Initial copied fullrate
+binding path failed before processing; correction and original failure preserved.
+Final sourcegate22783exit0:921passed/0failed/1ignored,fmt/strictClippy/release.
+CodeRabbit usage16100exit1lookup_failed; no review upload or paid usage.
+Evidence roots rotation-coverage-replay-20261104 and rotation-loss-fullrate-20261104
+sealed5910files/4638158074bytes; externalmanifest SHA256
+7d01052b56035a9000e3739db9305995bb516ae5983a74d354d49e5705b848c2.
+No new capture in this offline investigation. The separately verified fresh box
+precheck remains stationary; prepared rotation recording still awaits owner
+confirmation. No production recommendation implemented or main merge performed.

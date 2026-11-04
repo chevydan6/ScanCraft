@@ -1,3 +1,21 @@
+## Longer rotation replay exposes tracking loss — 2026-11-04
+
+The saved 900-frame board capture now has a full-interval diagnostic: 225 uniformly
+sampled pairs span 30 seconds. Laser matching succeeds on 154 pairs and refuses
+71 at its unchanged query budget. Marker tracking accepts the first 18 sampled
+views, then loses tracking without recovery. A separate first-101-consecutive-frame
+control also loses tracking, at frame 70, when stereo ambiguity reduces distinct
+reference coverage below the existing gate. Independent numerical checks reproduce
+both sequences, including failures. No complete fused scan is published from a
+success-only subset, and no physical accuracy is claimed.
+
+The unchanged source passes 921 tests (1 ignored), formatting, strict Clippy and
+release build. Parent viewer PR43 was independently verified in assignment550,
+with both CI runs successful. This new investigation needs independent review.
+Priorities are moving-object marker identity/relocalization, bounded laser-query
+processing and calibrated physical validation. See
+[rotation coverage limitations](docs/ROTATION_COVERAGE_LIMITS.md).
+
 ## Native fused-result GUI inspection — 2026-11-04
 
 `--fused-candidates` and **Open fused scan** now load recorded multi-frame results
