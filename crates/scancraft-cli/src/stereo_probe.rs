@@ -374,6 +374,10 @@ pub fn record_flood(count: usize, fps: u32, target: &Path) -> Result<Value, Stri
 pub fn record_line(count: usize, fps: u32, target: &Path) -> Result<Value, String> {
     record_trial(count, fps, target, None, IlluminationTrial::Line)
 }
+/// Combine the existing scoped line and gain leases; both restore before publication.
+pub fn record_line_gain(count: usize, fps: u32, target: &Path, gain: i32) -> Result<Value, String> {
+    record_trial(count, fps, target, Some(gain), IlluminationTrial::Line)
+}
 fn record_trial(
     count: usize,
     fps: u32,

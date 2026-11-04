@@ -1,13 +1,32 @@
 # Project status
 
-Current physical readiness: [caliper/scene evidence](docs/CALIPER_SCALE_EVIDENCE.md)
-confirms the old 50 mm jaw guesses pass reprojection but cannot validate physical
-scale or accuracy. Fresh native images still show a board cropped in the right
-camera. Normal-driver short capture retains 98/1 startup rejects; 20 scanning frames
-and 3 color frames replay/decode, checked settings/formats/media service restore.
-The color extraction invocation failure and corrected existing export are retained.
-No first measured object or active metric calibration is claimed. Printed-object
-positioning and measured cooled dimensions are requested.
+Latest integration result: [full native recorded-pair processing fails](docs/NATIVE_LASER_DOMAIN_FAILURES.md).
+The existing workflow retains all2,206query errors and produces zero candidates.
+Native diagnostics localize268first-ray,546sheet-projection and1,392second-trace
+failures. Invalid vertices in unrelated image traces abort otherwise usable queries.
+Immediate priority is explicit calibrated-domain rejection/valid-segment handling,
+with preserved errors/provenance and no lens-limit widening or bridging across gaps.
+
+Additional saved-board evidence supports the four frozen curved-sheet hypotheses in
+a new pose after a documented stronger marker mask. Original anchor/support/mask
+failures remain; no sheet refit or physical-accuracy claim. One point misclassified
+as stripe came from a marker outline narrowed by preprocessing. Original-pixel masks
+fix that diagnostic exclusion without changing geometry or quality limits.
+
+The earlier private201-point box stripe remains a narrow experimental fragment, not
+an operational full-image/native-GUI or measured object scan. Owner dimensions stay
+held out. Production source remains ebb77a2; private probe fmt/Clippy/release and
+numerical/source checks pass. Independent522 verified prior2552411 evidence/CI, not
+this new integration failure. Full895-test source gate still applies. CodeRabbit
+substantive coverage is outstanding. No new hardware or calibration activation.
+
+Current physical readiness: the owner's measured yellow box was captured in both
+scanning cameras. [Scoped line + gain capture](docs/LINE_CAPTURE_GAIN.md) saves/replays
+10frames per camera and three color frames with original state restored. Startup
+rejects0/97 and ongoing0/0 remain short-sample observations. Initial frozen stereo
+diagnostics produced only8/5/5 sparse points; later all-trace diagnostics retained709
+candidates/396queries, with321two-alternative queries. The new board-sheet consistency
+test resolves only a subset experimentally, not the complete scanning workflow.
 
 Independent assignment 501 resolves SCAN-REV-032 for the bound mandatory private
 reconciliation, and 506 confirms both ba99e7b CI runs passed. Original summary-only

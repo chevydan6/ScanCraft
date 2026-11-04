@@ -4955,3 +4955,148 @@ unchanged implementation retains the 892-test/fmt/Clippy/release baseline. Relev
 source parent ba99e7b and exact documentation commit are retained in Git/publication
 metadata. No new independent finding, metric accuracy, first scan or mission
 completion is claimed. Next: actual independently measured object and physical scale.
+
+
+## DEV-LINE-GAIN — actual measured-object acquisition and sparse reconstruction
+
+Developer work, not a new independent finding or closure. Accepted practical need:
+combine existing scoped line illumination and raw gain so real object stripes are
+usable. `line_options.rs`, CLI dispatch and `stereo_probe.rs::record_line_gain`
+expose the already implemented dual-lease path without changing device-control,
+recording or geometry implementations. Regression file `native_laser_preflight.rs`
+adds actual malformed/unsupported CLI refusals; parser unit tests preserve defaults
+and reject ambiguity. Source parent 876c3af5e49214d466534cbcca25c24de67c7956;
+exact new commit is available in Git/publication metadata.
+
+Tests: full final gate 895 passed/0 failed/1 ignored, fmt, strict Clippy and release
+PASS. Initial chunks_exact Clippy failure retained and fixed with as_chunks. Actual
+10-frame/camera combined capture plus 3 color frames validates/replays; 0/97 startup
+and 0/0 ongoing rejects remain reported. Gain and line restore, seven native state
+comparisons/five format restores/original WirePlumber state pass. Matched indices5/3,
+equal sensorPTS and25us host difference do not establish exposure synchronization.
+Private verification and manifest are detailed in docs/LINE_CAPTURE_GAIN.md.
+
+Frozen existing native reconstruction passes produce only8/5/5 points; no credible
+surface, physical dimension, repeatability, metric export or first genuine scan is
+claimed. Owner dimensions are held out, no model/scale/acceptance fitting performed.
+Private probe code/data are not shipped. Source/lens domains remain unchanged.
+Immediate priority is robust real correspondence and coverage. CodeRabbit usage
+lookup exits1 with all quota/billing fields lookup_failed; no review/paid usage
+requested. Substantive review remains outstanding. Independent507's verification of
+prior caliper evidence and CI is preserved; reviewer-owned findings/statuses untouched.
+
+
+## DEV-LINE-GAIN — publication and trace follow-up
+
+Implementation ebb77a2954f8563d15e28f2d0b02928da0835cd2 is pushed in draft PR37;
+both exact-head PR41787075489 and push41786941673 CI pass. Independent and CodeRabbit
+review of this change remain outstanding. No merge/protection changes.
+
+Additional private all-trace diagnostic preserves396queries/709candidate points,
+including321queries with two valid intersections. No best match, measured surface,
+physical units or dimension error is claimed. Native detector initial100000-observation
+cap failure retained; stronger contrast gates reduce noise without increasing caps.
+Existing native detector/continuity/epipolar/triangulation implementations are used
+unchanged; private probe Clippy/release and input/pair/count reconciliation pass.
+All known limits and remaining trace-identity requirement are documented in
+LINE_CAPTURE_GAIN.md. Next investigate native projector calibration from retained
+board data, preserving historical factory-coordinate distinctions and failed anchors.
+
+This follow-up changes only LINE_CAPTURE_GAIN.md, PROJECT_STATUS.md and this response.
+The895-test implementation gate remains applicable; no redundant Rust gate was run
+for prose. Exact documentation commit follows in Git. Findings/statuses belong to
+the reviewer and remain untouched. Current CodeRabbit lookup failure is already
+recorded; no repeated paid review or review success is inferred.
+
+
+## DEV-NATIVE-BOARD-SHEETS — failed provisional transfer retained
+
+Developer investigation, not an independent finding/closure. Independent516 reproduced
+the prior396queries/709candidates and518 verified both5643105 CI runs; record their scope
+without changing reviewer records. New private board-plane/sheet work is documented in
+NATIVE_BOARD_SHEET_PREPARATION.md. It uses unchanged native detector, association,
+triangulation, plane fitting and ray-intersection APIs. Original anchor/stability
+failures and five far lens-domain rejections remain. Saturation exclusion strengthens
+quality checks; no limit is relaxed. Preparatory filtering/grouping is private,
+exploratory and not a production scanning feature.
+
+Evidence:80 actual GREY frames fully validated during native component measurements;
+all marker requests reproduce; private Rust Clippy/release passes; independent NumPy
+plane/projection comparisons agree numerically.32/27 native line-on marker points
+support board planes,944/703 stripe centroids intersect them. All25 cross-pose sheet
+hypotheses retained; three provisional models reject every prior709 box candidate at
+0.75RAW. Closest24.129303209RAW. No dimension fit, sheet activation, correct stripe
+identity or first genuine measured scan claimed. Additional board views/coverage and
+model assumptions remain the next task, with source units and physical accuracy
+unqualified. Manifest/source/procedure references are in the document.
+
+Only docs/NATIVE_BOARD_SHEET_PREPARATION.md, PROJECT_STATUS.md and this response change
+publicly. Production source remains ebb77a2; previous independent895-test/fmt/Clippy/
+release gate applies. No redundant full Rust run for prose. Exact documentation commit
+will be recorded by Git/publication metadata. Reviewer files untouched; no hardware,
+firmware, paid service, protection or merge action. New evidence awaits independent
+review; no substantive CodeRabbit completion inferred.
+
+
+## DEV-BOARD-CURVATURE — supported fragment, physical qualification incomplete
+
+Developer investigation, not an independent finding or closure. Accept independent519's
+verification of the prior87ce1f4 board-plane and failed transfer evidence and its stated
+limits. Reviewer findings/statuses remain exclusively reviewer-owned and untouched.
+
+New private experiment preserves that failure and adds426 actual edge-board observations.
+All30 native planar pair fits retain the same quality gates; added5/3 fails. A separately
+planned linear/quadratic comparison uses unweighted centered/scaled NumPy least squares,
+twofold100-row spatial holdouts in both poses, all samples and the declared per-pose
+X-residual/mutual-minimum gates. Four quadratic hypotheses pass; addedpair held-out RMS
+is0.060876645RAW versus0.253399768linear. Shared camera/board error and two-pose coverage
+remain limitations; this is not an independent physical validation or production fitter.
+
+The private Rust probe uses existing bounded PreparedCamera and QuadraticSheet APIs on
+all709 prior candidates.201queries have one candidate/sheet combination,195none,0multiple;
+all survivors form one stripe. Stereo geometry is preserved, no snapping or dimensionfit.
+Every2,836sheet result remains; independent numerical formulas reconcile roots/projection,
+residuals and all30 plane fits. Private fmt/strictClippy/release pass. Original edge exits
+were not recorded; later native reruns have exit0 receipts and byte-identical results.
+Full procedure, immutable36file manifest, sources and bounds are documented in
+NATIVE_BOARD_SHEET_PREPARATION.md. Raw evidence/private probe are not published.
+
+Public changes only PROJECT_STATUS.md, NATIVE_BOARD_SHEET_PREPARATION.md and this response.
+Application/dependencies unchanged from ebb77a2954f8563d15e28f2d0b02928da0835cd2; independent
+895-test/fmt/Clippy/release result applies. Exact documentation commit follows in Git.
+No repeated full Rust gate, metric export, measured dimensions, full surface, GUI scan,
+physical accuracy, reviewer closure or substantive CodeRabbit completion claimed.
+No new hardware, firmware, paid service, main merge or protection action. Immediate
+priority remains additional real sheet coverage/held-out poses and physical validation.
+
+
+## DEV-NATIVE-DOMAIN — held-out checks reveal full-image integration failure
+
+Developer-identified integration gap; no independent finding/status change. Accept
+independent522's scoped reproduction of2552411/201-point evidence and CI confirmation.
+New NATIVE_LASER_DOMAIN_FAILURES.md documents the subsequent evidence and limitations.
+
+Additional rotating-board sample1 supplies24 original unsaturated marker points;
+original four-anchor failures, sample0/8 insufficient support and one native inverse-
+domain rejection remain. Coarse opening is used only for identity. Three frozen sheets
+pass conservative held-out checks; the fourth fails its edge mask maximum. The initial
+small-component hypothesis is disproved and retained. Unioning every original shape-
+passing component outline with the opened masks removes two contaminated observations;
+allfour frozen checks pass without sheet refitting or threshold/domain changes. This
+mask correction is data-informed and not pristine physical qualification.
+
+Actual unchanged native full-image processing publishes zero candidates/2,206errors.
+All data/CRC/source/count checks pass; publication exit0 is not reconstruction success.
+Native audit explains268first-ray,546root-projection and1,392trace-domain failures,
+reconciling every error. Right traces0/2/49 have212/46/23invalid vertices; trace0also
+has170valid vertices. Strict whole-trace/root errors block otherwise valid hypotheses.
+Next implement explicit domain-rejection/contiguous-segment handling with full rejected
+source provenance, no bridging, no silent ambiguity loss, preserved resource/cancellation
+failures and strict legacy compatibility; replay this exact recording after changes.
+
+Only docs/NATIVE_LASER_DOMAIN_FAILURES.md, PROJECT_STATUS.md and this response change
+publicly. Source stays ebb77a2, independent895-test gate applies; no redundant fullgate.
+Private probes fmt/Clippy/release and numerical/raw reconciliation pass,223-file
+manifest/source refs in the document. New evidence awaits independent review. Exact
+publication commit follows in Git. No production fix, first scan, nativeGUI success,
+physical accuracy, paid review, merge or independent closure claimed.
